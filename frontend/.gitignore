@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+
+# Builds and caches
+dist/
+dist-ssr/
+web-build/
+coverage/
+.vite/
+.expo/
+.metro-health-check*
+*.tsbuildinfo
+
+# Native generated folders
+ios/
+android/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment files
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Editors and OS files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

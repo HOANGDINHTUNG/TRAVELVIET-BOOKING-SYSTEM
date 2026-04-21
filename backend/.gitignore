@@ -1,0 +1,53 @@
+HELP.md
+target/
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
+
+# Environment and logs
+.env
+.env.*
+!.env.example
+!.env.*.example
+logs/
+*.log
+
+# Local caches/tools
+.m2/
+.claude/
+.fake
+.gitnexus
+AGENTS.md
+CLAUDE.md
+PROJECT_MEMORY.md
+PHASE_*_AUDIT.md
+PHASE_*_IMPLEMENTATION_CHECKLIST.md
+LINT_ERRORS.md

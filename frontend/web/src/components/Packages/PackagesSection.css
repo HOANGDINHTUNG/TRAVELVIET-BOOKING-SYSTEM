@@ -1,0 +1,157 @@
+.package-section {
+  padding-top: 0;
+}
+
+.section-heading.split {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 480px);
+  align-items: end;
+  gap: 24px;
+}
+
+.tour-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 28px;
+}
+
+.tour-card {
+  border: 1px solid var(--color-border);
+  border-radius: 0;
+  display: grid;
+  gap: 0;
+  padding: 16px;
+  background: color-mix(in srgb, var(--color-surface) 86%, var(--color-surface-soft) 14%);
+  box-shadow: none;
+}
+
+.tour-image {
+  height: 178px;
+  overflow: hidden;
+}
+
+.tour-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 420ms ease;
+}
+
+.tour-card:hover .tour-image img {
+  transform: scale(1.045);
+}
+
+.tour-body {
+  display: grid;
+  gap: 12px;
+  padding-top: 16px;
+}
+
+.tour-card h3 {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 22px;
+  line-height: 1.15;
+  font-weight: 850;
+}
+
+.tour-card p {
+  min-height: 42px;
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 14px;
+  line-height: 1.42;
+}
+
+.tour-info-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 2px;
+  color: var(--color-muted);
+  font-size: 13px;
+}
+
+.tour-info-list span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tour-info-list svg {
+  color: var(--color-primary);
+  flex: 0 0 auto;
+}
+
+.tour-footer {
+  display: grid;
+  gap: 16px;
+  margin-top: 4px;
+}
+
+.tour-footer div {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.tour-footer strong {
+  color: var(--color-text);
+  font-size: 22px;
+  line-height: 1;
+  font-weight: 900;
+}
+
+.tour-footer span {
+  color: var(--color-muted);
+  font-size: 12px;
+}
+
+.tour-card button {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--color-text);
+  border-radius: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 0 18px;
+  color: var(--color-text);
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    background 180ms ease,
+    color 180ms ease,
+    transform 180ms ease;
+}
+
+.tour-card button:hover {
+  color: var(--color-surface);
+  background: var(--color-text);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 1100px) {
+  .section-heading.split {
+    grid-template-columns: 1fr;
+  }
+
+  .tour-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .tour-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tour-image {
+    height: 210px;
+  }
+}

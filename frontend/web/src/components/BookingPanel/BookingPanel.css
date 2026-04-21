@@ -1,0 +1,84 @@
+.booking-panel {
+  background: var(--color-page);
+  padding: 0 clamp(18px, 4vw, 64px);
+}
+
+.booking-bar {
+  width: min(1180px, 100%);
+  margin: -44px auto 0;
+  position: relative;
+  z-index: 8;
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr 0.7fr auto;
+  gap: 12px;
+  align-items: end;
+  padding: 16px;
+  border: 1px solid rgba(47, 141, 117, 0.18);
+  border-radius: 8px;
+  background: color-mix(in srgb, #fff 90%, var(--color-surface-soft) 10%);
+  color: var(--color-text);
+  box-shadow: 0 24px 70px rgba(16, 47, 42, 0.14);
+}
+
+.booking-bar label {
+  display: grid;
+  gap: 7px;
+  color: var(--color-muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.booking-bar select,
+.booking-bar input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid rgba(47, 141, 117, 0.16);
+  border-radius: 6px;
+  background: #fbf8ef;
+  color: var(--color-text);
+  font: inherit;
+  font-size: 15px;
+  min-height: 48px;
+  padding: 0 14px;
+}
+
+.booking-bar button {
+  min-width: 176px;
+  min-height: 50px;
+  border: 0;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 22px;
+  color: #fff;
+  background: var(--color-primary);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.16);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.theme-dark .booking-bar,
+.theme-dark .booking-bar label,
+.theme-dark .booking-bar select,
+.theme-dark .booking-bar input {
+  color: var(--color-primary);
+}
+
+@media (max-width: 1100px) {
+  .booking-bar {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .booking-panel {
+    padding-inline: 18px;
+  }
+
+  .booking-bar {
+    margin-top: -20px;
+    padding: 14px;
+  }
+}
