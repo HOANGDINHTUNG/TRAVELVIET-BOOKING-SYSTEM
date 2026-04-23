@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next'
 import { Outlet, useLocation } from 'react-router-dom'
 import { FloatingUtilities } from './components/FloatingUtilities/FloatingUtilities'
 import { useAppSelector } from './hooks/redux'
+import SmoothScrollLayout from './components/common/ux/SmoothScrollLayout'
+import ScrollToTop from './components/common/ux/ScrollToTop'
 
 const Navbar = lazy(() =>
   import('./components/Navbar/Navbar').then((module) => ({
@@ -27,28 +29,33 @@ function App() {
   }, [i18n, language])
 
   return (
-    <main
-      className={`app-shell theme-${theme} lang-${language} min-h-screen`}
-    >
+    <div className={`app-shell theme-${theme} lang-${language} min-h-screen`}>
+      <ScrollToTop />
       {isHomePage && (
         <Suspense fallback={null}>
           <Navbar />
         </Suspense>
       )}
       {isHomePage ? (
-        <div id="smooth-wrapper">
-          <div id="smooth-content">
-            <Outlet />
+        <main className="min-h-screen">
+          <div id="smooth-wrapper">
+            <div id="smooth-content">
+              <Outlet />
+            </div>
           </div>
-        </div>
+        </main>
       ) : (
-        <Outlet />
+        <SmoothScrollLayout ease={0.08}>
+          <main className="min-h-screen">
+            <Outlet />
+          </main>
+        </SmoothScrollLayout>
       )}
       <Suspense fallback={null}>
         <SiteMotion />
       </Suspense>
       <FloatingUtilities />
-    </main>
+    </div>
   )
 }
 

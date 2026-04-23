@@ -1,7 +1,9 @@
 .about-section {
   padding: clamp(92px, 12vw, 144px) 18px clamp(88px, 10vw, 128px);
-  background: var(--color-ocean);
-  color: #f5ead8;
+  background:
+    linear-gradient(135deg, rgba(0, 180, 216, 0.18), transparent 34%),
+    #606c38;
+  color: #fefae0;
 }
 
 .theme-dark .about-section {
@@ -53,7 +55,7 @@
   align-items: center;
   gap: 14px;
   margin: 0 0 14px;
-  color: color-mix(in srgb, #f5ead8 86%, transparent);
+  color: color-mix(in srgb, #fefae0 86%, transparent);
   font-size: 12px;
   font-weight: 900;
   letter-spacing: 0.18em;
@@ -64,7 +66,7 @@
   content: '';
   width: 24px;
   height: 1px;
-  background: color-mix(in srgb, #f5ead8 34%, transparent);
+  background: color-mix(in srgb, #fefae0 34%, transparent);
 }
 
 .about-content h2 {
@@ -79,7 +81,7 @@
 
 .about-content > p {
   margin: 34px 0 0;
-  color: color-mix(in srgb, #f5ead8 76%, transparent);
+  color: color-mix(in srgb, #fefae0 76%, transparent);
   font-size: 15px;
   line-height: 1.8;
 }
@@ -90,7 +92,7 @@
   margin: 28px 0 0;
   padding: 0;
   list-style: none;
-  color: color-mix(in srgb, #f5ead8 82%, transparent);
+  color: color-mix(in srgb, #fefae0 82%, transparent);
   font-size: 14px;
   line-height: 1.5;
 }
@@ -98,20 +100,20 @@
 .about-content li::before {
   content: '+';
   margin-right: 12px;
-  color: #f5ead8;
+  color: #dda15e;
   font-weight: 900;
 }
 
 .about-content a {
   min-width: 124px;
   min-height: 46px;
-  border: 1px solid #f5ead8;
+  border: 1px solid #fefae0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   margin-top: 30px;
   padding: 0 22px;
-  color: #f5ead8;
+  color: #fefae0;
   font-size: 12px;
   font-weight: 900;
   letter-spacing: 0.12em;
@@ -124,7 +126,126 @@
 
 .about-content a:hover {
   color: var(--color-ocean);
-  background: #f5ead8;
+  background: #fefae0;
+}
+
+.about-content .about-plant-button {
+  position: relative;
+  min-width: 148px;
+  min-height: 48px;
+  border: 0;
+  border-radius: 8px;
+  isolation: isolate;
+  overflow: visible;
+  padding: 0 28px;
+  color: #283618;
+  background: #fefae0;
+  box-shadow:
+    2px 2px 5px rgba(40, 54, 24, 0.34),
+    inset 2px 2px 10px rgba(255, 255, 255, 0.68);
+  letter-spacing: 0.1em;
+  transition:
+    padding 260ms ease,
+    border-radius 260ms ease,
+    background-color 260ms ease,
+    color 260ms ease,
+    box-shadow 260ms ease;
+}
+
+.about-content .about-plant-button:hover {
+  padding-inline: 22px;
+  border-radius: 8px 8px 24px 24px;
+  color: #283618;
+  background: #dda15e;
+  box-shadow:
+    2px 2px 8px rgba(40, 54, 24, 0.36),
+    inset 2px 2px 12px rgba(255, 255, 255, 0.42);
+}
+
+.about-plant-button-label {
+  position: relative;
+  z-index: 2;
+  white-space: nowrap;
+}
+
+.about-plant-icon {
+  width: 0;
+  height: auto;
+  position: absolute;
+  top: 10%;
+  left: 50%;
+  z-index: 1;
+  color: #283618;
+  pointer-events: none;
+  transform: translate(-50%, 0);
+  transform-origin: 0 100%;
+  transition:
+    top 520ms ease,
+    left 520ms ease,
+    width 520ms ease,
+    color 260ms ease;
+}
+
+.about-plant-icon svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  fill: currentColor;
+}
+
+.about-plant-icon-1 {
+  color: #a7c957;
+}
+
+.about-plant-icon-2 {
+  color: #80b918;
+}
+
+.about-plant-icon-3 {
+  color: #2b9348;
+}
+
+.about-plant-icon-4 {
+  color: #1b4332;
+}
+
+.about-plant-icon-5 {
+  color: #40916c;
+}
+
+.about-plant-button:hover .about-plant-icon-1 {
+  top: -250%;
+  left: 50%;
+  width: 50px;
+  animation: aboutPlantIconOne 1s ease 0.45s forwards;
+}
+
+.about-plant-button:hover .about-plant-icon-2 {
+  top: -205%;
+  left: 92%;
+  width: 74px;
+  animation: aboutPlantIconTwo 1s ease 0.45s forwards;
+}
+
+.about-plant-button:hover .about-plant-icon-3 {
+  top: -128%;
+  left: 18%;
+  width: 58px;
+  animation: aboutPlantIconThree 1s ease 0.45s forwards;
+}
+
+.about-plant-button:hover .about-plant-icon-4 {
+  top: -300%;
+  left: 10%;
+  width: 84px;
+  animation: aboutPlantIconFour 1s ease 0.45s forwards;
+}
+
+.about-plant-button:hover .about-plant-icon-5 {
+  top: -350%;
+  left: 90%;
+  width: 84px;
+  animation: aboutPlantIconFive 1s ease 0.45s forwards;
 }
 
 .about-stats-heading {
@@ -136,7 +257,7 @@
   content: '';
   width: 24px;
   height: 1px;
-  background: color-mix(in srgb, #f5ead8 34%, transparent);
+  background: color-mix(in srgb, #fefae0 34%, transparent);
 }
 
 .about-stats-heading h3 {
@@ -158,7 +279,7 @@
 
 .about-stat {
   min-height: 86px;
-  border-right: 1px solid color-mix(in srgb, #f5ead8 18%, transparent);
+  border-right: 1px solid color-mix(in srgb, #fefae0 18%, transparent);
   display: grid;
   grid-template-columns: auto 1fr;
   gap: 14px;
@@ -172,7 +293,7 @@
 
 .about-stat strong {
   min-width: 96px;
-  color: color-mix(in srgb, #f5ead8 72%, var(--color-ocean) 28%);
+  color: color-mix(in srgb, #fefae0 72%, #00b4d8 28%);
   font-family: Georgia, 'Times New Roman', serif;
   font-size: clamp(58px, 7vw, 86px);
   line-height: 0.9;
@@ -181,11 +302,97 @@
 
 .about-stat p {
   margin: 0;
-  color: #f5ead8;
+  color: #fefae0;
   font-family: Georgia, 'Times New Roman', serif;
   font-size: 15px;
   line-height: 1.25;
   text-transform: uppercase;
+}
+
+@keyframes aboutPlantIconOne {
+  0% {
+    transform: translate(-50%, 0) rotate(0deg);
+  }
+
+  25% {
+    transform: translate(-50%, 0) rotate(5deg);
+  }
+
+  50% {
+    transform: translate(-50%, 0) rotate(1deg);
+  }
+
+  65% {
+    transform: translate(-50%, 0) rotate(3deg);
+  }
+
+  100% {
+    transform: translate(-50%, 0) rotate(0deg);
+  }
+}
+
+@keyframes aboutPlantIconTwo {
+  0% {
+    transform: translate(-50%, 0) rotate(0deg);
+  }
+
+  35% {
+    transform: translate(-50%, 0) rotate(10deg);
+  }
+
+  50% {
+    transform: translate(-50%, 0) rotate(4deg);
+  }
+
+  80% {
+    transform: translate(-50%, 0) rotate(5deg);
+  }
+
+  100% {
+    transform: translate(-50%, 0) rotate(0deg);
+  }
+}
+
+@keyframes aboutPlantIconThree {
+  0% {
+    transform: translate(-50%, 0) rotate(0deg);
+  }
+
+  35% {
+    transform: translate(-50%, 0) rotate(-2deg);
+  }
+
+  100% {
+    transform: translate(-50%, 0) rotate(0deg);
+  }
+}
+
+@keyframes aboutPlantIconFour {
+  0% {
+    transform: translate(-50%, 0) rotate(0deg);
+  }
+
+  40% {
+    transform: translate(-50%, 0) rotate(-3deg);
+  }
+
+  100% {
+    transform: translate(-50%, 0) rotate(0deg);
+  }
+}
+
+@keyframes aboutPlantIconFive {
+  0% {
+    transform: translate(-50%, 0) rotate(0deg);
+  }
+
+  35% {
+    transform: translate(-50%, 0) rotate(-3deg);
+  }
+
+  100% {
+    transform: translate(-50%, 0) rotate(0deg);
+  }
 }
 
 @media (max-width: 1060px) {
@@ -226,11 +433,17 @@
   .about-stat,
   .about-stat:nth-child(2) {
     border-right: 0;
-    border-bottom: 1px solid color-mix(in srgb, #f5ead8 18%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, #fefae0 18%, transparent);
     padding: 22px 0;
   }
 
   .about-stat:last-child {
     border-bottom: 0;
+  }
+
+  .about-plant-button:hover .about-plant-icon-2,
+  .about-plant-button:hover .about-plant-icon-4,
+  .about-plant-button:hover .about-plant-icon-5 {
+    width: 58px;
   }
 }

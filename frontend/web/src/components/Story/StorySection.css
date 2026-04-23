@@ -37,8 +37,8 @@
   min-height: 720px;
   position: relative;
   overflow: hidden;
-  background: #102f2a;
-  color: #fff;
+  background: #283618;
+  color: #ffffff;
   touch-action: none;
 }
 
@@ -76,7 +76,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #102f2a;
+  background-color: #283618;
   background-position: center;
   background-size: cover;
   will-change: transform;
@@ -87,7 +87,7 @@
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(90deg, rgba(7, 20, 18, 0.72), rgba(7, 20, 18, 0.2) 58%, rgba(7, 20, 18, 0.58)),
+    linear-gradient(90deg, rgba(40, 54, 24, 0.76), rgba(40, 54, 24, 0.22) 58%, rgba(40, 54, 24, 0.58)),
     linear-gradient(180deg, rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.44));
 }
 
@@ -97,14 +97,14 @@
   left: clamp(18px, 8vw, 124px);
   bottom: clamp(74px, 12vh, 132px);
   z-index: 2;
-  color: #fff;
+  color: #ffffff;
   will-change: transform, opacity;
 }
 
 .service-panel-content span {
   display: inline-flex;
   margin-bottom: 16px;
-  color: #eadcc5;
+  color: #dda15e;
   font-size: 14px;
   font-weight: 900;
   letter-spacing: 0.18em;
@@ -138,8 +138,8 @@
   align-items: center;
   justify-content: center;
   padding: 0 24px;
-  color: #0e3d34;
-  background: #eadcc5;
+  color: #283618;
+  background: #fefae0;
   font: inherit;
   font-weight: 900;
   cursor: pointer;
@@ -162,10 +162,10 @@
   top: clamp(18px, 4vw, 44px);
   z-index: 8;
   padding: 18px 20px;
-  border: 1px solid rgba(234, 220, 197, 0.34);
+  border: 1px solid rgba(254, 250, 224, 0.34);
   border-radius: 8px;
-  color: #eadcc5;
-  background: rgba(16, 47, 42, 0.86);
+  color: #fefae0;
+  background: rgba(40, 54, 24, 0.86);
   box-shadow: 0 22px 58px rgba(0, 0, 0, 0.32);
   font-weight: 800;
   line-height: 1.6;

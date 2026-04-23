@@ -53,9 +53,9 @@
 }
 
 .floating-utility-action {
-  color: #111;
-  background: #fff;
-  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.2);
+  color: #283618;
+  background: #ffffff;
+  box-shadow: 0 14px 30px rgba(40, 54, 24, 0.22);
 }
 
 .utility-action-icon {
@@ -68,13 +68,13 @@
 }
 
 .floating-utilities-trigger {
-  --utility-trigger-bg: #eadcc5;
+  --utility-trigger-bg: #dda15e;
   position: relative;
   cursor: grab;
-  color: #111;
+  color: #283618;
   background: var(--utility-trigger-bg);
   box-shadow:
-    0 18px 38px rgba(0, 0, 0, 0.3),
+    0 18px 38px rgba(40, 54, 24, 0.24),
     inset 0 1px 12px rgba(255, 255, 255, 0.28);
   opacity: 0.68;
 }
@@ -98,7 +98,7 @@
   height: 2px;
   border-radius: 2px;
   position: absolute;
-  background: #111;
+  background: #283618;
 }
 
 .utility-slider-line::after {
@@ -109,13 +109,13 @@
   position: absolute;
   left: 0;
   top: 12px;
-  background: #111;
+  background: #283618;
 }
 
 .utility-slider-dot {
   width: 7px;
   height: 7px;
-  border: 2px solid #111;
+  border: 2px solid #283618;
   border-radius: 50%;
   position: absolute;
   background: var(--utility-trigger-bg);
@@ -139,7 +139,7 @@
   content: '';
   width: 14px;
   height: 14px;
-  border: 2px solid #243044;
+  border: 2px solid #283618;
   border-radius: 50%;
   position: absolute;
   top: 5px;
@@ -154,10 +154,10 @@
   top: 0;
   left: 0;
   background:
-    linear-gradient(#243044, #243044) center top / 2px 5px no-repeat,
-    linear-gradient(#243044, #243044) center bottom / 2px 5px no-repeat,
-    linear-gradient(90deg, #243044, #243044) left center / 5px 2px no-repeat,
-    linear-gradient(90deg, #243044, #243044) right center / 5px 2px no-repeat;
+    linear-gradient(#283618, #283618) center top / 2px 5px no-repeat,
+    linear-gradient(#283618, #283618) center bottom / 2px 5px no-repeat,
+    linear-gradient(90deg, #283618, #283618) left center / 5px 2px no-repeat,
+    linear-gradient(90deg, #283618, #283618) right center / 5px 2px no-repeat;
 }
 
 .utility-language-icon::before {
@@ -165,7 +165,7 @@
   position: absolute;
   top: -2px;
   left: 1px;
-  color: #243044;
+  color: #283618;
   font-size: 15px;
   font-weight: 800;
 }
@@ -175,13 +175,13 @@
   position: absolute;
   right: 1px;
   bottom: 0;
-  color: #243044;
+  color: #283618;
   font-size: 18px;
   font-weight: 900;
 }
 
 .floating-language-indicator {
-  color: #0a27e2;
+  color: #00b4d8;
   font-size: 14px;
   font-weight: 900;
   letter-spacing: 0.08em;

@@ -13,11 +13,11 @@
   gap: 12px;
   align-items: end;
   padding: 16px;
-  border: 1px solid rgba(47, 141, 117, 0.18);
+  border: 1px solid rgba(96, 108, 56, 0.28);
   border-radius: 8px;
-  background: color-mix(in srgb, #fff 90%, var(--color-surface-soft) 10%);
+  background: color-mix(in srgb, #ffffff 88%, #fefae0 12%);
   color: var(--color-text);
-  box-shadow: 0 24px 70px rgba(16, 47, 42, 0.14);
+  box-shadow: 0 24px 70px rgba(40, 54, 24, 0.18);
 }
 
 .booking-bar label {
@@ -32,9 +32,9 @@
 .booking-bar input {
   width: 100%;
   box-sizing: border-box;
-  border: 1px solid rgba(47, 141, 117, 0.16);
+  border: 1px solid rgba(96, 108, 56, 0.22);
   border-radius: 6px;
-  background: #fbf8ef;
+  background: #fefae0;
   color: var(--color-text);
   font: inherit;
   font-size: 15px;
@@ -51,7 +51,7 @@
   align-items: center;
   justify-content: center;
   padding: 0 22px;
-  color: #fff;
+  color: #ffffff;
   background: var(--color-primary);
   box-shadow: 0 16px 36px rgba(0, 0, 0, 0.16);
   font: inherit;

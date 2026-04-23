@@ -4,8 +4,8 @@
   overflow: hidden;
   color: #fff;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(26, 105, 124, 0.28) 52%, rgba(9, 54, 69, 0.7)),
-    linear-gradient(90deg, rgba(35, 126, 150, 0.45), rgba(255, 255, 255, 0.18)),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(0, 180, 216, 0.28) 52%, rgba(40, 54, 24, 0.72)),
+    linear-gradient(90deg, rgba(96, 108, 56, 0.52), rgba(221, 161, 94, 0.18)),
     url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=2400&q=90')
       center / cover;
 }
@@ -94,7 +94,7 @@
   width: 100%;
   border: 0;
   padding: 0 28px;
-  color: #1f2726;
+  color: #283618;
   background: #fff;
   font-size: 16px;
 }
@@ -104,7 +104,7 @@
   border: 6px solid #fff;
   border-radius: 4px;
   color: #fff;
-  background: #232323;
+  background: #283618;
   font: inherit;
   font-weight: 850;
   cursor: pointer;
@@ -114,7 +114,7 @@
 }
 
 .footer-subscribe button:hover {
-  background: #0e3d34;
+  background: #606c38;
 }
 
 .footer-links {
@@ -210,7 +210,7 @@
   position: absolute;
   top: 7px;
   left: 7px;
-  background: #102f2a;
+  background: #283618;
 }
 
 .footer-bottom p {

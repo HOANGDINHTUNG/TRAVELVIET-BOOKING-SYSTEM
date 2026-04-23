@@ -18,7 +18,7 @@ import { Footer } from '../../../components/Footer/Footer'
 import { Hero } from '../../../components/Hero/Hero'
 import { LoginWelcomeAnimation } from '../../../components/LoginWelcome/LoginWelcomeAnimation'
 import { PackagesSection } from '../../../components/Packages/PackagesSection'
-import { StatsStrip } from '../../../components/StatsStrip/StatsStrip'
+import { PartnerMarquee } from '../../../components/PartnerMarquee/PartnerMarquee'
 import { StorySection } from '../../../components/Story/StorySection'
 import { TravelFilmSection } from '../../../components/TravelFilm/TravelFilmSection'
 import { WeatherAlertsSection } from '../../../components/WeatherAlerts/WeatherAlertsSection'
@@ -173,6 +173,7 @@ function HomePage() {
   return (
     <>
       <Hero />
+      <PartnerMarquee />
       <BookingPanel
         destination={destination}
         destinationOptions={destinationOptions}
@@ -183,7 +184,6 @@ function HomePage() {
         onGuestsChange={setGuests}
         onSubmit={handleSubmit}
       />
-      <StatsStrip />
       <WeatherAlertsSection
         destinationName={weatherDestination?.name}
         forecasts={weatherForecasts}
