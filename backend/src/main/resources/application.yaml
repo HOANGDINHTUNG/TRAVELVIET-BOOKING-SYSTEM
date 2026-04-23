@@ -11,6 +11,12 @@ app:
       expiration: ${JWT_EXPIRATION:3600000} # 1 hour
       refresh-expiration: ${JWT_REFRESH_EXPIRATION:2592000000} # 30 days
 
+minio:
+  url: ${MINIO_URL:http://192.168.100.142:9000}
+  accessKey: ${MINIO_ACCESS_KEY:admin}
+  secretKey: ${MINIO_SECRET_KEY:09022006}
+  bucketName: ${MINIO_BUCKET_NAME:tour-images}
+
 spring:
   application:
     name: wedservice-backend

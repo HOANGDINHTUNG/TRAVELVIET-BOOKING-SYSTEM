@@ -90,6 +90,7 @@ export function AboutSection() {
         <div className="about-grid">
           <figure className="about-image-main">
             <img
+              data-motion-image
               src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=1000&q=85"
               alt=""
             />
@@ -109,6 +110,7 @@ export function AboutSection() {
 
           <figure className="about-image-side">
             <img
+              data-motion-image
               src="https://images.unsplash.com/photo-1540541338287-41700207dee6?auto=format&fit=crop&w=800&q=85"
               alt=""
             />

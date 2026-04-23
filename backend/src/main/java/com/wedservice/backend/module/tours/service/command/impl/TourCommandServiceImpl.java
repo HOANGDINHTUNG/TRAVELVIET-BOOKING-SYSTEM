@@ -689,30 +689,30 @@ public class TourCommandServiceImpl implements TourCommandService {
                 .toList();
     }
 
-    private TourResponse toResponse(Tour t) {
-        return TourResponse.builder()
-                .id(t.getId())
-                .code(t.getCode())
-                .name(t.getName())
-                .slug(t.getSlug())
-                .destinationId(t.getDestination() != null ? t.getDestination().getId() : null)
-                .cancellationPolicyId(t.getCancellationPolicyId())
-                .basePrice(t.getBasePrice())
-                .currency(t.getCurrency())
-                .durationDays(t.getDurationDays())
-                .durationNights(t.getDurationNights())
-                .shortDescription(t.getShortDescription())
-                .description(t.getDescription())
-                .transportType(t.getTransportType())
-                .tripMode(t.getTripMode())
-                .highlights(t.getHighlights())
-                .inclusions(t.getInclusions())
-                .exclusions(t.getExclusions())
-                .notes(t.getNotes())
-                .isFeatured(t.getIsFeatured())
-                .status(t.getStatus() != null ? t.getStatus().getValue() : null)
-                .build();
-    }
+    // private TourResponse toResponse(Tour t) {
+    //     return TourResponse.builder()
+    //             .id(t.getId())
+    //             .code(t.getCode())
+    //             .name(t.getName())
+    //             .slug(t.getSlug())
+    //             .destinationId(t.getDestination() != null ? t.getDestination().getId() : null)
+    //             .cancellationPolicyId(t.getCancellationPolicyId())
+    //             .basePrice(t.getBasePrice())
+    //             .currency(t.getCurrency())
+    //             .durationDays(t.getDurationDays())
+    //             .durationNights(t.getDurationNights())
+    //             .shortDescription(t.getShortDescription())
+    //             .description(t.getDescription())
+    //             .transportType(t.getTransportType())
+    //             .tripMode(t.getTripMode())
+    //             .highlights(t.getHighlights())
+    //             .inclusions(t.getInclusions())
+    //             .exclusions(t.getExclusions())
+    //             .notes(t.getNotes())
+    //             .isFeatured(t.getIsFeatured())
+    //             .status(t.getStatus() != null ? t.getStatus().getValue() : null)
+    //             .build();
+    // }
 
     private List<TagResponse> loadTagResponses(Long tourId) {
         List<Long> tagIds = tourTagRepository.findByIdTourId(tourId).stream()

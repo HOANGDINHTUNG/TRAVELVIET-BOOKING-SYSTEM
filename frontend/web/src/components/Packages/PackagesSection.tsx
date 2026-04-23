@@ -30,25 +30,40 @@ export function PackagesSection({ tours, onSelectTour }: PackagesSectionProps) {
       </div>
 
       <div className="tour-grid">
-        {tours.map((tour) => (
+        {tours.map((tour) => {
+          const title = tour.translationKey
+            ? t(`data.tours.${tour.translationKey}.title`)
+            : tour.title
+          const description = tour.translationKey
+            ? t(`data.tours.${tour.translationKey}.description`)
+            : tour.description || tour.highlights.join(', ') || tour.category
+          const days = tour.translationKey
+            ? t(`data.tours.${tour.translationKey}.days`)
+            : tour.days
+          const location = tour.translationKey
+            ? t(`data.tours.${tour.translationKey}.location`)
+            : tour.location
+
+          return (
           <article className="tour-card" key={tour.id}>
             <div className="tour-image">
               <img
+                data-motion-image
                 src={tour.image}
-                alt={t(`data.tours.${tour.translationKey}.title`)}
+                alt={title}
               />
             </div>
             <div className="tour-body">
-              <h3>{t(`data.tours.${tour.translationKey}.title`)}</h3>
-              <p>{t(`data.tours.${tour.translationKey}.description`)}</p>
+              <h3>{title}</h3>
+              <p>{description}</p>
               <div className="tour-info-list">
                 <span>
                   <CalendarDays size={15} strokeWidth={1.8} />
-                  {t(`data.tours.${tour.translationKey}.days`)}
+                  {days}
                 </span>
                 <span>
                   <MapPin size={15} strokeWidth={1.8} />
-                  {t(`data.tours.${tour.translationKey}.location`)}
+                  {location}
                 </span>
               </div>
               <div className="tour-footer">
@@ -63,7 +78,8 @@ export function PackagesSection({ tours, onSelectTour }: PackagesSectionProps) {
               </div>
             </div>
           </article>
-        ))}
+          )
+        })}
       </div>
     </section>
   )

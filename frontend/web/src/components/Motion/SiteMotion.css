@@ -1,0 +1,45 @@
+#smooth-wrapper {
+  min-height: 100vh;
+}
+
+#smooth-content {
+  overflow: visible;
+}
+
+.motion-line {
+  overflow: hidden;
+  padding-bottom: 0.04em;
+  perspective: 900px;
+}
+
+.motion-word,
+.motion-char {
+  display: inline-block;
+  transform-origin: 50% 95%;
+  will-change: transform, opacity;
+}
+
+[data-motion-image] {
+  will-change: transform;
+}
+
+.tour-card,
+.destination-tile,
+.travel-video-shell,
+.weather-alert-item,
+.weather-metrics article,
+.contact-form,
+.about-stat {
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .motion-word,
+  .motion-char,
+  [data-motion-image] {
+    transform: none !important;
+    opacity: 1 !important;
+    will-change: auto;
+  }
+}

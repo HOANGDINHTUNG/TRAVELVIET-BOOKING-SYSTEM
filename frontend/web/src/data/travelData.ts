@@ -1,6 +1,6 @@
 export type Tour = {
   id: number
-  translationKey: string
+  translationKey?: string
   title: string
   location: string
   category: string
@@ -9,6 +9,9 @@ export type Tour = {
   rating: number
   image: string
   highlights: string[]
+  description?: string
+  destinationId?: number
+  currency?: string
 }
 
 export type HeroSlide = {
@@ -20,10 +23,14 @@ export type HeroSlide = {
 }
 
 export type Destination = {
-  translationKey: string
+  translationKey?: string
+  uuid?: string
   name: string
   tours: string
   image: string
+  province?: string
+  region?: string
+  shortDescription?: string
 }
 
 export const heroSlides: HeroSlide[] = [

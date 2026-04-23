@@ -57,15 +57,25 @@ export function DestinationsSection({ destinations }: DestinationsSectionProps) 
       </div>
       <div className="destination-gallery-wrapper" ref={wrapperRef}>
         <div className="destination-gallery-strip" ref={stripRef}>
-          {destinations.map((item) => (
-            <article className="destination-tile" key={item.name}>
-              <img src={item.image} alt={item.name} />
-              <div>
-                <h3>{t(`data.destinations.${item.translationKey}`)}</h3>
-                <span>{item.tours}</span>
-              </div>
-            </article>
-          ))}
+          {destinations.map((item) => {
+            const destinationName = item.translationKey
+              ? t(`data.destinations.${item.translationKey}`)
+              : item.name
+            const badgeLabel = item.region || item.province || 'Vietnam'
+
+            return (
+              <article className="destination-tile" key={item.uuid ?? item.name}>
+                <div className="destination-image-frame">
+                  <img src={item.image} alt={destinationName} />
+                </div>
+                <span className="destination-badge">{badgeLabel}</span>
+                <div className="destination-card-copy">
+                  <h3>{destinationName}</h3>
+                  <span>{item.tours}</span>
+                </div>
+              </article>
+            )
+          })}
         </div>
       </div>
     </section>

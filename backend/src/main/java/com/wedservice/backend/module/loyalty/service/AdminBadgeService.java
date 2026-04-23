@@ -12,7 +12,6 @@ import com.wedservice.backend.module.loyalty.entity.PassportBadge;
 import com.wedservice.backend.module.loyalty.entity.TravelPassport;
 import com.wedservice.backend.module.loyalty.repository.BadgeDefinitionRepository;
 import com.wedservice.backend.module.loyalty.repository.PassportBadgeRepository;
-import com.wedservice.backend.module.loyalty.repository.TravelPassportRepository;
 import com.wedservice.backend.module.users.entity.User;
 import com.wedservice.backend.module.users.repository.UserRepository;
 import com.wedservice.backend.module.users.service.AuditActionType;
@@ -33,7 +32,6 @@ public class AdminBadgeService {
 
     private final BadgeDefinitionRepository badgeDefinitionRepository;
     private final UserRepository userRepository;
-    private final TravelPassportRepository travelPassportRepository;
     private final PassportBadgeRepository passportBadgeRepository;
     private final UserPassportService userPassportService;
     private final AuditTrailRecorder auditTrailRecorder;

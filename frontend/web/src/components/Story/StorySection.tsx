@@ -28,8 +28,8 @@ function hasServiceAccess() {
 }
 
 export function StorySection() {
-  const { t } = useTranslation()
-  const sectionRef = useRef<HTMLElement | null>(null)
+  const { i18n, t } = useTranslation()
+  const sectionRef = useRef<HTMLDivElement | null>(null)
   const [activeService, setActiveService] = useState<number | null>(null)
   const [notice, setNotice] = useState('')
 
@@ -41,7 +41,7 @@ export function StorySection() {
         copy: t(`services.items.${index}.copy`),
         detail: t(`services.items.${index}.detail`),
       })),
-    [t],
+    [i18n.language, t],
   )
 
   useEffect(() => {
@@ -137,7 +137,7 @@ export function StorySection() {
     return () => {
       ctx.revert()
     }
-  }, [])
+  }, [i18n.language])
 
   const handleDetailClick = (index: number) => {
     if (!hasServiceAccess()) {

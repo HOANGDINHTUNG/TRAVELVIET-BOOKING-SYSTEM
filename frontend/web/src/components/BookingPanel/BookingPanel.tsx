@@ -4,6 +4,7 @@ import './BookingPanel.css'
 
 type BookingPanelProps = {
   destination: string
+  destinationOptions?: string[]
   travelDate: string
   guests: number
   onDestinationChange: (value: string) => void
@@ -14,6 +15,7 @@ type BookingPanelProps = {
 
 export function BookingPanel({
   destination,
+  destinationOptions = ['Da Nang', 'Phu Quoc', 'Sa Pa'],
   travelDate,
   guests,
   onDestinationChange,
@@ -33,9 +35,11 @@ export function BookingPanel({
             onChange={(event) => onDestinationChange(event.target.value)}
           >
             <option value="Tat ca">{t('booking.all')}</option>
-            <option>Da Nang</option>
-            <option>Phu Quoc</option>
-            <option>Sa Pa</option>
+            {destinationOptions.map((item) => (
+              <option key={item} value={item}>
+                {item}
+              </option>
+            ))}
           </select>
         </label>
         <label>

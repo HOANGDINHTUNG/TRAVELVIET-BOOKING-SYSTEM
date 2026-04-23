@@ -31,7 +31,8 @@
 
 .theme-light .site-nav.is-scrolled .brand,
 .theme-light .site-nav.is-scrolled .nav-links,
-.theme-light .site-nav.is-scrolled .nav-action {
+.theme-light .site-nav.is-scrolled .nav-action,
+.theme-light .site-nav.is-scrolled .nav-auth-link {
   color: #0e3d34;
 }
 
@@ -46,7 +47,8 @@
 
 .brand,
 .nav-links a,
-.nav-action {
+.nav-action,
+.nav-auth-link {
   color: inherit;
   text-decoration: none;
 }
@@ -113,6 +115,10 @@
   background: #0e3d34;
 }
 
+.theme-light .site-nav.is-scrolled .nav-auth-link {
+  background: rgba(14, 61, 52, 0.12);
+}
+
 .theme-dark .site-nav.is-scrolled {
   color: #eadcc5;
   background: rgba(74, 47, 31, 0.92);
@@ -120,7 +126,8 @@
 
 .theme-dark .site-nav.is-scrolled .brand,
 .theme-dark .site-nav.is-scrolled .nav-links,
-.theme-dark .site-nav.is-scrolled .nav-action {
+.theme-dark .site-nav.is-scrolled .nav-action,
+.theme-dark .site-nav.is-scrolled .nav-auth-link {
   color: #eadcc5;
 }
 
@@ -140,6 +147,356 @@
 .theme-dark .site-nav.is-scrolled .nav-action {
   color: #4a2f1f;
   background: #eadcc5;
+}
+
+.nav-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-self: end;
+  gap: 10px;
+}
+
+.nav-account {
+  position: relative;
+}
+
+.nav-auth-link {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.2);
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    background-color 180ms ease;
+}
+
+.nav-auth-link svg {
+  width: 21px;
+  height: 21px;
+  stroke-width: 2.4;
+}
+
+.nav-avatar {
+  border: 2px solid rgba(255, 255, 255, 0.42);
+  overflow: hidden;
+  padding: 0;
+  color: #0e3d34;
+  background: #fff;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.nav-avatar img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.nav-avatar span {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #ffffff, #eadcc5);
+}
+
+.theme-light .site-nav.is-scrolled .nav-avatar,
+.theme-dark .site-nav.is-scrolled .nav-avatar {
+  color: #0e3d34;
+  background: #fff;
+}
+
+.nav-auth-link:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.34);
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.18);
+}
+
+.account-dropdown {
+  width: min(360px, calc(100vw - 36px));
+  position: absolute;
+  top: calc(100% + 14px);
+  right: 0;
+  z-index: 1;
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  border-radius: 8px;
+  color: #14362f;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(22px);
+  animation: accountDropdownIn 180ms ease both;
+}
+
+.account-dropdown::before {
+  content: '';
+  width: 14px;
+  height: 14px;
+  position: absolute;
+  top: -7px;
+  right: 16px;
+  border-left: 1px solid rgba(255, 255, 255, 0.38);
+  border-top: 1px solid rgba(255, 255, 255, 0.38);
+  background: inherit;
+  transform: rotate(45deg);
+}
+
+.theme-dark .account-dropdown {
+  border-color: rgba(234, 220, 197, 0.18);
+  color: #f6ead8;
+  background: rgba(26, 24, 22, 0.95);
+  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.42);
+}
+
+.account-summary {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+}
+
+.account-summary-avatar {
+  width: 58px;
+  height: 58px;
+  border: 2px solid rgba(47, 141, 117, 0.24);
+  border-radius: 50%;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  color: #0e3d34;
+  background: #fff;
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.account-summary-avatar img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.account-summary-avatar span {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #ffffff, #eadcc5);
+}
+
+.account-summary-copy {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.account-summary-copy span {
+  color: #2f8d75;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.theme-dark .account-summary-copy span {
+  color: #9bd6c7;
+}
+
+.account-summary-copy strong,
+.account-detail-item strong {
+  overflow-wrap: anywhere;
+}
+
+.account-summary-copy strong {
+  font-size: 16px;
+  line-height: 1.25;
+}
+
+.account-summary-copy small {
+  overflow: hidden;
+  color: rgba(20, 54, 47, 0.62);
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.theme-dark .account-summary-copy small {
+  color: rgba(246, 234, 216, 0.66);
+}
+
+.account-menu-button {
+  min-height: 44px;
+  border: 1px solid rgba(47, 141, 117, 0.16);
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  padding: 0 12px;
+  color: inherit;
+  background: rgba(47, 141, 117, 0.08);
+  font: inherit;
+  font-weight: 900;
+  cursor: pointer;
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    transform 180ms ease;
+}
+
+.account-menu-button svg,
+.account-setting-label svg {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+}
+
+.account-menu-button:hover {
+  border-color: rgba(47, 141, 117, 0.34);
+  background: rgba(47, 141, 117, 0.14);
+  transform: translateY(-1px);
+}
+
+.theme-dark .account-menu-button {
+  border-color: rgba(234, 220, 197, 0.16);
+  background: rgba(234, 220, 197, 0.08);
+}
+
+.theme-dark .account-menu-button:hover {
+  border-color: rgba(234, 220, 197, 0.3);
+  background: rgba(234, 220, 197, 0.13);
+}
+
+.account-detail-grid {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid rgba(47, 141, 117, 0.14);
+  border-radius: 8px;
+  background: rgba(251, 248, 239, 0.72);
+  animation: accountDropdownIn 180ms ease both;
+}
+
+.theme-dark .account-detail-grid {
+  border-color: rgba(234, 220, 197, 0.14);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.account-detail-item {
+  display: grid;
+  grid-template-columns: minmax(96px, 0.75fr) minmax(0, 1fr);
+  gap: 10px;
+  align-items: baseline;
+  font-size: 13px;
+}
+
+.account-detail-item span {
+  color: rgba(20, 54, 47, 0.62);
+  font-weight: 800;
+}
+
+.theme-dark .account-detail-item span {
+  color: rgba(246, 234, 216, 0.6);
+}
+
+.account-detail-item strong {
+  min-width: 0;
+  font-weight: 900;
+  text-align: right;
+}
+
+.account-setting-row {
+  display: grid;
+  gap: 8px;
+}
+
+.account-setting-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(20, 54, 47, 0.68);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.theme-dark .account-setting-label {
+  color: rgba(246, 234, 216, 0.72);
+}
+
+.account-segmented {
+  min-height: 42px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid rgba(47, 141, 117, 0.16);
+  border-radius: 8px;
+  background: rgba(47, 141, 117, 0.08);
+}
+
+.theme-dark .account-segmented {
+  border-color: rgba(234, 220, 197, 0.16);
+  background: rgba(234, 220, 197, 0.08);
+}
+
+.account-segmented button {
+  min-width: 0;
+  border: 0;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 10px;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+  transition:
+    color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.account-segmented button svg {
+  width: 15px;
+  height: 15px;
+}
+
+.account-segmented button.is-active {
+  color: #fff;
+  background: #2f8d75;
+  box-shadow: 0 8px 18px rgba(47, 141, 117, 0.24);
+}
+
+.theme-dark .account-segmented button.is-active {
+  color: #241b16;
+  background: #eadcc5;
+  box-shadow: 0 8px 18px rgba(234, 220, 197, 0.18);
+}
+
+.account-logout {
+  border-color: rgba(190, 62, 62, 0.18);
+  color: #a73535;
+  background: rgba(190, 62, 62, 0.08);
+}
+
+.account-logout:hover {
+  border-color: rgba(190, 62, 62, 0.34);
+  background: rgba(190, 62, 62, 0.14);
+}
+
+.theme-dark .account-logout {
+  color: #ffb3aa;
+  background: rgba(201, 71, 71, 0.14);
 }
 
 .nav-action {
@@ -185,5 +542,26 @@
     min-height: 42px;
     padding: 0 14px;
     font-size: 13px;
+  }
+
+  .nav-auth-link {
+    width: 42px;
+    height: 42px;
+  }
+
+  .account-dropdown {
+    right: -8px;
+  }
+}
+
+@keyframes accountDropdownIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }

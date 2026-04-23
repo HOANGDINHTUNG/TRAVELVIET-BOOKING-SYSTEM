@@ -53,7 +53,9 @@ export function ContactSection({
           >
             {tours.map((tour) => (
               <option key={tour.id} value={tour.title}>
-                {t(`data.tours.${tour.translationKey}.title`)}
+                {tour.translationKey
+                  ? t(`data.tours.${tour.translationKey}.title`)
+                  : tour.title}
               </option>
             ))}
           </select>

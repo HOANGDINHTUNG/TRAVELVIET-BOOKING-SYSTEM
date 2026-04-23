@@ -10,6 +10,25 @@
       center / cover;
 }
 
+.site-footer::before {
+  content: '';
+  height: clamp(150px, 18vw, 280px);
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      180deg,
+      var(--color-page) 0%,
+      color-mix(in srgb, var(--color-page) 90%, transparent) 30%,
+      color-mix(in srgb, var(--color-page) 42%, transparent) 62%,
+      transparent 100%
+    );
+}
+
 .theme-dark .site-footer {
   background:
     linear-gradient(180deg, rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.58) 52%, rgba(0, 0, 0, 0.9)),
@@ -22,6 +41,8 @@
   width: min(1320px, calc(100% - 36px));
   min-height: 820px;
   margin: 0 auto;
+  position: relative;
+  z-index: 2;
   display: grid;
   grid-template-rows: 1fr auto auto;
   gap: clamp(44px, 7vw, 86px);

@@ -18,7 +18,6 @@ import com.wedservice.backend.module.loyalty.repository.PassportBadgeRepository;
 import com.wedservice.backend.module.loyalty.repository.PassportVisitedDestinationRepository;
 import com.wedservice.backend.module.loyalty.repository.TravelPassportRepository;
 import com.wedservice.backend.module.loyalty.repository.UserCheckinRepository;
-import com.wedservice.backend.module.loyalty.service.MissionTrackerService;
 import com.wedservice.backend.module.tours.entity.Tour;
 import com.wedservice.backend.module.tours.repository.TourRepository;
 import com.wedservice.backend.module.users.entity.Status;

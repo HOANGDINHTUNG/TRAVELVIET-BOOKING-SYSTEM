@@ -2,7 +2,6 @@ package com.wedservice.backend.module.support.facade;
 
 import com.wedservice.backend.module.support.dto.request.CreateSupportMessageRequest;
 import com.wedservice.backend.module.support.dto.request.CreateSupportSessionRequest;
-import com.wedservice.backend.module.support.dto.request.RateSupportSessionRequest;
 import com.wedservice.backend.module.support.dto.response.SupportMessageResponse;
 import com.wedservice.backend.module.support.dto.response.SupportSessionResponse;
 import com.wedservice.backend.module.support.service.UserSupportService;

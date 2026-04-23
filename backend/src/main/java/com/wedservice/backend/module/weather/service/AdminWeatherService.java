@@ -3,7 +3,6 @@ package com.wedservice.backend.module.weather.service;
 import com.wedservice.backend.common.exception.BadRequestException;
 import com.wedservice.backend.common.exception.ResourceNotFoundException;
 import com.wedservice.backend.common.util.DataNormalizer;
-import com.wedservice.backend.module.destinations.entity.CrowdLevel;
 import com.wedservice.backend.module.destinations.entity.Destination;
 import com.wedservice.backend.module.destinations.repository.DestinationRepository;
 import com.wedservice.backend.module.tours.entity.Tour;
