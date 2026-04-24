@@ -23,6 +23,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -167,7 +168,10 @@ class AdminComboPackageServiceTest {
                 .isActive(true)
                 .build();
 
-        when(comboPackageRepository.findAll(any(org.springframework.data.jpa.domain.Specification.class), any(PageRequest.class)))
+        // Use typed ArgumentMatchers.any to avoid unchecked conversion warning
+        when(comboPackageRepository.findAll(
+                org.mockito.ArgumentMatchers.<Specification<ComboPackage>>any(),
+                any(PageRequest.class)))
                 .thenReturn(new PageImpl<>(List.of(comboPackage), PageRequest.of(0, 10), 1));
 
         PageResponse<ComboPackageResponse> response = adminComboPackageService.getComboPackages(new ComboPackageSearchRequest());

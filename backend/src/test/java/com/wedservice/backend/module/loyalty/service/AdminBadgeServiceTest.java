@@ -12,9 +12,9 @@ import com.wedservice.backend.module.loyalty.repository.TravelPassportRepository
 import com.wedservice.backend.module.users.entity.User;
 import com.wedservice.backend.module.users.repository.UserRepository;
 import com.wedservice.backend.module.users.service.AuditTrailRecorder;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -44,19 +44,8 @@ class AdminBadgeServiceTest {
     @Mock
     private AuditTrailRecorder auditTrailRecorder;
 
+    @InjectMocks
     private AdminBadgeService adminBadgeService;
-
-    @BeforeEach
-    void setUp() {
-        adminBadgeService = new AdminBadgeService(
-                badgeDefinitionRepository,
-                userRepository,
-                travelPassportRepository,
-                passportBadgeRepository,
-                userPassportService,
-                auditTrailRecorder
-        );
-    }
 
     @Test
     void createBadge_normalizesCodeAndRecordsAudit() {

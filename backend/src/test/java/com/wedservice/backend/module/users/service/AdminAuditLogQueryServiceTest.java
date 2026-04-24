@@ -22,7 +22,6 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -61,7 +60,9 @@ class AdminAuditLogQueryServiceTest {
         request.setPage(0);
         request.setSize(20);
 
-        when(auditLogRepository.findAll((Specification<AuditLog>) any(), eq(PageRequest.of(0, 20, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "createdAt")))))
+        when(auditLogRepository.findAll(
+                org.mockito.ArgumentMatchers.<Specification<AuditLog>>any(),
+                eq(PageRequest.of(0, 20, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "createdAt")))))
                 .thenReturn(new PageImpl<>(List.of(auditLog), PageRequest.of(0, 20), 1));
         when(auditLogService.parseJson("{\"code\":\"EDITOR\"}")).thenReturn(JsonNodeFactory.instance.objectNode().put("code", "EDITOR"));
         when(auditLogService.parseJson("{\"code\":\"EDITOR_PLUS\"}")).thenReturn(JsonNodeFactory.instance.objectNode().put("code", "EDITOR_PLUS"));

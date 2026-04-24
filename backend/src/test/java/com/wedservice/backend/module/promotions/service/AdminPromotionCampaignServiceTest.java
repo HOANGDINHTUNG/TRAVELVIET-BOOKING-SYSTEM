@@ -13,10 +13,13 @@ import com.wedservice.backend.module.users.service.AuditTrailRecorder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
+
 import tools.jackson.databind.json.JsonMapper;
 
 import java.time.LocalDateTime;
@@ -116,7 +119,9 @@ class AdminPromotionCampaignServiceTest {
                 .isActive(true)
                 .build();
 
-        when(promotionCampaignRepository.findAll(any(org.springframework.data.jpa.domain.Specification.class), any(PageRequest.class)))
+        when(promotionCampaignRepository.findAll(
+                ArgumentMatchers.<Specification<PromotionCampaign>>any(),
+                any(PageRequest.class)))
                 .thenReturn(new PageImpl<>(List.of(campaign), PageRequest.of(0, 10), 1));
 
         PageResponse<PromotionCampaignResponse> response = adminPromotionCampaignService.getPromotionCampaigns(request);

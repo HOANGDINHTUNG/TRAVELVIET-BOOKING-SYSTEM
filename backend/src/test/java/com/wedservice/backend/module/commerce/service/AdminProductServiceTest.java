@@ -13,10 +13,12 @@ import com.wedservice.backend.module.users.service.AuditTrailRecorder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -107,7 +109,10 @@ class AdminProductServiceTest {
                 .isActive(true)
                 .build();
 
-        when(productRepository.findAll(any(org.springframework.data.jpa.domain.Specification.class), any(PageRequest.class)))
+        // Use typed ArgumentMatchers.any to avoid unchecked conversion warning
+        when(productRepository.findAll(
+                ArgumentMatchers.<Specification<Product>>any(),
+                any(PageRequest.class)))
                 .thenReturn(new PageImpl<>(List.of(product), PageRequest.of(0, 10), 1));
 
         PageResponse<ProductResponse> response = adminProductService.getProducts(new ProductSearchRequest());

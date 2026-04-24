@@ -24,6 +24,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -175,7 +176,9 @@ class AdminVoucherServiceTest {
                 .isActive(true)
                 .build();
 
-        when(voucherRepository.findAll(any(org.springframework.data.jpa.domain.Specification.class), any(PageRequest.class)))
+        when(voucherRepository.findAll(
+                org.mockito.ArgumentMatchers.<Specification<Voucher>>any(),
+                any(PageRequest.class)))
                 .thenReturn(new PageImpl<>(List.of(voucher), PageRequest.of(0, 10), 1));
 
         PageResponse<VoucherResponse> response = adminVoucherService.getVouchers(request);
