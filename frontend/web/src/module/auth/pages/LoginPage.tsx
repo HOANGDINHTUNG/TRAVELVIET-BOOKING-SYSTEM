@@ -13,7 +13,13 @@ import {
   Sparkles,
   UserPlus,
 } from 'lucide-react'
-import { loginWithPassword, persistAuthSession } from '../api/authApi'
+import {
+  getStoredAccessToken,
+  getStoredAuthUser,
+  loginWithPassword,
+  persistAuthSession,
+  resolvePostAuthRedirect,
+} from '../api/authApi'
 import './AuthPage.css'
 
 type AlertState =
@@ -33,6 +39,13 @@ function LoginPage() {
   const [alert, setAlert] = useState<AlertState>(null)
 
   useEffect(() => {
+    const storedToken = getStoredAccessToken()
+    const storedUser = getStoredAuthUser()
+    if (storedToken && storedUser) {
+      navigate(resolvePostAuthRedirect(storedUser), { replace: true })
+      return
+    }
+
     try {
       const remembered = window.localStorage.getItem(REMEMBER_EMAIL_KEY)
 
@@ -43,7 +56,7 @@ function LoginPage() {
     } catch {
       window.localStorage.removeItem(REMEMBER_EMAIL_KEY)
     }
-  }, [])
+  }, [navigate])
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -80,7 +93,7 @@ function LoginPage() {
         message: 'Đăng nhập thành công! Đang chuyển hướng...',
       })
 
-      window.setTimeout(() => navigate('/'), 800)
+      window.setTimeout(() => navigate(resolvePostAuthRedirect(auth.user)), 800)
     } catch (error) {
       setAlert({
         type: 'error',

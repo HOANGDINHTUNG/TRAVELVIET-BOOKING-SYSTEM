@@ -22,6 +22,7 @@ function App() {
   const { i18n } = useTranslation()
   const { theme, language } = useAppSelector((state) => state.preferences)
   const isHomePage = location.pathname === '/'
+  const isManagementPage = location.pathname.startsWith('/management')
 
   useEffect(() => {
     document.documentElement.lang = language
@@ -44,6 +45,10 @@ function App() {
             </div>
           </div>
         </main>
+      ) : isManagementPage ? (
+        <main className="min-h-screen">
+          <Outlet />
+        </main>
       ) : (
         <SmoothScrollLayout ease={0.08}>
           <main className="min-h-screen">
@@ -51,10 +56,12 @@ function App() {
           </main>
         </SmoothScrollLayout>
       )}
-      <Suspense fallback={null}>
-        <SiteMotion />
-      </Suspense>
-      <FloatingUtilities />
+      {isHomePage && (
+        <Suspense fallback={null}>
+          <SiteMotion />
+        </Suspense>
+      )}
+      {!isManagementPage && <FloatingUtilities />}
     </div>
   )
 }

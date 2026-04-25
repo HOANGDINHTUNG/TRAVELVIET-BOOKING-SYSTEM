@@ -20,6 +20,398 @@
   will-change: background-color, backdrop-filter, box-shadow, padding;
 }
 
+.site-nav.has-auth-garden {
+  overflow: visible;
+}
+
+.nav-botanical {
+  --botanical-green-deep: #1f5138;
+  --botanical-green-main: #2d6a4f;
+  --botanical-green-soft: #40916c;
+  --botanical-green-light: #74c69d;
+  --botanical-green-pale: #d8f3dc;
+  --botanical-green-sage: #b7e4c7;
+  --botanical-highlight: #eef7ee;
+
+  position: absolute;
+  inset: 0 10px;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.nav-botanical-svg {
+  position: absolute;
+  display: block;
+  color: var(--botanical-green-main);
+  opacity: 0.5;
+  filter:
+    drop-shadow(0 8px 12px rgba(27, 67, 50, 0.12))
+    drop-shadow(0 2px 4px rgba(255, 255, 255, 0.08));
+  transform-origin: 50% 0;
+  transition:
+    opacity 240ms ease,
+    color 240ms ease,
+    transform 240ms ease,
+    filter 240ms ease;
+}
+
+.nav-botanical-svg svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.nav-monstera-stem,
+.nav-monstera-vein {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.nav-monstera-stem {
+  stroke: rgba(49, 74, 25, 0.86);
+  stroke-width: 4.2;
+}
+
+.nav-monstera-leaf {
+  fill: currentColor;
+}
+
+.nav-monstera-vein {
+  stroke: rgba(238, 247, 238, 0.58);
+  stroke-width: 1.6;
+}
+
+.nav-botanical-svg-1 {
+  width: 40px;
+  height: 58px;
+  top: 0;
+  left: 18px;
+  color: #334719;
+  opacity: 0.66;
+  transform: rotate(-12deg);
+  animation: navBotanicalSvgOne 8s ease-in-out infinite;
+}
+
+.nav-botanical-svg-2 {
+  width: 34px;
+  height: 52px;
+  top: 4px;
+  left: 166px;
+  color: #7a9a3b;
+  opacity: 0.58;
+  transform: rotate(8deg);
+  animation: navBotanicalSvgTwo 9.4s ease-in-out -1.4s infinite;
+}
+
+.nav-botanical-svg-3 {
+  width: 32px;
+  height: 50px;
+  top: 5px;
+  left: 43%;
+  color: #6f9234;
+  opacity: 0.46;
+  transform: rotate(-3deg);
+  animation: navBotanicalSvgThree 8.6s ease-in-out -2.2s infinite;
+}
+
+.nav-botanical-svg-4 {
+  width: 42px;
+  height: 60px;
+  top: 0;
+  right: 148px;
+  color: #405620;
+  opacity: 0.62;
+  transform: rotate(16deg);
+  animation: navBotanicalSvgFour 10s ease-in-out -3.2s infinite;
+}
+
+.nav-botanical-svg-5 {
+  width: 36px;
+  height: 54px;
+  right: 18px;
+  bottom: 0;
+  color: #2f4319;
+  opacity: 0.58;
+  transform: rotate(-14deg);
+  animation: navBotanicalSvgFive 8.4s ease-in-out -1s infinite;
+}
+
+.nav-botanical-tree {
+  width: 42px;
+  height: 34px;
+  position: absolute;
+  bottom: 3px;
+  display: block;
+  opacity: 0.62;
+  filter: drop-shadow(0 8px 8px rgba(27, 67, 50, 0.12));
+  transform-origin: 50% 100%;
+  animation: navBotanicalTreeSway 8.6s ease-in-out infinite;
+}
+
+.nav-botanical-tree-trunk {
+  width: 4px;
+  height: 18px;
+  position: absolute;
+  left: 19px;
+  bottom: 0;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #806044, #4d3b26);
+}
+
+.nav-botanical-tree-crown {
+  position: absolute;
+  border-radius: 50% 50% 46% 48%;
+  background:
+    radial-gradient(circle at 30% 26%, rgba(255, 255, 255, 0.42), transparent 36%),
+    linear-gradient(135deg, #b7e4c7, #40916c 62%, #1f5138);
+  box-shadow: inset -3px -3px 0 rgba(27, 67, 50, 0.12);
+}
+
+.nav-botanical-tree-crown-main {
+  width: 24px;
+  height: 24px;
+  left: 9px;
+  top: 0;
+}
+
+.nav-botanical-tree-crown-left {
+  width: 18px;
+  height: 18px;
+  left: 2px;
+  top: 10px;
+}
+
+.nav-botanical-tree-crown-right {
+  width: 18px;
+  height: 18px;
+  right: 2px;
+  top: 9px;
+}
+
+.nav-botanical-tree-1 {
+  left: 252px;
+  scale: 0.78;
+  animation-delay: -1.2s;
+}
+
+.nav-botanical-tree-2 {
+  left: 53%;
+  bottom: 4px;
+  scale: 0.68;
+  opacity: 0.46;
+  animation-delay: -4.2s;
+}
+
+.nav-botanical-tree-3 {
+  right: 236px;
+  scale: 0.74;
+  opacity: 0.52;
+  animation-delay: -2.8s;
+}
+
+.nav-botanical-tree-4 {
+  left: 36%;
+  bottom: 2px;
+  scale: 0.56;
+  opacity: 0.38;
+  animation-delay: -5.4s;
+}
+
+.nav-botanical-tree-5 {
+  right: 84px;
+  bottom: 2px;
+  scale: 0.6;
+  opacity: 0.42;
+  animation-delay: -6.6s;
+}
+
+.brand,
+.nav-links,
+.nav-actions {
+  position: relative;
+  z-index: 2;
+}
+
+.nav-botanical-sprig {
+  position: absolute;
+  width: 94px;
+  height: 38px;
+  opacity: 0.78;
+  transform-origin: 50% 50%;
+  filter: drop-shadow(0 6px 10px rgba(27, 67, 50, 0.1));
+}
+
+.nav-botanical-sprig::before {
+  content: '';
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  top: 18px;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(68, 123, 93, 0.15) 8%,
+    rgba(68, 123, 93, 0.75) 50%,
+    rgba(68, 123, 93, 0.15) 92%,
+    transparent 100%
+  );
+  transform: rotate(-6deg);
+}
+
+.nav-botanical-sprig span {
+  position: absolute;
+  width: 16px;
+  height: 10px;
+  border-radius: 80% 20% 75% 25%;
+  background:
+    radial-gradient(circle at 28% 30%, rgba(255, 255, 255, 0.55), transparent 42%),
+    linear-gradient(135deg, var(--botanical-green-pale), var(--botanical-green-soft) 68%, var(--botanical-green-main));
+  box-shadow:
+    inset -2px -2px 0 rgba(27, 67, 50, 0.1),
+    inset 1px 1px 0 rgba(255, 255, 255, 0.22);
+  transform-origin: 50% 50%;
+}
+
+.nav-botanical-sprig span:nth-child(1) {
+  top: 5px;
+  left: 12px;
+  transform: rotate(-30deg);
+}
+
+.nav-botanical-sprig span:nth-child(2) {
+  top: 19px;
+  left: 32px;
+  transform: rotate(148deg);
+}
+
+.nav-botanical-sprig span:nth-child(3) {
+  top: 4px;
+  right: 24px;
+  transform: rotate(-18deg);
+}
+
+.nav-botanical-sprig span:nth-child(4) {
+  top: 18px;
+  right: 7px;
+  transform: rotate(152deg);
+}
+
+.nav-botanical-sprig-brand {
+  top: 10px;
+  left: 34px;
+  transform: rotate(-2deg);
+  animation: navBotanicalBrand 8.4s ease-in-out infinite;
+}
+
+.nav-botanical-sprig-center {
+  top: 2px;
+  left: 50%;
+  width: 122px;
+  transform: translateX(-50%) rotate(0deg);
+  opacity: 0.56;
+  animation: navBotanicalCenter 9.6s ease-in-out -2s infinite;
+}
+
+.nav-botanical-sprig-center::before {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(116, 198, 157, 0.5),
+    transparent
+  );
+}
+
+.nav-botanical-sprig-center span {
+  width: 13px;
+  height: 8px;
+  background:
+    radial-gradient(circle at 28% 30%, rgba(255, 255, 255, 0.5), transparent 40%),
+    linear-gradient(135deg, #dff5e5, #6ec797 70%, #3d8d68);
+}
+
+.nav-botanical-sprig-action {
+  top: 12px;
+  right: 60px;
+  transform: rotate(4deg);
+  animation: navBotanicalAction 8.8s ease-in-out -3s infinite;
+}
+
+.nav-botanical-bloom {
+  display: grid;
+  grid-template-columns: 7px 7px;
+  gap: 0;
+  position: absolute;
+  opacity: 0.54;
+  filter: drop-shadow(0 6px 8px rgba(27, 67, 50, 0.08));
+  animation: navBotanicalBloom 10.4s ease-in-out infinite;
+}
+
+.nav-botanical-bloom span {
+  width: 7px;
+  height: 7px;
+  border: 0.5px solid rgba(150, 196, 160, 0.45);
+  border-radius: 40% 70% / 10% 90%;
+  background: linear-gradient(180deg, var(--botanical-highlight), #bfdcc6);
+}
+
+.nav-botanical-bloom span:nth-child(2) {
+  transform: rotate(90deg);
+}
+
+.nav-botanical-bloom span:nth-child(3) {
+  transform: rotate(270deg);
+}
+
+.nav-botanical-bloom span:nth-child(4) {
+  transform: rotate(180deg);
+}
+
+.nav-botanical-bloom-1 {
+  top: 8px;
+  left: min(35%, 420px);
+  transform: rotate(14deg) scale(0.86);
+}
+
+.nav-botanical-bloom-2 {
+  right: 19%;
+  bottom: 9px;
+  transform: rotate(-10deg) scale(0.72);
+  animation-delay: -4.2s;
+}
+
+.site-nav.has-auth-garden:hover .nav-botanical-sprig span,
+.site-nav.has-auth-garden:focus-within .nav-botanical-sprig span {
+  background:
+    radial-gradient(circle at 28% 30%, rgba(255, 255, 255, 0.58), transparent 42%),
+    linear-gradient(135deg, #dff5e5, #5fb885 68%, #21563a);
+}
+
+.site-nav.has-auth-garden:hover .nav-botanical-svg,
+.site-nav.has-auth-garden:focus-within .nav-botanical-svg {
+  color: #2a6a49;
+  opacity: 0.68;
+  filter:
+    drop-shadow(0 10px 14px rgba(27, 67, 50, 0.16))
+    drop-shadow(0 2px 5px rgba(255, 255, 255, 0.08));
+}
+
+.site-nav.has-auth-garden:hover .nav-botanical-tree-crown,
+.site-nav.has-auth-garden:focus-within .nav-botanical-tree-crown {
+  background:
+    radial-gradient(circle at 30% 26%, rgba(255, 255, 255, 0.42), transparent 36%),
+    linear-gradient(135deg, #d8f3dc, #2d6a4f 62%, #123d24);
+}
+
+.site-nav.has-auth-garden:hover .nav-botanical-bloom span,
+.site-nav.has-auth-garden:focus-within .nav-botanical-bloom span {
+  border-color: rgba(84, 130, 97, 0.42);
+  background: linear-gradient(180deg, #f5fbf4, #c8e5cf);
+}
+
 .site-nav.is-scrolled {
   background: rgba(82, 87, 89, 0.78);
 }
@@ -95,6 +487,10 @@
   font-weight: 700;
 }
 
+.site-nav.has-auth-garden .nav-links {
+  gap: clamp(18px, 2.2vw, 34px);
+}
+
 .nav-links a {
   transition:
     color 180ms ease,
@@ -158,6 +554,7 @@
 
 .nav-account {
   position: relative;
+  isolation: isolate;
 }
 
 .nav-auth-link {
@@ -180,6 +577,8 @@
 }
 
 .nav-avatar {
+  position: relative;
+  z-index: 2;
   border: 2px solid rgba(255, 255, 255, 0.42);
   overflow: hidden;
   padding: 0;
@@ -187,6 +586,290 @@
   background: #ffffff;
   font-weight: 900;
   cursor: pointer;
+}
+
+.nav-garden {
+  width: 112px;
+  height: 66px;
+  position: absolute;
+  top: -15px;
+  left: 50%;
+  z-index: 1;
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+.nav-garden-tendril {
+  position: absolute;
+  top: 3px;
+  border-radius: 999px;
+  transform-origin: 50% 0;
+  filter: drop-shadow(0 7px 8px rgba(40, 54, 24, 0.16));
+}
+
+.nav-garden-tendril::before {
+  content: '';
+  width: 100%;
+  height: 100%;
+  display: block;
+  border-radius: inherit;
+  border-left: 1.5px solid rgba(88, 129, 87, 0.72);
+  border-bottom: 1.5px solid rgba(88, 129, 87, 0.24);
+}
+
+.nav-garden-tendril span {
+  width: 10px;
+  height: 6px;
+  position: absolute;
+  border-radius: 100% 0 100% 0;
+  background: linear-gradient(135deg, #d8f3dc, #52b788);
+  box-shadow: 0 4px 8px rgba(27, 67, 50, 0.14);
+}
+
+.nav-garden-tendril span:first-child {
+  top: 35%;
+  left: -8px;
+  transform: rotate(-28deg);
+}
+
+.nav-garden-tendril span:last-child {
+  top: 62%;
+  right: -5px;
+  transform: rotate(142deg);
+}
+
+.nav-garden-tendril-1 {
+  width: 22px;
+  height: 54px;
+  left: 18px;
+  transform: rotate(9deg);
+  animation: navGardenTendrilOne 6.4s ease-in-out infinite;
+}
+
+.nav-garden-tendril-2 {
+  width: 28px;
+  height: 58px;
+  left: 51px;
+  transform: rotate(-2deg);
+  animation: navGardenTendrilTwo 7.2s ease-in-out -1.8s infinite;
+}
+
+.nav-garden-tendril-3 {
+  width: 24px;
+  height: 52px;
+  right: 16px;
+  transform: rotate(-11deg);
+  animation: navGardenTendrilThree 6.8s ease-in-out -3.2s infinite;
+}
+
+.nav-garden-vine {
+  width: 44px;
+  height: 50px;
+  position: absolute;
+  top: 3px;
+  border-left: 2px solid rgba(86, 125, 70, 0.72);
+  border-radius: 0 0 0 999px;
+  transform-origin: 50% 0;
+  filter: drop-shadow(0 8px 10px rgba(40, 54, 24, 0.16));
+  animation: navGardenSway 5.8s ease-in-out infinite;
+}
+
+.nav-garden-vine-left {
+  left: 7px;
+  transform: rotate(15deg);
+}
+
+.nav-garden-vine-right {
+  right: 2px;
+  height: 54px;
+  border-left: 0;
+  border-right: 2px solid rgba(57, 111, 74, 0.72);
+  border-radius: 0 0 999px 0;
+  transform: rotate(-17deg);
+  animation-delay: -2.8s;
+}
+
+.nav-garden-vine span {
+  width: 14px;
+  height: 8px;
+  position: absolute;
+  border-radius: 100% 0 100% 0;
+  background: linear-gradient(135deg, #b7e4c7, #40916c);
+  box-shadow: 0 4px 8px rgba(40, 54, 24, 0.14);
+}
+
+.nav-garden-vine span:nth-child(1) {
+  top: 14px;
+  left: -13px;
+  transform: rotate(-32deg);
+}
+
+.nav-garden-vine span:nth-child(2) {
+  top: 31px;
+  left: 1px;
+  transform: rotate(144deg);
+}
+
+.nav-garden-vine span:nth-child(3) {
+  top: 47px;
+  left: -12px;
+  transform: rotate(-26deg);
+}
+
+.nav-garden-vine-right span:nth-child(1) {
+  right: -13px;
+  left: auto;
+  transform: rotate(32deg);
+}
+
+.nav-garden-vine-right span:nth-child(2) {
+  right: 1px;
+  left: auto;
+  transform: rotate(-144deg);
+}
+
+.nav-garden-vine-right span:nth-child(3) {
+  right: -12px;
+  left: auto;
+  transform: rotate(26deg);
+}
+
+.nav-garden-flower {
+  display: grid;
+  grid-template-columns: 10px 10px;
+  position: absolute;
+  opacity: 0.96;
+  transition:
+    grid-template-columns 780ms ease,
+    transform 780ms ease;
+  filter: drop-shadow(0 8px 9px rgba(40, 54, 24, 0.18));
+}
+
+.nav-garden-flower-1 {
+  top: 6px;
+  left: 15px;
+  transform: rotate(5deg);
+}
+
+.nav-garden-flower-2 {
+  top: 25px;
+  left: 0;
+  transform: rotate(35deg) scale(0.82);
+}
+
+.nav-garden-flower-3 {
+  right: 10px;
+  bottom: 9px;
+  transform: rotate(0deg) scale(0.9);
+}
+
+.nav-garden-flower-4 {
+  top: 2px;
+  right: 21px;
+  transform: rotate(15deg) scale(0.76);
+}
+
+.nav-garden-flower-5 {
+  right: -1px;
+  top: 26px;
+  transform: rotate(25deg) scale(0.86);
+}
+
+.nav-garden-flower-6 {
+  left: 38px;
+  bottom: 1px;
+  transform: rotate(30deg) scale(0.72);
+}
+
+.nav-garden-petal {
+  width: 10px;
+  height: 10px;
+  border: 0.5px solid rgba(116, 198, 157, 0.8);
+  border-radius: 40% 70% / 7% 90%;
+  background: linear-gradient(#d8f3dc, #74c69d);
+  transition:
+    width 780ms ease,
+    height 780ms ease,
+    background 780ms ease,
+    border-color 780ms ease;
+}
+
+.nav-garden-petal-two {
+  transform: rotate(90deg);
+}
+
+.nav-garden-petal-three {
+  transform: rotate(270deg);
+}
+
+.nav-garden-petal-four {
+  transform: rotate(180deg);
+}
+
+.nav-account:hover .nav-garden-flower,
+.nav-account:focus-within .nav-garden-flower {
+  grid-template-columns: 13px 13px;
+}
+
+.nav-account:hover .nav-garden-petal,
+.nav-account:focus-within .nav-garden-petal {
+  width: 13px;
+  height: 13px;
+  border-color: rgba(27, 94, 32, 0.7);
+  background: linear-gradient(#d8f3dc, #2d6a4f);
+}
+
+.nav-account:hover .nav-garden-vine,
+.nav-account:focus-within .nav-garden-vine {
+  border-color: rgba(27, 94, 32, 0.78);
+}
+
+.nav-account:hover .nav-garden-vine-right,
+.nav-account:focus-within .nav-garden-vine-right {
+  border-color: rgba(27, 94, 32, 0.78);
+}
+
+.nav-account:hover .nav-garden-vine span,
+.nav-account:hover .nav-garden-tendril span,
+.nav-account:focus-within .nav-garden-vine span,
+.nav-account:focus-within .nav-garden-tendril span {
+  background: linear-gradient(135deg, #b7e4c7, #1b5e20);
+}
+
+.nav-account:hover .nav-garden-tendril::before,
+.nav-account:focus-within .nav-garden-tendril::before {
+  border-left-color: rgba(27, 94, 32, 0.84);
+  border-bottom-color: rgba(27, 94, 32, 0.28);
+}
+
+.nav-account:hover .nav-garden-flower-1,
+.nav-account:focus-within .nav-garden-flower-1 {
+  animation: navGardenFlowerOne 15s linear infinite;
+}
+
+.nav-account:hover .nav-garden-flower-2,
+.nav-account:focus-within .nav-garden-flower-2 {
+  animation: navGardenFlowerTwo 13s linear 800ms infinite;
+}
+
+.nav-account:hover .nav-garden-flower-3,
+.nav-account:focus-within .nav-garden-flower-3 {
+  animation: navGardenFlowerThree 16s linear 800ms infinite;
+}
+
+.nav-account:hover .nav-garden-flower-4,
+.nav-account:focus-within .nav-garden-flower-4 {
+  animation: navGardenFlowerFour 17s linear 800ms infinite;
+}
+
+.nav-account:hover .nav-garden-flower-5,
+.nav-account:focus-within .nav-garden-flower-5 {
+  animation: navGardenFlowerFive 20s linear 800ms infinite;
+}
+
+.nav-account:hover .nav-garden-flower-6,
+.nav-account:focus-within .nav-garden-flower-6 {
+  animation: navGardenFlowerSix 15s linear 800ms infinite;
 }
 
 .nav-avatar img {
@@ -221,7 +904,7 @@
   position: absolute;
   top: calc(100% + 14px);
   right: 0;
-  z-index: 1;
+  z-index: 5;
   display: grid;
   gap: 12px;
   padding: 14px;
@@ -631,6 +1314,18 @@
   .nav-links {
     display: none;
   }
+
+  .nav-botanical-sprig-center,
+  .nav-botanical-bloom-1,
+  .nav-botanical-svg-3,
+  .nav-botanical-tree-2,
+  .nav-botanical-tree-4 {
+    display: none;
+  }
+
+  .nav-botanical-sprig-brand {
+    left: 74px;
+  }
 }
 
 @media (max-width: 700px) {
@@ -653,8 +1348,95 @@
     height: 42px;
   }
 
+  .nav-garden {
+    width: 94px;
+    height: 54px;
+    top: -10px;
+  }
+
+  .nav-garden-vine {
+    height: 48px;
+  }
+
+  .nav-garden-tendril {
+    display: none;
+  }
+
+  .nav-botanical {
+    inset: 0 2px;
+  }
+
+  .nav-botanical-sprig {
+    width: 70px;
+    opacity: 0.7;
+  }
+
+  .nav-botanical-sprig-brand {
+    left: 42px;
+    top: 7px;
+  }
+
+  .nav-botanical-sprig-action {
+    right: 32px;
+    top: 9px;
+  }
+
+  .nav-botanical-bloom-2 {
+    display: none;
+  }
+
+  .nav-botanical-svg-2,
+  .nav-botanical-svg-4,
+  .nav-botanical-tree-1,
+  .nav-botanical-tree-5 {
+    display: none;
+  }
+
+  .nav-botanical-tree-3 {
+    right: 72px;
+    scale: 0.56;
+    opacity: 0.4;
+  }
+
+  .nav-botanical-svg-1 {
+    left: 4px;
+    width: 18px;
+    height: 45px;
+    opacity: 0.52;
+  }
+
+  .nav-botanical-svg-5 {
+    right: 2px;
+    width: 17px;
+    height: 44px;
+    opacity: 0.5;
+  }
+
+  .nav-garden-flower-2,
+  .nav-garden-flower-5,
+  .nav-garden-flower-6 {
+    display: none;
+  }
+
+  .nav-garden-flower {
+    transform: scale(0.76);
+  }
+
   .account-dropdown {
     right: -8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-botanical-sprig,
+  .nav-botanical-bloom,
+  .nav-botanical-svg,
+  .nav-botanical-tree,
+  .nav-garden-tendril,
+  .nav-garden-vine,
+  .nav-account:hover .nav-garden-flower,
+  .nav-account:focus-within .nav-garden-flower {
+    animation: none;
   }
 }
 
@@ -723,5 +1505,249 @@
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes navBotanicalBrand {
+  0%,
+  100% {
+    transform: rotate(-2deg) translateY(0);
+  }
+
+  50% {
+    transform: rotate(2deg) translateY(1px);
+  }
+}
+
+@keyframes navBotanicalCenter {
+  0%,
+  100% {
+    transform: translateX(-50%) rotate(0deg) translateY(0);
+  }
+
+  45% {
+    transform: translateX(-50%) rotate(-2deg) translateY(1px);
+  }
+
+  75% {
+    transform: translateX(-50%) rotate(3deg) translateY(0);
+  }
+}
+
+@keyframes navBotanicalAction {
+  0%,
+  100% {
+    transform: rotate(4deg) translateY(0);
+  }
+
+  50% {
+    transform: rotate(-2deg) translateY(1px);
+  }
+}
+
+@keyframes navBotanicalBloom {
+  0%,
+  100% {
+    transform: rotate(0deg) scale(1);
+    opacity: 0.5;
+  }
+
+  50% {
+    transform: rotate(5deg) scale(1.05);
+    opacity: 0.62;
+  }
+}
+
+@keyframes navBotanicalSvgOne {
+  0%,
+  100% {
+    transform: rotate(-18deg) translateY(0);
+  }
+
+  50% {
+    transform: rotate(-12deg) translateY(2px);
+  }
+}
+
+@keyframes navBotanicalSvgTwo {
+  0%,
+  100% {
+    transform: rotate(72deg) translateY(0);
+  }
+
+  42% {
+    transform: rotate(78deg) translateY(2px);
+  }
+
+  74% {
+    transform: rotate(68deg) translateY(1px);
+  }
+}
+
+@keyframes navBotanicalSvgThree {
+  0%,
+  100% {
+    transform: rotate(84deg) translateY(0);
+  }
+
+  50% {
+    transform: rotate(90deg) translateY(1px);
+  }
+}
+
+@keyframes navBotanicalSvgFour {
+  0%,
+  100% {
+    transform: rotate(-68deg) translateY(0);
+  }
+
+  46% {
+    transform: rotate(-75deg) translateY(2px);
+  }
+
+  78% {
+    transform: rotate(-63deg) translateY(1px);
+  }
+}
+
+@keyframes navBotanicalSvgFive {
+  0%,
+  100% {
+    transform: rotate(28deg) translateY(0);
+  }
+
+  48% {
+    transform: rotate(22deg) translateY(2px);
+  }
+}
+
+@keyframes navBotanicalTreeSway {
+  0%,
+  100% {
+    transform: rotate(-1deg) translateY(0);
+  }
+
+  48% {
+    transform: rotate(2deg) translateY(1px);
+  }
+
+  76% {
+    transform: rotate(-2deg) translateY(0);
+  }
+}
+
+@keyframes navGardenSway {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+
+  50% {
+    translate: 2px 1px;
+  }
+}
+
+@keyframes navGardenTendrilOne {
+  0%,
+  100% {
+    transform: rotate(9deg) translateY(0);
+  }
+
+  45% {
+    transform: rotate(16deg) translateY(2px);
+  }
+
+  70% {
+    transform: rotate(5deg) translateY(1px);
+  }
+}
+
+@keyframes navGardenTendrilTwo {
+  0%,
+  100% {
+    transform: rotate(-2deg) translateY(0);
+  }
+
+  42% {
+    transform: rotate(-9deg) translateY(2px);
+  }
+
+  72% {
+    transform: rotate(4deg) translateY(1px);
+  }
+}
+
+@keyframes navGardenTendrilThree {
+  0%,
+  100% {
+    transform: rotate(-11deg) translateY(0);
+  }
+
+  48% {
+    transform: rotate(-4deg) translateY(2px);
+  }
+
+  76% {
+    transform: rotate(-16deg) translateY(1px);
+  }
+}
+
+@keyframes navGardenFlowerOne {
+  from {
+    transform: rotate(5deg);
+  }
+
+  to {
+    transform: rotate(365deg);
+  }
+}
+
+@keyframes navGardenFlowerTwo {
+  from {
+    transform: rotate(35deg) scale(0.82);
+  }
+
+  to {
+    transform: rotate(-325deg) scale(0.82);
+  }
+}
+
+@keyframes navGardenFlowerThree {
+  from {
+    transform: rotate(0deg) scale(0.9);
+  }
+
+  to {
+    transform: rotate(360deg) scale(0.9);
+  }
+}
+
+@keyframes navGardenFlowerFour {
+  from {
+    transform: rotate(15deg) scale(0.76);
+  }
+
+  to {
+    transform: rotate(375deg) scale(0.76);
+  }
+}
+
+@keyframes navGardenFlowerFive {
+  from {
+    transform: rotate(25deg) scale(0.86);
+  }
+
+  to {
+    transform: rotate(-335deg) scale(0.86);
+  }
+}
+
+@keyframes navGardenFlowerSix {
+  from {
+    transform: rotate(30deg) scale(0.72);
+  }
+
+  to {
+    transform: rotate(390deg) scale(0.72);
   }
 }

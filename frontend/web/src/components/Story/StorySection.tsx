@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useTranslation } from 'react-i18next'
+import { hasStoredAuthSession } from '../../module/auth/api/authApi'
 import './StorySection.css'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -19,12 +20,7 @@ function hasServiceAccess() {
     return false
   }
 
-  return Boolean(
-    window.localStorage.getItem('travelviet-auth-token') ||
-      window.localStorage.getItem('travelviet-user') ||
-      window.localStorage.getItem('auth-token') ||
-      window.localStorage.getItem('token'),
-  )
+  return hasStoredAuthSession()
 }
 
 export function StorySection() {

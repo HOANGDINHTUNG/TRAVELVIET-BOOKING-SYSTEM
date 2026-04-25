@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
@@ -13,7 +13,13 @@ import {
   UserPlus,
   UserRound,
 } from 'lucide-react'
-import { persistAuthSession, registerWithPassword } from '../api/authApi'
+import {
+  getStoredAccessToken,
+  getStoredAuthUser,
+  persistAuthSession,
+  registerWithPassword,
+  resolvePostAuthRedirect,
+} from '../api/authApi'
 import './AuthPage.css'
 
 type AlertState =
@@ -29,6 +35,14 @@ function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [alert, setAlert] = useState<AlertState>(null)
+
+  useEffect(() => {
+    const storedToken = getStoredAccessToken()
+    const storedUser = getStoredAuthUser()
+    if (storedToken && storedUser) {
+      navigate(resolvePostAuthRedirect(storedUser), { replace: true })
+    }
+  }, [navigate])
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -69,7 +83,7 @@ function RegisterPage() {
         message: 'Đăng ký thành công! Đang chuyển về trang chủ...',
       })
 
-      window.setTimeout(() => navigate('/'), 900)
+      window.setTimeout(() => navigate(resolvePostAuthRedirect(auth.user)), 900)
     } catch (error) {
       setAlert({
         type: 'error',

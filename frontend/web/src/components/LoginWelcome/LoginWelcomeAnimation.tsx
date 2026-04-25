@@ -1,14 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CheckCircle2, Sparkles, X } from 'lucide-react'
+import { hasStoredAuthSession } from '../../module/auth/api/authApi'
 import './LoginWelcomeAnimation.css'
-
-const AUTH_STORAGE_KEYS = [
-  'travelviet-auth-token',
-  'travelviet-user',
-  'auth-token',
-  'token',
-] as const
 
 const WELCOME_SEEN_KEY = 'travelviet-login-welcome-seen'
 
@@ -17,7 +11,7 @@ function hasAuthSignal() {
     return false
   }
 
-  return AUTH_STORAGE_KEYS.some((key) => Boolean(window.localStorage.getItem(key)))
+  return hasStoredAuthSession()
 }
 
 export function LoginWelcomeAnimation() {
