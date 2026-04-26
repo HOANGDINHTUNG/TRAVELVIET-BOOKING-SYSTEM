@@ -1,0 +1,93 @@
+.destination-detail-cta {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 28px;
+  align-items: center;
+  margin-bottom: 48px;
+  padding: 58px;
+  border-radius: 8px;
+  color: #fff;
+  background:
+    linear-gradient(135deg, rgba(40, 54, 24, 0.96), rgba(0, 180, 216, 0.76)),
+    var(--color-primary);
+}
+
+.destination-detail-cta h2 {
+  margin: 0;
+  color: #fff;
+  font-size: 3.4rem;
+  line-height: 1.04;
+  font-weight: 930;
+  letter-spacing: 0;
+}
+
+.destination-detail-cta p,
+.destination-detail-cta .destination-detail-kicker {
+  color: #fff;
+}
+
+.destination-detail-cta p {
+  max-width: 760px;
+  margin: 20px 0 0;
+  color: rgba(255, 255, 255, 0.84);
+  font-size: 1.08rem;
+  line-height: 1.78;
+}
+
+.destination-detail-cta a {
+  min-height: 54px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 22px;
+  border-radius: 999px;
+  color: var(--color-text);
+  background: #fff;
+  text-decoration: none;
+  font-weight: 930;
+  white-space: nowrap;
+}
+
+.destination-detail-cta a svg {
+  width: 20px;
+  height: 20px;
+  color: var(--color-primary);
+}
+
+.destination-detail-cta > span {
+  position: absolute;
+  right: 26px;
+  bottom: 20px;
+  display: flex;
+  gap: 10px;
+  opacity: 0.18;
+}
+
+.destination-detail-cta > span svg {
+  width: 58px;
+  height: 58px;
+}
+
+@media (max-width: 1100px) {
+  .destination-detail-cta {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .destination-detail-cta {
+    padding: 30px;
+  }
+
+  .destination-detail-cta h2 {
+    font-size: 2.25rem;
+  }
+
+  .destination-detail-cta a {
+    width: 100%;
+    justify-content: center;
+    white-space: normal;
+  }
+}

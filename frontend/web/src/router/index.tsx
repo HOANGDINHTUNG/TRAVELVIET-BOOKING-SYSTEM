@@ -4,15 +4,18 @@ import { createBrowserRouter } from 'react-router-dom'
 import App from '../App'
 
 const lazyHomePage = lazy(() => import('../module/home/pages/HomePage'))
-const lazyAuthLayout = lazy(() => import('../module/auth/feature/layout/AuthLayout'))
+const lazyDestinationDetailPage = lazy(
+  () => import('../module/destinations/pages/DestinationDetailPage'),
+)
+const lazyAuthLayout = lazy(() => import('../module/auth/layouts/AuthLayout'))
 const lazyLoginPage = lazy(() => import('../module/auth/pages/LoginPage'))
 const lazyRegisterPage = lazy(() => import('../module/auth/pages/RegisterPage'))
 const lazyNotFoundPage = lazy(() => import('../components/error/NotFoundPage'))
 const lazyRequireManagerAccess = lazy(
-  () => import('../module/management/feature/RequireManagerAccess'),
+  () => import('./RequireManagerAccess'),
 )
 const lazyManagementLayout = lazy(
-  () => import('../module/management/feature/layout/ManagementLayout'),
+  () => import('../module/management/layouts/ManagementLayout'),
 )
 const lazyManagementHubPage = lazy(
   () => import('../module/management/pages/ManagementHubPage'),
@@ -31,6 +34,10 @@ const router = createBrowserRouter([
     errorElement: withSuspense(createElement(lazyNotFoundPage)),
     children: [
       { index: true, element: withSuspense(createElement(lazyHomePage)) },
+      {
+        path: 'destinations/:uuid',
+        element: withSuspense(createElement(lazyDestinationDetailPage)),
+      },
       {
         element: withSuspense(createElement(lazyAuthLayout)),
         children: [

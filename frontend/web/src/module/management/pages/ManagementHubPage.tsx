@@ -17,12 +17,12 @@ import {
   resolveManagerRolesForUser,
 } from '../config/managementRoles'
 import type { SpecialistRoleCode } from '../config/managementDashboardConfig'
-import QuickChecksPanel from './components/QuickChecksPanel'
-import type { CheckState } from './dashboardTypes'
-import { summarizePayload } from './dashboardUtils'
-import AdminDashboard from './dashboards/AdminDashboard'
-import SpecialistRoleDashboard from './dashboards/SpecialistRoleDashboard'
-import SuperAdminDashboard from './dashboards/SuperAdminDashboard'
+import QuickChecksPanel from '../components/QuickChecksPanel'
+import AdminDashboard from '../components/dashboards/AdminDashboard'
+import SpecialistRoleDashboard from '../components/dashboards/SpecialistRoleDashboard'
+import SuperAdminDashboard from '../components/dashboards/SuperAdminDashboard'
+import type { CheckState } from '../utils/dashboardTypes'
+import { summarizePayload } from '../utils/dashboardUtils'
 
 const specialistRoles: SpecialistRoleCode[] = [
   'OPERATOR',

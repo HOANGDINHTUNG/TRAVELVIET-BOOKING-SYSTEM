@@ -60,8 +60,15 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(securityProperties.getWhitelist().toArray(new String[0]))
                         .permitAll()
-                        // Public GET endpoints for destinations
-                        .requestMatchers(HttpMethod.GET, "/destinations", "/destinations/{uuid}").permitAll()
+                        // Public GET endpoints for travel discovery
+                        .requestMatchers(HttpMethod.GET,
+                                "/destinations",
+                                "/destinations/{uuid}",
+                                "/destinations/{destinationUuid}/weather/**",
+                                "/tours",
+                                "/tours/**",
+                                "/route-estimates"
+                        ).permitAll()
                         // Any other request must be authenticated (rules will be defined in controllers)
                         .anyRequest().authenticated()
                 )

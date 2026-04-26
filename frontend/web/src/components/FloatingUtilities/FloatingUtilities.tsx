@@ -3,7 +3,7 @@ import type { PointerEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { SlidersHorizontal, SunMedium } from 'lucide-react'
 import { MdTranslate } from 'react-icons/md'
-import { useAppDispatch, useAppSelector } from '../../hooks/redux'
+import { useAppDispatch, useAppSelector } from '../../hooks/reduxHooks'
 import {
   toggleLanguage,
   toggleTheme,
