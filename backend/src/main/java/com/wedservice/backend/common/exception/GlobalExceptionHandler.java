@@ -14,6 +14,7 @@ import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -57,6 +58,20 @@ public class GlobalExceptionHandler {
         }
 
         return buildErrorResponse(HttpStatus.BAD_REQUEST, "Validation failed", "VALIDATION_ERROR", errors);
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        String requiredType = ex.getRequiredType() == null ? "expected type" : ex.getRequiredType().getSimpleName();
+        String message = String.format(
+                "Parameter '%s' has invalid value '%s'. Expected type: %s",
+                ex.getName(),
+                ex.getValue(),
+                requiredType
+        );
+        Map<String, String> errors = new LinkedHashMap<>();
+        errors.put(ex.getName(), message);
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, "Invalid request parameter", "INVALID_PARAMETER", errors);
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
