@@ -37,4 +37,5 @@ public class TourResponse {
     private List<TourItineraryDayResponse> itineraryDays;
     private List<TourChecklistItemResponse> checklistItems;
     private CancellationPolicyResponse cancellationPolicy;
+    private String translationKey;
 }

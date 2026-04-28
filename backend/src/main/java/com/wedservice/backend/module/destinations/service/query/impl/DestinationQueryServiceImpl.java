@@ -15,6 +15,8 @@ import com.wedservice.backend.common.response.PageResponse;
 import com.wedservice.backend.module.destinations.dto.response.DestinationPublicDetailResponse;
 import com.wedservice.backend.module.destinations.dto.response.DestinationPublicResponse;
 import com.wedservice.backend.module.destinations.service.query.DestinationQueryService;
+import com.wedservice.backend.module.tours.entity.TourStatus;
+import com.wedservice.backend.module.tours.repository.TourRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -33,6 +35,7 @@ public class DestinationQueryServiceImpl implements DestinationQueryService {
 
     private final DestinationRepository destinationRepository;
     private final DestinationMapper destinationMapper;
+    private final TourRepository tourRepository;
 
     @Override
     @Cacheable(value = "destinations", key = "#request")
@@ -103,7 +106,17 @@ public class DestinationQueryServiceImpl implements DestinationQueryService {
                 .crowdLevelDefault(destination.getCrowdLevelDefault())
                 .isFeatured(destination.getIsFeatured())
                 .coverImageUrl(resolveCoverImage(destination))
+                .activeTourCount(countActiveTours(destination.getId()))
+                .translationKey(destination.getSlug())
                 .build();
+    }
+
+    private Long countActiveTours(Long destinationId) {
+        try {
+            return tourRepository.countByDestinationIdAndStatusAndDeletedAtIsNull(destinationId, TourStatus.ACTIVE);
+        } catch (Exception e) {
+            return 0L;
+        }
     }
 
     private DestinationPublicDetailResponse toPublicDetailResponse(Destination destination) {

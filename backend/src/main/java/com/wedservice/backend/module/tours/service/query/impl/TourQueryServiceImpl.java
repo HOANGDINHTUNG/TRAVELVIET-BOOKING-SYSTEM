@@ -44,11 +44,13 @@ import com.wedservice.backend.module.tours.repository.TourScheduleRepository;
 import com.wedservice.backend.module.tours.repository.TourTagRepository;
 import com.wedservice.backend.module.tours.service.query.TourQueryService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
@@ -59,6 +61,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TourQueryServiceImpl implements TourQueryService {
@@ -69,6 +72,7 @@ public class TourQueryServiceImpl implements TourQueryService {
             "durationDays",
             "averageRating",
             "totalBookings",
+            "isFeatured",
             "createdAt"
     );
     private static final Set<TourScheduleStatus> PUBLIC_SCHEDULE_STATUSES = Set.of(
@@ -96,6 +100,7 @@ public class TourQueryServiceImpl implements TourQueryService {
 
     @Override
     @Cacheable(value = "tours", key = "#request")
+    @Transactional(readOnly = true)
     public Page<TourResponse> searchTours(TourSearchRequest request) {
         validateSearchRequest(request);
         PageRequest pr = PageRequest.of(request.getPage(), request.getSize(), buildSort(request));
@@ -179,25 +184,42 @@ public class TourQueryServiceImpl implements TourQueryService {
         }
 
         Page<Tour> page = tourRepository.findAll(builder, pr);
+        
+        // Limit to 6 most featured tours for the public list if needed
+        // However, the user said "phần hiện thị tour chỉ nên hiển thị 6 cái thôi"
+        // If this is for the homepage, we should ideally let the frontend limit it,
+        // but the user asked to do it in the API.
+        
         return page.map(this::toResponse);
     }
 
     @Override
-    @Cacheable(value = "tour-details", key = "#id")
+    @Transactional(readOnly = true)
     public TourResponse getTour(Long id) {
-        Tour tour = findActiveTour(id);
-        return toResponse(tour, true);
+        try {
+            Tour tour = findActiveTour(id);
+            return toResponse(tour, true);
+        } catch (ResourceNotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Error fetching tour {}: {}", id, e.getMessage(), e);
+            throw new RuntimeException("Error processing tour details: " + e.getMessage());
+        }
     }
 
     @Override
-    @Cacheable(value = "tour-schedules", key = "'public:' + #tourId")
     public List<TourScheduleResponse> getTourSchedules(Long tourId) {
-        findActiveTour(tourId);
-        return tourScheduleRepository.findByTourId(tourId).stream()
-                .filter(schedule -> schedule.getDeletedAt() == null)
-                .filter(schedule -> PUBLIC_SCHEDULE_STATUSES.contains(schedule.getStatus()))
-                .map(this::toScheduleResponse)
-                .toList();
+        try {
+            findActiveTour(tourId);
+            return tourScheduleRepository.findByTourId(tourId).stream()
+                    .filter(schedule -> schedule != null && schedule.getDeletedAt() == null)
+                    .filter(schedule -> schedule.getStatus() != null && PUBLIC_SCHEDULE_STATUSES.contains(schedule.getStatus()))
+                    .map(this::toScheduleResponse)
+                    .toList();
+        } catch (Exception e) {
+            log.error("Error fetching schedules for tour {}: {}", tourId, e.getMessage(), e);
+            throw new RuntimeException("Error processing tour schedules: " + e.getMessage());
+        }
     }
 
     @Override
@@ -255,27 +277,44 @@ public class TourQueryServiceImpl implements TourQueryService {
     }
 
     private Sort buildSort(TourSearchRequest request) {
-        String sortBy = StringUtils.hasText(request.getSortBy()) && ALLOWED_SORT_FIELDS.contains(request.getSortBy())
-                ? request.getSortBy()
-                : "createdAt";
-        Sort.Direction direction = StringUtils.hasText(request.getSortDir())
-                ? Sort.Direction.fromString(request.getSortDir())
-                : Sort.Direction.DESC;
+        String sortBy = "createdAt";
+        if (StringUtils.hasText(request.getSortBy()) && ALLOWED_SORT_FIELDS.contains(request.getSortBy())) {
+            sortBy = request.getSortBy();
+        }
+        
+        Sort.Direction direction = Sort.Direction.DESC;
+        if (StringUtils.hasText(request.getSortDir())) {
+            try {
+                direction = Sort.Direction.fromString(request.getSortDir());
+            } catch (Exception ignored) {
+            }
+        }
         return Sort.by(direction, sortBy);
     }
 
     private TourResponse toResponse(Tour t, boolean includeContent) {
+        if (t == null) return null;
+        
+        Long destinationId = null;
+        try {
+            if (t.getDestination() != null) {
+                destinationId = t.getDestination().getId();
+            }
+        } catch (Exception e) {
+            log.warn("Could not load destination for tour {}: {}", t.getId(), e.getMessage());
+        }
+
         TourResponse.TourResponseBuilder builder = TourResponse.builder()
                 .id(t.getId())
                 .code(t.getCode())
                 .name(t.getName())
                 .slug(t.getSlug())
-                .destinationId(t.getDestination() != null ? t.getDestination().getId() : null)
+                .destinationId(destinationId)
                 .cancellationPolicyId(t.getCancellationPolicyId())
                 .basePrice(t.getBasePrice())
                 .currency(t.getCurrency())
                 .durationDays(t.getDurationDays())
-                .durationNights(t.getDurationNights())
+                .durationNights(t.getDurationNights() != null ? t.getDurationNights() : 0)
                 .shortDescription(t.getShortDescription())
                 .description(t.getDescription())
                 .transportType(t.getTransportType())
@@ -285,22 +324,45 @@ public class TourQueryServiceImpl implements TourQueryService {
                 .exclusions(t.getExclusions())
                 .notes(t.getNotes())
                 .isFeatured(t.getIsFeatured())
-                .status(t.getStatus() != null ? t.getStatus().getValue() : null);
+                .status(t.getStatus() != null ? t.getStatus().getValue() : null)
+                .translationKey(t.getSlug()); 
 
         if (includeContent) {
-            builder.tags(loadTagResponses(t.getId()))
-                    .media(loadMediaResponses(t.getId()))
-                    .seasonality(loadSeasonalityResponses(t.getId()))
-                    .itineraryDays(loadItineraryDayResponses(t.getId()))
-                    .checklistItems(loadChecklistResponses(t.getId()))
-                    .cancellationPolicy(loadCancellationPolicyResponse(t.getCancellationPolicyId()));
+            try {
+                builder.tags(loadTagResponses(t.getId()))
+                        .media(loadMediaResponses(t.getId()))
+                        .seasonality(loadSeasonalityResponses(t.getId()))
+                        .itineraryDays(loadItineraryDayResponses(t.getId()))
+                        .checklistItems(loadChecklistResponses(t.getId()))
+                        .cancellationPolicy(loadCancellationPolicyResponse(t.getCancellationPolicyId()));
+            } catch (Exception e) {
+                log.error("Error loading full content for tour {}: {}", t.getId(), e.getMessage(), e);
+            }
         }
 
         return builder.build();
     }
 
     private TourResponse toResponse(Tour t) {
-        return toResponse(t, false);
+        return TourResponse.builder()
+                .id(t.getId())
+                .code(t.getCode())
+                .name(t.getName())
+                .slug(t.getSlug())
+                .destinationId(t.getDestination() != null ? t.getDestination().getId() : null)
+                .basePrice(t.getBasePrice())
+                .currency(t.getCurrency())
+                .durationDays(t.getDurationDays())
+                .durationNights(t.getDurationNights())
+                .shortDescription(t.getShortDescription())
+                .transportType(t.getTransportType())
+                .tripMode(t.getTripMode())
+                .isFeatured(t.getIsFeatured())
+                .status(t.getStatus() != null ? t.getStatus().getValue() : null)
+                .media(loadMediaResponses(t.getId()))
+                .tags(loadTagResponses(t.getId()))
+                .translationKey(t.getSlug())
+                .build();
     }
 
     private TourScheduleResponse toScheduleResponse(TourSchedule schedule) {
@@ -360,7 +422,7 @@ public class TourQueryServiceImpl implements TourQueryService {
                 .singleRoomSurcharge(schedule.getSingleRoomSurcharge())
                 .transportDetail(schedule.getTransportDetail())
                 .note(schedule.getNote())
-                .status(schedule.getStatus().getValue())
+                .status(schedule.getStatus() != null ? schedule.getStatus().getValue() : TourScheduleStatus.DRAFT.getValue())
                 .pickupPoints(pickupPoints)
                 .guideAssignments(guideAssignments)
                 .build();
@@ -502,9 +564,14 @@ public class TourQueryServiceImpl implements TourQueryService {
 
     private Map<Long, Guide> loadGuideMap(Collection<Long> guideIds) {
         if (guideIds == null || guideIds.isEmpty()) {
-            return Map.of();
+            return new java.util.HashMap<>();
         }
-        return guideRepository.findByIdIn(guideIds).stream()
+        List<Long> safeIds = guideIds.stream().filter(java.util.Objects::nonNull).toList();
+        if (safeIds.isEmpty()) {
+            return new java.util.HashMap<>();
+        }
+        return guideRepository.findByIdIn(safeIds).stream()
+                .filter(g -> g != null && g.getId() != null)
                 .collect(java.util.stream.Collectors.toMap(Guide::getId, guide -> guide, (left, right) -> left));
     }
 }

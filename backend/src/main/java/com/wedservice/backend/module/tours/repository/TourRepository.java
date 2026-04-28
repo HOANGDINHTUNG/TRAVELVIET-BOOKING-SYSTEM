@@ -9,4 +9,6 @@ public interface TourRepository extends JpaRepository<Tour, Long>, QuerydslPredi
     boolean existsByCode(String code);
 
     boolean existsBySlug(String slug);
+
+    long countByDestinationIdAndStatusAndDeletedAtIsNull(Long destinationId, com.wedservice.backend.module.tours.entity.TourStatus status);
 }

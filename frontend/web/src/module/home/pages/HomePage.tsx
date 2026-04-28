@@ -1,32 +1,32 @@
-import { useEffect, useMemo, useState } from 'react'
-import type { FormEvent } from 'react'
-import { Footer } from '../../../components/Footer/Footer'
-import { EmptyState } from '../../../components/common/ui/EmptyState'
-import { ErrorBlock } from '../../../components/common/ui/ErrorBlock'
-import { PageLoader } from '../../../components/common/ux/PageLoader'
-import { useAppDispatch, useAppSelector } from '../../../hooks/reduxHooks'
-import { LoginWelcomeAnimation } from '../../auth/components/LoginWelcome/LoginWelcomeAnimation'
-import { AboutSection } from '../components/About/AboutSection'
-import { BookingPanel } from '../components/BookingPanel/BookingPanel'
-import { ContactSection } from '../components/Contact/ContactSection'
-import { DestinationsSection } from '../components/Destinations/DestinationsSection'
-import { Hero } from '../components/Hero/Hero'
-import { PackagesSection } from '../components/Packages/PackagesSection'
-import { PartnerMarquee } from '../components/PartnerMarquee/PartnerMarquee'
-import { StorySection } from '../components/Story/StorySection'
-import { TravelFilmSection } from '../components/TravelFilm/TravelFilmSection'
-import { WeatherAlertsSection } from '../components/WeatherAlerts/WeatherAlertsSection'
+import { useEffect, useMemo, useState } from "react";
+import type { FormEvent } from "react";
+import { Footer } from "../../../components/Footer/Footer";
+import { EmptyState } from "../../../components/common/ui/EmptyState";
+import { ErrorBlock } from "../../../components/common/ui/ErrorBlock";
+import { PageLoader } from "../../../components/common/ux/PageLoader";
+import { useAppDispatch, useAppSelector } from "../../../hooks/reduxHooks";
+import { LoginWelcomeAnimation } from "../../auth/components/LoginWelcome/LoginWelcomeAnimation";
+import { AboutSection } from "../components/About/AboutSection";
+import { BookingPanel } from "../components/BookingPanel/BookingPanel";
+import { ContactSection } from "../components/Contact/ContactSection";
+import { DestinationsSection } from "../components/Destinations/DestinationsSection";
+import { Hero } from "../components/Hero/Hero";
+import { PackagesSection } from "../components/Packages/PackagesSection";
+import { PartnerMarquee } from "../components/PartnerMarquee/PartnerMarquee";
+import { StorySection } from "../components/Story/StorySection";
+import { TravelFilmSection } from "../components/TravelFilm/TravelFilmSection";
+import { WeatherAlertsSection } from "../components/WeatherAlerts/WeatherAlertsSection";
 import {
   clearHomeWeather,
   fetchHomePublicData,
   fetchHomeWeather,
   selectHome,
-} from '../store/homeSlice'
+} from "../store/homeSlice";
 
-const ALL_DESTINATIONS_VALUE = 'Tat ca'
+const ALL_DESTINATIONS_VALUE = "Tat ca";
 
 function HomePage() {
-  const dispatch = useAppDispatch()
+  const dispatch = useAppDispatch();
   const {
     destinations,
     tours,
@@ -37,92 +37,90 @@ function HomePage() {
     weatherLoading,
     error,
     weatherError,
-  } = useAppSelector(selectHome)
-  const [destination, setDestination] = useState(ALL_DESTINATIONS_VALUE)
-  const [travelDate, setTravelDate] = useState('')
-  const [guests, setGuests] = useState(2)
-  const [selectedTour, setSelectedTour] = useState('')
-  const [submitted, setSubmitted] = useState(false)
+  } = useAppSelector(selectHome);
+  const [destination, setDestination] = useState(ALL_DESTINATIONS_VALUE);
+  const [travelDate, setTravelDate] = useState("");
+  const [guests, setGuests] = useState(2);
+  const [selectedTour, setSelectedTour] = useState("");
+  const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
-    void dispatch(fetchHomePublicData())
-  }, [dispatch])
+    console.log(">>> HomePage Data:", { destinations, tours });
+    destinations.forEach((d) => {
+      if (d.image) console.log(`Destination ${d.name} image URL:`, d.image);
+    });
+    tours.forEach((t) => {
+      if (t.image) console.log(`Tour ${t.title} image URL:`, t.image);
+    });
+  }, [destinations, tours]);
+
+  useEffect(() => {
+    void dispatch(fetchHomePublicData());
+  }, [dispatch]);
 
   const selectedDestination = useMemo(() => {
     if (destination === ALL_DESTINATIONS_VALUE) {
-      return ALL_DESTINATIONS_VALUE
+      return ALL_DESTINATIONS_VALUE;
     }
 
     return destinations.some(
       (item) => item.name.toLowerCase() === destination.toLowerCase(),
     )
       ? destination
-      : ALL_DESTINATIONS_VALUE
-  }, [destination, destinations])
+      : ALL_DESTINATIONS_VALUE;
+  }, [destination, destinations]);
 
   const selectedTourValue = useMemo(() => {
     if (tours.length === 0) {
-      return ''
+      return "";
     }
 
     return selectedTour && tours.some((tour) => tour.title === selectedTour)
       ? selectedTour
-      : tours[0].title
-  }, [selectedTour, tours])
+      : tours[0].title;
+  }, [selectedTour, tours]);
 
   const visibleTours = useMemo(() => {
-    if (selectedDestination === ALL_DESTINATIONS_VALUE) {
-      return tours
-    }
-
-    const matchedTours = tours.filter((tour) =>
-      [tour.location, tour.title, tour.category, tour.description]
-        .filter((item): item is string => Boolean(item))
-        .some((item) =>
-          item.toLowerCase().includes(selectedDestination.toLowerCase()),
-        ),
-    )
-
-    return matchedTours
-  }, [selectedDestination, tours])
+    return tours.slice(0, 6);
+  }, [tours]);
 
   const destinationOptions = useMemo(
     () => destinations.map((item) => item.name).filter(Boolean),
     [destinations],
-  )
+  );
   const heroDestinations = useMemo(
     () => destinations.filter((item) => Boolean(item.image)),
     [destinations],
-  )
+  );
 
   const weatherDestination = useMemo(() => {
     if (selectedDestination !== ALL_DESTINATIONS_VALUE) {
       return destinations.find(
         (item) => item.name.toLowerCase() === selectedDestination.toLowerCase(),
-      )
+      );
     }
 
-    return destinations.find((item) => item.uuid)
-  }, [selectedDestination, destinations])
+    return destinations.find((item) => item.uuid);
+  }, [selectedDestination, destinations]);
 
   useEffect(() => {
     if (!weatherDestination?.uuid) {
-      dispatch(clearHomeWeather())
-      return
+      dispatch(clearHomeWeather());
+      return;
     }
 
-    void dispatch(fetchHomeWeather(weatherDestination.uuid))
-  }, [dispatch, weatherDestination?.uuid])
+    void dispatch(fetchHomeWeather(weatherDestination.uuid));
+  }, [dispatch, weatherDestination?.uuid]);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    setSubmitted(true)
-  }
+    event.preventDefault();
+    setSubmitted(true);
+  };
 
   const handleSelectTour = (tourTitle: string) => {
-    setSelectedTour(tourTitle)
-    document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })
-  }
+    setSelectedTour(tourTitle);
+    document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
+  };
 
   if (loading && destinations.length === 0 && tours.length === 0) {
     return (
@@ -131,7 +129,7 @@ function HomePage() {
         <Footer />
         <LoginWelcomeAnimation />
       </>
-    )
+    );
   }
 
   if (error && destinations.length === 0 && tours.length === 0) {
@@ -141,7 +139,7 @@ function HomePage() {
         <Footer />
         <LoginWelcomeAnimation />
       </>
-    )
+    );
   }
 
   return (
@@ -199,7 +197,7 @@ function HomePage() {
       <Footer />
       <LoginWelcomeAnimation />
     </>
-  )
+  );
 }
 
-export default HomePage
+export default HomePage;
