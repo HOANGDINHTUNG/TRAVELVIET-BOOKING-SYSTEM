@@ -12,6 +12,7 @@
   "dependencies": {
     "@reduxjs/toolkit": "^2.11.2",
     "@tailwindcss/vite": "^4.2.3",
+    "axios": "^1.15.2",
     "gsap": "^3.15.0",
     "i18next": "^26.0.6",
     "lucide-react": "^1.8.0",

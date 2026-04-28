@@ -1,0 +1,160 @@
+.destination-detail-hero {
+  min-height: 760px;
+  position: relative;
+  overflow: hidden;
+  color: #fff;
+  background: #10242a;
+  isolation: isolate;
+}
+
+.destination-detail-hero-media {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background:
+    linear-gradient(135deg, rgba(40, 54, 24, 0.95), rgba(0, 180, 216, 0.72)),
+    #10242a;
+}
+
+.destination-detail-hero-media img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  filter: saturate(1.03) contrast(1.02);
+}
+
+.destination-detail-hero-media::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    linear-gradient(90deg, rgba(2, 12, 18, 0.88), rgba(2, 12, 18, 0.32) 64%),
+    linear-gradient(180deg, rgba(2, 12, 18, 0.14), rgba(2, 12, 18, 0.88));
+}
+
+.destination-detail-hero-inner {
+  width: min(1240px, calc(100% - 40px));
+  min-height: 760px;
+  margin: 0 auto;
+  display: grid;
+  align-content: space-between;
+  gap: 48px;
+  padding: 32px 0 72px;
+}
+
+.destination-detail-back {
+  width: fit-content;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 16px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 999px;
+  color: #fff;
+  background: rgba(4, 18, 24, 0.34);
+  text-decoration: none;
+  font-weight: 850;
+  backdrop-filter: blur(14px);
+}
+
+.destination-detail-back svg {
+  width: 18px;
+  height: 18px;
+}
+
+.destination-detail-hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 34px;
+  align-items: end;
+}
+
+.destination-detail-hero-copy {
+  max-width: 900px;
+}
+
+.destination-detail-hero-copy h1 {
+  max-width: 900px;
+  margin: 0;
+  font-size: 6.5rem;
+  line-height: 0.94;
+  font-weight: 950;
+  letter-spacing: 0;
+}
+
+.destination-detail-hero-copy > p:not(.destination-detail-kicker) {
+  max-width: 720px;
+  margin: 24px 0 0;
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 1.22rem;
+  line-height: 1.65;
+}
+
+.destination-detail-hero-panel {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 8px;
+  background: rgba(5, 22, 30, 0.44);
+  backdrop-filter: blur(16px);
+}
+
+.destination-detail-hero-panel div {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.destination-detail-hero-panel svg {
+  width: 22px;
+  height: 22px;
+  color: var(--color-accent);
+}
+
+.destination-detail-hero-panel span {
+  color: rgba(255, 255, 255, 0.92);
+  font-weight: 850;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 1100px) {
+  .destination-detail-hero-copy h1 {
+    font-size: 5rem;
+  }
+
+  .destination-detail-hero-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .destination-detail-hero-panel {
+    max-width: 520px;
+  }
+}
+
+@media (max-width: 700px) {
+  .destination-detail-hero,
+  .destination-detail-hero-inner {
+    min-height: 690px;
+  }
+
+  .destination-detail-hero-inner {
+    width: min(100% - 28px, 1240px);
+    padding-bottom: 42px;
+  }
+
+  .destination-detail-hero-copy h1 {
+    font-size: 3.45rem;
+  }
+
+  .destination-detail-hero-copy > p:not(.destination-detail-kicker) {
+    font-size: 1rem;
+  }
+}

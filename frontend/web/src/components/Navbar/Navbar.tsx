@@ -13,7 +13,7 @@ import {
   UserRound,
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { useAppDispatch, useAppSelector } from '../../hooks/redux'
+import { useAppDispatch, useAppSelector } from '../../hooks/reduxHooks'
 import {
   clearAuthSession,
   getStoredAccessToken,

@@ -1,0 +1,417 @@
+/* General Layout */
+.tour-detail-page {
+  background: var(--surface-100);
+  min-height: 100vh;
+}
+
+.tour-detail-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 80px 20px 40px;
+}
+
+.tour-detail-nav-bar {
+  margin-bottom: 24px;
+}
+
+.back-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--primary-600);
+  font-weight: 500;
+  text-decoration: none;
+  transition: transform 0.2s;
+}
+
+.back-link:hover {
+  transform: translateX(-4px);
+}
+
+.tour-detail-content-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+  margin-top: 40px;
+}
+
+/* Hero Section */
+.tour-detail-hero {
+  position: relative;
+  background: var(--surface-0);
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 480px;
+}
+
+.tour-detail-hero-media {
+  height: 100%;
+  width: 100%;
+}
+
+.tour-detail-hero-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.tour-detail-hero-content {
+  padding: 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 32px;
+}
+
+.tour-detail-kicker {
+  color: var(--primary-600);
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.tour-detail-hero-copy h1 {
+  font-size: 42px;
+  line-height: 1.2;
+  margin-bottom: 16px;
+  color: var(--surface-900);
+}
+
+.tour-detail-short {
+  font-size: 18px;
+  color: var(--surface-600);
+  line-height: 1.6;
+}
+
+.tour-detail-hero-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  padding-top: 24px;
+  border-top: 1px solid var(--surface-200);
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.stat-item svg {
+  color: var(--primary-500);
+}
+
+.stat-item span {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--surface-700);
+}
+
+/* Overview Section */
+.tour-detail-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 40px;
+}
+
+.section-title {
+  font-size: 28px;
+  margin-bottom: 24px;
+  color: var(--surface-900);
+  position: relative;
+  padding-left: 16px;
+}
+
+.section-title::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 4px;
+  bottom: 4px;
+  width: 4px;
+  background: var(--primary-500);
+  border-radius: 2px;
+}
+
+.tour-description {
+  font-size: 16px;
+  line-height: 1.8;
+  color: var(--surface-700);
+}
+
+.tour-highlights-panel {
+  background: var(--surface-0);
+  padding: 32px;
+  border-radius: 20px;
+  box-shadow: var(--shadow-md);
+  height: fit-content;
+}
+
+.panel-title {
+  font-size: 20px;
+  margin-bottom: 20px;
+}
+
+.highlights-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.highlight-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  font-size: 15px;
+  color: var(--surface-700);
+  line-height: 1.4;
+}
+
+/* Itinerary Section */
+.itinerary-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-top: 32px;
+}
+
+.itinerary-day {
+  display: flex;
+  gap: 32px;
+}
+
+.day-marker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 80px;
+  position: relative;
+}
+
+.day-number {
+  font-weight: 700;
+  color: var(--primary-600);
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.marker-dot {
+  width: 16px;
+  height: 16px;
+  background: var(--primary-500);
+  border-radius: 50%;
+  margin: 12px 0;
+  border: 4px solid var(--primary-100);
+  z-index: 2;
+}
+
+.marker-line {
+  flex: 1;
+  width: 2px;
+  background: var(--surface-200);
+}
+
+.itinerary-day:last-child .marker-line {
+  display: none;
+}
+
+.day-content {
+  flex: 1;
+  padding-bottom: 48px;
+}
+
+.day-title {
+  font-size: 22px;
+  margin-bottom: 12px;
+  color: var(--surface-900);
+}
+
+.day-summary {
+  color: var(--surface-600);
+  margin-bottom: 24px;
+}
+
+.day-items {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.itinerary-item {
+  display: flex;
+  gap: 24px;
+  background: var(--surface-0);
+  padding: 20px;
+  border-radius: 16px;
+  border: 1px solid var(--surface-200);
+}
+
+.item-time {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--primary-600);
+  font-weight: 600;
+  font-size: 14px;
+  min-width: 80px;
+}
+
+.item-detail h4 {
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+
+.item-description {
+  color: var(--surface-600);
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+.item-location {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--surface-500);
+}
+
+/* Policy Section */
+.policy-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.policy-card {
+  background: var(--surface-0);
+  padding: 24px;
+  border-radius: 20px;
+  border: 1px solid var(--surface-200);
+}
+
+.policy-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.policy-card-header h3 {
+  font-size: 18px;
+}
+
+.policy-card-content {
+  font-size: 14px;
+  color: var(--surface-600);
+  line-height: 1.6;
+}
+
+.full-width {
+  grid-column: 1 / -1;
+}
+
+/* Schedule Section */
+.schedules-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.schedule-card {
+  background: var(--surface-0);
+  padding: 24px;
+  border-radius: 20px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--surface-200);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: center;
+}
+
+.schedule-date,
+.schedule-availability {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.schedule-date svg,
+.schedule-availability svg {
+  color: var(--primary-500);
+}
+
+.label {
+  display: block;
+  font-size: 12px;
+  color: var(--surface-500);
+  text-transform: uppercase;
+}
+
+.value {
+  display: block;
+  font-weight: 600;
+  color: var(--surface-800);
+}
+
+.schedule-price {
+  grid-column: 1 / -1;
+  padding-top: 16px;
+  border-top: 1px dashed var(--surface-200);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.price-value {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--primary-600);
+}
+
+.price-label {
+  font-size: 14px;
+  color: var(--surface-500);
+}
+
+.book-btn {
+  grid-column: 1 / -1;
+  background: var(--primary-600);
+  color: white;
+  padding: 14px;
+  border-radius: 12px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: filter 0.2s;
+}
+
+.book-btn:hover {
+  filter: brightness(1.1);
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .tour-detail-hero {
+    grid-template-columns: 1fr;
+  }
+  .tour-detail-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .policy-grid {
+    grid-template-columns: 1fr;
+  }
+}
