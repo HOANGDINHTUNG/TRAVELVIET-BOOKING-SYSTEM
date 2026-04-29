@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import {
   ArrowLeft,
   Eye,
@@ -31,18 +31,26 @@ const REMEMBER_EMAIL_KEY = 'travelviet-remember-email'
 
 function LoginPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [rememberEmail, setRememberEmail] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [alert, setAlert] = useState<AlertState>(null)
+  const redirectFrom =
+    typeof location.state === 'object' &&
+    location.state !== null &&
+    'from' in location.state &&
+    typeof location.state.from === 'string'
+      ? location.state.from
+      : ''
 
   useEffect(() => {
     const storedToken = getStoredAccessToken()
     const storedUser = getStoredAuthUser()
     if (storedToken && storedUser) {
-      navigate(resolvePostAuthRedirect(storedUser), { replace: true })
+      navigate(redirectFrom || resolvePostAuthRedirect(storedUser), { replace: true })
       return
     }
 
@@ -56,7 +64,7 @@ function LoginPage() {
     } catch {
       window.localStorage.removeItem(REMEMBER_EMAIL_KEY)
     }
-  }, [navigate])
+  }, [navigate, redirectFrom])
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -93,7 +101,10 @@ function LoginPage() {
         message: 'Đăng nhập thành công! Đang chuyển hướng...',
       })
 
-      window.setTimeout(() => navigate(resolvePostAuthRedirect(auth.user)), 800)
+      window.setTimeout(
+        () => navigate(redirectFrom || resolvePostAuthRedirect(auth.user)),
+        800,
+      )
     } catch (error) {
       setAlert({
         type: 'error',
@@ -114,7 +125,7 @@ function LoginPage() {
           <ArrowLeft aria-hidden="true" />
           TravelViet
         </Link>
-        <Link className="auth-switch-link" to="/register">
+        <Link className="auth-switch-link" to="/register" state={{ from: redirectFrom }}>
           <UserPlus aria-hidden="true" />
           Đăng ký
         </Link>

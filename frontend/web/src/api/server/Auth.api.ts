@@ -1,44 +1,24 @@
-import { axiosBackend } from '../../utils/axiosInstance'
-import type { ApiResponse } from '../../types/api'
-import { unwrapApiResponse } from '../../types/api'
 import type {
   AuthResponse,
   LoginPayload,
   RegisterPayload,
 } from '../../module/auth/database/interface/users'
-import { getApiErrorMessage } from '../../utils/getApiErrorMessage'
+import { postBackendData } from './serverApiClient'
+
+export type RefreshTokenPayload = {
+  refreshToken: string
+}
 
 export const authApi = {
-  async login(payload: LoginPayload) {
-    try {
-      const response = await axiosBackend.post<ApiResponse<AuthResponse>>(
-        'auth/login',
-        payload,
-      )
-
-      return unwrapApiResponse(
-        response.data,
-        'Khong the xu ly yeu cau dang nhap.',
-      )
-    } catch (error) {
-      throw new Error(
-        getApiErrorMessage(error, 'Khong the xu ly yeu cau dang nhap.'),
-      )
-    }
+  login(payload: LoginPayload) {
+    return postBackendData<AuthResponse>('auth/login', payload)
   },
 
-  async register(payload: RegisterPayload) {
-    try {
-      const response = await axiosBackend.post<ApiResponse<AuthResponse>>(
-        'auth/register',
-        payload,
-      )
+  register(payload: RegisterPayload) {
+    return postBackendData<AuthResponse>('auth/register', payload)
+  },
 
-      return unwrapApiResponse(response.data, 'Khong the xu ly yeu cau dang ky.')
-    } catch (error) {
-      throw new Error(
-        getApiErrorMessage(error, 'Khong the xu ly yeu cau dang ky.'),
-      )
-    }
+  refresh(payload: RefreshTokenPayload) {
+    return postBackendData<AuthResponse>('auth/refresh', payload)
   },
 }

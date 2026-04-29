@@ -325,6 +325,9 @@ public class TourQueryServiceImpl implements TourQueryService {
                 .notes(t.getNotes())
                 .isFeatured(t.getIsFeatured())
                 .status(t.getStatus() != null ? t.getStatus().getValue() : null)
+                .averageRating(t.getAverageRating())
+                .totalReviews(t.getTotalReviews())
+                .totalBookings(t.getTotalBookings())
                 .translationKey(t.getSlug()); 
 
         if (includeContent) {
@@ -359,6 +362,9 @@ public class TourQueryServiceImpl implements TourQueryService {
                 .tripMode(t.getTripMode())
                 .isFeatured(t.getIsFeatured())
                 .status(t.getStatus() != null ? t.getStatus().getValue() : null)
+                .averageRating(t.getAverageRating())
+                .totalReviews(t.getTotalReviews())
+                .totalBookings(t.getTotalBookings())
                 .media(loadMediaResponses(t.getId()))
                 .tags(loadTagResponses(t.getId()))
                 .translationKey(t.getSlug())

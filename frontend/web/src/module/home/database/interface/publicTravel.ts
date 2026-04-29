@@ -85,17 +85,27 @@ export type BackendChecklistItem = {
 
 export type BackendTourSchedulePickupPoint = {
   id: number;
+  pointName?: string;
   pickupName?: string;
   address?: string;
   pickupAt?: string;
+  sortOrder?: number;
   note?: string;
 };
 
 export type BackendTourScheduleGuide = {
   id: number;
   guideId?: number;
+  guideCode?: string;
+  guideFullName?: string;
+  guidePhone?: string;
+  guideEmail?: string;
+  guideStatus?: string;
+  isLocalGuide?: boolean;
   guideName?: string;
+  guideRole?: string;
   role?: string;
+  assignedAt?: string;
   note?: string;
 };
 
@@ -140,6 +150,9 @@ export type BackendTour = {
   notes?: string;
   isFeatured?: boolean;
   status?: string;
+  averageRating?: number | string;
+  totalReviews?: number;
+  totalBookings?: number;
   translationKey?: string;
   media?: BackendTourMedia[];
   itineraryDays?: BackendItineraryDay[];

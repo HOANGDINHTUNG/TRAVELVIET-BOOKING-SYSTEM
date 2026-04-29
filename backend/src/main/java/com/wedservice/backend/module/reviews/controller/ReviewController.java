@@ -45,7 +45,7 @@ public class ReviewController {
     }
 
     @GetMapping("/tours/{tourId}")
-    @PreAuthorize("hasAuthority('review.view')")
+    @PreAuthorize("permitAll()")
     public ApiResponse<PageResponse<ReviewResponse>> getTourReviews(
             @PathVariable Long tourId,
             @Valid @ModelAttribute ReviewSearchRequest request

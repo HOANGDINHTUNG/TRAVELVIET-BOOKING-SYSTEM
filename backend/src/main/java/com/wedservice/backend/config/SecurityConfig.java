@@ -67,6 +67,7 @@ public class SecurityConfig {
                                 "/destinations/{destinationUuid}/weather/**",
                                 "/tours",
                                 "/tours/**",
+                                "/reviews/tours/**",
                                 "/route-estimates"
                         ).permitAll()
                         // Any other request must be authenticated (rules will be defined in controllers)

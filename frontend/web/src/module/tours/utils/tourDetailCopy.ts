@@ -33,6 +33,32 @@ export type TourDetailCopy = {
   meetingPoint: string;
   status: string;
   bookNow: string;
+  viewSchedule: string;
+  scheduleDetailTitle: string;
+  pickupPoints: string;
+  guides: string;
+  capacity: string;
+  bookedSeats: string;
+  adultPrice: string;
+  childPrice: string;
+  infantPrice: string;
+  seniorPrice: string;
+  roomSurcharge: string;
+  transportDetail: string;
+  close: string;
+  wishlistSaved: string;
+  wishlistSave: string;
+  wishlistLogin: string;
+  wishlistSavedMessage: string;
+  wishlistRemovedMessage: string;
+  wishlistError: string;
+  reviewsKicker: string;
+  reviewsTitle: string;
+  reviewsLoading: string;
+  noReviews: string;
+  reviewScore: string;
+  reviewCount: string;
+  wouldRecommend: string;
   mediaKicker: string;
   mediaTitle: string;
   noMedia: string;
@@ -48,6 +74,30 @@ export type TourDetailCopy = {
   ctaTitle: (name: string) => string;
   ctaCopy: string;
   ctaAction: string;
+  bookingKicker: string;
+  bookingTitle: string;
+  bookingCopy: string;
+  selectSchedule: string;
+  passengerCount: string;
+  adults: string;
+  children: string;
+  infants: string;
+  seniors: string;
+  voucherCode: string;
+  contactName: string;
+  contactPhone: string;
+  contactEmail: string;
+  quoteAction: string;
+  createBookingAction: string;
+  bookingSuccess: (code: string) => string;
+  quoteSuccess: string;
+  bookingError: string;
+  subtotal: string;
+  discount: string;
+  tax: string;
+  finalAmount: string;
+  appliedVoucher: string;
+  requiredField: string;
   facts: Record<string, string>;
 };
 
@@ -85,6 +135,32 @@ export const tourDetailCopyByLocale: Record<TourDetailLocale, TourDetailCopy> = 
     meetingPoint: "Diem hen",
     status: "Trang thai",
     bookNow: "Dat ngay",
+    viewSchedule: "Xem lich",
+    scheduleDetailTitle: "Chi tiet lich khoi hanh",
+    pickupPoints: "Diem don",
+    guides: "Huong dan vien",
+    capacity: "Suc chua",
+    bookedSeats: "Da dat",
+    adultPrice: "Gia nguoi lon",
+    childPrice: "Gia tre em",
+    infantPrice: "Gia em be",
+    seniorPrice: "Gia nguoi cao tuoi",
+    roomSurcharge: "Phu thu phong don",
+    transportDetail: "Phuong tien",
+    close: "Dong",
+    wishlistSaved: "Da luu",
+    wishlistSave: "Luu tour",
+    wishlistLogin: "Dang nhap de luu tour",
+    wishlistSavedMessage: "Da them tour vao danh sach yeu thich.",
+    wishlistRemovedMessage: "Da bo luu tour.",
+    wishlistError: "Khong the cap nhat danh sach yeu thich.",
+    reviewsKicker: "Danh gia",
+    reviewsTitle: "Cam nhan tu khach da di",
+    reviewsLoading: "Dang tai danh gia...",
+    noReviews: "Tour nay chua co danh gia.",
+    reviewScore: "Diem danh gia",
+    reviewCount: "luot danh gia",
+    wouldRecommend: "Khach san sang gioi thieu tour nay",
     mediaKicker: "Thu vien",
     mediaTitle: "Hinh anh va video cua tour",
     noMedia: "Backend chua co media cho tour nay.",
@@ -101,6 +177,31 @@ export const tourDetailCopyByLocale: Record<TourDetailLocale, TourDetailCopy> = 
     ctaCopy:
       "Chon lich khoi hanh phu hop, de lai thong tin lien he va TravelViet se tu van chi tiet gia, dieu kien va cac yeu cau rieng.",
     ctaAction: "Tu van tour",
+    bookingKicker: "Dat tour",
+    bookingTitle: "Giu cho theo lich khoi hanh",
+    bookingCopy:
+      "Chon lich, so luong khach va ma uu dai de TravelViet tinh gia truoc khi tao booking.",
+    selectSchedule: "Chon lich khoi hanh",
+    passengerCount: "So khach",
+    adults: "Nguoi lon",
+    children: "Tre em",
+    infants: "Em be",
+    seniors: "Nguoi cao tuoi",
+    voucherCode: "Ma uu dai",
+    contactName: "Ho ten lien he",
+    contactPhone: "So dien thoai",
+    contactEmail: "Email",
+    quoteAction: "Tinh gia",
+    createBookingAction: "Tao booking",
+    bookingSuccess: (code) => `Da tao booking ${code}.`,
+    quoteSuccess: "Gia tam tinh da san sang.",
+    bookingError: "Khong the xu ly booking. Vui long kiem tra thong tin.",
+    subtotal: "Tam tinh",
+    discount: "Giam gia",
+    tax: "Thue",
+    finalAmount: "Can thanh toan",
+    appliedVoucher: "Voucher da ap dung",
+    requiredField: "Vui long nhap day du thong tin bat buoc.",
     facts: {
       code: "Ma tour",
       slug: "Slug",
@@ -148,6 +249,32 @@ export const tourDetailCopyByLocale: Record<TourDetailLocale, TourDetailCopy> = 
     meetingPoint: "Meeting point",
     status: "Status",
     bookNow: "Book now",
+    viewSchedule: "View schedule",
+    scheduleDetailTitle: "Departure details",
+    pickupPoints: "Pickup points",
+    guides: "Guides",
+    capacity: "Capacity",
+    bookedSeats: "Booked",
+    adultPrice: "Adult price",
+    childPrice: "Child price",
+    infantPrice: "Infant price",
+    seniorPrice: "Senior price",
+    roomSurcharge: "Single room surcharge",
+    transportDetail: "Transport",
+    close: "Close",
+    wishlistSaved: "Saved",
+    wishlistSave: "Save tour",
+    wishlistLogin: "Sign in to save",
+    wishlistSavedMessage: "Tour saved to your wishlist.",
+    wishlistRemovedMessage: "Tour removed from your wishlist.",
+    wishlistError: "Could not update wishlist.",
+    reviewsKicker: "Reviews",
+    reviewsTitle: "What travelers say",
+    reviewsLoading: "Loading reviews...",
+    noReviews: "No review is available for this tour yet.",
+    reviewScore: "Review score",
+    reviewCount: "reviews",
+    wouldRecommend: "Traveler recommends this tour",
     mediaKicker: "Gallery",
     mediaTitle: "Tour images and videos",
     noMedia: "No media is available for this tour yet.",
@@ -164,6 +291,31 @@ export const tourDetailCopyByLocale: Record<TourDetailLocale, TourDetailCopy> = 
     ctaCopy:
       "Choose a suitable departure, leave your contact information, and TravelViet will advise pricing, conditions, and custom requirements.",
     ctaAction: "Request consultation",
+    bookingKicker: "Booking",
+    bookingTitle: "Reserve a departure",
+    bookingCopy:
+      "Choose a schedule, passenger count, and voucher code to preview pricing before creating a booking.",
+    selectSchedule: "Select departure",
+    passengerCount: "Passengers",
+    adults: "Adults",
+    children: "Children",
+    infants: "Infants",
+    seniors: "Seniors",
+    voucherCode: "Voucher code",
+    contactName: "Contact name",
+    contactPhone: "Phone number",
+    contactEmail: "Email",
+    quoteAction: "Calculate quote",
+    createBookingAction: "Create booking",
+    bookingSuccess: (code) => `Booking ${code} has been created.`,
+    quoteSuccess: "Quote is ready.",
+    bookingError: "Could not process booking. Please check your information.",
+    subtotal: "Subtotal",
+    discount: "Discount",
+    tax: "Tax",
+    finalAmount: "Amount due",
+    appliedVoucher: "Applied voucher",
+    requiredField: "Please fill in all required information.",
     facts: {
       code: "Tour code",
       slug: "Slug",

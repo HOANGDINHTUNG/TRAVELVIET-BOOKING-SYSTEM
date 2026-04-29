@@ -31,6 +31,9 @@ public class TourResponse {
     private String notes;
     private Boolean isFeatured;
     private String status;
+    private BigDecimal averageRating;
+    private Integer totalReviews;
+    private Integer totalBookings;
     private List<TagResponse> tags;
     private List<TourMediaResponse> media;
     private List<TourSeasonalityResponse> seasonality;

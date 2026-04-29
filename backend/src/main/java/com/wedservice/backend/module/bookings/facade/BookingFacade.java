@@ -34,6 +34,10 @@ public class BookingFacade {
         return bookingQueryService.getBooking(id);
     }
 
+    public List<BookingResponse> getMyBookings() {
+        return bookingQueryService.getMyBookings();
+    }
+
     public BookingResponse cancelBooking(Long id, String reason) {
         return bookingCommandService.cancelBooking(id, reason);
     }
