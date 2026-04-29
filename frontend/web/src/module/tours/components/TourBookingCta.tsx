@@ -15,7 +15,7 @@ export function TourBookingCta({ tour, copy }: TourBookingCtaProps) {
         <h2>{copy.ctaTitle(tour.name)}</h2>
         <p>{copy.ctaCopy}</p>
       </div>
-      <a href="#tour-schedules" className="tour-action-button primary">
+      <a href="#tour-booking-panel" className="tour-action-button primary">
         <CalendarCheck size={18} />
         {copy.ctaAction}
       </a>

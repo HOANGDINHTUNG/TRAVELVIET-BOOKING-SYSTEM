@@ -11,12 +11,16 @@ import type {
   BackendTourSchedule,
 } from "../../home/database/interface/publicTravel";
 import { TourBookingCta } from "../components/TourBookingCta";
+import { TourBookingPanel } from "../components/TourBookingPanel";
 import { TourDetailHero } from "../components/TourDetailHero";
+import { TourEngagementPanel } from "../components/TourEngagementPanel";
 import { TourFactsSection } from "../components/TourFactsSection";
 import { TourItinerarySection } from "../components/TourItinerarySection";
 import { TourMediaSection } from "../components/TourMediaSection";
 import { TourOverviewSection } from "../components/TourOverviewSection";
 import { TourPolicySection } from "../components/TourPolicySection";
+import { TourReviewsSection } from "../components/TourReviewsSection";
+import { TourScheduleDetailModal } from "../components/TourScheduleDetailModal";
 import { TourScheduleSection } from "../components/TourScheduleSection";
 import {
   getTourDetailLocale,
@@ -33,7 +37,11 @@ export default function TourDetailPage() {
   const copy = tourDetailCopyByLocale[locale];
   const [tour, setTour] = useState<BackendTour | null>(null);
   const [schedules, setSchedules] = useState<BackendTourSchedule[]>([]);
+  const [selectedSchedule, setSelectedSchedule] =
+    useState<BackendTourSchedule | null>(null);
+  const [bookingScheduleId, setBookingScheduleId] = useState<number | undefined>();
   const [loading, setLoading] = useState(true);
+  const [scheduleLoading, setScheduleLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -77,6 +85,29 @@ export default function TourDetailPage() {
     return createTourDetailViewModel(tour, copy, locale);
   }, [copy, locale, tour]);
 
+  const handleViewSchedule = async (schedule: BackendTourSchedule) => {
+    if (!tour) {
+      return;
+    }
+
+    setSelectedSchedule(schedule);
+    setScheduleLoading(true);
+
+    try {
+      const detail = await tourApi.getTourSchedule(tour.id, schedule.id);
+      setSelectedSchedule(detail);
+    } catch (scheduleError) {
+      console.error("Error loading schedule detail:", scheduleError);
+    } finally {
+      setScheduleLoading(false);
+    }
+  };
+
+  const handleSelectScheduleForBooking = (schedule: BackendTourSchedule) => {
+    setBookingScheduleId(schedule.id);
+    void handleViewSchedule(schedule);
+  };
+
   if (loading) {
     return <PageLoader label={copy.loading} />;
   }
@@ -109,6 +140,7 @@ export default function TourDetailPage() {
         <TourDetailHero tour={tour} viewModel={viewModel} copy={copy} />
 
         <div className="tour-detail-content-wrap">
+          <TourEngagementPanel tour={tour} copy={copy} />
           <TourOverviewSection tour={tour} viewModel={viewModel} copy={copy} />
           <TourFactsSection viewModel={viewModel} copy={copy} />
           <TourScheduleSection
@@ -116,12 +148,37 @@ export default function TourDetailPage() {
             copy={copy}
             locale={locale}
             currency={tour.currency}
+            onViewSchedule={handleSelectScheduleForBooking}
           />
+          {schedules.length > 0 && (
+            <TourBookingPanel
+              tour={tour}
+              schedules={schedules}
+              selectedScheduleId={bookingScheduleId}
+              copy={copy}
+              locale={locale}
+            />
+          )}
           <TourItinerarySection tour={tour} copy={copy} />
+          <TourReviewsSection tour={tour} copy={copy} />
           <TourMediaSection viewModel={viewModel} copy={copy} />
           <TourPolicySection tour={tour} copy={copy} />
           <TourBookingCta tour={tour} copy={copy} />
         </div>
+        {selectedSchedule && (
+          <TourScheduleDetailModal
+            schedule={selectedSchedule}
+            copy={{
+              ...copy,
+              scheduleDetailTitle: scheduleLoading
+                ? copy.reviewsLoading
+                : copy.scheduleDetailTitle,
+            }}
+            locale={locale}
+            currency={tour.currency}
+            onClose={() => setSelectedSchedule(null)}
+          />
+        )}
       </main>
       <Footer />
     </div>

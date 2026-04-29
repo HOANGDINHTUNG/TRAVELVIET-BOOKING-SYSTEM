@@ -7,5 +7,6 @@ import java.util.List;
 
 public interface BookingQueryService {
     BookingResponse getBooking(Long id);
+    List<BookingResponse> getMyBookings();
     List<BookingStatusHistoryResponse> getBookingStatusHistory(Long id);
 }

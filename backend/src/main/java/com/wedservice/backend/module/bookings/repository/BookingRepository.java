@@ -12,6 +12,8 @@ import java.util.UUID;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
+    List<Booking> findByUserIdOrderByCreatedAtDesc(UUID userId);
+
     @Query("""
             select coalesce(sum(b.adults + b.children + b.seniors), 0)
             from Booking b

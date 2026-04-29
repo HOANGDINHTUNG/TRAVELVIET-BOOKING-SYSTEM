@@ -38,6 +38,12 @@ public class BookingController {
         return ApiResponse.success(response, "Booking created");
     }
 
+    @GetMapping("/me")
+    @PreAuthorize("hasAuthority('booking.view')")
+    public ApiResponse<List<BookingResponse>> getMyBookings() {
+        return ApiResponse.success(bookingFacade.getMyBookings());
+    }
+
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('booking.view')")
     public ApiResponse<BookingResponse> getBooking(@PathVariable Long id) {

@@ -5,6 +5,13 @@ import type {
   LoginPayload,
   RegisterPayload,
 } from '../database/interface/users'
+import {
+  clearPersistentAuthSessionData,
+  clearStoredAuthSession,
+  getStoredAccessToken,
+  getStoredAuthUser,
+  persistAuthSessionData,
+} from '../../../utils/authSessionStorage'
 
 export type {
   AuthResponse,
@@ -13,18 +20,12 @@ export type {
   RegisterPayload,
 } from '../database/interface/users'
 
-const AUTH_TOKEN_KEY = 'travelviet-auth-token'
-const REFRESH_TOKEN_KEY = 'travelviet-refresh-token'
-const USER_KEY = 'travelviet-user'
-const LEGACY_AUTH_TOKEN_KEY = 'auth-token'
-const LEGACY_TOKEN_KEY = 'token'
-const AUTH_STORAGE_KEYS = [
-  AUTH_TOKEN_KEY,
-  REFRESH_TOKEN_KEY,
-  USER_KEY,
-  LEGACY_AUTH_TOKEN_KEY,
-  LEGACY_TOKEN_KEY,
-] as const
+export {
+  getStoredAccessToken,
+  getStoredAuthUser,
+  getStoredRefreshToken,
+  persistStoredAuthUser,
+} from '../../../utils/authSessionStorage'
 
 export type ManagerRoleCode =
   | 'SUPER_ADMIN'
@@ -49,53 +50,28 @@ export function registerWithPassword(payload: RegisterPayload) {
   return authApi.register(payload)
 }
 
+export function refreshAuthSession(refreshToken: string) {
+  return authApi.refresh({ refreshToken })
+}
+
 export function persistAuthSession(auth: AuthResponse) {
   clearPersistentAuthSession()
-  window.sessionStorage.setItem(AUTH_TOKEN_KEY, auth.accessToken)
-  window.sessionStorage.setItem(REFRESH_TOKEN_KEY, auth.refreshToken)
-  window.sessionStorage.setItem(USER_KEY, JSON.stringify(auth.user))
-  window.sessionStorage.setItem(LEGACY_AUTH_TOKEN_KEY, auth.accessToken)
-  window.sessionStorage.setItem(LEGACY_TOKEN_KEY, auth.accessToken)
+  persistAuthSessionData(auth)
   window.dispatchEvent(new Event('travelviet:login'))
 }
 
 export function clearAuthSession() {
-  AUTH_STORAGE_KEYS.forEach((key) => {
-    window.sessionStorage.removeItem(key)
-    window.localStorage.removeItem(key)
-  })
+  clearStoredAuthSession()
   window.sessionStorage.removeItem('travelviet-login-welcome-seen')
   window.dispatchEvent(new Event('travelviet:logout'))
 }
 
-export function getStoredAccessToken() {
-  return (
-    window.sessionStorage.getItem(AUTH_TOKEN_KEY) ||
-    window.sessionStorage.getItem(LEGACY_AUTH_TOKEN_KEY) ||
-    window.sessionStorage.getItem(LEGACY_TOKEN_KEY)
-  )
-}
-
-export function getStoredAuthUser(): AuthUser | null {
-  try {
-    const rawUser = window.sessionStorage.getItem(USER_KEY)
-    if (!rawUser) {
-      return null
-    }
-
-    return JSON.parse(rawUser) as AuthUser
-  } catch {
-    window.sessionStorage.removeItem(USER_KEY)
-    return null
-  }
-}
-
 export function hasStoredAuthSession() {
-  return Boolean(getStoredAccessToken() || window.sessionStorage.getItem(USER_KEY))
+  return Boolean(getStoredAccessToken() || getStoredAuthUser())
 }
 
 export function clearPersistentAuthSession() {
-  AUTH_STORAGE_KEYS.forEach((key) => window.localStorage.removeItem(key))
+  clearPersistentAuthSessionData()
 }
 
 export function getAuthUserRoleCodes(user: AuthUser | null) {

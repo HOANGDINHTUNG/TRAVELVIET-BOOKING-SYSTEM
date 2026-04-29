@@ -110,18 +110,7 @@ public class BookingCommandServiceImpl implements BookingCommandService {
             }
         }
 
-        return BookingResponse.builder()
-                .id(booking.getId())
-                .bookingCode(booking.getBookingCode())
-                .status(booking.getStatus().getValue())
-                .subtotalAmount(booking.getSubtotalAmount())
-                .discountAmount(booking.getDiscountAmount())
-                .voucherDiscountAmount(booking.getVoucherDiscountAmount())
-                .addonAmount(booking.getAddonAmount())
-                .finalAmount(booking.getFinalAmount())
-                .voucherId(booking.getVoucherId())
-                .comboId(booking.getComboId())
-                .build();
+        return toResponse(booking);
     }
 
     @Override
@@ -210,17 +199,36 @@ public class BookingCommandServiceImpl implements BookingCommandService {
                 authenticatedUserProvider.getRequiredCurrentUserId(),
                 reason
         );
+        return toResponse(booking);
+    }
+
+    private BookingResponse toResponse(Booking booking) {
         return BookingResponse.builder()
                 .id(booking.getId())
                 .bookingCode(booking.getBookingCode())
+                .tourId(booking.getTourId())
+                .scheduleId(booking.getScheduleId())
                 .status(booking.getStatus().getValue())
+                .paymentStatus(booking.getPaymentStatus().getValue())
+                .contactName(booking.getContactName())
+                .contactPhone(booking.getContactPhone())
+                .contactEmail(booking.getContactEmail())
+                .adults(booking.getAdults())
+                .children(booking.getChildren())
+                .infants(booking.getInfants())
+                .seniors(booking.getSeniors())
                 .subtotalAmount(booking.getSubtotalAmount())
                 .discountAmount(booking.getDiscountAmount())
                 .voucherDiscountAmount(booking.getVoucherDiscountAmount())
+                .loyaltyDiscountAmount(booking.getLoyaltyDiscountAmount())
                 .addonAmount(booking.getAddonAmount())
+                .taxAmount(booking.getTaxAmount())
                 .finalAmount(booking.getFinalAmount())
                 .voucherId(booking.getVoucherId())
                 .comboId(booking.getComboId())
+                .currency(booking.getCurrency())
+                .createdAt(booking.getCreatedAt())
+                .updatedAt(booking.getUpdatedAt())
                 .build();
     }
 

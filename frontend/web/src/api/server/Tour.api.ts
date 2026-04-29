@@ -85,6 +85,12 @@ export const tourApi = {
     );
     return schedules;
   },
+  async getTourSchedule(tourId: number, scheduleId: number) {
+    const schedule = await getBackendData<BackendTourSchedule>(
+      `tours/${tourId}/schedules/${scheduleId}`,
+    );
+    return schedule;
+  },
 };
 
 export const fetchPublicTours = () => tourApi.getTours();

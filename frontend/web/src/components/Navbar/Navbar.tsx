@@ -6,6 +6,7 @@ import { ScrollToPlugin } from 'gsap/ScrollToPlugin'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import {
   Languages,
+  LifeBuoy,
   LogOut,
   Moon,
   SunMedium,
@@ -60,6 +61,8 @@ function getAccountLabels(language: string) {
     return {
       signedIn: 'Signed in',
       account: 'Account',
+      accountPage: 'Account center',
+      supportCenter: 'Support center',
       profileDetails: 'Personal details',
       fullName: 'Full name',
       displayName: 'Display name',
@@ -81,6 +84,8 @@ function getAccountLabels(language: string) {
   return {
     signedIn: 'Đã đăng nhập',
     account: 'Tài khoản',
+    accountPage: 'Trang tài khoản',
+    supportCenter: 'Hỗ trợ',
     profileDetails: 'Thông tin cá nhân',
     fullName: 'Họ tên',
     displayName: 'Tên hiển thị',
@@ -327,6 +332,24 @@ export function Navbar() {
                     <small>{authUser.email || accountLabels.notUpdated}</small>
                   </div>
                 </div>
+
+                <Link
+                  className="account-menu-button"
+                  to="/account"
+                  onClick={() => setIsAccountOpen(false)}
+                >
+                  <UserRound aria-hidden="true" />
+                  <span>{accountLabels.accountPage}</span>
+                </Link>
+
+                <Link
+                  className="account-menu-button"
+                  to="/support"
+                  onClick={() => setIsAccountOpen(false)}
+                >
+                  <LifeBuoy aria-hidden="true" />
+                  <span>{accountLabels.supportCenter}</span>
+                </Link>
 
                 <button
                   className="account-menu-button"

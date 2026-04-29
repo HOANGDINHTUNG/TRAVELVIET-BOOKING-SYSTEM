@@ -1,4 +1,4 @@
-import { Calendar, MapPin, Ticket, Users } from "lucide-react";
+import { Calendar, Eye, MapPin, Ticket, Users } from "lucide-react";
 import type { BackendTourSchedule } from "../../home/database/interface/publicTravel";
 import type { TourDetailCopy, TourDetailLocale } from "../utils/tourDetailCopy";
 import { formatTourDate, formatTourPrice } from "../utils/tourDetailFormatters";
@@ -8,6 +8,7 @@ type TourScheduleSectionProps = {
   copy: TourDetailCopy;
   locale: TourDetailLocale;
   currency?: string;
+  onViewSchedule?: (schedule: BackendTourSchedule) => void;
 };
 
 export function TourScheduleSection({
@@ -15,6 +16,7 @@ export function TourScheduleSection({
   copy,
   locale,
   currency = "VND",
+  onViewSchedule,
 }: TourScheduleSectionProps) {
   return (
     <section id="tour-schedules" className="tour-section tour-schedule-section">
@@ -74,6 +76,16 @@ export function TourScheduleSection({
                     {copy.bookNow}
                   </a>
                 </div>
+                {onViewSchedule && (
+                  <button
+                    type="button"
+                    className="tour-schedule-detail-button"
+                    onClick={() => onViewSchedule(schedule)}
+                  >
+                    <Eye size={18} />
+                    {copy.viewSchedule}
+                  </button>
+                )}
               </article>
             );
           })}

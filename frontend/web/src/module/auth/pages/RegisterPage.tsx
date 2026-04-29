@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import {
   ArrowLeft,
   Eye,
@@ -29,20 +29,28 @@ type AlertState =
 
 function RegisterPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [alert, setAlert] = useState<AlertState>(null)
+  const redirectFrom =
+    typeof location.state === 'object' &&
+    location.state !== null &&
+    'from' in location.state &&
+    typeof location.state.from === 'string'
+      ? location.state.from
+      : ''
 
   useEffect(() => {
     const storedToken = getStoredAccessToken()
     const storedUser = getStoredAuthUser()
     if (storedToken && storedUser) {
-      navigate(resolvePostAuthRedirect(storedUser), { replace: true })
+      navigate(redirectFrom || resolvePostAuthRedirect(storedUser), { replace: true })
     }
-  }, [navigate])
+  }, [navigate, redirectFrom])
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -83,7 +91,10 @@ function RegisterPage() {
         message: 'Đăng ký thành công! Đang chuyển về trang chủ...',
       })
 
-      window.setTimeout(() => navigate(resolvePostAuthRedirect(auth.user)), 900)
+      window.setTimeout(
+        () => navigate(redirectFrom || resolvePostAuthRedirect(auth.user)),
+        900,
+      )
     } catch (error) {
       setAlert({
         type: 'error',
@@ -104,7 +115,7 @@ function RegisterPage() {
           <ArrowLeft aria-hidden="true" />
           TravelViet
         </Link>
-        <Link className="auth-switch-link" to="/login">
+        <Link className="auth-switch-link" to="/login" state={{ from: redirectFrom }}>
           <UserRound aria-hidden="true" />
           Đăng nhập
         </Link>

@@ -10,12 +10,24 @@ const lazyDestinationDetailPage = lazy(
 const lazyTourDetailPage = lazy(
   () => import("../module/tours/pages/TourDetailPage"),
 );
+const lazyBookingDetailPage = lazy(
+  () => import("../module/bookings/pages/BookingDetailPage"),
+);
+const lazyAccountPage = lazy(
+  () => import("../module/account/pages/AccountPage"),
+);
+const lazySupportCenterPage = lazy(
+  () => import("../module/support/pages/SupportCenterPage"),
+);
 const lazyAuthLayout = lazy(() => import("../module/auth/layouts/AuthLayout"));
 const lazyLoginPage = lazy(() => import("../module/auth/pages/LoginPage"));
 const lazyRegisterPage = lazy(
   () => import("../module/auth/pages/RegisterPage"),
 );
 const lazyNotFoundPage = lazy(() => import("../components/error/NotFoundPage"));
+const lazyRequireAuthenticated = lazy(
+  () => import("./RequireAuthenticated"),
+);
 const lazyRequireManagerAccess = lazy(() => import("./RequireManagerAccess"));
 const lazyManagementLayout = lazy(
   () => import("../module/management/layouts/ManagementLayout"),
@@ -38,12 +50,29 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: withSuspense(createElement(lazyHomePage)) },
       {
-        path: "destinations/:uuid",
-        element: withSuspense(createElement(lazyDestinationDetailPage)),
-      },
-      {
-        path: "tours/:id",
-        element: withSuspense(createElement(lazyTourDetailPage)),
+        element: withSuspense(createElement(lazyRequireAuthenticated)),
+        children: [
+          {
+            path: "destinations/:uuid",
+            element: withSuspense(createElement(lazyDestinationDetailPage)),
+          },
+          {
+            path: "tours/:id",
+            element: withSuspense(createElement(lazyTourDetailPage)),
+          },
+          {
+            path: "bookings/:id",
+            element: withSuspense(createElement(lazyBookingDetailPage)),
+          },
+          {
+            path: "account",
+            element: withSuspense(createElement(lazyAccountPage)),
+          },
+          {
+            path: "support",
+            element: withSuspense(createElement(lazySupportCenterPage)),
+          },
+        ],
       },
       {
         element: withSuspense(createElement(lazyAuthLayout)),
