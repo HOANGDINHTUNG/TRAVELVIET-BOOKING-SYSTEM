@@ -1,75 +1,76 @@
 import { Clock, MapPin } from "lucide-react";
 import type { BackendTour } from "../../home/database/interface/publicTravel";
+import type { TourDetailCopy } from "../utils/tourDetailCopy";
+import { formatTourTime } from "../utils/tourDetailFormatters";
 
 type TourItinerarySectionProps = {
   tour: BackendTour;
+  copy: TourDetailCopy;
 };
 
-export function TourItinerarySection({ tour }: TourItinerarySectionProps) {
-  const sortedDays = (tour.itineraryDays || []).sort(
+export function TourItinerarySection({ tour, copy }: TourItinerarySectionProps) {
+  const sortedDays = [...(tour.itineraryDays ?? [])].sort(
     (a, b) => a.dayNumber - b.dayNumber,
   );
 
-  const formatTime = (time?: string | number[] | null) => {
-    if (!time) return "--:--";
-    if (Array.isArray(time)) {
-      const h = String(time[0]).padStart(2, "0");
-      const m = String(time[1]).padStart(2, "0");
-      return `${h}:${m}`;
-    }
-    if (typeof time === "string") {
-      return time.substring(0, 5);
-    }
-    return "--:--";
-  };
-
   return (
-    <section className="tour-itinerary-section">
-      <h2 className="section-title">Lịch trình chi tiết</h2>
-
-      <div className="itinerary-timeline">
-        {sortedDays.map((day) => (
-          <div key={day.id} className="itinerary-day">
-            <div className="day-marker">
-              <span className="day-number">Ngày {day.dayNumber}</span>
-              <div className="marker-dot" />
-              <div className="marker-line" />
-            </div>
-
-            <div className="day-content">
-              <h3 className="day-title">{day.title}</h3>
-              {day.description && (
-                <p className="day-summary">{day.description}</p>
-              )}
-
-              <div className="day-items">
-                {(day.items || [])
-                  .sort((a, b) => a.sequenceNo - b.sequenceNo)
-                  .map((item) => (
-                    <div key={item.id} className="itinerary-item">
-                      <div className="item-time">
-                        <Clock size={16} />
-                        <span>{formatTime(item.startTime)}</span>
-                      </div>
-                      <div className="item-detail">
-                        <h4 className="item-title">{item.title}</h4>
-                        {item.description && (
-                          <p className="item-description">{item.description}</p>
-                        )}
-                        {item.locationName && (
-                          <div className="item-location">
-                            <MapPin size={14} />
-                            <span>{item.locationName}</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            </div>
-          </div>
-        ))}
+    <section className="tour-section tour-itinerary-section">
+      <div className="tour-section-heading">
+        <p className="tour-section-kicker">{copy.itineraryKicker}</p>
+        <h2>{copy.itineraryTitle}</h2>
       </div>
+
+      {sortedDays.length === 0 ? (
+        <div className="tour-empty-state">{copy.noItinerary}</div>
+      ) : (
+        <div className="tour-itinerary-timeline">
+          {sortedDays.map((day) => (
+            <article key={day.id} className="tour-itinerary-day">
+              <div className="tour-day-marker">
+                <span>{copy.day} {day.dayNumber}</span>
+                <i aria-hidden="true" />
+              </div>
+
+              <div className="tour-day-content">
+                <h3>{day.title}</h3>
+                {day.description && <p>{day.description}</p>}
+
+                <div className="tour-day-items">
+                  {[...(day.items ?? [])]
+                    .sort((a, b) => a.sequenceNo - b.sequenceNo)
+                    .map((item) => {
+                      const startTime = formatTourTime(item.startTime);
+                      const endTime = formatTourTime(item.endTime);
+                      const timeLabel =
+                        startTime && endTime
+                          ? `${startTime} - ${endTime}`
+                          : startTime || copy.timeFallback;
+
+                      return (
+                        <div key={item.id} className="tour-itinerary-item">
+                          <div className="tour-item-time">
+                            <Clock size={16} />
+                            <span>{timeLabel}</span>
+                          </div>
+                          <div className="tour-item-detail">
+                            <h4>{item.title}</h4>
+                            {item.description && <p>{item.description}</p>}
+                            {item.locationName && (
+                              <div className="tour-item-location">
+                                <MapPin size={14} />
+                                <span>{item.locationName}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
     </section>
   );
 }

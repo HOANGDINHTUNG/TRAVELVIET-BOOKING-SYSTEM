@@ -11,4 +11,16 @@ public enum DestinationStatus {
     REJECTED("rejected");
 
     private final String value;
+
+    public static DestinationStatus fromValue(String value) {
+        if (value == null) {
+            return null;
+        }
+        for (DestinationStatus status : DestinationStatus.values()) {
+            if (status.value.equalsIgnoreCase(value) || status.name().equalsIgnoreCase(value)) {
+                return status;
+            }
+        }
+        throw new IllegalArgumentException("Invalid destination status: " + value);
+    }
 }

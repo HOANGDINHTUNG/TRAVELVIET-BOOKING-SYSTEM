@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { tourApi } from "../../../api/server/Tour.api";
 import { PageLoader } from "../../../components/common/ux/PageLoader";
 import { ErrorBlock } from "../../../components/common/ui/ErrorBlock";
@@ -9,17 +10,27 @@ import type {
   BackendTour,
   BackendTourSchedule,
 } from "../../home/database/interface/publicTravel";
-import { useTranslation } from "react-i18next";
+import { TourBookingCta } from "../components/TourBookingCta";
 import { TourDetailHero } from "../components/TourDetailHero";
-import { TourOverviewSection } from "../components/TourOverviewSection";
+import { TourFactsSection } from "../components/TourFactsSection";
 import { TourItinerarySection } from "../components/TourItinerarySection";
+import { TourMediaSection } from "../components/TourMediaSection";
+import { TourOverviewSection } from "../components/TourOverviewSection";
 import { TourPolicySection } from "../components/TourPolicySection";
 import { TourScheduleSection } from "../components/TourScheduleSection";
+import {
+  getTourDetailLocale,
+  tourDetailCopyByLocale,
+} from "../utils/tourDetailCopy";
+import { getErrorMessage } from "../utils/tourDetailFormatters";
+import { createTourDetailViewModel } from "../utils/tourDetailViewModel";
 import "../styles/TourDetailPage.css";
 
 export default function TourDetailPage() {
   const { id } = useParams();
-  const { t } = useTranslation();
+  const { i18n } = useTranslation();
+  const locale = getTourDetailLocale(i18n.language);
+  const copy = tourDetailCopyByLocale[locale];
   const [tour, setTour] = useState<BackendTour | null>(null);
   const [schedules, setSchedules] = useState<BackendTourSchedule[]>([]);
   const [loading, setLoading] = useState(true);
@@ -27,38 +38,60 @@ export default function TourDetailPage() {
 
   useEffect(() => {
     async function loadData() {
-      if (!id) return;
+      if (!id) {
+        setError(copy.missingTour);
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
+      setError(null);
+
       try {
-        const [tourData, scheduleData] = await Promise.all([
-          tourApi.getTourById(id),
-          tourApi.getTourSchedules(Number(id)),
-        ]);
+        const numericId = Number(id);
+        const tourData = await tourApi.getTourById(id);
+        const scheduleData = Number.isFinite(numericId)
+          ? await tourApi.getTourSchedules(numericId).catch((scheduleError) => {
+              console.error("Error loading tour schedules:", scheduleError);
+              return [];
+            })
+          : [];
         setTour(tourData);
         setSchedules(scheduleData);
       } catch (err) {
         console.error("Error loading tour data:", err);
-        setError("Không thể tải thông tin tour. Vui lòng thử lại sau.");
+        setError(getErrorMessage(err, copy.loadError));
       } finally {
         setLoading(false);
       }
     }
+
     loadData();
-  }, [id]);
+  }, [copy.loadError, copy.missingTour, id]);
 
-  if (loading) return <PageLoader label="Đang tải thông tin tour..." />;
+  const viewModel = useMemo(() => {
+    if (!tour) {
+      return null;
+    }
 
-  if (error || !tour) {
+    return createTourDetailViewModel(tour, copy, locale);
+  }, [copy, locale, tour]);
+
+  if (loading) {
+    return <PageLoader label={copy.loading} />;
+  }
+
+  if (error || !tour || !viewModel) {
     return (
-      <div className="error-container p-8">
-        <Link
-          to="/"
-          className="flex items-center gap-2 mb-4 text-emerald-600 font-medium"
-        >
+      <div className="tour-detail-error p-8">
+        <Link to="/" className="tour-detail-back-link">
           <ArrowLeft size={20} />
-          Quay lại trang chủ
+          {copy.backHome}
         </Link>
-        <ErrorBlock title="Lỗi" message={error || "Không tìm thấy tour"} />
+        <ErrorBlock
+          title={copy.detailErrorTitle}
+          message={error || copy.missingTour}
+        />
       </div>
     );
   }
@@ -67,19 +100,27 @@ export default function TourDetailPage() {
     <div className="tour-detail-page">
       <main className="tour-detail-container">
         <div className="tour-detail-nav-bar">
-          <Link to="/" className="back-link">
+          <Link to="/" className="tour-detail-back-link">
             <ArrowLeft size={20} />
-            <span>{t("common.backHome") || "Quay lại"}</span>
+            <span>{copy.backHome}</span>
           </Link>
         </div>
 
-        <TourDetailHero tour={tour} />
+        <TourDetailHero tour={tour} viewModel={viewModel} copy={copy} />
 
-        <div className="tour-detail-content-wrap hover-garden-theme">
-          <TourScheduleSection schedules={schedules} />
-          <TourOverviewSection tour={tour} />
-          <TourItinerarySection tour={tour} />
-          <TourPolicySection tour={tour} />
+        <div className="tour-detail-content-wrap">
+          <TourOverviewSection tour={tour} viewModel={viewModel} copy={copy} />
+          <TourFactsSection viewModel={viewModel} copy={copy} />
+          <TourScheduleSection
+            schedules={schedules}
+            copy={copy}
+            locale={locale}
+            currency={tour.currency}
+          />
+          <TourItinerarySection tour={tour} copy={copy} />
+          <TourMediaSection viewModel={viewModel} copy={copy} />
+          <TourPolicySection tour={tour} copy={copy} />
+          <TourBookingCta tour={tour} copy={copy} />
         </div>
       </main>
       <Footer />

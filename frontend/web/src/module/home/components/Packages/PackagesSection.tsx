@@ -18,8 +18,21 @@ const formatPrice = (price: number) =>
   }).format(price);
 
 export function PackagesSection({ tours }: PackagesSectionProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+
+  const translateTourField = (
+    tour: Tour,
+    field: "title" | "description" | "days" | "location",
+    fallback: string,
+  ) => {
+    if (!tour.translationKey) {
+      return fallback;
+    }
+
+    const key = `data.tours.${tour.translationKey}.${field}`;
+    return i18n.exists(key) ? t(key) : fallback;
+  };
 
   return (
     <section className="section-shell package-section" id="packages">
@@ -33,18 +46,14 @@ export function PackagesSection({ tours }: PackagesSectionProps) {
 
       <div className="tour-grid">
         {tours.map((tour) => {
-          const title = tour.translationKey
-            ? t(`data.tours.${tour.translationKey}.title`)
-            : tour.title;
-          const description = tour.translationKey
-            ? t(`data.tours.${tour.translationKey}.description`)
-            : tour.description || tour.highlights.join(", ") || tour.category;
-          const days = tour.translationKey
-            ? t(`data.tours.${tour.translationKey}.days`)
-            : tour.days;
-          const location = tour.translationKey
-            ? t(`data.tours.${tour.translationKey}.location`)
-            : tour.location;
+          const title = translateTourField(tour, "title", tour.title);
+          const description = translateTourField(
+            tour,
+            "description",
+            tour.description || tour.highlights.join(", ") || tour.category,
+          );
+          const days = translateTourField(tour, "days", tour.days);
+          const location = translateTourField(tour, "location", tour.location);
 
           return (
             <article className="tour-card" key={tour.id}>

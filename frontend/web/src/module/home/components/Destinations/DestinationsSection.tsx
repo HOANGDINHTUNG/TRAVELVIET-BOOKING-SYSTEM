@@ -13,9 +13,15 @@ type DestinationsSectionProps = {
 }
 
 export function DestinationsSection({ destinations }: DestinationsSectionProps) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const wrapperRef = useRef<HTMLDivElement | null>(null)
   const stripRef = useRef<HTMLDivElement | null>(null)
+  const resolveDestinationName = (item: Destination) => {
+    const key = item.translationKey ? `data.destinations.${item.translationKey}` : ''
+
+    return key && i18n.exists(key) ? t(key) : item.name
+  }
+
   const renderTileContent = (item: Destination, destinationName: string) => {
     const badgeLabel = item.region || item.province || 'Vietnam'
 
@@ -80,9 +86,7 @@ export function DestinationsSection({ destinations }: DestinationsSectionProps) 
       <div className="destination-gallery-wrapper" ref={wrapperRef}>
         <div className="destination-gallery-strip" ref={stripRef}>
           {destinations.map((item) => {
-            const destinationName = item.translationKey
-              ? t(`data.destinations.${item.translationKey}`)
-              : item.name
+            const destinationName = resolveDestinationName(item)
             const content = renderTileContent(item, destinationName)
 
             return item.uuid ? (

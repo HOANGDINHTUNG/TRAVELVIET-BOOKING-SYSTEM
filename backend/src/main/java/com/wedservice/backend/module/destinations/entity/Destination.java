@@ -3,15 +3,16 @@ package com.wedservice.backend.module.destinations.entity;
 import com.wedservice.backend.common.entity.AuditableEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
+import com.wedservice.backend.module.destinations.entity.converter.CrowdLevelConverter;
+import com.wedservice.backend.module.destinations.entity.converter.DestinationStatusConverter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import lombok.AllArgsConstructor;
@@ -85,7 +86,7 @@ public class Destination extends AuditableEntity {
     @Column(name = "best_time_to_month")
     private Integer bestTimeToMonth;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = CrowdLevelConverter.class)
     @Column(name = "crowd_level_default", nullable = false)
     @Builder.Default
     private CrowdLevel crowdLevelDefault = CrowdLevel.MEDIUM;
@@ -98,7 +99,7 @@ public class Destination extends AuditableEntity {
     @Builder.Default
     private Boolean isActive = true;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = DestinationStatusConverter.class)
     @Column(name = "status", nullable = false, length = 20)
     @Builder.Default
     private DestinationStatus status = DestinationStatus.APPROVED;

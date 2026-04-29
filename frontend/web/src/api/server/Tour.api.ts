@@ -41,15 +41,12 @@ function parseHighlights(highlights?: string) {
 }
 
 function chooseTourImage(tour: BackendTour) {
-  console.log(`>>> chooseTourImage for tour: ${tour.name}`, tour.media);
   const image = tour.media
     ?.filter((item) => item.isActive !== false)
     .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
     .find((item) => item.mediaType?.toLowerCase() !== "video" && item.mediaUrl);
 
-  const finalUrl = buildAssetUrl(image?.mediaUrl);
-  console.log(`>>> Resulting image URL for ${tour.name}:`, finalUrl);
-  return finalUrl;
+  return buildAssetUrl(image?.mediaUrl);
 }
 
 function mapTour(item: BackendTour): Tour {

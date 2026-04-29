@@ -16,6 +16,8 @@ const destinationFetchSize = 50;
 const featuredDestinationLimit = 10;
 
 function mapDestination(item: BackendDestination): Destination {
+  const activeTourCount = item.activeTourCount ?? 0;
+
   return {
     translationKey: item.translationKey,
     uuid: item.uuid,
@@ -23,9 +25,13 @@ function mapDestination(item: BackendDestination): Destination {
     province: item.province,
     region: item.region,
     shortDescription: item.shortDescription,
-    tours: `${item.activeTourCount ?? 0} tour${(item.activeTourCount ?? 0) === 1 ? "" : "s"}`,
+    tours: `${activeTourCount} tour${activeTourCount === 1 ? "" : "s"}`,
     image: buildAssetUrl(item.coverImageUrl),
   };
+}
+
+function hasActiveTours(item: BackendDestination) {
+  return (item.activeTourCount ?? 0) > 0;
 }
 
 function isVideoMedia(mediaType: string | undefined) {
@@ -85,7 +91,7 @@ export const destinationApi = {
     );
 
     return getRandomItems(
-      page.content.map(mapDestination),
+      page.content.filter(hasActiveTours).map(mapDestination),
       featuredDestinationLimit,
     );
   },

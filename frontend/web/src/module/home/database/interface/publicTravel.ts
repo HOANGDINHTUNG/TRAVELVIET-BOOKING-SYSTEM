@@ -83,6 +83,22 @@ export type BackendChecklistItem = {
   isRequired?: boolean;
 };
 
+export type BackendTourSchedulePickupPoint = {
+  id: number;
+  pickupName?: string;
+  address?: string;
+  pickupAt?: string;
+  note?: string;
+};
+
+export type BackendTourScheduleGuide = {
+  id: number;
+  guideId?: number;
+  guideName?: string;
+  role?: string;
+  note?: string;
+};
+
 export type BackendCancellationPolicyRule = {
   id: number;
   minHoursBefore?: number;
@@ -156,11 +172,28 @@ export type BackendItineraryItem = {
 export type BackendTourSchedule = {
   id: number;
   scheduleCode: string;
+  tourId?: number;
   departureAt: string;
   returnAt: string;
+  bookingOpenAt?: string;
+  bookingCloseAt?: string;
+  meetingAt?: string;
+  meetingPointName?: string;
+  meetingAddress?: string;
+  capacityTotal?: number;
+  bookedSeats?: number;
   adultPrice: number;
+  childPrice?: number;
+  infantPrice?: number;
+  seniorPrice?: number;
+  singleRoomSurcharge?: number;
   remainingSeats: number;
+  minGuestsToOperate?: number;
+  transportDetail?: string;
+  note?: string;
   status: string;
+  pickupPoints?: BackendTourSchedulePickupPoint[];
+  guideAssignments?: BackendTourScheduleGuide[];
 };
 
 export type WeatherSeverity = "info" | "watch" | "warning" | "danger";

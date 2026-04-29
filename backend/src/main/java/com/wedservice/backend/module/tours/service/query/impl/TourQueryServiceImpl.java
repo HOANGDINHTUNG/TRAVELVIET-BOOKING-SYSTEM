@@ -366,37 +366,8 @@ public class TourQueryServiceImpl implements TourQueryService {
     }
 
     private TourScheduleResponse toScheduleResponse(TourSchedule schedule) {
-        List<TourSchedulePickupPointResponse> pickupPoints = tourSchedulePickupPointRepository
-                .findByScheduleIdOrderBySortOrder(schedule.getId())
-                .stream()
-                .map(pickupPoint -> TourSchedulePickupPointResponse.builder()
-                        .id(pickupPoint.getId())
-                        .pointName(pickupPoint.getPointName())
-                        .address(pickupPoint.getAddress())
-                        .latitude(pickupPoint.getLatitude())
-                        .longitude(pickupPoint.getLongitude())
-                        .pickupAt(pickupPoint.getPickupAt())
-                        .sortOrder(pickupPoint.getSortOrder())
-                        .build())
-                .toList();
-
-        List<TourScheduleGuide> assignedGuides = tourScheduleGuideRepository.findByScheduleId(schedule.getId());
-        Map<Long, Guide> guideMap = loadGuideMap(assignedGuides.stream().map(TourScheduleGuide::getGuideId).toList());
-        List<TourScheduleGuideResponse> guideAssignments = assignedGuides
-                .stream()
-                .map(guide -> TourScheduleGuideResponse.builder()
-                        .id(guide.getId())
-                        .guideId(guide.getGuideId())
-                        .guideCode(guideMap.containsKey(guide.getGuideId()) ? guideMap.get(guide.getGuideId()).getCode() : null)
-                        .guideFullName(guideMap.containsKey(guide.getGuideId()) ? guideMap.get(guide.getGuideId()).getFullName() : null)
-                        .guidePhone(guideMap.containsKey(guide.getGuideId()) ? guideMap.get(guide.getGuideId()).getPhone() : null)
-                        .guideEmail(guideMap.containsKey(guide.getGuideId()) ? guideMap.get(guide.getGuideId()).getEmail() : null)
-                        .guideStatus(guideMap.containsKey(guide.getGuideId()) ? guideMap.get(guide.getGuideId()).getStatus() : null)
-                        .isLocalGuide(guideMap.containsKey(guide.getGuideId()) ? guideMap.get(guide.getGuideId()).getIsLocalGuide() : null)
-                        .guideRole(guide.getGuideRole())
-                        .assignedAt(guide.getAssignedAt())
-                        .build())
-                .toList();
+        List<TourSchedulePickupPointResponse> pickupPoints = loadSchedulePickupPoints(schedule.getId());
+        List<TourScheduleGuideResponse> guideAssignments = loadScheduleGuides(schedule.getId());
 
         return TourScheduleResponse.builder()
                 .id(schedule.getId())
@@ -426,6 +397,58 @@ public class TourQueryServiceImpl implements TourQueryService {
                 .pickupPoints(pickupPoints)
                 .guideAssignments(guideAssignments)
                 .build();
+    }
+
+    private List<TourSchedulePickupPointResponse> loadSchedulePickupPoints(Long scheduleId) {
+        try {
+            return tourSchedulePickupPointRepository
+                    .findByScheduleIdOrderBySortOrder(scheduleId)
+                    .stream()
+                    .filter(pickupPoint -> pickupPoint.getDeletedAt() == null)
+                    .map(pickupPoint -> TourSchedulePickupPointResponse.builder()
+                            .id(pickupPoint.getId())
+                            .pointName(pickupPoint.getPointName())
+                            .address(pickupPoint.getAddress())
+                            .latitude(pickupPoint.getLatitude())
+                            .longitude(pickupPoint.getLongitude())
+                            .pickupAt(pickupPoint.getPickupAt())
+                            .sortOrder(pickupPoint.getSortOrder())
+                            .build())
+                    .toList();
+        } catch (Exception e) {
+            log.warn("Could not load pickup points for schedule {}: {}", scheduleId, e.getMessage());
+            return List.of();
+        }
+    }
+
+    private List<TourScheduleGuideResponse> loadScheduleGuides(Long scheduleId) {
+        try {
+            List<TourScheduleGuide> assignedGuides = tourScheduleGuideRepository.findByScheduleId(scheduleId).stream()
+                    .filter(guide -> guide.getDeletedAt() == null)
+                    .toList();
+            Map<Long, Guide> guideMap = loadGuideMap(assignedGuides.stream().map(TourScheduleGuide::getGuideId).toList());
+            return assignedGuides
+                    .stream()
+                    .map(guide -> {
+                        Guide guideProfile = guideMap.get(guide.getGuideId());
+                        return TourScheduleGuideResponse.builder()
+                                .id(guide.getId())
+                                .guideId(guide.getGuideId())
+                                .guideCode(guideProfile != null ? guideProfile.getCode() : null)
+                                .guideFullName(guideProfile != null ? guideProfile.getFullName() : null)
+                                .guidePhone(guideProfile != null ? guideProfile.getPhone() : null)
+                                .guideEmail(guideProfile != null ? guideProfile.getEmail() : null)
+                                .guideStatus(guideProfile != null ? guideProfile.getStatus() : null)
+                                .isLocalGuide(guideProfile != null ? guideProfile.getIsLocalGuide() : null)
+                                .guideRole(guide.getGuideRole())
+                                .assignedAt(guide.getAssignedAt())
+                                .build();
+                    })
+                    .toList();
+        } catch (Exception e) {
+            log.warn("Could not load guide assignments for schedule {}: {}", scheduleId, e.getMessage());
+            return List.of();
+        }
     }
 
     private List<TourMediaResponse> loadMediaResponses(Long tourId) {

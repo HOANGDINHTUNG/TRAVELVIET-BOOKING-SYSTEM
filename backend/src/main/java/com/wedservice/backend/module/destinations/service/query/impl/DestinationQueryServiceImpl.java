@@ -71,7 +71,7 @@ public class DestinationQueryServiceImpl implements DestinationQueryService {
 
         builder.and(qDestination.status.eq(DestinationStatus.APPROVED));
         builder.and(qDestination.deletedAt.isNull());
-        builder.and(qDestination.isOfficial.isTrue());
+        builder.and(qDestination.isActive.isTrue());
 
         Page<Destination> page = destinationRepository.findAll(builder, pageable);
         return PageResponse.of(page.map(this::toPublicResponse));
@@ -84,7 +84,9 @@ public class DestinationQueryServiceImpl implements DestinationQueryService {
         Destination destination = destinationRepository.findByUuid(uuid)
                 .orElseThrow(() -> new ResourceNotFoundException("Destination not found with uuid: " + uuid));
 
-        if (destination.getStatus() != DestinationStatus.APPROVED || destination.getDeletedAt() != null) {
+        if (destination.getStatus() != DestinationStatus.APPROVED
+                || !Boolean.TRUE.equals(destination.getIsActive())
+                || destination.getDeletedAt() != null) {
             throw new ResourceNotFoundException("Destination not found or not approved");
         }
 
