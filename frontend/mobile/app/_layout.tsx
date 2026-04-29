@@ -1,24 +1,18 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
-
-import { useColorScheme } from '@/hooks/use-color-scheme';
-
-export const unstable_settings = {
-  anchor: '(tabs)',
-};
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    // Thuộc tính initialRouteName sẽ chỉ định thư mục nào được chạy lên đầu tiên
+    <Stack initialRouteName="(auth)">
+      
+      {/* 1. Khai báo luồng Đăng nhập/Đăng ký (Cho nó chạy đầu tiên) */}
+      <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+
+      {/* 2. Khai báo luồng chính của App (Màn hình Home, Explore...) */}
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+
+      {/* 3. Khai báo các màn hình phụ khác (như Modal, Not Found) */}
+      <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+    </Stack>
   );
 }

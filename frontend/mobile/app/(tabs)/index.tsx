@@ -1,98 +1,96 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, FlatList, Text, ImageBackground, TouchableOpacity } from 'react-native';
+import { Searchbar, Chip } from 'react-native-paper';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+// Đảm bảo file style này nằm cùng thư mục (tabs)
+import { styles } from '../styles/_index.styles'; 
+// Đường dẫn lùi 2 cấp ra khỏi (tabs) và app để vào constants
+import { TOURS_DATA } from '../../constants/Tours';
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+const CATEGORIES = ['Tất cả', 'Miền Bắc', 'Miền Trung', 'Miền Nam', 'Biển đảo'];
 
 export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('Tất cả'); 
+  const router = useRouter();
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+  // FIX: Đổi TOURS thành TOURS_DATA để khớp với lệnh import
+  const filteredTours = TOURS_DATA.filter(tour => {
+    const matchCategory = selectedCategory === 'Tất cả' || tour.category === selectedCategory;
+    const matchSearch = tour.title.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchCategory && matchSearch;
+  });
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.greeting}>Xin chào, Trứ! 👋</Text>
+        <Text style={styles.subtitle}>Bạn muốn đi đâu hôm nay?</Text>
+        <Searchbar
+          placeholder="Tìm kiếm tour..."
+          onChangeText={setSearchQuery}
+          value={searchQuery}
+          style={styles.searchBar}
+          iconColor="#E91E63"
+        />
+      </View>
+
+      <View style={styles.categoriesContainer}>
+        <FlatList
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          data={CATEGORIES}
+          keyExtractor={(item) => item}
+          renderItem={({ item }) => {
+            const isActive = selectedCategory === item;
+            return (
+              <Chip 
+                style={[styles.chip, isActive && { backgroundColor: '#FF2D55' }]} 
+                textStyle={[styles.chipText, isActive && { color: '#fff' }]} 
+                onPress={() => setSelectedCategory(item)}
+              >
+                {item}
+              </Chip>
+            );
+          }}
+        />
+      </View>
+
+      <FlatList
+        data={filteredTours}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.tourList}
+        showsVerticalScrollIndicator={false}
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            activeOpacity={0.9}
+            // Điều hướng đến màn hình chi tiết tour
+            onPress={() => router.push(`/tour/${item.id}`)}
+          >
+            <ImageBackground source={{ uri: item.image }} style={styles.cardImage} imageStyle={{ borderRadius: 20 }}>
+              <LinearGradient colors={['transparent', 'rgba(0,0,0,0.8)']} style={styles.gradient}>
+                <View style={styles.weatherBadge}>
+                  <Ionicons name="partly-sunny" size={16} color="#000" />
+                  <Text style={styles.weatherText}>{item.weather}</Text>
+                </View>
+                <View style={styles.tourInfo}>
+                  <Text style={styles.tourTitle}>{item.title}</Text>
+                  <View style={styles.locationRow}>
+                    <Ionicons name="location-outline" size={16} color="#ddd" />
+                    <Text style={styles.locationText}>{item.location}</Text>
+                  </View>
+                  <View style={styles.priceRow}>
+                    <Text style={styles.priceText}>{item.price}</Text>
+                    <Text style={styles.bookText}>Đặt ngay</Text>
+                  </View>
+                </View>
+              </LinearGradient>
+            </ImageBackground>
+          </TouchableOpacity>
+        )}
+      />
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-});
