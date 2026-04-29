@@ -726,6 +726,17 @@ Authorization: Bearer <ACCESS_TOKEN>
 - Returns upcoming weather forecasts of one approved, active destination
 - Sort: `forecastDate asc`
 - Rows with `forecastDate < today` are hidden from the public API
+- `destinationUuid` phai la UUID hop le (vi du `3fa85f64-5717-4562-b3fc-2c963f66afa6`)
+- Destination phai ton tai, `status = approved`, `isActive = true` va chua bi soft-delete; nguoc lai tra `404 RESOURCE_NOT_FOUND`
+- Neu `destinationUuid` khong dung dinh dang UUID, backend tra `400 INVALID_PARAMETER`
+
+**Request**
+
+```http
+GET http://localhost:8088/api/v1/destinations/3fa85f64-5717-4562-b3fc-2c963f66afa6/weather/forecasts
+```
+
+> Luu y khi test bang Postman: phai thay literal `{destinationUuid}` bang UUID that. Postman khong tu substitute `{...}` trong path; muon dung bien thi viet `{{destinationUuid}}` (hai cap ngoac) va khai bao trong environment.
 
 #### `GET /destinations/{destinationUuid}/weather/alerts`
 

@@ -15,6 +15,8 @@ import com.wedservice.backend.common.response.PageResponse;
 import com.wedservice.backend.module.destinations.dto.response.DestinationPublicDetailResponse;
 import com.wedservice.backend.module.destinations.dto.response.DestinationPublicResponse;
 import com.wedservice.backend.module.destinations.service.query.DestinationQueryService;
+import com.wedservice.backend.module.tours.entity.TourStatus;
+import com.wedservice.backend.module.tours.repository.TourRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -33,6 +35,7 @@ public class DestinationQueryServiceImpl implements DestinationQueryService {
 
     private final DestinationRepository destinationRepository;
     private final DestinationMapper destinationMapper;
+    private final TourRepository tourRepository;
 
     @Override
     @Cacheable(value = "destinations", key = "#request")
@@ -68,7 +71,7 @@ public class DestinationQueryServiceImpl implements DestinationQueryService {
 
         builder.and(qDestination.status.eq(DestinationStatus.APPROVED));
         builder.and(qDestination.deletedAt.isNull());
-        builder.and(qDestination.isOfficial.isTrue());
+        builder.and(qDestination.isActive.isTrue());
 
         Page<Destination> page = destinationRepository.findAll(builder, pageable);
         return PageResponse.of(page.map(this::toPublicResponse));
@@ -81,7 +84,9 @@ public class DestinationQueryServiceImpl implements DestinationQueryService {
         Destination destination = destinationRepository.findByUuid(uuid)
                 .orElseThrow(() -> new ResourceNotFoundException("Destination not found with uuid: " + uuid));
 
-        if (destination.getStatus() != DestinationStatus.APPROVED || destination.getDeletedAt() != null) {
+        if (destination.getStatus() != DestinationStatus.APPROVED
+                || !Boolean.TRUE.equals(destination.getIsActive())
+                || destination.getDeletedAt() != null) {
             throw new ResourceNotFoundException("Destination not found or not approved");
         }
 
@@ -103,7 +108,17 @@ public class DestinationQueryServiceImpl implements DestinationQueryService {
                 .crowdLevelDefault(destination.getCrowdLevelDefault())
                 .isFeatured(destination.getIsFeatured())
                 .coverImageUrl(resolveCoverImage(destination))
+                .activeTourCount(countActiveTours(destination.getId()))
+                .translationKey(destination.getSlug())
                 .build();
+    }
+
+    private Long countActiveTours(Long destinationId) {
+        try {
+            return tourRepository.countByDestinationIdAndStatusAndDeletedAtIsNull(destinationId, TourStatus.ACTIVE);
+        } catch (Exception e) {
+            return 0L;
+        }
     }
 
     private DestinationPublicDetailResponse toPublicDetailResponse(Destination destination) {

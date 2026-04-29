@@ -35,7 +35,12 @@ public class TourController {
     @GetMapping("/{id}")
     public ApiResponse<TourResponse> getTour(@PathVariable Long id) {
         TourResponse response = tourFacade.getTour(id);
-        userTourViewFacade.recordCurrentUserTourViewIfAuthenticated(id);
+        try {
+            userTourViewFacade.recordCurrentUserTourViewIfAuthenticated(id);
+        } catch (Exception e) {
+            // Log error but don't fail the request as this is non-critical
+            org.slf4j.LoggerFactory.getLogger(TourController.class).error("Failed to record tour view for tour {}: {}", id, e.getMessage());
+        }
         return ApiResponse.success(response);
     }
 

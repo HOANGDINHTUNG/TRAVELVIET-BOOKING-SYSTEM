@@ -34,62 +34,6 @@ type NavAuthUser = {
   avatarUrl?: string | null
 }
 
-const botanicalLeaves = {
-  monstera: {
-    viewBox: '0 0 96 132',
-    path: 'M74 14C54 8 33 16 21 34C8 53 9 80 25 98C37 112 57 118 74 108C88 100 96 82 93 64C91 48 83 34 71 26C78 26 88 24 94 18C88 18 81 17 74 14ZM33 37C38 41 43 45 48 48C40 50 33 50 25 47C27 43 30 40 33 37ZM57 32C57 40 58 47 60 54C66 49 71 43 76 36C70 32 64 31 57 32ZM24 61C31 62 38 61 46 58C42 66 36 73 28 78C25 73 24 67 24 61ZM69 61C76 57 82 52 87 45C90 53 91 61 89 69C82 68 75 65 69 61ZM43 77C37 84 31 90 24 94C29 101 37 106 46 108C45 98 44 88 43 77ZM59 74C66 82 74 88 84 93C79 101 72 106 63 108C61 97 60 86 59 74ZM48 28C49 40 49 55 49 70C49 84 50 98 52 113C56 94 57 75 56 57C55 45 53 35 48 28Z',
-  },
-  fern: {
-    viewBox: '0 0 26.3 65.33',
-    path: 'M13.98 52.87c0.37,-0.8 0.6,-1.74 0.67,-2.74 1.01,1.1 2.23,2.68 1.24,3.87 -0.22,0.26 -0.41,0.61 -0.59,0.97 -2.95,5.89 3.44,10.87 2.98,0.78 0.29,0.23 0.73,0.82 1.03,1.18 0.33,0.4 0.7,0.77 1,1.15 0.29,0.64 -0.09,2.68 1.77,4.91 5.42,6.5 5.67,-2.38 0.47,-4.62 -0.41,-0.18 -0.95,-0.26 -1.28,-0.54 -0.5,-0.41 -1.23,-1.37 -1.66,-1.9 0.03,-0.43 -0.17,-0.13 0.11,-0.33 4.98,1.72 8.4,-1.04 2.38,-3.16 -1.98,-0.7 -2.9,-0.36 -4.72,0.16 -0.63,-0.58 -2.38,-3.82 -2.82,-4.76 1.21,0.56 1.72,1.17 3.47,1.3 6.5,0.5 2.31,-4.21 -2.07,-4.04 -1.12,0.04 -1.62,0.37 -2.49,0.62l-1.25 -3.11c0.03,-0.26 0.01,-0.18 0.1,-0.28 1.35,0.86 1.43,1 3.25,1.45 2.35,0.15 3.91,-0.15 1.75,-2.4 -1.22,-1.27 -2.43,-2.04 -4.22,-2.23l-2.08 0.13c-0.35,-0.58 -0.99,-2.59 -1.12,-3.3 -0.24,-0.36 1.88,1.31 2.58,1.57 1.32,0.49 2.6,0.33 3.82,0 -0.37,-1.08 -1.17,-2.31 -2.13,-3.11 -1.79,-1.51 -3.07,-1.41 -5.22,-1.38l-0.93 -4.07c0.41,-0.57 1.41,0.9 2.82,1.36 0.96,0.31 1.94,0.41 3,0.14 2,-0.52 -2.25,-4.4 -4.53,-4.71 -0.7,-0.1 -1.23,-0.04 -1.92,-0.03 -0.46,-0.82 -0.68,-3.61 -0.92,-4.74 0.8,0.88 1.15,1.54 2.25,2.23 0.8,0.5 1.58,0.78 2.57,0.85 2.54,0.18 -0.1,-3.47 -0.87,-4.24 -1.05,-1.05 -2.34,-1.59 -4.32,-1.78l-0.33 -3.49c0.83,0.67 1.15,1.48 2.3,2.16 1.07,0.63 2.02,0.89 3.58,0.79 0.15,-1.34 -1.07,-3.39 -2.03,-4.3 -1.05,-0.99 -2.08,-1.47 -3.91,-1.68l-0.07 -3.27 0.32 -0.65c0.44,0.88 1.4,1.74 2.24,2.22 0.69,0.39 2.4,1.1 3.44,0.67 0.31,-1.92 -1.84,-4.49 -3.5,-5.29 -0.81,-0.39 -1.61,-0.41 -2.18,-0.68 -0.12,-1.28 0.27,-3.23 0.37,-4.55l-0.89 0c-0.06,1.28 -0.35,3.12 -0.34,4.31 -0.44,0.45 -0.37,0.42 -0.96,0.64 -3.88,1.49 -4.86,6.38 -3.65,7.34 1.42,-0.31 3.69,-2.14 4.16,-3.66 0.23,0.5 0.1,2.36 0.05,3.05 -1.23,0.4 -2.19,1.05 -2.92,1.82 -1.17,1.24 -2.36,4.04 -1.42,5.69 1.52,0.09 4.07,-2.49 4.49,-4.07l0.29 3.18c-2.81,0.96 -5.01,3.68 -4.18,7.43 2.06,-0.09 3.78,-2.56 4.66,-4.15 0.23,1.45 0.67,3.06 0.74,4.52 -1.26,0.93 -2.37,1.8 -2.97,3.55 -0.48,1.4 -0.49,3.72 0.19,4.55 0.59,0.71 2.06,-1.17 2.42,-1.67 1,-1.35 0.81,-1.92 1.29,-2.46l0.7 3.44c-0.49,0.45 -0.94,0.55 -1.5,1.19 -1.93,2.23 -2.14,4.33 -1.01,6.92 0.72,0.09 2.04,-1.4 2.49,-2.06 0.65,-0.95 0.79,-1.68 1.14,-2.88l0.97 2.92c-0.2,0.55 -1.84,1.32 -2.6,3.62 -0.54,1.62 -0.37,3.86 0.67,4.93 0.58,-0.09 1.85,-1.61 2.2,-2.19 0.66,-1.09 0.66,-1.64 1,-2.93l1.32 3.18c-0.23,0.72 -1.63,1.72 -1.82,4.18 -0.17,2.16 1.11,6.88 3.13,2.46z',
-  },
-  leaf: {
-    viewBox: '0 0 208.52 511.88',
-    path: 'M121.86 141.25c16.73,2.91 65.77,9.16 77.74,-14.94 14.49,-29.19 12.6,-56.91 -15.12,-69.09 -11.3,-4.96 -22.28,-7.7 -32.28,-9.66 -24.58,24.72 -41.22,75.51 -43.83,83.82 4.31,3.56 8.81,6.86 13.49,9.87zm-17.26 41.05c2.87,7.92 8.26,29.59 7.63,79.7 -0.16,12.74 -0.48,25.41 -0.81,38.43 -1.4,55.59 -2.96,117.52 7.12,210.69l-7.09 0.75c-10.12,-93.56 -8.56,-155.77 -7.15,-211.61 0.33,-13.06 0.65,-25.77 0.81,-38.35 0.53,-42.42 -3.06,-63.29 -5.69,-72.77 -7.55,8.48 -18.48,15.07 -34.33,16.54 -26.77,2.47 -43.19,-16.99 -52.84,-36.58 16.49,-8.49 65.65,-32.22 98.27,-31.47 1.86,1.42 3.76,2.8 5.69,4.13 -0.15,5.56 -1.43,24.61 -11.62,40.53zm-41.18 -148.65c-0.32,0.84 1.68,9.87 -6.19,10.71 -7.87,0.84 -3.26,-5.14 -6.82,-7.98 -3.57,-2.84 -9.97,-14.59 1.99,-15.96 11.97,-1.37 11.02,13.23 11.02,13.23zm124.63 55.54c0,0 -3.89,14.8 -10.18,18.69 -6.3,3.88 -22.78,7.24 -28.87,0.11 -6.09,-7.14 -1.57,-31.71 17.64,-30.45 19.21,1.26 22.68,8.4 21.42,11.65zm-101.53 67.51c0,0 5.88,5.56 5.46,9.87 -0.42,4.3 -5.78,19.21 -14.07,20.05 -8.29,0.84 -24.15,-6.82 -21.84,-17.53 2.31,-10.71 10.5,-11.34 12.6,-10.6 2.1,0.74 3.36,2.1 17.85,-1.78zm61.49 -109.94c-12.74,-2.33 -23.63,-3.69 -31.15,-7.4 0,0 -2.41,15.22 -4.51,19.74 -2.1,4.51 -6.3,17.32 -14.8,21.1 -8.5,3.78 -9.87,-28.14 4.62,-45.15 0,0 -10.13,-4.4 -22.34,-9.92 -11.47,31.21 -7.3,64.58 -7.28,64.68l-0.48 0.06c9.73,14.77 20.76,28.04 33.37,39.01 3.68,-11.43 19.48,-57.46 42.58,-82.12zm-71.44 -23.1c-16.59,-7.55 -35.59,-16.58 -38.25,-19.47 -1.97,-2.14 -4.87,-3.72 -7.63,-4.2 9.11,27.4 20.23,54.59 34.36,78.62 1.13,1.92 2.28,3.82 3.45,5.7 -0.66,-11.21 -0.85,-36.56 8.07,-60.65zm-49.59 -23.57c-2.34,0.66 -4.05,2.62 -4.09,6.41 -0.1,9.45 -9.03,35.38 -9.03,35.38 0,0 33.07,14.91 22.99,23.1 -10.08,8.19 -25.41,-8.5 -26.35,-9.34 0,0 -5.94,16.24 -8.44,35.85 11.53,-1.14 38.81,-2.11 72.53,8.35 -4.45,-6.19 -8.65,-12.68 -12.61,-19.42 -14.44,-24.56 -25.77,-52.36 -35.01,-80.32zm-25.33 95.01c-0.61,6.01 -0.86,12.26 -0.49,18.39 0,0 56.17,-9.87 57.33,8.71 1.15,18.58 -58.48,9.45 -58.48,9.45 0,0 2.71,16.68 10.73,34.23 16.07,-8.25 62.14,-30.45 95.29,-31.76l-1.75 -1.5 0.01 -0.03c-9.54,-8.13 -18.2,-17.54 -26.08,-27.89l-0.01 0.04c-36.16,-12.16 -65.36,-10.82 -76.53,-9.63z',
-  },
-} as const
-
-function BotanicalSvgLeaf({
-  className,
-  variant,
-}: {
-  className: string
-  variant: keyof typeof botanicalLeaves
-}) {
-  const leaf = botanicalLeaves[variant]
-
-  if (variant === 'monstera') {
-    return (
-      <span className={className}>
-        <svg viewBox={leaf.viewBox} focusable="false" aria-hidden="true">
-          <path
-            className="nav-monstera-stem"
-            d="M48 128C43 95 41 70 45 47C48 29 56 15 70 4"
-          />
-          <path
-            className="nav-monstera-leaf"
-            d={leaf.path}
-            fillRule="evenodd"
-            clipRule="evenodd"
-          />
-          <path
-            className="nav-monstera-vein"
-            d="M49 31C51 55 51 84 54 112M50 50C41 45 33 40 26 34M50 58C40 62 31 64 23 63M51 70C43 80 34 88 24 96M55 56C63 49 70 41 77 32M56 66C68 70 79 74 89 78M57 78C65 88 74 96 84 103"
-          />
-        </svg>
-      </span>
-    )
-  }
-
-  return (
-    <span className={className}>
-      <svg viewBox={leaf.viewBox} focusable="false">
-        <path d={leaf.path} />
-      </svg>
-    </span>
-  )
-}
-
 const navItems = [
   { href: '#home', labelKey: 'nav.home' },
   { href: '#destinations', labelKey: 'nav.about' },
@@ -292,81 +236,10 @@ export function Navbar() {
 
   return (
     <nav
-      className={`site-nav ${isScrolled ? 'is-scrolled' : ''} ${authUser ? 'has-auth-garden' : ''}`}
+      className={`site-nav ${isScrolled ? 'is-scrolled' : ''}`}
       ref={navRef}
       aria-label="Main navigation"
     >
-      {authUser && (
-        <div className="nav-botanical" aria-hidden="true">
-          <BotanicalSvgLeaf
-            className="nav-botanical-svg nav-botanical-svg-1"
-            variant="fern"
-          />
-          <BotanicalSvgLeaf
-            className="nav-botanical-svg nav-botanical-svg-2"
-            variant="leaf"
-          />
-          <BotanicalSvgLeaf
-            className="nav-botanical-svg nav-botanical-svg-3"
-            variant="fern"
-          />
-          <BotanicalSvgLeaf
-            className="nav-botanical-svg nav-botanical-svg-4"
-            variant="leaf"
-          />
-          <BotanicalSvgLeaf
-            className="nav-botanical-svg nav-botanical-svg-5"
-            variant="fern"
-          />
-          <span className="nav-botanical-tree nav-botanical-tree-1">
-            <span className="nav-botanical-tree-trunk" />
-            <span className="nav-botanical-tree-crown nav-botanical-tree-crown-main" />
-            <span className="nav-botanical-tree-crown nav-botanical-tree-crown-left" />
-            <span className="nav-botanical-tree-crown nav-botanical-tree-crown-right" />
-          </span>
-          <span className="nav-botanical-tree nav-botanical-tree-2">
-            <span className="nav-botanical-tree-trunk" />
-            <span className="nav-botanical-tree-crown nav-botanical-tree-crown-main" />
-            <span className="nav-botanical-tree-crown nav-botanical-tree-crown-left" />
-            <span className="nav-botanical-tree-crown nav-botanical-tree-crown-right" />
-          </span>
-          <span className="nav-botanical-tree nav-botanical-tree-3">
-            <span className="nav-botanical-tree-trunk" />
-            <span className="nav-botanical-tree-crown nav-botanical-tree-crown-main" />
-            <span className="nav-botanical-tree-crown nav-botanical-tree-crown-left" />
-            <span className="nav-botanical-tree-crown nav-botanical-tree-crown-right" />
-          </span>
-          <span className="nav-botanical-sprig nav-botanical-sprig-brand">
-            <span />
-            <span />
-            <span />
-            <span />
-          </span>
-          <span className="nav-botanical-sprig nav-botanical-sprig-center">
-            <span />
-            <span />
-            <span />
-          </span>
-          <span className="nav-botanical-sprig nav-botanical-sprig-action">
-            <span />
-            <span />
-            <span />
-            <span />
-          </span>
-          <span className="nav-botanical-bloom nav-botanical-bloom-1">
-            <span />
-            <span />
-            <span />
-            <span />
-          </span>
-          <span className="nav-botanical-bloom nav-botanical-bloom-2">
-            <span />
-            <span />
-            <span />
-            <span />
-          </span>
-        </div>
-      )}
       <a
         className="brand"
         href="#home"

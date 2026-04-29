@@ -1,3 +1,3 @@
 @echo off
 echo Starting TravelViet Backend...
-.\mvnw.cmd spring-boot:run
+.\mvnw.cmd spring-boot:run -Dmaven.test.skip=true

@@ -26,4 +26,6 @@ public class DestinationPublicResponse {
     private CrowdLevel crowdLevelDefault;
     private Boolean isFeatured;
     private String coverImageUrl;
+    private Long activeTourCount;
+    private String translationKey;
 }

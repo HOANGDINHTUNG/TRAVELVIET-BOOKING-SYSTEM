@@ -76,7 +76,7 @@ public class TourSearchRequest {
     private BigDecimal minRating;
 
     @Pattern(
-            regexp = "name|basePrice|durationDays|averageRating|totalBookings|createdAt",
+            regexp = "name|basePrice|durationDays|averageRating|totalBookings|isFeatured|createdAt",
             message = "sortBy is invalid"
     )
     @Builder.Default
