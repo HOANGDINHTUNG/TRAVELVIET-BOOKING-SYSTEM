@@ -1,57 +1,128 @@
-import React from 'react';
-import { View, Text, StyleSheet, FlatList, ImageBackground, TouchableOpacity } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import React, { useState } from 'react';
+import { 
+  View, Text, StyleSheet, SafeAreaView, TouchableOpacity, 
+  FlatList, Image, Platform 
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
-const DESTINATIONS = [
-  { id: '1', name: 'Sapa', tours: '15 Tours', image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSQwpADrYEWIS0tPPCXm3ZdGT2ShhPhK4QG0g&s' },
-  { id: '2', name: 'Phú Quốc', tours: '24 Tours', image: 'https://www.vietnambooking.com/wp-content/uploads/2022/05/kinh-nghiem-du-lich-phu-quoc-cho-gia-dinh-1.jpg' },
-  { id: '3', name: 'Đà Nẵng', tours: '30 Tours', image: 'https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?q=80&w=1000&auto=format&fit=crop' },
-  { id: '4', name: 'Hạ Long', tours: '18 Tours', image: 'https://images.unsplash.com/photo-1528127269322-539801943592?q=80&w=1000&auto=format&fit=crop' },
-  { id: '5', name: 'Hội An', tours: '22 Tours', image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1000&auto=format&fit=crop' },
-  { id: '6', name: 'Nha Trang', tours: '20 Tours', image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1000&auto=format&fit=crop' }
-
+// Dữ liệu giả lập (Lấy ảnh từ Unsplash cho ổn định)
+const PROMOS = [
+  { 
+    id: '1', type: 'hot', 
+    title: 'GIA NHẬP VIETRAVELPLUS - ĐẶC QUYỀN DÀNH CHO HỘI VIÊN MỚI', 
+    date: '02/07/2025', 
+    image: 'https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?w=800&q=80' 
+  },
+  { 
+    id: '2', type: 'hot', 
+    title: '✨ TRẢI NGHIỆM DU LỊCH 5 SAO VỚI TOP 3 HÃNG HÀNG KHÔNG TỐT NHẤT', 
+    date: '21/06/2025', 
+    image: 'https://images.unsplash.com/photo-1436491865332-7a61e109cc05?w=800&q=80' 
+  },
+  { 
+    id: '3', type: 'partner', 
+    title: 'Chạm hành trình - Nhận quà xinh cùng Vietravel & JCB', 
+    likes: 0, comments: 0, 
+    image: 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=800&q=80' 
+  },
+  { 
+    id: '4', type: 'partner', 
+    title: 'Du Xuân tiết kiệm cùng Vietravel và Sacombank: Giảm ngay 500.000 đồng', 
+    likes: 0, comments: 0, 
+    image: 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=800&q=80' 
+  }
 ];
 
 export default function ExploreScreen() {
+  const [activeTab, setActiveTab] = useState('hot');
+
+  // Lọc dữ liệu theo tab
+  const filteredPromos = PROMOS.filter(item => item.type === activeTab);
+
+  const renderPromoCard = ({ item }: any) => (
+    <View style={styles.card}>
+      <Image source={{ uri: item.image }} style={styles.cardImage} />
+      <View style={styles.cardContent}>
+        <Text style={styles.cardTitle} numberOfLines={2}>{item.title}</Text>
+        
+        {/* Render bottom info based on type */}
+        {item.type === 'hot' ? (
+          <View style={styles.metaRow}>
+            <Ionicons name={"calendar-outline" as any} size={16} color="#666" />
+            <Text style={styles.metaText}>{item.date}</Text>
+          </View>
+        ) : (
+          <View style={styles.metaRow}>
+            <Ionicons name={"thumbs-up-outline" as any} size={16} color="#888" />
+            <Text style={styles.metaText}>{item.likes}</Text>
+            <View style={styles.dot} />
+            <Ionicons name={"chatbubble-outline" as any} size={16} color="#888" />
+            <Text style={styles.metaText}>{item.comments} Đánh giá</Text>
+          </View>
+        )}
+      </View>
+    </View>
+  );
+
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
+      {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Khám phá</Text>
-        <Text style={styles.subtitle}>Điểm đến thịnh hành nhất</Text>
+        <Text style={styles.headerTitle}>KHUYẾN MÃI</Text>
       </View>
 
-      <FlatList
-        data={DESTINATIONS}
-        keyExtractor={(item) => item.id}
-        numColumns={2}
-        columnWrapperStyle={styles.row}
-        contentContainerStyle={styles.list}
-        showsVerticalScrollIndicator={false}
-        renderItem={({ item }) => (
-          <TouchableOpacity style={styles.card} activeOpacity={0.8}>
-            <ImageBackground source={{ uri: item.image }} style={styles.image} imageStyle={{ borderRadius: 15 }}>
-              <LinearGradient colors={['transparent', 'rgba(0,0,0,0.8)']} style={styles.gradient}>
-                <Text style={styles.cardTitle}>{item.name}</Text>
-                <Text style={styles.cardSub}>{item.tours}</Text>
-              </LinearGradient>
-            </ImageBackground>
+      {/* Toggle Tabs */}
+      <View style={styles.tabContainer}>
+        <View style={styles.tabBackground}>
+          <TouchableOpacity 
+            style={[styles.tabButton, activeTab === 'hot' && styles.activeTab]}
+            onPress={() => setActiveTab('hot')}
+            activeOpacity={0.8}
+          >
+            <Text style={[styles.tabText, activeTab === 'hot' && styles.activeTabText]}>Hot nhất</Text>
           </TouchableOpacity>
-        )}
+          <TouchableOpacity 
+            style={[styles.tabButton, activeTab === 'partner' && styles.activeTab]}
+            onPress={() => setActiveTab('partner')}
+            activeOpacity={0.8}
+          >
+            <Text style={[styles.tabText, activeTab === 'partner' && styles.activeTabText]}>Đối tác Vietravel</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* Danh sách Khuyến mãi */}
+      <FlatList
+        data={filteredPromos}
+        keyExtractor={item => item.id}
+        renderItem={renderPromoCard}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.listContainer}
       />
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F8F9FA' },
-  header: { padding: 20, paddingTop: 60, backgroundColor: '#fff', borderBottomWidth: 1, borderColor: '#eee' },
-  title: { fontSize: 32, fontWeight: 'bold', color: '#1A1A1A' },
-  subtitle: { fontSize: 16, color: '#666', marginTop: 5 },
-  list: { padding: 10 },
-  row: { justifyContent: 'space-between', paddingHorizontal: 5 },
-  card: { width: '48%', height: 220, marginBottom: 15, elevation: 3, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 5 },
-  image: { flex: 1, justifyContent: 'flex-end' },
-  gradient: { padding: 15, borderRadius: 15, height: '50%', justifyContent: 'flex-end' },
-  cardTitle: { color: '#fff', fontSize: 18, fontWeight: 'bold' },
-  cardSub: { color: '#ddd', fontSize: 14, marginTop: 2 }
+  container: { flex: 1, backgroundColor: '#F5F6F8', paddingTop: Platform.OS === 'android' ? 30 : 0 },
+  
+  header: { paddingVertical: 15, backgroundColor: '#fff', alignItems: 'center' },
+  headerTitle: { fontSize: 16, fontWeight: 'bold', color: '#005AAB' },
+
+  tabContainer: { backgroundColor: '#fff', paddingHorizontal: 15, paddingBottom: 15 },
+  tabBackground: { flexDirection: 'row', backgroundColor: '#F0F5FA', borderRadius: 25, padding: 4 },
+  tabButton: { flex: 1, paddingVertical: 10, borderRadius: 20, alignItems: 'center' },
+  activeTab: { backgroundColor: '#fff', elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 2 },
+  tabText: { fontSize: 14, color: '#666', fontWeight: '500' },
+  activeTabText: { color: '#005AAB', fontWeight: 'bold' },
+
+  listContainer: { padding: 15, paddingBottom: 100 }, // Padding bottom để không bị lẹm vào Tab Bar
+  
+  card: { backgroundColor: '#fff', borderRadius: 12, marginBottom: 20, overflow: 'hidden', elevation: 3, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4 },
+  cardImage: { width: '100%', height: 180, resizeMode: 'cover' },
+  cardContent: { padding: 15 },
+  cardTitle: { fontSize: 14, fontWeight: 'bold', color: '#333', marginBottom: 10, lineHeight: 20, textTransform: 'uppercase' },
+  metaRow: { flexDirection: 'row', alignItems: 'center' },
+  metaText: { fontSize: 13, color: '#666', marginLeft: 6, marginRight: 15 },
+  dot: { width: 4, height: 4, borderRadius: 2, backgroundColor: '#ccc', marginRight: 15 }
 });
