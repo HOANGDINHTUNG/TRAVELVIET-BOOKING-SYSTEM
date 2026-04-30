@@ -124,21 +124,18 @@ export const createStyles = (isDark: boolean) => {
       fontWeight: '700',
       color: colors.text,
       marginBottom: 4,
-      numberOfLines: 2,
     },
     titleMedium: {
       fontSize: 16,
       fontWeight: '700',
       color: colors.text,
       marginBottom: 8,
-      numberOfLines: 2,
     },
     titleLarge: {
       fontSize: 18,
       fontWeight: '700',
       color: colors.text,
       marginBottom: 10,
-      numberOfLines: 2,
     },
 
     // Location
@@ -146,19 +143,16 @@ export const createStyles = (isDark: boolean) => {
       fontSize: 10,
       color: colors.icon,
       marginBottom: 4,
-      numberOfLines: 1,
     },
     locationMedium: {
       fontSize: 12,
       color: colors.icon,
       marginBottom: 8,
-      numberOfLines: 1,
     },
     locationLarge: {
       fontSize: 13,
       color: colors.icon,
       marginBottom: 8,
-      numberOfLines: 1,
     },
 
     // Rating Row
@@ -262,20 +256,17 @@ export const createStyles = (isDark: boolean) => {
       fontSize: 10,
       color: colors.icon,
       marginBottom: 6,
-      numberOfLines: 1,
     },
     descriptionMedium: {
       fontSize: 12,
       color: colors.icon,
       marginBottom: 10,
-      numberOfLines: 2,
       lineHeight: 16,
     },
     descriptionLarge: {
       fontSize: 13,
       color: colors.icon,
       marginBottom: 12,
-      numberOfLines: 3,
       lineHeight: 18,
     },
 

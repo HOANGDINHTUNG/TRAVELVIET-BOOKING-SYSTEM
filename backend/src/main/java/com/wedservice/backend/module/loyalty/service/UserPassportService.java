@@ -65,15 +65,17 @@ public class UserPassportService {
         User user = findCurrentUser();
         TravelPassport passport = ensurePassport(user);
 
-        List<PassportBadge> passportBadges = passportBadgeRepository.findByPassportIdOrderByUnlockedAtDesc(passport.getId());
+        List<PassportBadge> passportBadges = passportBadgeRepository
+                .findByPassportIdOrderByUnlockedAtDesc(passport.getId());
         Map<Long, BadgeDefinition> badgeMap = badgeDefinitionRepository.findAllById(
-                passportBadges.stream().map(PassportBadge::getBadgeId).toList()
-        ).stream().collect(java.util.stream.Collectors.toMap(BadgeDefinition::getId, item -> item));
+                passportBadges.stream().map(PassportBadge::getBadgeId).toList()).stream()
+                .collect(java.util.stream.Collectors.toMap(BadgeDefinition::getId, item -> item));
 
         List<PassportVisitedDestination> visitedDestinations = passportVisitedDestinationRepository
                 .findByPassportIdOrderByLastVisitedAtDesc(passport.getId());
         Map<Long, Destination> destinationMap = new LinkedHashMap<>();
-        destinationRepository.findAllById(visitedDestinations.stream().map(PassportVisitedDestination::getDestinationId).toList())
+        destinationRepository
+                .findAllById(visitedDestinations.stream().map(PassportVisitedDestination::getDestinationId).toList())
                 .forEach(destination -> destinationMap.put(destination.getId(), destination));
 
         return TravelPassportResponse.builder()
@@ -116,7 +118,8 @@ public class UserPassportService {
 
         if (booking != null && resolvedDestination != null) {
             Tour bookingTour = findTour(booking.getTourId());
-            Long bookingDestinationId = bookingTour.getDestination() == null ? null : bookingTour.getDestination().getId();
+            Long bookingDestinationId = bookingTour.getDestination() == null ? null
+                    : bookingTour.getDestination().getId();
             if (!resolvedDestination.getId().equals(bookingDestinationId)) {
                 throw new BadRequestException("destinationUuid does not match booking destination");
             }
@@ -126,14 +129,25 @@ public class UserPassportService {
             throw new BadRequestException("bookingId or destinationUuid is required");
         }
 
-        Long destinationId = resolvedDestination != null
-                ? resolvedDestination.getId()
-                : findTour(booking.getTourId()).getDestination().getId();
+        Long destinationId;
+        if (resolvedDestination != null) {
+            destinationId = resolvedDestination.getId();
+        } else if (booking != null) {
+            Tour tour = findTour(booking.getTourId());
+            if (tour.getDestination() == null) {
+                throw new ResourceNotFoundException("Destination not found for tour with id: " + tour.getId());
+            }
+            destinationId = tour.getDestination().getId();
+        } else {
+            throw new BadRequestException("bookingId or destinationUuid is required");
+        }
 
         if (booking != null) {
-            UserCheckin existing = userCheckinRepository.findFirstByBookingIdAndUserId(booking.getId(), userId).orElse(null);
+            UserCheckin existing = userCheckinRepository.findFirstByBookingIdAndUserId(booking.getId(), userId)
+                    .orElse(null);
             if (existing != null) {
-                return mapCheckin(existing, booking, resolvedDestination != null ? resolvedDestination : findTour(booking.getTourId()).getDestination());
+                return mapCheckin(existing, booking, resolvedDestination != null ? resolvedDestination
+                        : findTour(booking.getTourId()).getDestination());
             }
         }
 
@@ -151,7 +165,8 @@ public class UserPassportService {
         Destination destination = resolvedDestination != null
                 ? resolvedDestination
                 : destinationRepository.findById(destinationId)
-                        .orElseThrow(() -> new ResourceNotFoundException("Destination not found with id: " + destinationId));
+                        .orElseThrow(
+                                () -> new ResourceNotFoundException("Destination not found with id: " + destinationId));
         UserCheckinResponse response = mapCheckin(checkin, booking, destination);
         if (audit) {
             auditTrailRecorder.record(AuditActionType.USER_CHECKIN_CREATE, checkin.getId(), null, response);
@@ -173,8 +188,7 @@ public class UserPassportService {
                         .bookingId(booking.getId())
                         .note(note)
                         .build(),
-                false
-        );
+                false);
     }
 
     TravelPassport ensurePassport(User user) {
@@ -219,7 +233,8 @@ public class UserPassportService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
         if (user.getStatus() != Status.ACTIVE) {
-            throw new UnauthorizedException("Your account is " + user.getStatus().getValue() + ". Please contact support.");
+            throw new UnauthorizedException(
+                    "Your account is " + user.getStatus().getValue() + ". Please contact support.");
         }
         return user;
     }
@@ -248,7 +263,8 @@ public class UserPassportService {
         try {
             UUID destinationUuid = UUID.fromString(request.getDestinationUuid());
             return destinationRepository.findByUuid(destinationUuid)
-                    .orElseThrow(() -> new ResourceNotFoundException("Destination not found with uuid: " + destinationUuid));
+                    .orElseThrow(
+                            () -> new ResourceNotFoundException("Destination not found with uuid: " + destinationUuid));
         } catch (IllegalArgumentException ex) {
             throw new BadRequestException("destinationUuid must be a valid UUID");
         }
@@ -269,18 +285,22 @@ public class UserPassportService {
             return List.of();
         }
         Map<Long, Booking> bookingMap = new LinkedHashMap<>();
-        List<Long> bookingIds = checkins.stream().map(UserCheckin::getBookingId).filter(java.util.Objects::nonNull).distinct().toList();
+        List<Long> bookingIds = checkins.stream().map(UserCheckin::getBookingId).filter(java.util.Objects::nonNull)
+                .distinct().toList();
         if (!bookingIds.isEmpty()) {
             bookingRepository.findAllById(bookingIds).forEach(booking -> bookingMap.put(booking.getId(), booking));
         }
         Map<Long, Destination> destinationMap = new LinkedHashMap<>();
-        List<Long> destinationIds = checkins.stream().map(UserCheckin::getDestinationId).filter(java.util.Objects::nonNull).distinct().toList();
+        List<Long> destinationIds = checkins.stream().map(UserCheckin::getDestinationId)
+                .filter(java.util.Objects::nonNull).distinct().toList();
         if (!destinationIds.isEmpty()) {
-            destinationRepository.findAllById(destinationIds).forEach(destination -> destinationMap.put(destination.getId(), destination));
+            destinationRepository.findAllById(destinationIds)
+                    .forEach(destination -> destinationMap.put(destination.getId(), destination));
         }
         List<UserCheckinResponse> responses = new ArrayList<>();
         for (UserCheckin item : checkins) {
-            responses.add(mapCheckin(item, bookingMap.get(item.getBookingId()), destinationMap.get(item.getDestinationId())));
+            responses.add(
+                    mapCheckin(item, bookingMap.get(item.getBookingId()), destinationMap.get(item.getDestinationId())));
         }
         return responses;
     }
@@ -321,8 +341,7 @@ public class UserPassportService {
 
     private PassportVisitedDestinationResponse toVisitedDestinationResponse(
             PassportVisitedDestination visitedDestination,
-            Destination destination
-    ) {
+            Destination destination) {
         if (destination == null) {
             return null;
         }

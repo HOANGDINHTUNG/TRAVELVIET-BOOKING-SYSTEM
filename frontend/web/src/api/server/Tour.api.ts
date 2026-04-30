@@ -58,6 +58,8 @@ function mapTour(item: BackendTour): Tour {
     category: item.tripMode || "Tour",
     days: formatDuration(item.durationDays, item.durationNights),
     price: toNumber(item.basePrice),
+    rating: toNumber(item.averageRating) || undefined,
+    reviewCount: item.totalReviews,
     image: chooseTourImage(item),
     highlights: parseHighlights(item.highlights),
     description: item.shortDescription || item.description,
