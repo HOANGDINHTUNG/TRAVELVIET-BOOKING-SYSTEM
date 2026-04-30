@@ -4,6 +4,7 @@ import com.wedservice.backend.module.weather.dto.response.WeatherAlertResponse;
 import com.wedservice.backend.module.weather.dto.response.CrowdPredictionResponse;
 import com.wedservice.backend.module.weather.dto.response.RouteEstimateResponse;
 import com.wedservice.backend.module.weather.dto.response.WeatherForecastResponse;
+import com.wedservice.backend.module.weather.dto.response.WeatherNoticeCenterResponse;
 import com.wedservice.backend.module.weather.service.PublicWeatherService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -23,6 +24,10 @@ public class WeatherFacade {
 
     public List<WeatherAlertResponse> getDestinationAlerts(UUID destinationUuid) {
         return publicWeatherService.getDestinationAlerts(destinationUuid);
+    }
+
+    public WeatherNoticeCenterResponse getDestinationWeatherNotice(UUID destinationUuid) {
+        return publicWeatherService.getDestinationWeatherNotice(destinationUuid);
     }
 
     public List<CrowdPredictionResponse> getDestinationCrowdPredictions(UUID destinationUuid) {

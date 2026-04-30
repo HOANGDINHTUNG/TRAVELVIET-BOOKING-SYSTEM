@@ -7,15 +7,23 @@ import com.wedservice.backend.module.destinations.repository.DestinationReposito
 import com.wedservice.backend.module.weather.dto.response.CrowdPredictionResponse;
 import com.wedservice.backend.module.weather.dto.response.RouteEstimateResponse;
 import com.wedservice.backend.module.weather.dto.response.WeatherAlertResponse;
+import com.wedservice.backend.module.weather.dto.response.WeatherDisplayPolicyResponse;
 import com.wedservice.backend.module.weather.dto.response.WeatherForecastResponse;
+import com.wedservice.backend.module.weather.dto.response.WeatherNoticeCenterResponse;
+import com.wedservice.backend.module.weather.dto.response.WeatherPublicNoticeResponse;
 import com.wedservice.backend.module.weather.entity.CrowdPrediction;
 import com.wedservice.backend.module.weather.entity.RouteEstimate;
 import com.wedservice.backend.module.weather.entity.WeatherAlert;
+import com.wedservice.backend.module.weather.entity.WeatherDisplayPolicy;
 import com.wedservice.backend.module.weather.entity.WeatherForecast;
+import com.wedservice.backend.module.weather.entity.WeatherNoticeStatus;
+import com.wedservice.backend.module.weather.entity.WeatherPublicNotice;
 import com.wedservice.backend.module.weather.repository.CrowdPredictionRepository;
 import com.wedservice.backend.module.weather.repository.RouteEstimateRepository;
 import com.wedservice.backend.module.weather.repository.WeatherAlertRepository;
+import com.wedservice.backend.module.weather.repository.WeatherDisplayPolicyRepository;
 import com.wedservice.backend.module.weather.repository.WeatherForecastRepository;
+import com.wedservice.backend.module.weather.repository.WeatherPublicNoticeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,23 +41,31 @@ public class PublicWeatherService {
     private final DestinationRepository destinationRepository;
     private final WeatherForecastRepository weatherForecastRepository;
     private final WeatherAlertRepository weatherAlertRepository;
+    private final WeatherDisplayPolicyRepository weatherDisplayPolicyRepository;
+    private final WeatherPublicNoticeRepository weatherPublicNoticeRepository;
     private final CrowdPredictionRepository crowdPredictionRepository;
     private final RouteEstimateRepository routeEstimateRepository;
 
     @Transactional(readOnly = true)
     public List<WeatherForecastResponse> getDestinationForecasts(UUID destinationUuid) {
         Destination destination = findPublicDestination(destinationUuid);
+        WeatherDisplayPolicy policy = findDisplayPolicyOrDefault(destination.getId());
         return weatherForecastRepository.findByDestinationIdAndForecastDateGreaterThanEqualOrderByForecastDateAsc(
                         destination.getId(),
                         LocalDate.now()
                 ).stream()
-                .map(this::toForecastResponse)
+                .map(forecast -> toForecastResponse(forecast, policy))
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public List<WeatherAlertResponse> getDestinationAlerts(UUID destinationUuid) {
         Destination destination = findPublicDestination(destinationUuid);
+        WeatherDisplayPolicy policy = findDisplayPolicyOrDefault(destination.getId());
+        if (!Boolean.TRUE.equals(policy.getShowAlerts())) {
+            return List.of();
+        }
+
         LocalDateTime now = LocalDateTime.now();
         return weatherAlertRepository
                 .findByDestinationIdAndIsActiveTrueAndValidFromLessThanEqualAndValidToGreaterThanEqualOrderByValidFromDesc(
@@ -57,8 +73,53 @@ public class PublicWeatherService {
                         now,
                         now
                 ).stream()
-                .map(this::toAlertResponse)
+                .map(alert -> toAlertResponse(alert, policy))
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public WeatherNoticeCenterResponse getDestinationWeatherNotice(UUID destinationUuid) {
+        Destination destination = findPublicDestination(destinationUuid);
+        WeatherDisplayPolicy policy = findDisplayPolicyOrDefault(destination.getId());
+        LocalDateTime now = LocalDateTime.now();
+
+        WeatherForecastResponse currentForecast = weatherForecastRepository
+                .findByDestinationIdAndForecastDateGreaterThanEqualOrderByForecastDateAsc(
+                        destination.getId(),
+                        LocalDate.now()
+                ).stream()
+                .findFirst()
+                .map(forecast -> toForecastResponse(forecast, policy))
+                .orElse(null);
+
+        List<WeatherPublicNoticeResponse> notices = weatherPublicNoticeRepository
+                .findByDestinationIdAndStatusAndDisplayFromLessThanEqualAndDisplayToGreaterThanEqualOrderByPinnedDescDisplayFromDesc(
+                        destination.getId(),
+                        WeatherNoticeStatus.PUBLISHED,
+                        now,
+                        now
+                ).stream()
+                .map(this::toPublicNoticeResponse)
+                .toList();
+
+        List<WeatherAlertResponse> activeAlerts = Boolean.TRUE.equals(policy.getShowAlerts())
+                ? weatherAlertRepository
+                .findByDestinationIdAndIsActiveTrueAndValidFromLessThanEqualAndValidToGreaterThanEqualOrderByValidFromDesc(
+                        destination.getId(),
+                        now,
+                        now
+                ).stream()
+                .map(alert -> toAlertResponse(alert, policy))
+                .toList()
+                : List.of();
+
+        return WeatherNoticeCenterResponse.builder()
+                .destinationId(destination.getId())
+                .displayPolicy(toDisplayPolicyResponse(policy))
+                .currentForecast(currentForecast)
+                .notices(notices)
+                .activeAlerts(activeAlerts)
+                .build();
     }
 
     @Transactional(readOnly = true)
@@ -96,25 +157,33 @@ public class PublicWeatherService {
         return destination;
     }
 
-    private WeatherForecastResponse toForecastResponse(WeatherForecast forecast) {
+    private WeatherDisplayPolicy findDisplayPolicyOrDefault(Long destinationId) {
+        return weatherDisplayPolicyRepository.findByDestinationId(destinationId)
+                .orElseGet(() -> WeatherDisplayPolicy.builder()
+                        .destinationId(destinationId)
+                        .build());
+    }
+
+    private WeatherForecastResponse toForecastResponse(WeatherForecast forecast, WeatherDisplayPolicy policy) {
         return WeatherForecastResponse.builder()
                 .id(forecast.getId())
                 .destinationId(forecast.getDestinationId())
                 .forecastDate(forecast.getForecastDate())
-                .weatherCode(forecast.getWeatherCode())
-                .summary(forecast.getSummary())
-                .tempMin(forecast.getTempMin())
-                .tempMax(forecast.getTempMax())
-                .humidityPercent(forecast.getHumidityPercent())
-                .windSpeed(forecast.getWindSpeed())
-                .rainProbability(forecast.getRainProbability())
+                .weatherCode(Boolean.TRUE.equals(policy.getShowForecastSummary()) ? forecast.getWeatherCode() : null)
+                .summary(Boolean.TRUE.equals(policy.getShowForecastSummary()) ? forecast.getSummary() : null)
+                .tempMin(Boolean.TRUE.equals(policy.getShowTemperature()) ? forecast.getTempMin() : null)
+                .tempMax(Boolean.TRUE.equals(policy.getShowTemperature()) ? forecast.getTempMax() : null)
+                .humidityPercent(Boolean.TRUE.equals(policy.getShowHumidity()) ? forecast.getHumidityPercent() : null)
+                .windSpeed(Boolean.TRUE.equals(policy.getShowWindSpeed()) ? forecast.getWindSpeed() : null)
+                .rainProbability(Boolean.TRUE.equals(policy.getShowRainProbability()) ? forecast.getRainProbability() : null)
                 .sourceName(forecast.getSourceName())
-                .rawPayload(forecast.getRawPayload())
+                .rawPayload(null)
                 .createdAt(forecast.getCreatedAt())
                 .build();
     }
 
-    private WeatherAlertResponse toAlertResponse(WeatherAlert alert) {
+    private WeatherAlertResponse toAlertResponse(WeatherAlert alert, WeatherDisplayPolicy policy) {
+        boolean showDetail = Boolean.TRUE.equals(policy.getShowAlertDetail());
         return WeatherAlertResponse.builder()
                 .id(alert.getId())
                 .destinationId(alert.getDestinationId())
@@ -122,12 +191,48 @@ public class PublicWeatherService {
                 .severity(alert.getSeverity())
                 .alertType(alert.getAlertType())
                 .title(alert.getTitle())
-                .message(alert.getMessage())
-                .actionAdvice(alert.getActionAdvice())
+                .message(showDetail ? alert.getMessage() : null)
+                .actionAdvice(showDetail ? alert.getActionAdvice() : null)
                 .validFrom(alert.getValidFrom())
                 .validTo(alert.getValidTo())
                 .isActive(alert.getIsActive())
                 .createdAt(alert.getCreatedAt())
+                .build();
+    }
+
+    private WeatherDisplayPolicyResponse toDisplayPolicyResponse(WeatherDisplayPolicy policy) {
+        return WeatherDisplayPolicyResponse.builder()
+                .id(policy.getId())
+                .destinationId(policy.getDestinationId())
+                .showForecastSummary(policy.getShowForecastSummary())
+                .showTemperature(policy.getShowTemperature())
+                .showRainProbability(policy.getShowRainProbability())
+                .showWindSpeed(policy.getShowWindSpeed())
+                .showHumidity(policy.getShowHumidity())
+                .showAqi(policy.getShowAqi())
+                .showHourlyForecast(policy.getShowHourlyForecast())
+                .showAlerts(policy.getShowAlerts())
+                .showAlertDetail(policy.getShowAlertDetail())
+                .updatedAt(policy.getUpdatedAt())
+                .build();
+    }
+
+    private WeatherPublicNoticeResponse toPublicNoticeResponse(WeatherPublicNotice notice) {
+        return WeatherPublicNoticeResponse.builder()
+                .id(notice.getId())
+                .destinationId(notice.getDestinationId())
+                .sourceAlertId(notice.getSourceAlertId())
+                .severity(notice.getSeverity())
+                .title(notice.getTitle())
+                .summary(notice.getSummary())
+                .detail(notice.getDetail())
+                .actionAdvice(notice.getActionAdvice())
+                .displayFrom(notice.getDisplayFrom())
+                .displayTo(notice.getDisplayTo())
+                .status(notice.getStatus())
+                .pinned(notice.getPinned())
+                .createdAt(notice.getCreatedAt())
+                .updatedAt(notice.getUpdatedAt())
                 .build();
     }
 

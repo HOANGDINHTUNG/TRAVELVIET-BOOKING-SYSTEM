@@ -3,13 +3,20 @@ package com.wedservice.backend.module.weather.facade;
 import com.wedservice.backend.module.weather.dto.request.AdminCreateRouteEstimateRequest;
 import com.wedservice.backend.module.weather.dto.request.AdminUpsertCrowdPredictionRequest;
 import com.wedservice.backend.module.weather.dto.request.AdminUpsertWeatherForecastRequest;
+import com.wedservice.backend.module.weather.dto.request.AdminWeatherDisplayPolicyRequest;
 import com.wedservice.backend.module.weather.dto.request.AdminWeatherAlertRequest;
+import com.wedservice.backend.module.weather.dto.request.AdminWeatherPublicNoticeRequest;
 import com.wedservice.backend.module.weather.dto.request.UpdateWeatherAlertStatusRequest;
+import com.wedservice.backend.module.weather.dto.request.UpdateWeatherPublicNoticeStatusRequest;
 import com.wedservice.backend.module.weather.dto.response.CrowdPredictionResponse;
 import com.wedservice.backend.module.weather.dto.response.RouteEstimateResponse;
 import com.wedservice.backend.module.weather.dto.response.WeatherAlertResponse;
+import com.wedservice.backend.module.weather.dto.response.WeatherApiSyncResponse;
+import com.wedservice.backend.module.weather.dto.response.WeatherDisplayPolicyResponse;
 import com.wedservice.backend.module.weather.dto.response.WeatherForecastResponse;
+import com.wedservice.backend.module.weather.dto.response.WeatherPublicNoticeResponse;
 import com.wedservice.backend.module.weather.service.AdminWeatherService;
+import com.wedservice.backend.module.weather.service.WeatherApiSyncService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -22,6 +29,22 @@ import java.util.UUID;
 public class AdminWeatherFacade {
 
     private final AdminWeatherService adminWeatherService;
+    private final WeatherApiSyncService weatherApiSyncService;
+
+    public WeatherDisplayPolicyResponse getDisplayPolicy(UUID destinationUuid) {
+        return adminWeatherService.getDisplayPolicy(destinationUuid);
+    }
+
+    public WeatherApiSyncResponse syncWeatherApi(UUID destinationUuid) {
+        return weatherApiSyncService.syncDestination(destinationUuid);
+    }
+
+    public WeatherDisplayPolicyResponse updateDisplayPolicy(
+            UUID destinationUuid,
+            AdminWeatherDisplayPolicyRequest request
+    ) {
+        return adminWeatherService.updateDisplayPolicy(destinationUuid, request);
+    }
 
     public List<WeatherForecastResponse> getForecasts(UUID destinationUuid) {
         return adminWeatherService.getForecasts(destinationUuid);
@@ -53,6 +76,33 @@ public class AdminWeatherFacade {
             UpdateWeatherAlertStatusRequest request
     ) {
         return adminWeatherService.updateAlertStatus(destinationUuid, alertId, request);
+    }
+
+    public List<WeatherPublicNoticeResponse> getPublicNotices(UUID destinationUuid) {
+        return adminWeatherService.getPublicNotices(destinationUuid);
+    }
+
+    public WeatherPublicNoticeResponse createPublicNotice(
+            UUID destinationUuid,
+            AdminWeatherPublicNoticeRequest request
+    ) {
+        return adminWeatherService.createPublicNotice(destinationUuid, request);
+    }
+
+    public WeatherPublicNoticeResponse updatePublicNotice(
+            UUID destinationUuid,
+            Long noticeId,
+            AdminWeatherPublicNoticeRequest request
+    ) {
+        return adminWeatherService.updatePublicNotice(destinationUuid, noticeId, request);
+    }
+
+    public WeatherPublicNoticeResponse updatePublicNoticeStatus(
+            UUID destinationUuid,
+            Long noticeId,
+            UpdateWeatherPublicNoticeStatusRequest request
+    ) {
+        return adminWeatherService.updatePublicNoticeStatus(destinationUuid, noticeId, request);
     }
 
     public List<CrowdPredictionResponse> getCrowdPredictions(UUID destinationUuid) {

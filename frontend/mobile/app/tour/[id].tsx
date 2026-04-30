@@ -9,6 +9,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { WeatherNoticeCard } from '../../components/WeatherNoticeCard';
 import { SERVICE_ITEMS, TOURS_DATA } from '../../constants/Tours';
 import { styles } from './tour-detail.styles';
 
@@ -94,6 +95,13 @@ export default function TourDetailScreen() {
               <Text style={styles.priceValue}>{tour.price}</Text>
             </View>
           </View>
+
+          <WeatherNoticeCard
+            destinationUuid={tour.destinationUuid}
+            destinationId={tour.destinationId}
+            destinationName={tour.destinationName}
+            variant="detail"
+          />
 
           <View style={styles.factGrid}>
             <View style={styles.factItem}>

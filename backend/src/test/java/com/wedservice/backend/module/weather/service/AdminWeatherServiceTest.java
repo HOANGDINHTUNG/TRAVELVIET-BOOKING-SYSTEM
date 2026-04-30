@@ -13,15 +13,22 @@ import com.wedservice.backend.module.weather.dto.request.AdminCreateRouteEstimat
 import com.wedservice.backend.module.weather.dto.request.AdminUpsertCrowdPredictionRequest;
 import com.wedservice.backend.module.weather.dto.request.AdminUpsertWeatherForecastRequest;
 import com.wedservice.backend.module.weather.dto.request.AdminWeatherAlertRequest;
+import com.wedservice.backend.module.weather.dto.request.AdminWeatherDisplayPolicyRequest;
+import com.wedservice.backend.module.weather.dto.request.AdminWeatherPublicNoticeRequest;
 import com.wedservice.backend.module.weather.dto.request.UpdateWeatherAlertStatusRequest;
 import com.wedservice.backend.module.weather.entity.CrowdPrediction;
 import com.wedservice.backend.module.weather.entity.WeatherAlert;
+import com.wedservice.backend.module.weather.entity.WeatherDisplayPolicy;
 import com.wedservice.backend.module.weather.entity.WeatherForecast;
+import com.wedservice.backend.module.weather.entity.WeatherNoticeStatus;
+import com.wedservice.backend.module.weather.entity.WeatherPublicNotice;
 import com.wedservice.backend.module.weather.entity.WeatherSeverity;
 import com.wedservice.backend.module.weather.repository.CrowdPredictionRepository;
 import com.wedservice.backend.module.weather.repository.RouteEstimateRepository;
 import com.wedservice.backend.module.weather.repository.WeatherAlertRepository;
+import com.wedservice.backend.module.weather.repository.WeatherDisplayPolicyRepository;
 import com.wedservice.backend.module.weather.repository.WeatherForecastRepository;
+import com.wedservice.backend.module.weather.repository.WeatherPublicNoticeRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -52,6 +59,10 @@ class AdminWeatherServiceTest {
     @Mock
     private WeatherAlertRepository weatherAlertRepository;
     @Mock
+    private WeatherDisplayPolicyRepository weatherDisplayPolicyRepository;
+    @Mock
+    private WeatherPublicNoticeRepository weatherPublicNoticeRepository;
+    @Mock
     private CrowdPredictionRepository crowdPredictionRepository;
     @Mock
     private RouteEstimateRepository routeEstimateRepository;
@@ -70,12 +81,45 @@ class AdminWeatherServiceTest {
                 destinationRepository,
                 weatherForecastRepository,
                 weatherAlertRepository,
+                weatherDisplayPolicyRepository,
+                weatherPublicNoticeRepository,
                 crowdPredictionRepository,
                 routeEstimateRepository,
                 tourScheduleRepository,
                 tourRepository,
                 auditTrailRecorder
         );
+    }
+
+    @Test
+    void updateDisplayPolicy_createsPolicyAndRecordsAudit() {
+        UUID destinationUuid = UUID.randomUUID();
+        Destination destination = Destination.builder().id(9L).uuid(destinationUuid).build();
+
+        when(destinationRepository.findByUuid(destinationUuid)).thenReturn(Optional.of(destination));
+        when(weatherDisplayPolicyRepository.findByDestinationId(destination.getId())).thenReturn(Optional.empty());
+        when(weatherDisplayPolicyRepository.save(any(WeatherDisplayPolicy.class))).thenAnswer(invocation -> {
+            WeatherDisplayPolicy policy = invocation.getArgument(0);
+            policy.setId(61L);
+            return policy;
+        });
+
+        var response = adminWeatherService.updateDisplayPolicy(destinationUuid, AdminWeatherDisplayPolicyRequest.builder()
+                .showForecastSummary(true)
+                .showTemperature(true)
+                .showRainProbability(true)
+                .showWindSpeed(true)
+                .showHumidity(true)
+                .showAqi(false)
+                .showHourlyForecast(false)
+                .showAlerts(true)
+                .showAlertDetail(false)
+                .build());
+
+        assertEquals(61L, response.getId());
+        assertEquals(true, response.getShowHumidity());
+        assertEquals(false, response.getShowAlertDetail());
+        verify(auditTrailRecorder).record(any(), eq(61L), any(), any());
     }
 
     @Test
@@ -173,6 +217,48 @@ class AdminWeatherServiceTest {
         verify(weatherAlertRepository).save(captor.capture());
         assertEquals(false, captor.getValue().getIsActive());
         verify(auditTrailRecorder).record(any(), eq(50L), any(), any());
+    }
+
+    @Test
+    void createPublicNotice_savesNoticeAndRecordsAudit() {
+        UUID destinationUuid = UUID.randomUUID();
+        Destination destination = Destination.builder().id(9L).uuid(destinationUuid).build();
+        WeatherAlert sourceAlert = WeatherAlert.builder()
+                .id(50L)
+                .destinationId(destination.getId())
+                .severity(WeatherSeverity.WARNING)
+                .alertType("rain")
+                .title("Mua lon")
+                .message("Canh bao")
+                .validFrom(LocalDateTime.now().minusHours(1))
+                .validTo(LocalDateTime.now().plusHours(3))
+                .isActive(true)
+                .build();
+
+        when(destinationRepository.findByUuid(destinationUuid)).thenReturn(Optional.of(destination));
+        when(weatherAlertRepository.findByIdAndDestinationId(50L, destination.getId())).thenReturn(Optional.of(sourceAlert));
+        when(weatherPublicNoticeRepository.save(any(WeatherPublicNotice.class))).thenAnswer(invocation -> {
+            WeatherPublicNotice notice = invocation.getArgument(0);
+            notice.setId(72L);
+            return notice;
+        });
+
+        var response = adminWeatherService.createPublicNotice(destinationUuid, AdminWeatherPublicNoticeRequest.builder()
+                .sourceAlertId(50L)
+                .severity(WeatherSeverity.WARNING)
+                .title("Mua lon")
+                .summary("Nen mang ao mua")
+                .detail("Mua lon co the anh huong lich trinh chieu")
+                .displayFrom(LocalDateTime.now().minusHours(1))
+                .displayTo(LocalDateTime.now().plusHours(3))
+                .status(WeatherNoticeStatus.PUBLISHED)
+                .pinned(true)
+                .build());
+
+        assertEquals(72L, response.getId());
+        assertEquals(WeatherNoticeStatus.PUBLISHED, response.getStatus());
+        assertEquals(true, response.getPinned());
+        verify(auditTrailRecorder).record(any(), eq(72L), any(), any());
     }
 
     @Test

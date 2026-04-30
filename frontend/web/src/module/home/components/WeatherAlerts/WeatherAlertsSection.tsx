@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   AlertTriangle,
@@ -7,6 +7,7 @@ import {
   Droplets,
   MapPin,
   Navigation,
+  ShieldAlert,
   ThermometerSun,
   Umbrella,
   Waves,
@@ -17,6 +18,7 @@ import type {
   CrowdPrediction,
   WeatherAlert,
   WeatherForecast,
+  WeatherNoticeCenter,
   WeatherSeverity,
 } from '../../database/interface/publicTravel'
 import './WeatherAlertsSection.css'
@@ -25,6 +27,7 @@ type WeatherAlertsSectionProps = {
   destinationName?: string
   forecasts?: WeatherForecast[]
   alerts?: WeatherAlert[]
+  noticeCenter?: WeatherNoticeCenter | null
   crowdPredictions?: CrowdPrediction[]
   isLoading?: boolean
   errorMessage?: string | null
@@ -40,12 +43,17 @@ const copy: Record<
     copy: string
     live: string
     detail: string
+    closeDetail: string
+    detailTitle: string
     loading: string
     emptyTitle: string
     emptyDescription: string
     errorTitle: string
     routeFallback: string
     updatedFallback: string
+    curatedSource: string
+    hiddenByPolicy: string
+    noDetail: string
     noAlerts: string
     noTimeline: string
     metrics: Array<{ label: string; note: string }>
@@ -58,6 +66,8 @@ const copy: Record<
       'Du lieu du bao, canh bao va muc do dong duoc lay truc tiep tu backend TravelViet.',
     live: 'Du lieu backend',
     detail: 'Xem chi tiet',
+    closeDetail: 'Thu gon',
+    detailTitle: 'Chi tiet thong bao',
     loading: 'Dang tai du lieu thoi tiet',
     emptyTitle: 'Chua co canh bao thoi tiet',
     emptyDescription:
@@ -65,12 +75,16 @@ const copy: Record<
     errorTitle: 'Khong the tai du lieu thoi tiet',
     routeFallback: 'Chon diem den de theo doi thoi tiet',
     updatedFallback: 'Cho du lieu tu backend',
+    curatedSource: 'Da loc theo cau hinh hien thi',
+    hiddenByPolicy: 'An boi quan tri',
+    noDetail: 'Chua co thong tin chi tiet.',
     noAlerts: 'Chua co canh bao dang hoat dong.',
     noTimeline: 'Chua co du bao sap toi.',
     metrics: [
       { label: 'Nhiet do', note: 'Chua co du bao' },
       { label: 'Gio', note: 'Chua co du bao' },
       { label: 'Mua', note: 'Chua co du bao' },
+      { label: 'Do am', note: 'Chua co du lieu' },
     ],
   },
   en: {
@@ -80,6 +94,8 @@ const copy: Record<
       'Forecasts, alerts, and crowd predictions are loaded from the TravelViet backend.',
     live: 'Backend data',
     detail: 'View details',
+    closeDetail: 'Hide details',
+    detailTitle: 'Notice details',
     loading: 'Loading weather data',
     emptyTitle: 'No weather alert available',
     emptyDescription:
@@ -87,12 +103,16 @@ const copy: Record<
     errorTitle: 'Could not load weather data',
     routeFallback: 'Select a destination to track weather',
     updatedFallback: 'Waiting for backend data',
+    curatedSource: 'Filtered by display policy',
+    hiddenByPolicy: 'Hidden by admin policy',
+    noDetail: 'No detailed information yet.',
     noAlerts: 'No active alerts.',
     noTimeline: 'No upcoming forecasts.',
     metrics: [
       { label: 'Temperature', note: 'No forecast yet' },
       { label: 'Wind', note: 'No forecast yet' },
       { label: 'Rain chance', note: 'No forecast yet' },
+      { label: 'Humidity', note: 'No data yet' },
     ],
   },
 }
@@ -100,6 +120,7 @@ const copy: Record<
 const metricIcons = [
   <ThermometerSun size={18} strokeWidth={1.9} aria-hidden="true" />,
   <Wind size={18} strokeWidth={1.9} aria-hidden="true" />,
+  <Umbrella size={18} strokeWidth={1.9} aria-hidden="true" />,
   <Droplets size={18} strokeWidth={1.9} aria-hidden="true" />,
 ]
 
@@ -152,8 +173,13 @@ function rounded(value: number | undefined, suffix = '') {
   return `${Math.round(value)}${suffix}`
 }
 
+function isPolicyVisible(value: boolean | undefined) {
+  return value !== false
+}
+
 export function WeatherAlertsSection({
   destinationName,
+  noticeCenter,
   forecasts = [],
   alerts = [],
   crowdPredictions = [],
@@ -162,52 +188,142 @@ export function WeatherAlertsSection({
 }: WeatherAlertsSectionProps) {
   const { i18n } = useTranslation()
   const sectionRef = useRef<HTMLElement | null>(null)
+  const [isDetailOpen, setIsDetailOpen] = useState(false)
   const locale: Locale = i18n.language === 'en' ? 'en' : 'vi'
   const content = copy[locale]
-  const primaryForecast = forecasts[0]
-  const primaryAlert = alerts[0]
+  const displayPolicy = noticeCenter?.displayPolicy
+  const curatedNotices = noticeCenter?.notices ?? []
+  const activeAlerts = noticeCenter?.activeAlerts ?? alerts
+  const primaryForecast = noticeCenter?.currentForecast ?? forecasts[0]
+  const primaryNotice = curatedNotices[0]
+  const primaryAlert = activeAlerts[0]
   const primaryCrowd = crowdPredictions[0]
+
+  const getMetricNote = (
+    visible: boolean,
+    fallback: string | undefined,
+    empty: string,
+  ) => (visible ? fallback || empty : content.hiddenByPolicy)
 
   const displayMetrics = [
     {
       label: content.metrics[0].label,
-      value:
-        primaryForecast?.tempMin !== undefined &&
-        primaryForecast?.tempMax !== undefined
+      value: isPolicyVisible(displayPolicy?.showTemperature)
+        ? primaryForecast?.tempMin !== undefined &&
+          primaryForecast?.tempMax !== undefined
           ? `${Math.round(primaryForecast.tempMin)}-${Math.round(
               primaryForecast.tempMax,
             )}C`
-          : rounded(primaryForecast?.tempMax, 'C'),
-      note: primaryForecast?.summary || content.metrics[0].note,
+          : rounded(primaryForecast?.tempMax, 'C')
+        : '--',
+      note: getMetricNote(
+        isPolicyVisible(displayPolicy?.showTemperature),
+        primaryForecast?.summary,
+        content.metrics[0].note,
+      ),
     },
     {
       label: content.metrics[1].label,
-      value: rounded(primaryForecast?.windSpeed, ' km/h'),
-      note: primaryForecast?.sourceName || content.metrics[1].note,
+      value: isPolicyVisible(displayPolicy?.showWindSpeed)
+        ? rounded(primaryForecast?.windSpeed, ' km/h')
+        : '--',
+      note: getMetricNote(
+        isPolicyVisible(displayPolicy?.showWindSpeed),
+        primaryForecast?.sourceName,
+        content.metrics[1].note,
+      ),
     },
     {
       label: content.metrics[2].label,
-      value: rounded(primaryForecast?.rainProbability, '%'),
-      note: primaryCrowd?.crowdLevel
-        ? `${locale === 'vi' ? 'Muc dong' : 'Crowd'}: ${primaryCrowd.crowdLevel}`
-        : content.metrics[2].note,
+      value: isPolicyVisible(displayPolicy?.showRainProbability)
+        ? rounded(primaryForecast?.rainProbability, '%')
+        : '--',
+      note: getMetricNote(
+        isPolicyVisible(displayPolicy?.showRainProbability),
+        primaryCrowd?.crowdLevel
+          ? `${locale === 'vi' ? 'Muc dong' : 'Crowd'}: ${primaryCrowd.crowdLevel}`
+          : undefined,
+        content.metrics[2].note,
+      ),
+    },
+    {
+      label: content.metrics[3].label,
+      value: isPolicyVisible(displayPolicy?.showHumidity)
+        ? rounded(primaryForecast?.humidityPercent, '%')
+        : '--',
+      note: getMetricNote(
+        isPolicyVisible(displayPolicy?.showHumidity),
+        primaryForecast?.sourceName,
+        content.metrics[3].note,
+      ),
     },
   ]
 
-  const displayAlerts = alerts.slice(0, 3).map((alert) => {
-    const severity = alert.severity ?? 'info'
+  const displayAlerts = [
+    ...curatedNotices.map((notice) => {
+      const severity = notice.severity ?? 'info'
 
-    return {
-      location: destinationName || content.routeFallback,
-      status: severityLabel[severity][locale],
-      level: severityLevel[severity],
+      return {
+        key: `notice-${notice.id}`,
+        location: destinationName || content.routeFallback,
+        status: notice.pinned
+          ? locale === 'vi'
+            ? 'Uu tien'
+            : 'Pinned'
+          : severityLabel[severity][locale],
+        level: severityLevel[severity],
+        time: `${formatDateTime(notice.displayFrom, locale)} - ${formatDateTime(
+          notice.displayTo,
+          locale,
+        )}`,
+        detail: notice.summary || notice.actionAdvice || notice.title,
+      }
+    }),
+    ...activeAlerts.map((alert) => {
+      const severity = alert.severity ?? 'info'
+
+      return {
+        key: `alert-${alert.id}`,
+        location: destinationName || content.routeFallback,
+        status: severityLabel[severity][locale],
+        level: severityLevel[severity],
+        time: `${formatDateTime(alert.validFrom, locale)} - ${formatDateTime(
+          alert.validTo,
+          locale,
+        )}`,
+        detail: alert.actionAdvice || alert.message || alert.title || '',
+      }
+    }),
+  ].slice(0, 3)
+
+  const detailItems = [
+    ...curatedNotices.map((notice) => ({
+      key: `notice-detail-${notice.id}`,
+      title: notice.title,
+      status: notice.severity
+        ? severityLabel[notice.severity][locale]
+        : content.curatedSource,
+      body: notice.detail || notice.summary || content.noDetail,
+      advice: notice.actionAdvice,
+      time: `${formatDateTime(notice.displayFrom, locale)} - ${formatDateTime(
+        notice.displayTo,
+        locale,
+      )}`,
+    })),
+    ...activeAlerts.map((alert) => ({
+      key: `alert-detail-${alert.id}`,
+      title: alert.title || alert.alertType || content.emptyTitle,
+      status: alert.severity
+        ? severityLabel[alert.severity][locale]
+        : content.curatedSource,
+      body: alert.message || content.noDetail,
+      advice: alert.actionAdvice,
       time: `${formatDateTime(alert.validFrom, locale)} - ${formatDateTime(
         alert.validTo,
         locale,
       )}`,
-      detail: alert.actionAdvice || alert.message || alert.title || '',
-    }
-  })
+    })),
+  ].slice(0, 5)
 
   const displayTimeline = forecasts.slice(0, 4).map((forecast) => ({
     time: formatForecastDate(forecast.forecastDate, locale),
@@ -230,9 +346,13 @@ export function WeatherAlertsSection({
     ? content.loading
     : errorMessage
       ? content.errorTitle
-      : primaryAlert?.title || primaryForecast?.summary || content.emptyTitle
+      : primaryNotice?.title ||
+        primaryAlert?.title ||
+        primaryForecast?.summary ||
+        content.emptyTitle
   const mainDescription =
     errorMessage ||
+    primaryNotice?.summary ||
     primaryAlert?.message ||
     primaryAlert?.actionAdvice ||
     primaryForecast?.summary ||
@@ -240,8 +360,9 @@ export function WeatherAlertsSection({
   const routeStatus = destinationName
     ? `${locale === 'vi' ? 'Dang theo doi' : 'Tracking'}: ${destinationName}`
     : content.routeFallback
+  const hasBackendWeather = Boolean(primaryForecast?.sourceName || primaryAlert)
   const updated =
-    primaryForecast?.sourceName || primaryAlert
+    noticeCenter ? content.curatedSource : hasBackendWeather
       ? locale === 'vi'
         ? 'Du lieu thoi tiet tu backend'
         : 'Weather data from backend'
@@ -317,10 +438,48 @@ export function WeatherAlertsSection({
               ))}
             </div>
 
-            <button className="weather-detail-button" type="button">
-              {content.detail}
+            <button
+              aria-controls="weather-detail-panel"
+              aria-expanded={isDetailOpen}
+              className="weather-detail-button"
+              type="button"
+              onClick={() => setIsDetailOpen((current) => !current)}
+            >
+              {isDetailOpen ? content.closeDetail : content.detail}
               <AlertTriangle size={16} strokeWidth={2} aria-hidden="true" />
             </button>
+
+            {isDetailOpen && (
+              <div className="weather-detail-panel" id="weather-detail-panel">
+                <div className="weather-detail-panel-head">
+                  <ShieldAlert size={18} strokeWidth={2} aria-hidden="true" />
+                  <strong>{content.detailTitle}</strong>
+                  <span>{updated}</span>
+                </div>
+                {detailItems.length > 0 ? (
+                  detailItems.map((item) => (
+                    <article key={item.key}>
+                      <div>
+                        <strong>{item.title}</strong>
+                        <span>{item.status}</span>
+                      </div>
+                      <time>{item.time}</time>
+                      <p>{item.body}</p>
+                      {item.advice && <small>{item.advice}</small>}
+                    </article>
+                  ))
+                ) : (
+                  <article>
+                    <div>
+                      <strong>{content.emptyTitle}</strong>
+                      <span>{content.curatedSource}</span>
+                    </div>
+                    <time>{updated}</time>
+                    <p>{content.noDetail}</p>
+                  </article>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="weather-side-panel">
@@ -329,7 +488,7 @@ export function WeatherAlertsSection({
                 displayAlerts.map((alert) => (
                   <article
                     className={`weather-alert-item is-${alert.level}`}
-                    key={`${alert.location}-${alert.time}`}
+                    key={alert.key}
                   >
                     <div>
                       <MapPin size={16} strokeWidth={2} aria-hidden="true" />

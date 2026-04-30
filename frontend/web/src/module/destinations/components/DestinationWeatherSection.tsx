@@ -1,4 +1,4 @@
-import { CloudSun, Flag, MountainSnow } from 'lucide-react'
+import { CloudSun, Flag, MountainSnow, ShieldAlert } from 'lucide-react'
 import type { DestinationDetail } from '../database/interface/destination'
 import type { DestinationDetailCopy } from '../utils/destinationDetailCopy'
 import { getCrowdLabel } from '../utils/destinationDetailFormatters'
@@ -16,8 +16,30 @@ export function DestinationWeatherSection({
   detail,
   weather,
 }: DestinationWeatherSectionProps) {
-  const primaryForecast = weather.forecasts[0]
+  const noticeCenter = weather.noticeCenter
+  const notices = noticeCenter?.notices ?? []
+  const activeAlerts = noticeCenter?.activeAlerts ?? weather.alerts
+  const primaryForecast = noticeCenter?.currentForecast ?? weather.forecasts[0]
+  const primaryNotice = notices[0]
   const primaryCrowd = weather.crowdPredictions[0]
+  const riskItems = [
+    ...notices.map((notice) => ({
+      key: `notice-${notice.id}`,
+      title: notice.title,
+      badge: notice.pinned ? 'pinned' : notice.severity || 'info',
+      body: notice.detail || notice.summary || notice.actionAdvice,
+    })),
+    ...activeAlerts.map((alert) => ({
+      key: `alert-${alert.id}`,
+      title: alert.title || alert.alertType || copy.activeAlerts,
+      badge: alert.severity || 'info',
+      body: alert.message || alert.actionAdvice,
+    })),
+  ].slice(0, 4)
+  const alertCount = notices.length + activeAlerts.length
+  const temperatureRange = primaryForecast
+    ? `${primaryForecast.tempMin ?? '--'}C - ${primaryForecast.tempMax ?? '--'}C`
+    : copy.waitingBackend
 
   return (
     <section className="destination-detail-band">
@@ -36,14 +58,24 @@ export function DestinationWeatherSection({
                 primaryForecast?.weatherCode ||
                 copy.noForecast}
             </strong>
+            <small>{temperatureRange}</small>
+          </article>
+
+          <article className="is-curated">
+            <ShieldAlert aria-hidden="true" />
+            <span>{copy.activeAlerts}</span>
+            <strong>
+              {primaryNotice?.title ||
+                primaryNotice?.summary ||
+                (alertCount > 0 ? alertCount.toString() : copy.noForecast)}
+            </strong>
             <small>
-              {primaryForecast
-                ? `${primaryForecast.tempMin ?? '--'}°C - ${
-                    primaryForecast.tempMax ?? '--'
-                  }°C`
-                : copy.waitingBackend}
+              {primaryNotice?.summary ||
+                weather.error ||
+                (weather.loading ? copy.loadingWeather : copy.weatherApi)}
             </small>
           </article>
+
           <article>
             <MountainSnow aria-hidden="true" />
             <span>{copy.crowdPrediction}</span>
@@ -57,10 +89,11 @@ export function DestinationWeatherSection({
                 : copy.useDefaultCrowd}
             </small>
           </article>
+
           <article>
             <Flag aria-hidden="true" />
             <span>{copy.activeAlerts}</span>
-            <strong>{weather.alerts.length.toString()}</strong>
+            <strong>{alertCount.toString()}</strong>
             <small>
               {weather.error ||
                 (weather.loading ? copy.loadingWeather : copy.weatherApi)}
@@ -68,13 +101,13 @@ export function DestinationWeatherSection({
           </article>
         </div>
 
-        {weather.alerts.length > 0 && (
+        {riskItems.length > 0 && (
           <div className="destination-detail-alert-list">
-            {weather.alerts.slice(0, 3).map((alert) => (
-              <article key={alert.id}>
-                <strong>{alert.title || alert.alertType || copy.activeAlerts}</strong>
-                <span>{alert.severity || 'info'}</span>
-                <p>{alert.message || alert.actionAdvice}</p>
+            {riskItems.map((item) => (
+              <article key={item.key}>
+                <strong>{item.title}</strong>
+                <span>{item.badge}</span>
+                <p>{item.body || copy.weatherApi}</p>
               </article>
             ))}
           </div>

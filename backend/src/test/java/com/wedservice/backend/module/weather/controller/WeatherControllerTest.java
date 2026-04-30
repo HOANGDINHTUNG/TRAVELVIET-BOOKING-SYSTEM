@@ -3,7 +3,11 @@ package com.wedservice.backend.module.weather.controller;
 import com.wedservice.backend.common.exception.GlobalExceptionHandler;
 import com.wedservice.backend.module.weather.dto.response.CrowdPredictionResponse;
 import com.wedservice.backend.module.weather.dto.response.WeatherAlertResponse;
+import com.wedservice.backend.module.weather.dto.response.WeatherDisplayPolicyResponse;
 import com.wedservice.backend.module.weather.dto.response.WeatherForecastResponse;
+import com.wedservice.backend.module.weather.dto.response.WeatherNoticeCenterResponse;
+import com.wedservice.backend.module.weather.dto.response.WeatherPublicNoticeResponse;
+import com.wedservice.backend.module.weather.entity.WeatherNoticeStatus;
 import com.wedservice.backend.module.weather.entity.WeatherSeverity;
 import com.wedservice.backend.module.weather.facade.WeatherFacade;
 import org.junit.jupiter.api.BeforeEach;
@@ -79,6 +83,42 @@ class WeatherControllerTest {
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("Weather alerts fetched successfully"))
                 .andExpect(jsonPath("$.data[0].severity").value("warning"));
+    }
+
+    @Test
+    void getDestinationWeatherNotice_returnsWrappedApiResponse() throws Exception {
+        UUID destinationUuid = UUID.randomUUID();
+        when(weatherFacade.getDestinationWeatherNotice(destinationUuid)).thenReturn(
+                WeatherNoticeCenterResponse.builder()
+                        .destinationId(12L)
+                        .displayPolicy(WeatherDisplayPolicyResponse.builder()
+                                .destinationId(12L)
+                                .showTemperature(true)
+                                .showAlertDetail(false)
+                                .build())
+                        .currentForecast(WeatherForecastResponse.builder()
+                                .id(1L)
+                                .summary("Mua nhe")
+                                .build())
+                        .notices(List.of(
+                                WeatherPublicNoticeResponse.builder()
+                                        .id(8L)
+                                        .severity(WeatherSeverity.WARNING)
+                                        .title("Mua lon")
+                                        .summary("Nen mang ao mua")
+                                        .status(WeatherNoticeStatus.PUBLISHED)
+                                        .build()
+                        ))
+                        .activeAlerts(List.of())
+                        .build()
+        );
+
+        mockMvc.perform(get("/destinations/{destinationUuid}/weather/notice", destinationUuid))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.message").value("Weather notice fetched successfully"))
+                .andExpect(jsonPath("$.data.notices[0].status").value("published"))
+                .andExpect(jsonPath("$.data.displayPolicy.showAlertDetail").value(false));
     }
 
     @Test

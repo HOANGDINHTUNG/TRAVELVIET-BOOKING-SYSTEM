@@ -2,9 +2,11 @@ import type {
   CrowdPrediction,
   WeatherAlert,
   WeatherForecast,
+  WeatherNoticeCenter,
 } from '../../home/database/interface/publicTravel'
 
 export type DestinationDetailWeatherState = {
+  noticeCenter: WeatherNoticeCenter | null
   forecasts: WeatherForecast[]
   alerts: WeatherAlert[]
   crowdPredictions: CrowdPrediction[]
@@ -13,6 +15,7 @@ export type DestinationDetailWeatherState = {
 }
 
 export const emptyDestinationDetailWeather: DestinationDetailWeatherState = {
+  noticeCenter: null,
   forecasts: [],
   alerts: [],
   crowdPredictions: [],

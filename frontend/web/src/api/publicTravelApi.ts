@@ -3,6 +3,7 @@ export {
   fetchDestinationAlerts,
   fetchDestinationCrowdPredictions,
   fetchDestinationForecasts,
+  fetchDestinationWeatherNotice,
   fetchPublicDestinations,
   fetchPublicTours,
   publicTravelApi,
@@ -15,6 +16,10 @@ export type {
   Destination,
   Tour,
   WeatherAlert,
+  WeatherDisplayPolicy,
   WeatherForecast,
+  WeatherNoticeCenter,
+  WeatherNoticeStatus,
+  WeatherPublicNotice,
   WeatherSeverity,
 } from '../module/home/database/interface/publicTravel'

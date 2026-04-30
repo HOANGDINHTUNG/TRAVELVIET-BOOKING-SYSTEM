@@ -2,10 +2,17 @@ import type {
   CrowdPrediction,
   WeatherAlert,
   WeatherForecast,
+  WeatherNoticeCenter,
 } from '../../module/home/database/interface/publicTravel'
 import { getBackendData } from './serverApiClient'
 
 export const weatherApi = {
+  getDestinationWeatherNotice(destinationUuid: string) {
+    return getBackendData<WeatherNoticeCenter>(
+      `destinations/${destinationUuid}/weather/notice`,
+    )
+  },
+
   getDestinationForecasts(destinationUuid: string) {
     return getBackendData<WeatherForecast[]>(
       `destinations/${destinationUuid}/weather/forecasts`,
@@ -29,6 +36,8 @@ export const weatherApi = {
   },
 }
 
+export const fetchDestinationWeatherNotice = (destinationUuid: string) =>
+  weatherApi.getDestinationWeatherNotice(destinationUuid)
 export const fetchDestinationForecasts = (destinationUuid: string) =>
   weatherApi.getDestinationForecasts(destinationUuid)
 export const fetchDestinationAlerts = (destinationUuid: string) =>

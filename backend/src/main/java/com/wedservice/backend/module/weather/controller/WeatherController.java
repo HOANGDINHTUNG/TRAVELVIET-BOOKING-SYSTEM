@@ -4,6 +4,7 @@ import com.wedservice.backend.common.response.ApiResponse;
 import com.wedservice.backend.module.weather.dto.response.CrowdPredictionResponse;
 import com.wedservice.backend.module.weather.dto.response.WeatherAlertResponse;
 import com.wedservice.backend.module.weather.dto.response.WeatherForecastResponse;
+import com.wedservice.backend.module.weather.dto.response.WeatherNoticeCenterResponse;
 import com.wedservice.backend.module.weather.facade.WeatherFacade;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,6 +37,15 @@ public class WeatherController {
                 .success(true)
                 .message("Weather alerts fetched successfully")
                 .data(weatherFacade.getDestinationAlerts(destinationUuid))
+                .build();
+    }
+
+    @GetMapping("/notice")
+    public ApiResponse<WeatherNoticeCenterResponse> getDestinationWeatherNotice(@PathVariable UUID destinationUuid) {
+        return ApiResponse.<WeatherNoticeCenterResponse>builder()
+                .success(true)
+                .message("Weather notice fetched successfully")
+                .data(weatherFacade.getDestinationWeatherNotice(destinationUuid))
                 .build();
     }
 

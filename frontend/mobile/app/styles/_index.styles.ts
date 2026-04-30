@@ -206,6 +206,10 @@ export const styles = StyleSheet.create({
     flex: 1,
     gap: 4,
   },
+  weatherNoticeWrap: {
+    marginHorizontal: 16,
+    marginBottom: 20,
+  },
   panelTitle: {
     color: text,
     fontSize: 15,

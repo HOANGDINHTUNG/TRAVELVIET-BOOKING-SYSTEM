@@ -86,6 +86,9 @@ export type BackendWeatherForecastMock = {
 export type TourData = {
   id: string;
   title: string;
+  destinationId: number;
+  destinationUuid: string;
+  destinationName: string;
   location: string;
   price: string;
   weather: string;
@@ -643,17 +646,21 @@ function parseHighlights(value: string) {
     .filter(Boolean);
 }
 
-function getDestination(destinationId: number) {
+export function getDestinationById(destinationId: number) {
   return BACKEND_DESTINATION_MOCKS.find((item) => item.id === destinationId);
 }
 
-function getWeather(destinationId: number) {
+export function getDestinationByUuid(destinationUuid: string) {
+  return BACKEND_DESTINATION_MOCKS.find((item) => item.uuid === destinationUuid);
+}
+
+export function getWeatherByDestinationId(destinationId: number) {
   return BACKEND_WEATHER_MOCKS.find((item) => item.destinationId === destinationId);
 }
 
 export const TOURS_DATA: TourData[] = BACKEND_TOUR_MOCKS.map((tour) => {
-  const destination = getDestination(tour.destinationId);
-  const weather = getWeather(tour.destinationId);
+  const destination = getDestinationById(tour.destinationId);
+  const weather = getWeatherByDestinationId(tour.destinationId);
   const image =
     tour.media
       .filter((item) => item.isActive && item.mediaType === 'image')
@@ -662,6 +669,9 @@ export const TOURS_DATA: TourData[] = BACKEND_TOUR_MOCKS.map((tour) => {
   return {
     id: String(tour.id),
     title: tour.name,
+    destinationId: tour.destinationId,
+    destinationUuid: destination?.uuid ?? '',
+    destinationName: destination?.name ?? tour.transportType,
     location: destination
       ? `${destination.name} - ${destination.province}`
       : tour.transportType,

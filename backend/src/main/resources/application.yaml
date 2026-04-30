@@ -17,6 +17,15 @@ minio:
   secretKey: ${MINIO_SECRET_KEY:09022006}
   bucketName: ${MINIO_BUCKET_NAME:tour-images}
 
+weather-api:
+  base-url: ${WEATHERAPI_BASE_URL:https://api.weatherapi.com/v1}
+  api-key: ${WEATHERAPI_KEY:}
+  forecast-days: ${WEATHERAPI_FORECAST_DAYS:3}
+  lang: ${WEATHERAPI_LANG:vi}
+  aqi: ${WEATHERAPI_AQI:yes}
+  alerts: ${WEATHERAPI_ALERTS:yes}
+  timeout-seconds: ${WEATHERAPI_TIMEOUT_SECONDS:12}
+
 spring:
   application:
     name: wedservice-backend

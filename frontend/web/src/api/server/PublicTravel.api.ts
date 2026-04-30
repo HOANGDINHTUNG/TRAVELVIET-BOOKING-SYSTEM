@@ -4,12 +4,14 @@ import {
   fetchDestinationAlerts,
   fetchDestinationCrowdPredictions,
   fetchDestinationForecasts,
+  fetchDestinationWeatherNotice,
   weatherApi,
 } from './Weather.api'
 
 export const publicTravelApi = {
   getDestinations: destinationApi.getDestinations,
   getTours: tourApi.getTours,
+  getDestinationWeatherNotice: weatherApi.getDestinationWeatherNotice,
   getDestinationForecasts: weatherApi.getDestinationForecasts,
   getDestinationAlerts: weatherApi.getDestinationAlerts,
   getDestinationCrowdPredictions: weatherApi.getDestinationCrowdPredictions,
@@ -20,6 +22,7 @@ export {
   fetchDestinationAlerts,
   fetchDestinationCrowdPredictions,
   fetchDestinationForecasts,
+  fetchDestinationWeatherNotice,
   fetchPublicDestinations,
   fetchPublicTours,
   tourApi,

@@ -212,6 +212,23 @@ export type BackendTourSchedule = {
 
 export type WeatherSeverity = "info" | "watch" | "warning" | "danger";
 
+export type WeatherNoticeStatus = "draft" | "published" | "expired";
+
+export type WeatherDisplayPolicy = {
+  id?: number;
+  destinationId: number;
+  showForecastSummary?: boolean;
+  showTemperature?: boolean;
+  showRainProbability?: boolean;
+  showWindSpeed?: boolean;
+  showHumidity?: boolean;
+  showAqi?: boolean;
+  showHourlyForecast?: boolean;
+  showAlerts?: boolean;
+  showAlertDetail?: boolean;
+  updatedAt?: string;
+};
+
 export type WeatherForecast = {
   id: number;
   destinationId: number;
@@ -241,6 +258,31 @@ export type WeatherAlert = {
   validTo?: string;
   isActive?: boolean;
   createdAt?: string;
+};
+
+export type WeatherPublicNotice = {
+  id: number;
+  destinationId: number;
+  sourceAlertId?: number;
+  severity?: WeatherSeverity;
+  title: string;
+  summary: string;
+  detail?: string;
+  actionAdvice?: string;
+  displayFrom?: string;
+  displayTo?: string;
+  status?: WeatherNoticeStatus;
+  pinned?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export type WeatherNoticeCenter = {
+  destinationId: number;
+  displayPolicy?: WeatherDisplayPolicy;
+  currentForecast?: WeatherForecast | null;
+  notices: WeatherPublicNotice[];
+  activeAlerts: WeatherAlert[];
 };
 
 export type CrowdPrediction = {

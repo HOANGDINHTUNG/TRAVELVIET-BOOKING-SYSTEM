@@ -17,5 +17,13 @@ public interface WeatherAlertRepository extends JpaRepository<WeatherAlert, Long
             LocalDateTime validTo
     );
 
+    Optional<WeatherAlert> findFirstByDestinationIdAndAlertTypeAndTitleAndValidFromAndValidTo(
+            Long destinationId,
+            String alertType,
+            String title,
+            LocalDateTime validFrom,
+            LocalDateTime validTo
+    );
+
     Optional<WeatherAlert> findByIdAndDestinationId(Long id, Long destinationId);
 }

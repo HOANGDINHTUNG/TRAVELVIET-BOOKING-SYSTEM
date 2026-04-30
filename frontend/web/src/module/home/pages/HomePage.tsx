@@ -31,6 +31,7 @@ function HomePage() {
   const {
     destinations,
     tours,
+    noticeCenter,
     forecasts,
     alerts,
     crowdPredictions,
@@ -166,6 +167,7 @@ function HomePage() {
       />
       <WeatherAlertsSection
         destinationName={weatherDestination?.name}
+        noticeCenter={noticeCenter}
         forecasts={forecasts}
         alerts={alerts}
         crowdPredictions={crowdPredictions}

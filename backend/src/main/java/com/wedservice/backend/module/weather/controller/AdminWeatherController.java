@@ -3,11 +3,17 @@ package com.wedservice.backend.module.weather.controller;
 import com.wedservice.backend.common.response.ApiResponse;
 import com.wedservice.backend.module.weather.dto.request.AdminUpsertCrowdPredictionRequest;
 import com.wedservice.backend.module.weather.dto.request.AdminUpsertWeatherForecastRequest;
+import com.wedservice.backend.module.weather.dto.request.AdminWeatherDisplayPolicyRequest;
 import com.wedservice.backend.module.weather.dto.request.AdminWeatherAlertRequest;
+import com.wedservice.backend.module.weather.dto.request.AdminWeatherPublicNoticeRequest;
 import com.wedservice.backend.module.weather.dto.request.UpdateWeatherAlertStatusRequest;
+import com.wedservice.backend.module.weather.dto.request.UpdateWeatherPublicNoticeStatusRequest;
 import com.wedservice.backend.module.weather.dto.response.CrowdPredictionResponse;
 import com.wedservice.backend.module.weather.dto.response.WeatherAlertResponse;
+import com.wedservice.backend.module.weather.dto.response.WeatherApiSyncResponse;
+import com.wedservice.backend.module.weather.dto.response.WeatherDisplayPolicyResponse;
 import com.wedservice.backend.module.weather.dto.response.WeatherForecastResponse;
+import com.wedservice.backend.module.weather.dto.response.WeatherPublicNoticeResponse;
 import com.wedservice.backend.module.weather.facade.AdminWeatherFacade;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +37,39 @@ import java.util.UUID;
 public class AdminWeatherController {
 
     private final AdminWeatherFacade adminWeatherFacade;
+
+    @PostMapping("/weatherapi/sync")
+    @PreAuthorize("hasAuthority('destination.update')")
+    public ApiResponse<WeatherApiSyncResponse> syncWeatherApi(@PathVariable UUID destinationUuid) {
+        return ApiResponse.<WeatherApiSyncResponse>builder()
+                .success(true)
+                .message("WeatherAPI data synced successfully")
+                .data(adminWeatherFacade.syncWeatherApi(destinationUuid))
+                .build();
+    }
+
+    @GetMapping("/display-policy")
+    @PreAuthorize("hasAuthority('destination.view')")
+    public ApiResponse<WeatherDisplayPolicyResponse> getDisplayPolicy(@PathVariable UUID destinationUuid) {
+        return ApiResponse.<WeatherDisplayPolicyResponse>builder()
+                .success(true)
+                .message("Weather display policy fetched successfully")
+                .data(adminWeatherFacade.getDisplayPolicy(destinationUuid))
+                .build();
+    }
+
+    @PutMapping("/display-policy")
+    @PreAuthorize("hasAuthority('destination.update')")
+    public ApiResponse<WeatherDisplayPolicyResponse> updateDisplayPolicy(
+            @PathVariable UUID destinationUuid,
+            @Valid @RequestBody AdminWeatherDisplayPolicyRequest request
+    ) {
+        return ApiResponse.<WeatherDisplayPolicyResponse>builder()
+                .success(true)
+                .message("Weather display policy saved successfully")
+                .data(adminWeatherFacade.updateDisplayPolicy(destinationUuid, request))
+                .build();
+    }
 
     @GetMapping("/forecasts")
     @PreAuthorize("hasAuthority('destination.view')")
@@ -104,6 +143,57 @@ public class AdminWeatherController {
                 .success(true)
                 .message("Weather alert status updated successfully")
                 .data(adminWeatherFacade.updateAlertStatus(destinationUuid, alertId, request))
+                .build();
+    }
+
+    @GetMapping("/public-notices")
+    @PreAuthorize("hasAuthority('destination.view')")
+    public ApiResponse<List<WeatherPublicNoticeResponse>> getPublicNotices(@PathVariable UUID destinationUuid) {
+        return ApiResponse.<List<WeatherPublicNoticeResponse>>builder()
+                .success(true)
+                .message("Weather public notices fetched successfully")
+                .data(adminWeatherFacade.getPublicNotices(destinationUuid))
+                .build();
+    }
+
+    @PostMapping("/public-notices")
+    @PreAuthorize("hasAuthority('destination.update')")
+    public ApiResponse<WeatherPublicNoticeResponse> createPublicNotice(
+            @PathVariable UUID destinationUuid,
+            @Valid @RequestBody AdminWeatherPublicNoticeRequest request
+    ) {
+        return ApiResponse.<WeatherPublicNoticeResponse>builder()
+                .success(true)
+                .message("Weather public notice created successfully")
+                .data(adminWeatherFacade.createPublicNotice(destinationUuid, request))
+                .build();
+    }
+
+    @PutMapping("/public-notices/{noticeId}")
+    @PreAuthorize("hasAuthority('destination.update')")
+    public ApiResponse<WeatherPublicNoticeResponse> updatePublicNotice(
+            @PathVariable UUID destinationUuid,
+            @PathVariable Long noticeId,
+            @Valid @RequestBody AdminWeatherPublicNoticeRequest request
+    ) {
+        return ApiResponse.<WeatherPublicNoticeResponse>builder()
+                .success(true)
+                .message("Weather public notice updated successfully")
+                .data(adminWeatherFacade.updatePublicNotice(destinationUuid, noticeId, request))
+                .build();
+    }
+
+    @PatchMapping("/public-notices/{noticeId}/status")
+    @PreAuthorize("hasAuthority('destination.update')")
+    public ApiResponse<WeatherPublicNoticeResponse> updatePublicNoticeStatus(
+            @PathVariable UUID destinationUuid,
+            @PathVariable Long noticeId,
+            @Valid @RequestBody UpdateWeatherPublicNoticeStatusRequest request
+    ) {
+        return ApiResponse.<WeatherPublicNoticeResponse>builder()
+                .success(true)
+                .message("Weather public notice status updated successfully")
+                .data(adminWeatherFacade.updatePublicNoticeStatus(destinationUuid, noticeId, request))
                 .build();
     }
 

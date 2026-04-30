@@ -215,7 +215,7 @@
 
 .weather-metrics {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
   gap: 12px;
   margin-top: 4px;
 }
@@ -284,6 +284,89 @@
 
 .theme-dark .weather-detail-button:not(:hover) {
   color: var(--color-primary);
+}
+
+.weather-detail-panel {
+  display: grid;
+  gap: 12px;
+  border: 1px solid rgba(96, 108, 56, 0.22);
+  border-radius: 8px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.58);
+}
+
+.theme-dark .weather-detail-panel {
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.weather-detail-panel-head {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-wrap: wrap;
+  color: var(--color-text);
+}
+
+.weather-detail-panel-head svg {
+  color: var(--color-danger);
+}
+
+.weather-detail-panel-head strong {
+  font-size: 14px;
+  font-weight: 920;
+}
+
+.weather-detail-panel-head span {
+  margin-left: auto;
+  color: var(--color-muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.weather-detail-panel article {
+  display: grid;
+  gap: 7px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border);
+}
+
+.weather-detail-panel article > div {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.weather-detail-panel article strong {
+  color: var(--color-text);
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.weather-detail-panel article span {
+  flex: 0 0 auto;
+  border-radius: 999px;
+  padding: 5px 9px;
+  color: #606c38;
+  background: rgba(96, 108, 56, 0.16);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.weather-detail-panel time,
+.weather-detail-panel small {
+  color: var(--color-muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.weather-detail-panel p {
+  max-width: none;
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 13px;
+  line-height: 1.5;
 }
 
 .weather-side-panel {
@@ -491,6 +574,15 @@
 
   .weather-alert-item span {
     justify-self: start;
+  }
+
+  .weather-detail-panel-head span {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .weather-detail-panel article > div {
+    display: grid;
   }
 
   .weather-timeline article {

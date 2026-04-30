@@ -72,25 +72,38 @@ function DestinationDetailPage() {
 
         setDetail(destination)
 
-        const [forecasts, alerts, crowdPredictions] = await Promise.allSettled([
-          weatherApi.getDestinationForecasts(uuid),
-          weatherApi.getDestinationAlerts(uuid),
-          weatherApi.getDestinationCrowdPredictions(uuid),
-        ])
+        const [noticeCenter, forecasts, alerts, crowdPredictions] =
+          await Promise.allSettled([
+            weatherApi.getDestinationWeatherNotice(uuid),
+            weatherApi.getDestinationForecasts(uuid),
+            weatherApi.getDestinationAlerts(uuid),
+            weatherApi.getDestinationCrowdPredictions(uuid),
+          ])
 
         if (!isActive) {
           return
         }
 
+        const resolvedNoticeCenter =
+          noticeCenter.status === 'fulfilled' ? noticeCenter.value : null
+
         setWeather({
-          forecasts: forecasts.status === 'fulfilled' ? forecasts.value : [],
-          alerts: alerts.status === 'fulfilled' ? alerts.value : [],
+          noticeCenter: resolvedNoticeCenter,
+          forecasts: resolvedNoticeCenter?.currentForecast
+            ? [resolvedNoticeCenter.currentForecast]
+            : forecasts.status === 'fulfilled'
+              ? forecasts.value
+              : [],
+          alerts:
+            resolvedNoticeCenter?.activeAlerts ??
+            (alerts.status === 'fulfilled' ? alerts.value : []),
           crowdPredictions:
             crowdPredictions.status === 'fulfilled'
               ? crowdPredictions.value
               : [],
           loading: false,
           error:
+            noticeCenter.status === 'rejected' &&
             forecasts.status === 'rejected' &&
             alerts.status === 'rejected' &&
             crowdPredictions.status === 'rejected'

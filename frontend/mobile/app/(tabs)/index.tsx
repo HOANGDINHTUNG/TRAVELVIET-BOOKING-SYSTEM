@@ -16,6 +16,7 @@ import {
   TOURS_DATA,
   type TourData,
 } from '../../constants/Tours';
+import { WeatherNoticeCard } from '../../components/WeatherNoticeCard';
 import { styles } from '../styles/_index.styles';
 
 const ALL_CATEGORY = 'Tất cả';
@@ -219,17 +220,13 @@ export default function HomeScreen() {
         </ScrollView>
       </View>
 
-      <View style={styles.weatherPanel}>
-        <View style={styles.weatherIconWrap}>
-          <Ionicons name="cloudy-night-outline" size={22} color="#087f9c" />
-        </View>
-        <View style={styles.weatherCopy}>
-          <Text style={styles.panelTitle}>Cập nhật thời tiết và mật độ</Text>
-          <Text style={styles.panelText}>
-            Mobile đã bổ sung lớp cảnh báo giống web để khách chọn lịch trình
-            an toàn hơn trước khi giữ chỗ.
-          </Text>
-        </View>
+      <View style={styles.weatherNoticeWrap}>
+        <WeatherNoticeCard
+          destinationUuid={heroTour.destinationUuid}
+          destinationId={heroTour.destinationId}
+          destinationName={heroTour.destinationName}
+          variant="home"
+        />
       </View>
 
       <View style={styles.sectionHeader}>

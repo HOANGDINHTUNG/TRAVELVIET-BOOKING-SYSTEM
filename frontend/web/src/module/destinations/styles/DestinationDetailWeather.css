@@ -6,7 +6,7 @@
 
 .destination-detail-weather-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 16px;
 }
 
@@ -20,6 +20,13 @@
   border-radius: 8px;
   background: var(--color-surface);
   box-shadow: 0 16px 44px rgba(40, 54, 24, 0.1);
+}
+
+.destination-detail-weather-grid article.is-curated {
+  border-color: rgba(96, 108, 56, 0.32);
+  background:
+    linear-gradient(135deg, rgba(96, 108, 56, 0.12), transparent 56%),
+    var(--color-surface);
 }
 
 .destination-detail-weather-grid svg {
@@ -69,8 +76,13 @@
 }
 
 .destination-detail-alert-list span {
+  width: fit-content;
+  border-radius: 999px;
+  padding: 5px 9px;
   color: var(--color-danger);
+  background: rgba(255, 116, 91, 0.14);
   font-weight: 930;
+  font-size: 0.72rem;
   text-transform: uppercase;
 }
 

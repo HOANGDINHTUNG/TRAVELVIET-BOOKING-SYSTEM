@@ -9,6 +9,7 @@ import type {
   Tour,
   WeatherAlert,
   WeatherForecast,
+  WeatherNoticeCenter,
 } from '../database/interface/publicTravel'
 
 type HomePublicData = {
@@ -17,6 +18,7 @@ type HomePublicData = {
 }
 
 type HomeWeatherData = {
+  noticeCenter: WeatherNoticeCenter | null
   forecasts: WeatherForecast[]
   alerts: WeatherAlert[]
   crowdPredictions: CrowdPrediction[]
@@ -33,6 +35,7 @@ type HomeState = HomePublicData &
 const initialState: HomeState = {
   destinations: [],
   tours: [],
+  noticeCenter: null,
   forecasts: [],
   alerts: [],
   crowdPredictions: [],
@@ -83,18 +86,42 @@ export const fetchHomeWeather = createAsyncThunk<
   string,
   { rejectValue: string }
 >('home/fetchWeather', async (destinationUuid, { rejectWithValue }) => {
-  try {
-    const [forecasts, alerts, crowdPredictions] = await Promise.all([
+  const [noticeCenter, forecasts, alerts, crowdPredictions] =
+    await Promise.allSettled([
+      weatherApi.getDestinationWeatherNotice(destinationUuid),
       weatherApi.getDestinationForecasts(destinationUuid),
       weatherApi.getDestinationAlerts(destinationUuid),
       weatherApi.getDestinationCrowdPredictions(destinationUuid),
     ])
 
-    return { forecasts, alerts, crowdPredictions }
-  } catch (error) {
+  const resolvedNoticeCenter =
+    noticeCenter.status === 'fulfilled' ? noticeCenter.value : null
+  const resolvedForecasts =
+    forecasts.status === 'fulfilled' ? forecasts.value : []
+  const resolvedAlerts = alerts.status === 'fulfilled' ? alerts.value : []
+  const resolvedCrowdPredictions =
+    crowdPredictions.status === 'fulfilled' ? crowdPredictions.value : []
+
+  if (
+    noticeCenter.status === 'rejected' &&
+    forecasts.status === 'rejected' &&
+    alerts.status === 'rejected' &&
+    crowdPredictions.status === 'rejected'
+  ) {
+    const error = getSettledError(noticeCenter)
+
     return rejectWithValue(
       getErrorMessage(error, 'Khong the tai du lieu thoi tiet.'),
     )
+  }
+
+  return {
+    noticeCenter: resolvedNoticeCenter,
+    forecasts: resolvedNoticeCenter?.currentForecast
+      ? [resolvedNoticeCenter.currentForecast]
+      : resolvedForecasts,
+    alerts: resolvedNoticeCenter?.activeAlerts ?? resolvedAlerts,
+    crowdPredictions: resolvedCrowdPredictions,
   }
 })
 
@@ -103,6 +130,7 @@ const homeSlice = createSlice({
   initialState,
   reducers: {
     clearHomeWeather(state) {
+      state.noticeCenter = null
       state.forecasts = []
       state.alerts = []
       state.crowdPredictions = []
@@ -133,12 +161,14 @@ const homeSlice = createSlice({
       })
       .addCase(fetchHomeWeather.fulfilled, (state, action) => {
         state.weatherLoading = false
+        state.noticeCenter = action.payload.noticeCenter
         state.forecasts = action.payload.forecasts
         state.alerts = action.payload.alerts
         state.crowdPredictions = action.payload.crowdPredictions
       })
       .addCase(fetchHomeWeather.rejected, (state, action) => {
         state.weatherLoading = false
+        state.noticeCenter = null
         state.forecasts = []
         state.alerts = []
         state.crowdPredictions = []
