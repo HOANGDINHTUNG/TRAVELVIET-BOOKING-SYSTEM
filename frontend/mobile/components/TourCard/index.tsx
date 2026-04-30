@@ -5,14 +5,15 @@ import {
   Image,
   TouchableOpacity,
   useColorScheme,
-  StyleSheet,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { createStyles } from './styles';
-import { TourCardProps } from '@/types/Tour';
+import type { TourCardProps, WeatherInfo } from '@/types/Tour';
 import { Colors } from '@/constants/theme';
 
-const weatherIcons = {
+type MaterialIconName = keyof typeof MaterialCommunityIcons.glyphMap;
+
+const weatherIcons: Record<WeatherInfo['condition'], MaterialIconName> = {
   sunny: 'weather-sunny',
   cloudy: 'weather-cloudy',
   rainy: 'weather-rainy',
@@ -262,7 +263,7 @@ export function TourCard({
           </View>
           {size === 'large' && (
             <Text style={[{ color: themeColors.text }, getReviewCountStyle()]}>
-              {tour.rating.toFixed(1)} ⭐
+              {tour.rating.toFixed(1)} sao
             </Text>
           )}
         </View>

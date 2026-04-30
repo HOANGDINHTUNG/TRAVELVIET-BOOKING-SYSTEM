@@ -7,6 +7,7 @@ export type Tour = {
   days: string;
   price: number;
   rating?: number;
+  reviewCount?: number;
   image: string;
   highlights: string[];
   description?: string;
