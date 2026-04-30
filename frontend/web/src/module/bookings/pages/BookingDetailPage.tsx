@@ -4,8 +4,12 @@ import {
   ArrowLeft,
   CheckCircle2,
   CreditCard,
+  Flag,
   History,
+  MessageCircle,
   ReceiptText,
+  UserCheck,
+  XCircle,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import {
@@ -17,6 +21,10 @@ import { paymentApi, type Payment } from "../../../api/server/Payment.api";
 import { PageLoader } from "../../../components/common/ux/PageLoader";
 import { ErrorBlock } from "../../../components/common/ui/ErrorBlock";
 import { Footer } from "../../../components/Footer/Footer";
+import {
+  getStoredAuthUser,
+  hasManagerRole,
+} from "../../auth/api/authApi";
 import "./BookingDetailPage.css";
 
 type BookingDetailLocale = "vi" | "en";
@@ -43,6 +51,18 @@ type BookingDetailCopy = {
   paid: string;
   paymentSuccess: (code: string) => string;
   paymentError: string;
+  actionsTitle: string;
+  actionsCopy: string;
+  chatTitle: string;
+  chatCopy: string;
+  openChat: string;
+  reason: string;
+  cancelAction: string;
+  checkInAction: string;
+  completeAction: string;
+  lifecycleSuccess: string;
+  lifecycleError: string;
+  noActions: string;
   historyTitle: string;
   noHistory: string;
 };
@@ -71,6 +91,19 @@ const copyByLocale: Record<BookingDetailLocale, BookingDetailCopy> = {
     paid: "Da thanh toan",
     paymentSuccess: (code) => `Da ghi nhan thanh toan ${code}.`,
     paymentError: "Khong the tao thanh toan cho booking nay.",
+    actionsTitle: "Xu ly booking",
+    actionsCopy: "Cac thao tac nay goi truc tiep booking lifecycle API va cap nhat lich su trang thai.",
+    chatTitle: "Nhom chat lich trinh",
+    chatCopy:
+      "Trao doi voi cac thanh vien cung lich trinh va doi ngu TravelViet truoc ngay khoi hanh.",
+    openChat: "Mo nhom chat",
+    reason: "Ly do / ghi chu",
+    cancelAction: "Huy booking",
+    checkInAction: "Check-in khach",
+    completeAction: "Hoan tat booking",
+    lifecycleSuccess: "Da cap nhat trang thai booking.",
+    lifecycleError: "Khong the cap nhat booking.",
+    noActions: "Khong co thao tac kha dung voi trang thai hien tai.",
     historyTitle: "Lich su trang thai",
     noHistory: "Chua co lich su trang thai.",
   },
@@ -97,6 +130,19 @@ const copyByLocale: Record<BookingDetailLocale, BookingDetailCopy> = {
     paid: "Paid",
     paymentSuccess: (code) => `Payment ${code} has been recorded.`,
     paymentError: "Could not create payment for this booking.",
+    actionsTitle: "Booking actions",
+    actionsCopy: "These actions call the booking lifecycle API and refresh the status history.",
+    chatTitle: "Schedule group chat",
+    chatCopy:
+      "Coordinate with travelers on the same schedule and the TravelViet team before departure.",
+    openChat: "Open group chat",
+    reason: "Reason / note",
+    cancelAction: "Cancel booking",
+    checkInAction: "Check in guest",
+    completeAction: "Complete booking",
+    lifecycleSuccess: "Booking status updated.",
+    lifecycleError: "Could not update booking.",
+    noActions: "No actions are available for the current status.",
     historyTitle: "Status history",
     noHistory: "No status history yet.",
   },
@@ -129,7 +175,33 @@ function formatDate(value: string | undefined, locale: BookingDetailLocale) {
 }
 
 function isPaidBooking(booking: Booking | null) {
-  return booking?.status === "confirmed" || booking?.status === "completed";
+  return (
+    booking?.paymentStatus === "paid" ||
+    booking?.status === "confirmed" ||
+    booking?.status === "checked_in" ||
+    booking?.status === "completed"
+  );
+}
+
+function canCancelBooking(booking: Booking | null) {
+  return booking?.status === "pending_payment" || booking?.status === "confirmed";
+}
+
+function canCheckInBooking(booking: Booking | null) {
+  return booking?.status === "confirmed" && booking?.paymentStatus === "paid";
+}
+
+function canCompleteBooking(booking: Booking | null) {
+  return booking?.status === "checked_in";
+}
+
+function canOpenScheduleChat(booking: Booking | null) {
+  return Boolean(
+    booking?.scheduleId &&
+      booking.status !== "cancelled" &&
+      booking.status !== "expired" &&
+      booking.status !== "refunded",
+  );
 }
 
 export default function BookingDetailPage() {
@@ -145,10 +217,14 @@ export default function BookingDetailPage() {
   const [transactionRef, setTransactionRef] = useState("");
   const [loading, setLoading] = useState(true);
   const [paymentLoading, setPaymentLoading] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState("");
   const [paymentMessage, setPaymentMessage] = useState("");
+  const [actionMessage, setActionMessage] = useState("");
+  const [statusReason, setStatusReason] = useState("");
 
   const bookingId = useMemo(() => Number(id), [id]);
+  const isManager = hasManagerRole(getStoredAuthUser());
 
   useEffect(() => {
     let mounted = true;
@@ -224,6 +300,41 @@ export default function BookingDetailPage() {
     }
   };
 
+  const runBookingAction = async (
+    action: "cancel" | "checkIn" | "complete",
+  ) => {
+    if (!booking?.id || actionLoading) {
+      return;
+    }
+
+    setActionLoading(true);
+    setActionMessage("");
+
+    try {
+      const payload = { reason: statusReason.trim() || undefined };
+      const nextBooking =
+        action === "cancel"
+          ? await bookingApi.cancel(booking.id, payload)
+          : action === "checkIn"
+            ? await bookingApi.checkIn(booking.id, payload)
+            : await bookingApi.complete(booking.id, payload);
+      const nextHistory = await bookingApi
+        .getStatusHistory(booking.id)
+        .catch(() => history);
+
+      setBooking(nextBooking);
+      setHistory(nextHistory);
+      setStatusReason("");
+      setActionMessage(copy.lifecycleSuccess);
+    } catch (actionError) {
+      setActionMessage(
+        actionError instanceof Error ? actionError.message : copy.lifecycleError,
+      );
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   if (loading) {
     return <PageLoader label={copy.loading} />;
   }
@@ -242,6 +353,11 @@ export default function BookingDetailPage() {
 
   const bookingCode = booking.bookingCode || String(booking.id);
   const paid = isPaidBooking(booking);
+  const canCancel = canCancelBooking(booking);
+  const canCheckIn = isManager && canCheckInBooking(booking);
+  const canComplete = isManager && canCompleteBooking(booking);
+  const canChat = canOpenScheduleChat(booking);
+  const hasAnyAction = canCancel || canCheckIn || canComplete;
 
   return (
     <div className="booking-detail-page">
@@ -343,6 +459,77 @@ export default function BookingDetailPage() {
             )}
           </section>
         </div>
+
+        {canChat && (
+          <section className="booking-card booking-chat-card">
+            <header>
+              <MessageCircle size={22} />
+              <h2>{copy.chatTitle}</h2>
+            </header>
+            <p>{copy.chatCopy}</p>
+            <Link
+              className="booking-chat-link"
+              to={`/schedules/${booking.scheduleId}/chat`}
+            >
+              <MessageCircle size={18} />
+              {copy.openChat}
+            </Link>
+          </section>
+        )}
+
+        <section className="booking-card booking-actions-card">
+          <header>
+            <Flag size={22} />
+            <h2>{copy.actionsTitle}</h2>
+          </header>
+          <p>{hasAnyAction ? copy.actionsCopy : copy.noActions}</p>
+
+          <label className="booking-action-reason">
+            <span>{copy.reason}</span>
+            <textarea
+              rows={3}
+              value={statusReason}
+              onChange={(event) => setStatusReason(event.target.value)}
+              disabled={!hasAnyAction || actionLoading}
+            />
+          </label>
+
+          <div className="booking-action-buttons">
+            {canCancel && (
+              <button
+                className="danger"
+                type="button"
+                onClick={() => void runBookingAction("cancel")}
+                disabled={actionLoading}
+              >
+                <XCircle size={18} />
+                {copy.cancelAction}
+              </button>
+            )}
+            {canCheckIn && (
+              <button
+                type="button"
+                onClick={() => void runBookingAction("checkIn")}
+                disabled={actionLoading}
+              >
+                <UserCheck size={18} />
+                {copy.checkInAction}
+              </button>
+            )}
+            {canComplete && (
+              <button
+                type="button"
+                onClick={() => void runBookingAction("complete")}
+                disabled={actionLoading}
+              >
+                <CheckCircle2 size={18} />
+                {copy.completeAction}
+              </button>
+            )}
+          </div>
+
+          {actionMessage && <p className="booking-action-message">{actionMessage}</p>}
+        </section>
 
         <section className="booking-card booking-history-card">
           <header>

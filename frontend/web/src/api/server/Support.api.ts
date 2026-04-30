@@ -42,6 +42,28 @@ export type RateSupportSessionPayload = {
   feedback?: string
 }
 
+export type SupportSessionStatus =
+  | 'open'
+  | 'waiting_staff'
+  | 'waiting_customer'
+  | 'resolved'
+  | 'closed'
+  | string
+
+export type SupportSessionQuery = {
+  status?: SupportSessionStatus
+  userId?: string
+  assignedStaffId?: string
+}
+
+export type AssignSupportSessionPayload = {
+  assignedStaffId?: string
+}
+
+export type UpdateSupportSessionStatusPayload = {
+  status: SupportSessionStatus
+}
+
 export const supportApi = {
   createMySession(payload: CreateSupportSessionPayload) {
     return postBackendData<SupportSession>('users/me/support/sessions', payload)
@@ -61,5 +83,25 @@ export const supportApi = {
 
   rateMySession(id: number, payload: RateSupportSessionPayload) {
     return patchBackendData<SupportSession>(`users/me/support/sessions/${id}/rate`, payload)
+  },
+
+  getSessions(params: SupportSessionQuery = {}) {
+    return getBackendData<SupportSession[]>('support/sessions', params)
+  },
+
+  getSession(id: number) {
+    return getBackendData<SupportSession>(`support/sessions/${id}`)
+  },
+
+  assignSession(id: number, payload: AssignSupportSessionPayload) {
+    return patchBackendData<SupportSession>(`support/sessions/${id}/assign`, payload)
+  },
+
+  updateSessionStatus(id: number, payload: UpdateSupportSessionStatusPayload) {
+    return patchBackendData<SupportSession>(`support/sessions/${id}/status`, payload)
+  },
+
+  sendReply(id: number, payload: CreateSupportMessagePayload) {
+    return postBackendData<SupportMessage>(`support/sessions/${id}/messages`, payload)
   },
 }

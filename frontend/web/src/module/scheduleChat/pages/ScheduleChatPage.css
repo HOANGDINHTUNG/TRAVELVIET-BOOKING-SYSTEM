@@ -1,0 +1,418 @@
+.schedule-chat-page {
+  min-height: 100vh;
+  color: #26342a;
+  background:
+    linear-gradient(180deg, rgba(222, 235, 229, 0.92), rgba(247, 244, 235, 0.96)),
+    #f7f4eb;
+}
+
+.theme-dark .schedule-chat-page {
+  color: #f5ead9;
+  background:
+    linear-gradient(180deg, rgba(21, 32, 34, 0.96), rgba(35, 31, 25, 0.98)),
+    #151c1c;
+}
+
+.schedule-chat-shell {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 122px 0 64px;
+}
+
+.schedule-chat-back-link {
+  min-height: 42px;
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  border: 0;
+  padding: 0;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  font-weight: 900;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.schedule-chat-back-link svg {
+  width: 19px;
+  height: 19px;
+}
+
+.schedule-chat-hero {
+  min-height: 260px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 24px;
+  align-items: end;
+  border-radius: 8px;
+  padding: clamp(28px, 5vw, 52px);
+  color: #fff;
+  background:
+    linear-gradient(115deg, rgba(35, 56, 54, 0.92), rgba(96, 108, 56, 0.62)),
+    url("../../../assets/hero.png") center/cover;
+  box-shadow: 0 24px 72px rgba(39, 63, 58, 0.18);
+}
+
+.schedule-chat-hero span {
+  color: #f1d69d;
+  font-size: 13px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.schedule-chat-hero h1 {
+  max-width: 780px;
+  margin: 10px 0 0;
+  font-size: clamp(36px, 6vw, 68px);
+  line-height: 0.98;
+}
+
+.schedule-chat-hero p {
+  max-width: 680px;
+  margin: 18px 0 0;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.6;
+}
+
+.schedule-chat-stats {
+  width: min(300px, 100%);
+  display: grid;
+  gap: 10px;
+}
+
+.schedule-chat-stats span,
+.schedule-chat-stats strong {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 0 12px;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(12px);
+  color: #fff;
+  font-weight: 900;
+}
+
+.schedule-chat-stats svg {
+  width: 18px;
+  height: 18px;
+}
+
+.schedule-chat-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.58fr) minmax(0, 1.42fr);
+  gap: 18px;
+  align-items: start;
+  margin-top: 18px;
+}
+
+.schedule-chat-members,
+.schedule-chat-conversation {
+  border: 1px solid rgba(96, 108, 56, 0.16);
+  border-radius: 8px;
+  padding: 18px;
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 18px 48px rgba(39, 63, 58, 0.08);
+}
+
+.theme-dark .schedule-chat-members,
+.theme-dark .schedule-chat-conversation {
+  border-color: rgba(238, 222, 190, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.22);
+}
+
+.schedule-chat-members header,
+.schedule-chat-conversation header,
+.schedule-chat-conversation header div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.schedule-chat-members header,
+.schedule-chat-conversation header {
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.schedule-chat-members header svg,
+.schedule-chat-conversation header svg {
+  width: 22px;
+  height: 22px;
+  color: #087f9c;
+}
+
+.theme-dark .schedule-chat-members header svg,
+.theme-dark .schedule-chat-conversation header svg {
+  color: #dfc38f;
+}
+
+.schedule-chat-members h2,
+.schedule-chat-conversation h2 {
+  margin: 0;
+  font-size: 22px;
+  line-height: 1.15;
+}
+
+.schedule-chat-conversation header > span {
+  border-radius: 999px;
+  padding: 7px 10px;
+  color: #23545a;
+  background: rgba(8, 127, 156, 0.12);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.theme-dark .schedule-chat-conversation header > span {
+  color: #f5ead9;
+  background: rgba(238, 222, 190, 0.12);
+}
+
+.schedule-chat-member-list {
+  display: grid;
+  gap: 10px;
+}
+
+.schedule-chat-member-list article {
+  min-height: 56px;
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  border: 1px solid rgba(96, 108, 56, 0.12);
+  border-radius: 8px;
+  padding: 10px;
+  background: rgba(247, 244, 235, 0.72);
+}
+
+.theme-dark .schedule-chat-member-list article {
+  border-color: rgba(238, 222, 190, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.schedule-chat-member-list div {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff;
+  background: #087f9c;
+  font-weight: 900;
+}
+
+.schedule-chat-member-list span {
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.schedule-chat-conversation {
+  min-height: 760px;
+  display: grid;
+  grid-template-rows: auto minmax(320px, 1fr) auto;
+}
+
+.schedule-chat-message-list {
+  max-height: 560px;
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  overflow: auto;
+  padding: 4px;
+}
+
+.schedule-chat-message-list article {
+  width: min(78%, 620px);
+  display: grid;
+  gap: 6px;
+  border: 1px solid rgba(96, 108, 56, 0.12);
+  border-radius: 8px;
+  padding: 12px;
+  background: rgba(247, 244, 235, 0.78);
+}
+
+.theme-dark .schedule-chat-message-list article {
+  border-color: rgba(238, 222, 190, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.schedule-chat-message-list article.is-mine {
+  justify-self: end;
+  color: #fff;
+  background: #087f9c;
+}
+
+.schedule-chat-message-list span {
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.schedule-chat-message-list p {
+  margin: 0;
+  line-height: 1.55;
+}
+
+.schedule-chat-message-list a {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: inherit;
+  font-weight: 900;
+  overflow-wrap: anywhere;
+}
+
+.schedule-chat-message-list a svg {
+  width: 15px;
+  height: 15px;
+}
+
+.schedule-chat-message-list small {
+  opacity: 0.72;
+  font-weight: 800;
+}
+
+.schedule-chat-empty {
+  margin: 0;
+  color: rgba(38, 52, 42, 0.66);
+  font-weight: 800;
+}
+
+.theme-dark .schedule-chat-empty {
+  color: rgba(245, 234, 217, 0.62);
+}
+
+.schedule-chat-form {
+  display: grid;
+  gap: 12px;
+  border-top: 1px solid rgba(96, 108, 56, 0.14);
+  padding-top: 14px;
+}
+
+.theme-dark .schedule-chat-form {
+  border-top-color: rgba(238, 222, 190, 0.14);
+}
+
+.schedule-chat-form label {
+  display: grid;
+  gap: 7px;
+}
+
+.schedule-chat-form span {
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.schedule-chat-form input,
+.schedule-chat-form textarea {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid rgba(96, 108, 56, 0.18);
+  border-radius: 8px;
+  padding: 0 12px;
+  box-sizing: border-box;
+  color: inherit;
+  background: rgba(255, 255, 255, 0.72);
+  font: inherit;
+}
+
+.schedule-chat-form textarea {
+  min-height: 116px;
+  padding: 10px 12px;
+  resize: vertical;
+}
+
+.theme-dark .schedule-chat-form input,
+.theme-dark .schedule-chat-form textarea {
+  border-color: rgba(238, 222, 190, 0.16);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.schedule-chat-form button {
+  min-height: 46px;
+  border: 0;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 14px;
+  color: #fff;
+  background: #606c38;
+  font: inherit;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.schedule-chat-form button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.schedule-chat-form button svg {
+  width: 17px;
+  height: 17px;
+}
+
+.schedule-chat-notice {
+  margin: 0;
+  color: #bc6c25;
+  font-weight: 900;
+}
+
+.schedule-chat-error {
+  min-height: 100vh;
+  display: grid;
+  place-content: center;
+  gap: 16px;
+  padding: 24px;
+  color: #26342a;
+  background: #f7f4eb;
+}
+
+@media (max-width: 960px) {
+  .schedule-chat-hero,
+  .schedule-chat-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .schedule-chat-stats {
+    width: 100%;
+  }
+
+  .schedule-chat-conversation {
+    min-height: 0;
+  }
+}
+
+@media (max-width: 620px) {
+  .schedule-chat-shell {
+    width: min(100% - 20px, 1180px);
+    padding-top: 104px;
+  }
+
+  .schedule-chat-hero {
+    padding: 24px;
+  }
+
+  .schedule-chat-hero h1 {
+    font-size: 40px;
+  }
+
+  .schedule-chat-message-list article {
+    width: 100%;
+  }
+}

@@ -14,6 +14,10 @@ import {
   superAdminLanes,
 } from '../../config/managementDashboardConfig'
 import QuickChecksPanel from '../QuickChecksPanel'
+import PromotionCommercePanel from '../PromotionCommercePanel'
+import ReviewModerationPanel from '../ReviewModerationPanel'
+import ScheduleChatControlPanel from '../ScheduleChatControlPanel'
+import SystemGovernancePanel from '../SystemGovernancePanel'
 import { getEndpointCount, getMethodCounts } from '../../utils/dashboardUtils'
 import type { RoleDashboardProps } from '../../utils/dashboardTypes'
 
@@ -147,6 +151,14 @@ function SuperAdminDashboard({
           </div>
         </article>
       </section>
+
+      <SystemGovernancePanel />
+
+      <PromotionCommercePanel />
+
+      <ReviewModerationPanel />
+
+      <ScheduleChatControlPanel />
 
       <section className="mgmt-section" id="superadmin-modules">
         <div className="mgmt-section-title">

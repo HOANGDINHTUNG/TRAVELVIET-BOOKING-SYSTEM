@@ -12,7 +12,13 @@ import {
   adminWorkQueues,
 } from '../../config/managementDashboardConfig'
 import { EndpointRows, FocusGrid } from '../EndpointCards'
+import OperationsControlPanel from '../OperationsControlPanel'
+import PromotionCommercePanel from '../PromotionCommercePanel'
 import QuickChecksPanel from '../QuickChecksPanel'
+import ReviewModerationPanel from '../ReviewModerationPanel'
+import ScheduleChatControlPanel from '../ScheduleChatControlPanel'
+import SupportOperationsPanel from '../SupportOperationsPanel'
+import SystemGovernancePanel from '../SystemGovernancePanel'
 import {
   getCheckSummary,
   getEndpointCount,
@@ -167,6 +173,18 @@ function AdminDashboard({
           </div>
         </article>
       </section>
+
+      <SystemGovernancePanel />
+
+      <PromotionCommercePanel />
+
+      <OperationsControlPanel />
+
+      <ReviewModerationPanel />
+
+      <ScheduleChatControlPanel />
+
+      <SupportOperationsPanel />
 
       <section className="mgmt-section" id="admin-endpoints">
         <div className="mgmt-section-title">

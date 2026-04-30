@@ -54,8 +54,7 @@ export type CreateReviewReplyPayload = {
 }
 
 export type ModerateReviewPayload = {
-  status?: string
-  reason?: string
+  sentiment: string
 }
 
 export const reviewApi = {
@@ -76,7 +75,7 @@ export const reviewApi = {
   },
 
   reply(id: number, payload: CreateReviewReplyPayload) {
-    return postBackendData<ReviewReply>(`reviews/${id}/replies`, payload)
+    return postBackendData<Review>(`reviews/${id}/replies`, payload)
   },
 
   moderate(id: number, payload: ModerateReviewPayload) {

@@ -23,6 +23,10 @@ export const weatherApi = {
       `destinations/${destinationUuid}/weather/crowd-predictions`,
     )
   },
+
+  getRouteEstimates(params?: { fromLabel?: string; toLabel?: string }) {
+    return getBackendData<RouteEstimate[]>('route-estimates', params)
+  },
 }
 
 export const fetchDestinationForecasts = (destinationUuid: string) =>
@@ -31,3 +35,18 @@ export const fetchDestinationAlerts = (destinationUuid: string) =>
   weatherApi.getDestinationAlerts(destinationUuid)
 export const fetchDestinationCrowdPredictions = (destinationUuid: string) =>
   weatherApi.getDestinationCrowdPredictions(destinationUuid)
+
+export type RouteEstimate = {
+  id: number
+  fromLabel?: string
+  toLabel?: string
+  fromLatitude?: number | string
+  fromLongitude?: number | string
+  toLatitude?: number | string
+  toLongitude?: number | string
+  distanceKm?: number | string
+  durationMinutes?: number
+  googleMapUrl?: string
+  sourceName?: string
+  createdAt?: string
+}

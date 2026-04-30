@@ -11,7 +11,11 @@ import {
   type SpecialistRoleCode,
 } from '../../config/managementDashboardConfig'
 import { EndpointRows, FocusGrid } from '../EndpointCards'
+import OperationsControlPanel from '../OperationsControlPanel'
 import QuickChecksPanel from '../QuickChecksPanel'
+import ReviewModerationPanel from '../ReviewModerationPanel'
+import ScheduleChatControlPanel from '../ScheduleChatControlPanel'
+import SupportOperationsPanel from '../SupportOperationsPanel'
 import { getEndpointCount, getMethodCounts } from '../../utils/dashboardUtils'
 import type { RoleDashboardProps } from '../../utils/dashboardTypes'
 
@@ -141,6 +145,16 @@ function SpecialistRoleDashboard({
           </ol>
         </article>
       </section>
+
+      {roleCode === 'OPERATOR' && <OperationsControlPanel enableNotification={false} />}
+
+      {roleCode === 'OPERATOR' && <ReviewModerationPanel enableModeration={false} />}
+
+      {(roleCode === 'OPERATOR' || roleCode === 'FIELD_STAFF') && (
+        <ScheduleChatControlPanel enableUpdate={roleCode === 'OPERATOR'} />
+      )}
+
+      {roleCode === 'OPERATOR' && <SupportOperationsPanel />}
 
       <section className="mgmt-section" id={`${roleCode.toLowerCase()}-api`}>
         <div className="mgmt-section-title">

@@ -11,9 +11,58 @@ import type {
 import { buildAssetUrl } from "../../utils/buildAssetUrl";
 import { getRandomItems } from "./apiCollectionUtils";
 import { getBackendData } from "./serverApiClient";
+import {
+  deleteBackendData,
+  postBackendData,
+  putBackendData,
+} from "./serverApiClient";
 
 const destinationFetchSize = 50;
 const featuredDestinationLimit = 10;
+
+export type DestinationFollowPayload = Partial<{
+  notifyEvent: boolean;
+  notifyVoucher: boolean;
+  notifyNewTour: boolean;
+  notifyBestSeason: boolean;
+}>;
+
+export type DestinationFollow = {
+  id: number;
+  destinationUuid?: string;
+  destinationName?: string;
+  notifyEvent?: boolean;
+  notifyVoucher?: boolean;
+  notifyNewTour?: boolean;
+  notifyBestSeason?: boolean;
+  createdAt?: string;
+};
+
+export type ProposeDestinationPayload = {
+  name: string;
+  province: string;
+  district?: string;
+  region?: string;
+  countryCode?: string;
+  address?: string;
+  latitude?: number | string;
+  longitude?: number | string;
+  shortDescription?: string;
+  description?: string;
+  bestTimeFromMonth?: number;
+  bestTimeToMonth?: number;
+  crowdLevelDefault?: string;
+};
+
+export type DestinationProposal = {
+  uuid: string;
+  name?: string;
+  province?: string;
+  district?: string;
+  region?: string;
+  status?: string;
+  submittedAt?: string;
+};
 
 function mapDestination(item: BackendDestination): Destination {
   const activeTourCount = item.activeTourCount ?? 0;
@@ -102,6 +151,32 @@ export const destinationApi = {
     );
 
     return mapDestinationDetail(detail);
+  },
+
+  followDestination(uuid: string, payload?: DestinationFollowPayload) {
+    return postBackendData<DestinationFollow>(`destinations/${uuid}/follow`, payload);
+  },
+
+  unfollowDestination(uuid: string) {
+    return deleteBackendData(`destinations/${uuid}/follow`);
+  },
+
+  updateFollowSettings(uuid: string, payload: DestinationFollowPayload) {
+    return putBackendData<DestinationFollow>(
+      `destinations/${uuid}/follow/settings`,
+      payload,
+    );
+  },
+
+  getMyFollows(page = 0, size = 50) {
+    return getBackendData<PageResponse<DestinationFollow>>(
+      "destinations/me/follows",
+      { page, size },
+    );
+  },
+
+  proposeDestination(payload: ProposeDestinationPayload) {
+    return postBackendData<DestinationProposal>("destinations/propose", payload);
   },
 };
 

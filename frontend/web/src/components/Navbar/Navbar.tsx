@@ -9,6 +9,7 @@ import {
   LifeBuoy,
   LogOut,
   Moon,
+  Stamp,
   SunMedium,
   UserCircle2,
   UserRound,
@@ -63,6 +64,7 @@ function getAccountLabels(language: string) {
       account: 'Account',
       accountPage: 'Account center',
       supportCenter: 'Support center',
+      passport: 'Travel passport',
       profileDetails: 'Personal details',
       fullName: 'Full name',
       displayName: 'Display name',
@@ -86,6 +88,7 @@ function getAccountLabels(language: string) {
     account: 'Tài khoản',
     accountPage: 'Trang tài khoản',
     supportCenter: 'Hỗ trợ',
+    passport: 'Passport',
     profileDetails: 'Thông tin cá nhân',
     fullName: 'Họ tên',
     displayName: 'Tên hiển thị',
@@ -349,6 +352,15 @@ export function Navbar() {
                 >
                   <LifeBuoy aria-hidden="true" />
                   <span>{accountLabels.supportCenter}</span>
+                </Link>
+
+                <Link
+                  className="account-menu-button"
+                  to="/passport"
+                  onClick={() => setIsAccountOpen(false)}
+                >
+                  <Stamp aria-hidden="true" />
+                  <span>{accountLabels.passport}</span>
                 </Link>
 
                 <button

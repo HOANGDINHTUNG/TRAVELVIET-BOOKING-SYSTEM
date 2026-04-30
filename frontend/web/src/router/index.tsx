@@ -19,6 +19,12 @@ const lazyAccountPage = lazy(
 const lazySupportCenterPage = lazy(
   () => import("../module/support/pages/SupportCenterPage"),
 );
+const lazyPassportPage = lazy(
+  () => import("../module/loyalty/pages/PassportPage"),
+);
+const lazyScheduleChatPage = lazy(
+  () => import("../module/scheduleChat/pages/ScheduleChatPage"),
+);
 const lazyAuthLayout = lazy(() => import("../module/auth/layouts/AuthLayout"));
 const lazyLoginPage = lazy(() => import("../module/auth/pages/LoginPage"));
 const lazyRegisterPage = lazy(
@@ -71,6 +77,14 @@ const router = createBrowserRouter([
           {
             path: "support",
             element: withSuspense(createElement(lazySupportCenterPage)),
+          },
+          {
+            path: "passport",
+            element: withSuspense(createElement(lazyPassportPage)),
+          },
+          {
+            path: "schedules/:scheduleId/chat",
+            element: withSuspense(createElement(lazyScheduleChatPage)),
           },
         ],
       },

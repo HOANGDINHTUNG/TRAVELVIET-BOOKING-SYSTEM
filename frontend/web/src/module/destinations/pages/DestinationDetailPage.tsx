@@ -9,6 +9,7 @@ import { PageLoader } from '../../../components/common/ux/PageLoader'
 import { Footer } from '../../../components/Footer/Footer'
 import { DestinationActivitiesSection } from '../components/DestinationActivitiesSection'
 import { DestinationDetailHero } from '../components/DestinationDetailHero'
+import { DestinationEngagementSection } from '../components/DestinationEngagementSection'
 import { DestinationFoodSpecialtySection } from '../components/DestinationFoodSpecialtySection'
 import { DestinationMediaSection } from '../components/DestinationMediaSection'
 import { DestinationOverviewSection } from '../components/DestinationOverviewSection'
@@ -161,6 +162,11 @@ function DestinationDetailPage() {
           copy={copy}
           detail={detail}
           weather={weather}
+        />
+        <DestinationEngagementSection
+          copy={copy}
+          detail={detail}
+          locale={locale}
         />
         <DestinationMediaSection
           copy={copy}

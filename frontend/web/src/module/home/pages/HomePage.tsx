@@ -13,6 +13,7 @@ import { DestinationsSection } from "../components/Destinations/DestinationsSect
 import { Hero } from "../components/Hero/Hero";
 import { PackagesSection } from "../components/Packages/PackagesSection";
 import { PartnerMarquee } from "../components/PartnerMarquee/PartnerMarquee";
+import { PersonalizedRecommendations } from "../components/Recommendations/PersonalizedRecommendations";
 import { StorySection } from "../components/Story/StorySection";
 import { TravelFilmSection } from "../components/TravelFilm/TravelFilmSection";
 import { WeatherAlertsSection } from "../components/WeatherAlerts/WeatherAlertsSection";
@@ -186,6 +187,7 @@ function HomePage() {
           message="Kiem tra endpoint GET /tours hoac bo loc diem den hien tai."
         />
       )}
+      <PersonalizedRecommendations />
       <StorySection />
       <ContactSection
         tours={tours}
