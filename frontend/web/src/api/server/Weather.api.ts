@@ -5,6 +5,21 @@ import type {
 } from '../../module/home/database/interface/publicTravel'
 import { getBackendData } from './serverApiClient'
 
+type WeatherApiFlag = 'yes' | 'no'
+
+export type WeatherApiCurrentResponse = Record<string, unknown>
+export type WeatherApiForecastResponse = Record<string, unknown>
+export type WeatherApiLocationResponse = {
+  id?: number
+  name?: string
+  region?: string
+  country?: string
+  lat?: number
+  lon?: number
+  url?: string
+}
+export type WeatherApiIpLookupResponse = Record<string, unknown>
+
 export const weatherApi = {
   getDestinationForecasts(destinationUuid: string) {
     return getBackendData<WeatherForecast[]>(
@@ -26,6 +41,35 @@ export const weatherApi = {
 
   getRouteEstimates(params?: { fromLabel?: string; toLabel?: string }) {
     return getBackendData<RouteEstimate[]>('route-estimates', params)
+  },
+
+  getRealtime(params: { q: string; aqi?: WeatherApiFlag }) {
+    return getBackendData<WeatherApiCurrentResponse>('weather/realtime', {
+      q: params.q,
+      aqi: params.aqi ?? 'no',
+    })
+  },
+
+  getForecast(params: {
+    q: string
+    days?: number
+    aqi?: WeatherApiFlag
+    alerts?: WeatherApiFlag
+  }) {
+    return getBackendData<WeatherApiForecastResponse>('weather/forecast', {
+      q: params.q,
+      days: params.days ?? 1,
+      aqi: params.aqi ?? 'no',
+      alerts: params.alerts ?? 'no',
+    })
+  },
+
+  searchLocations(q: string) {
+    return getBackendData<WeatherApiLocationResponse[]>('weather/search', { q })
+  },
+
+  lookupIp(q: string) {
+    return getBackendData<WeatherApiIpLookupResponse>('weather/ip', { q })
   },
 }
 

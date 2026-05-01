@@ -729,6 +729,9 @@ Authorization: Bearer <ACCESS_TOKEN>
 - `destinationUuid` phai la UUID hop le (vi du `3fa85f64-5717-4562-b3fc-2c963f66afa6`)
 - Destination phai ton tai, `status = approved`, `isActive = true` va chua bi soft-delete; nguoc lai tra `404 RESOURCE_NOT_FOUND`
 - Neu `destinationUuid` khong dung dinh dang UUID, backend tra `400 INVALID_PARAMETER`
+- Neu `WEATHERAPI_KEY` duoc cau hinh, backend uu tien WeatherAPI.com Forecast API:
+  `GET https://api.weatherapi.com/v1/forecast.json?key={key}&q={lat},{lon}&days=1&aqi=no&alerts=no`
+- Neu WeatherAPI.com chua cau hinh hoac loi, backend fallback ve forecast da luu trong DB
 
 **Request**
 
@@ -737,6 +740,42 @@ GET http://localhost:8088/api/v1/destinations/3fa85f64-5717-4562-b3fc-2c963f66af
 ```
 
 > Luu y khi test bang Postman: phai thay literal `{destinationUuid}` bang UUID that. Postman khong tu substitute `{...}` trong path; muon dung bien thi viet `{{destinationUuid}}` (hai cap ngoac) va khai bao trong environment.
+
+#### `GET /weather/realtime`
+
+- Access: `PUBLIC`
+- Proxy WeatherAPI.com Realtime API without exposing the provider API key to the frontend
+- Provider call: `GET https://api.weatherapi.com/v1/current.json?key={key}&q={q}&aqi={aqi}`
+- Query params:
+  - `q`: required city, IP, lat/lon, or supported WeatherAPI.com location query
+  - `aqi`: optional `yes|no`, default `no`
+
+#### `GET /weather/forecast`
+
+- Access: `PUBLIC`
+- Proxy WeatherAPI.com Forecast API
+- Provider call: `GET https://api.weatherapi.com/v1/forecast.json?key={key}&q={q}&days={days}&aqi={aqi}&alerts={alerts}`
+- Query params:
+  - `q`: required city, IP, lat/lon, or supported WeatherAPI.com location query
+  - `days`: optional `1..14`, default `1`
+  - `aqi`: optional `yes|no`, default `no`
+  - `alerts`: optional `yes|no`, default `no`
+
+#### `GET /weather/search`
+
+- Access: `PUBLIC`
+- Proxy WeatherAPI.com Search/Autocomplete API
+- Provider call: `GET https://api.weatherapi.com/v1/search.json?key={key}&q={q}`
+- Query params:
+  - `q`: required city/town search text
+
+#### `GET /weather/ip`
+
+- Access: `PUBLIC`
+- Proxy WeatherAPI.com IP Lookup API
+- Provider call: `GET https://api.weatherapi.com/v1/ip.json?key={key}&q={q}`
+- Query params:
+  - `q`: required IP address
 
 #### `GET /destinations/{destinationUuid}/weather/alerts`
 

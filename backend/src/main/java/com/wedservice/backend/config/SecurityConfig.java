@@ -65,6 +65,7 @@ public class SecurityConfig {
                                 "/destinations",
                                 "/destinations/{uuid}",
                                 "/destinations/{destinationUuid}/weather/**",
+                                "/weather/**",
                                 "/tours",
                                 "/tours/**",
                                 "/reviews/tours/**",
