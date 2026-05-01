@@ -37,7 +37,11 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false} bounces={false}>
+      <ScrollView 
+        showsVerticalScrollIndicator={false} 
+        bounces={false}
+        contentContainerStyle={{ paddingBottom: 110 }} 
+      >
         
         {/* 1. HEADER & THANH TÌM KIẾM */}
         <View style={styles.headerBackground}>

@@ -1,35 +1,88 @@
-import { Tabs } from 'expo-router';
 import React from 'react';
+import { Platform, StyleSheet } from 'react-native';
+import { Tabs } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
+export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-      }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
-        }}
-      />
+        headerShown: false, // Ẩn Header mặc định
+        tabBarShowLabel: true,
+        tabBarActiveTintColor: '#005AAB', // Xanh chủ đạo TravelViet khi chọn
+        tabBarInactiveTintColor: '#888',  // Xám nhạt tinh tế khi không chọn
+        tabBarStyle: styles.tabBar,
+        tabBarLabelStyle: styles.tabBarLabel,
+      }}
+    >
       <Tabs.Screen
         name="explore"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: 'Khuyến mãi',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? "gift" : "gift-outline"} size={24} color={color} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="discover"
+        options={{
+          title: 'Khám phá',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? "compass" : "compass-outline"} size={24} color={color} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="index"
+        options={{
+          title: 'Trang chủ',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? "home" : "home-outline"} size={24} color={color} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="video"
+        options={{
+          title: 'Video',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? "play-circle" : "play-circle-outline"} size={24} color={color} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="preferences"
+        options={{
+          title: 'Tài khoản',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? "person" : "person-outline"} size={24} color={color} />
+          ),
         }}
       />
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  tabBar: {
+    backgroundColor: '#ffffff', // Nền trắng tinh khiết
+    height: Platform.OS === 'ios' ? 85 : 60, // Chiều cao chuẩn mực
+    paddingBottom: Platform.OS === 'ios' ? 20 : 5,
+    paddingTop: 5,
+    // Thiết kế phẳng: Bỏ hết đổ bóng (elevation/shadow), chỉ dùng 1 đường viền mỏng manh ở trên
+    borderTopWidth: 1,
+    borderTopColor: '#EAEAEA', 
+    elevation: 0, 
+    shadowOpacity: 0,
+  },
+  tabBarLabel: {
+    fontSize: 11,
+    fontWeight: '500',
+    marginTop: 2,
+  }
+});
