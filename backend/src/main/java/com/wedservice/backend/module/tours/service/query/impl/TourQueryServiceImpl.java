@@ -102,13 +102,27 @@ public class TourQueryServiceImpl implements TourQueryService {
     @Cacheable(value = "tours", key = "#request")
     @Transactional(readOnly = true)
     public Page<TourResponse> searchTours(TourSearchRequest request) {
+        return searchTours(request, true);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<TourResponse> searchAdminTours(TourSearchRequest request) {
+        return searchTours(request, false);
+    }
+
+    private Page<TourResponse> searchTours(TourSearchRequest request, boolean publicOnly) {
         validateSearchRequest(request);
         PageRequest pr = PageRequest.of(request.getPage(), request.getSize(), buildSort(request));
 
         QTour qTour = QTour.tour;
         BooleanBuilder builder = new BooleanBuilder();
         builder.and(qTour.deletedAt.isNull());
-        builder.and(qTour.status.eq(TourStatus.ACTIVE));
+        if (publicOnly) {
+            builder.and(qTour.status.eq(TourStatus.ACTIVE));
+        } else if (StringUtils.hasText(request.getStatus())) {
+            builder.and(qTour.status.eq(TourStatus.fromValue(request.getStatus().trim())));
+        }
 
         if (request.getDestinationId() != null) {
             builder.and(qTour.destination.id.eq(request.getDestinationId()));
@@ -203,6 +217,20 @@ public class TourQueryServiceImpl implements TourQueryService {
             throw e;
         } catch (Exception e) {
             log.error("Error fetching tour {}: {}", id, e.getMessage(), e);
+            throw new RuntimeException("Error processing tour details: " + e.getMessage());
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public TourResponse getAdminTour(Long id) {
+        try {
+            Tour tour = findActiveTour(id);
+            return toResponse(tour, true);
+        } catch (ResourceNotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Error fetching admin tour {}: {}", id, e.getMessage(), e);
             throw new RuntimeException("Error processing tour details: " + e.getMessage());
         }
     }

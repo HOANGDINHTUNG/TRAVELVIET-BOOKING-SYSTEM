@@ -24,8 +24,16 @@ public class TourFacade {
         return tourQueryService.searchTours(request);
     }
 
+    public Page<TourResponse> searchAdminTours(TourSearchRequest request) {
+        return tourQueryService.searchAdminTours(request);
+    }
+
     public TourResponse getTour(Long id) {
         return tourQueryService.getTour(id);
+    }
+
+    public TourResponse getAdminTour(Long id) {
+        return tourQueryService.getAdminTour(id);
     }
 
     public List<TourScheduleResponse> getTourSchedules(Long tourId) {

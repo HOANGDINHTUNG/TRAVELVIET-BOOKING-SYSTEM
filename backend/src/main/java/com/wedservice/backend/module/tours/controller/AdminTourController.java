@@ -2,9 +2,11 @@ package com.wedservice.backend.module.tours.controller;
 
 import com.wedservice.backend.common.service.FileService;
 import com.wedservice.backend.common.response.ApiResponse;
+import com.wedservice.backend.common.response.PageResponse;
 import com.wedservice.backend.module.tours.dto.request.TourMediaRequest;
 import com.wedservice.backend.module.tours.dto.request.TourRequest;
 import com.wedservice.backend.module.tours.dto.request.TourScheduleRequest;
+import com.wedservice.backend.module.tours.dto.request.TourSearchRequest;
 import com.wedservice.backend.module.tours.dto.request.UpdateTourScheduleStatusRequest;
 import com.wedservice.backend.module.tours.dto.response.TourResponse;
 import com.wedservice.backend.module.tours.dto.response.TourScheduleResponse;
@@ -35,6 +37,18 @@ public class AdminTourController {
 
     private final TourFacade tourFacade;
     private final FileService fileService;
+
+    @GetMapping
+    @PreAuthorize("hasAuthority('tour.view')")
+    public ApiResponse<PageResponse<TourResponse>> searchTours(@Validated TourSearchRequest request) {
+        return ApiResponse.success(PageResponse.of(tourFacade.searchAdminTours(request)));
+    }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('tour.view')")
+    public ApiResponse<TourResponse> getTour(@PathVariable Long id) {
+        return ApiResponse.success(tourFacade.getAdminTour(id));
+    }
 
     @PostMapping
     @PreAuthorize("hasAuthority('tour.create')")

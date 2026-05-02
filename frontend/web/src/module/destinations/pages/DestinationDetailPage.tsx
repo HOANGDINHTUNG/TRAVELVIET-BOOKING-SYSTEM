@@ -25,7 +25,9 @@ import {
 import { getErrorMessage } from '../utils/destinationDetailFormatters'
 import { createDestinationDetailViewModel } from '../utils/destinationDetailViewModel'
 import {
+  buildDestinationWeatherQuery,
   emptyDestinationDetailWeather,
+  mapWeatherApiForecasts,
   type DestinationDetailWeatherState,
 } from '../utils/destinationDetailWeather'
 import '../styles/DestinationDetailPage.css'
@@ -72,7 +74,7 @@ function DestinationDetailPage() {
 
         setDetail(destination)
 
-        const [forecasts, alerts, crowdPredictions] = await Promise.allSettled([
+        const [storedForecasts, alerts, crowdPredictions] = await Promise.allSettled([
           weatherApi.getDestinationForecasts(uuid),
           weatherApi.getDestinationAlerts(uuid),
           weatherApi.getDestinationCrowdPredictions(uuid),
@@ -82,8 +84,26 @@ function DestinationDetailPage() {
           return
         }
 
+        let resolvedForecasts =
+          storedForecasts.status === 'fulfilled' ? storedForecasts.value : []
+        let liveForecastRejected = false
+
+        if (resolvedForecasts.length === 0) {
+          try {
+            const livePayload = await weatherApi.getForecast({
+              q: buildDestinationWeatherQuery(destination),
+              days: 1,
+              aqi: 'no',
+              alerts: 'no',
+            })
+            resolvedForecasts = mapWeatherApiForecasts(livePayload)
+          } catch {
+            liveForecastRejected = true
+          }
+        }
+
         setWeather({
-          forecasts: forecasts.status === 'fulfilled' ? forecasts.value : [],
+          forecasts: resolvedForecasts,
           alerts: alerts.status === 'fulfilled' ? alerts.value : [],
           crowdPredictions:
             crowdPredictions.status === 'fulfilled'
@@ -91,7 +111,8 @@ function DestinationDetailPage() {
               : [],
           loading: false,
           error:
-            forecasts.status === 'rejected' &&
+            storedForecasts.status === 'rejected' &&
+            liveForecastRejected &&
             alerts.status === 'rejected' &&
             crowdPredictions.status === 'rejected'
               ? copy.loadError

@@ -7,6 +7,9 @@ import type {
 import { buildAssetUrl } from "../../utils/buildAssetUrl";
 import { getBackendData } from "./serverApiClient";
 
+const featuredTourFetchSize = 6;
+const tourFetchSize = 100;
+
 function toNumber(value: number | string | undefined, fallback = 0) {
   if (value === undefined || value === null || value === "") {
     return fallback;
@@ -69,10 +72,18 @@ function mapTour(item: BackendTour): Tour {
 }
 
 export const tourApi = {
+  async getAllTours() {
+    const page = await getBackendData<PageResponse<BackendTour>>("tours", {
+      page: 0,
+      size: tourFetchSize,
+    });
+
+    return page.content.map(mapTour);
+  },
   async getTours() {
     const page = await getBackendData<PageResponse<BackendTour>>("tours", {
       page: 0,
-      size: 6,
+      size: featuredTourFetchSize,
     });
 
     return page.content.map(mapTour);
