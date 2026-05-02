@@ -1,8 +1,8 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { CalendarDays, MapPin, Search, Star, Tag } from "lucide-react";
+import { ArrowRight, CalendarDays, MapPin, Search, Star, Tag } from "lucide-react";
 import { FiArrowUpRight } from "react-icons/fi";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import type { Tour } from "../../database/travelData";
 import "./PackagesSection.css";
 
@@ -155,7 +155,7 @@ export function PackagesSection({ tours, onSelectTour }: PackagesSectionProps) {
               <button
                 className="tour-secondary-button"
                 type="button"
-                onClick={() => onSelectTour(title)}
+                onClick={() => onSelectTour(tour.title)}
               >
                 Tu van nhanh
               </button>
@@ -186,7 +186,13 @@ export function PackagesSection({ tours, onSelectTour }: PackagesSectionProps) {
           <p className="eyebrow">{t("packages.eyebrow")}</p>
           <h2>{t("packages.title")}</h2>
         </div>
-        <p>{t("packages.copy")}</p>
+        <div className="package-heading-action">
+          <p>{t("packages.copy")}</p>
+          <Link className="package-more-link" to="/tours">
+            Xem thêm tour
+            <ArrowRight size={17} strokeWidth={2.2} aria-hidden="true" />
+          </Link>
+        </div>
       </div>
 
       <div className="tour-discovery-toolbar" aria-label="Tour filters">

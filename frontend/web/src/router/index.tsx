@@ -7,6 +7,10 @@ const lazyHomePage = lazy(() => import("../module/home/pages/HomePage"));
 const lazyDestinationDetailPage = lazy(
   () => import("../module/destinations/pages/DestinationDetailPage"),
 );
+const lazyDestinationsPage = lazy(
+  () => import("../module/destinations/pages/DestinationsPage"),
+);
+const lazyToursPage = lazy(() => import("../module/tours/pages/ToursPage"));
 const lazyTourDetailPage = lazy(
   () => import("../module/tours/pages/TourDetailPage"),
 );
@@ -41,6 +45,12 @@ const lazyManagementLayout = lazy(
 const lazyManagementHubPage = lazy(
   () => import("../module/management/pages/ManagementHubPage"),
 );
+const lazyManageDestinationsPage = lazy(
+  () => import("../module/management/pages/ManageDestinationsPage"),
+);
+const lazyManageToursPage = lazy(
+  () => import("../module/management/pages/ManageToursPage"),
+);
 
 const withSuspense = (element: ReactElement) => (
   <Suspense fallback={<div className="min-h-screen">Đang tải...</div>}>
@@ -55,6 +65,14 @@ const router = createBrowserRouter([
     errorElement: withSuspense(createElement(lazyNotFoundPage)),
     children: [
       { index: true, element: withSuspense(createElement(lazyHomePage)) },
+      {
+        path: "destinations",
+        element: withSuspense(createElement(lazyDestinationsPage)),
+      },
+      {
+        path: "tours",
+        element: withSuspense(createElement(lazyToursPage)),
+      },
       {
         element: withSuspense(createElement(lazyRequireAuthenticated)),
         children: [
@@ -111,6 +129,14 @@ const router = createBrowserRouter([
               {
                 index: true,
                 element: withSuspense(createElement(lazyManagementHubPage)),
+              },
+              {
+                path: "destinations",
+                element: withSuspense(createElement(lazyManageDestinationsPage)),
+              },
+              {
+                path: "tours",
+                element: withSuspense(createElement(lazyManageToursPage)),
               },
               {
                 path: ":roleCode",

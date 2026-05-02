@@ -9,7 +9,9 @@ import java.util.List;
 
 public interface TourQueryService {
     Page<TourResponse> searchTours(TourSearchRequest request);
+    Page<TourResponse> searchAdminTours(TourSearchRequest request);
     TourResponse getTour(Long id);
+    TourResponse getAdminTour(Long id);
     List<TourScheduleResponse> getTourSchedules(Long tourId);
     List<TourScheduleResponse> getAdminTourSchedules(Long tourId);
     TourScheduleResponse getTourSchedule(Long tourId, Long scheduleId);
