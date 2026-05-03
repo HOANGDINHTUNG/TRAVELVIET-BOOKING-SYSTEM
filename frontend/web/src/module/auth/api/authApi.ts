@@ -18,6 +18,7 @@ export type {
   AuthUser,
   LoginPayload,
   RegisterPayload,
+  UserAccessContext,
 } from '../database/interface/users'
 
 export {
@@ -95,5 +96,5 @@ export function hasManagerRole(user: AuthUser | null) {
 }
 
 export function resolvePostAuthRedirect(user: AuthUser | null) {
-  return hasManagerRole(user) ? '/management' : '/'
+  return hasManagerRole(user) ? '/management/dashboard' : '/'
 }

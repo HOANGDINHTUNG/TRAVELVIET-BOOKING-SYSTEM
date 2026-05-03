@@ -22,8 +22,8 @@ export type ManagementModule = {
 export const managementModules: ManagementModule[] = [
   {
     id: 'system',
-    title: 'System & RBAC',
-    description: 'Quan ly nguoi dung, role, permission, audit.',
+    title: 'Hệ thống & phân quyền',
+    description: 'Quản lý người dùng, vai trò, quyền và nhật ký audit.',
     endpoints: [
       {
         id: 'users-list',
@@ -61,6 +61,20 @@ export const managementModules: ManagementModule[] = [
         permission: 'user.view',
       },
       {
+        id: 'roles-create',
+        method: 'POST',
+        path: '/roles',
+        controller: 'AdminRbacController',
+        permission: 'role.assign',
+      },
+      {
+        id: 'roles-update',
+        method: 'PUT',
+        path: '/roles/{id}',
+        controller: 'AdminRbacController',
+        permission: 'role.assign',
+      },
+      {
         id: 'permissions-list',
         method: 'GET',
         path: '/permissions',
@@ -85,8 +99,8 @@ export const managementModules: ManagementModule[] = [
   },
   {
     id: 'destination',
-    title: 'Destination & Weather',
-    description: 'Quan ly diem den, duyet de xuat, thong tin thoi tiet.',
+    title: 'Điểm đến & thời tiết',
+    description: 'Quản lý điểm đến, duyệt đề xuất và thông tin thời tiết.',
     endpoints: [
       {
         id: 'destination-list',
@@ -141,8 +155,8 @@ export const managementModules: ManagementModule[] = [
   },
   {
     id: 'tour-schedule',
-    title: 'Tour & Schedule',
-    description: 'Quan ly tour, lich khoi hanh va chat room theo schedule.',
+    title: 'Tour & lịch khởi hành',
+    description: 'Quản lý tour, lịch khởi hành và phòng chat theo lịch.',
     endpoints: [
       {
         id: 'tour-public-list',
@@ -150,7 +164,7 @@ export const managementModules: ManagementModule[] = [
         path: '/tours?page=0&size=10',
         controller: 'TourController',
         permission: 'tour.view',
-        note: 'API public hien dang duoc dung de listing tour.',
+        note: 'API public hiện đang được dùng để liệt kê tour.',
       },
       {
         id: 'tour-create',
@@ -205,8 +219,8 @@ export const managementModules: ManagementModule[] = [
   },
   {
     id: 'operation',
-    title: 'Operation',
-    description: 'Booking, payment, refund, support van hanh.',
+    title: 'Vận hành',
+    description: 'Booking, thanh toán, hoàn tiền và hỗ trợ vận hành.',
     endpoints: [
       {
         id: 'booking-create',
@@ -251,6 +265,13 @@ export const managementModules: ManagementModule[] = [
         permission: 'refund.create',
       },
       {
+        id: 'refund-detail',
+        method: 'GET',
+        path: '/refunds/{id}',
+        controller: 'RefundController',
+        permission: 'refund.view',
+      },
+      {
         id: 'refund-approve',
         method: 'PATCH',
         path: '/refunds/{id}/approve',
@@ -274,9 +295,52 @@ export const managementModules: ManagementModule[] = [
     ],
   },
   {
+    id: 'review',
+    title: 'Đánh giá',
+    description: 'Xem chi tiết, phản hồi và kiểm duyệt đánh giá.',
+    endpoints: [
+      {
+        id: 'reviews-detail',
+        method: 'GET',
+        path: '/reviews/{id}',
+        controller: 'ReviewController',
+        permission: 'review.view',
+      },
+      {
+        id: 'reviews-reply',
+        method: 'POST',
+        path: '/reviews/{id}/replies',
+        controller: 'ReviewController',
+        permission: 'review.reply',
+      },
+      {
+        id: 'reviews-moderate',
+        method: 'PATCH',
+        path: '/reviews/{id}/moderation',
+        controller: 'ReviewController',
+        permission: 'review.moderate',
+      },
+    ],
+  },
+  {
+    id: 'communication',
+    title: 'Thông báo',
+    description: 'Gửi thông báo vận hành và chiến dịch cho người dùng.',
+    endpoints: [
+      {
+        id: 'notifications-create',
+        method: 'POST',
+        path: '/notifications',
+        controller: 'AdminNotificationController',
+        permission: 'user.update',
+        note: 'Backend đang dùng user.update; nên đổi sang notification.send ở giai đoạn sau.',
+      },
+    ],
+  },
+  {
     id: 'promotion',
-    title: 'Promotion',
-    description: 'Voucher, campaign va package san pham.',
+    title: 'Khuyến mãi',
+    description: 'Voucher, chiến dịch khuyến mãi và gói sản phẩm.',
     endpoints: [
       {
         id: 'vouchers-list',
@@ -320,43 +384,43 @@ export type QuickCheckItem = {
 export const quickCheckItems: QuickCheckItem[] = [
   {
     id: 'check-roles',
-    label: 'Role list',
+    label: 'Danh sách vai trò',
     path: '/roles',
     permission: 'user.view',
   },
   {
     id: 'check-users',
-    label: 'User list',
+    label: 'Danh sách người dùng',
     path: '/users?page=0&size=5',
     permission: 'user.view',
   },
   {
     id: 'check-destinations',
-    label: 'Destination list',
+    label: 'Danh sách điểm đến',
     path: '/admin/destinations?page=0&size=5',
     permission: 'destination.view',
   },
   {
     id: 'check-tours',
-    label: 'Tour list',
+    label: 'Danh sách tour',
     path: '/tours?page=0&size=5',
     permission: 'tour.view',
   },
   {
     id: 'check-support',
-    label: 'Support sessions',
+    label: 'Phiên hỗ trợ',
     path: '/support/sessions',
     permission: 'support.view',
   },
   {
     id: 'check-vouchers',
-    label: 'Voucher list',
+    label: 'Danh sách voucher',
     path: '/vouchers?page=0&size=5',
     permission: 'voucher.view',
   },
   {
     id: 'check-audit',
-    label: 'Audit logs',
+    label: 'Nhật ký audit',
     path: '/audit-logs?page=0&size=5',
     permission: 'audit.view',
   },

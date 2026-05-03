@@ -6,6 +6,7 @@ import com.wedservice.backend.module.users.dto.request.UserAddressRequest;
 import com.wedservice.backend.module.users.dto.request.UserDeviceRequest;
 import com.wedservice.backend.module.users.dto.request.UserPreferenceRequest;
 import com.wedservice.backend.module.users.dto.response.UserAddressResponse;
+import com.wedservice.backend.module.users.dto.response.UserAccessContextResponse;
 import com.wedservice.backend.module.users.dto.response.UserDeviceResponse;
 import com.wedservice.backend.module.users.dto.response.UserPreferenceResponse;
 import com.wedservice.backend.module.users.dto.response.UserResponse;
@@ -78,6 +79,38 @@ class UserProfileControllerTest {
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("Current user fetched successfully"))
                 .andExpect(jsonPath("$.data.email").value("customer@example.com"));
+    }
+
+    @Test
+    void getMyAccessContext_returnsRolesAndPermissionsForCurrentUser() throws Exception {
+        UserResponse user = UserResponse.builder()
+                .id(UUID.randomUUID())
+                .fullName("Admin User")
+                .email("admin@example.com")
+                .role("ADMIN")
+                .roles(List.of("ADMIN", "OPERATOR"))
+                .status(Status.ACTIVE)
+                .build();
+        UserAccessContextResponse response = UserAccessContextResponse.builder()
+                .user(user)
+                .roles(List.of("ADMIN", "OPERATOR"))
+                .permissions(List.of("user.view", "booking.view"))
+                .managementRoles(List.of("ADMIN", "OPERATOR"))
+                .hasManagementAccess(true)
+                .isSuperAdmin(false)
+                .build();
+
+        when(userProfileFacade.getMyAccessContext()).thenReturn(response);
+
+        mockMvc.perform(get("/users/me/access-context"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.message").value("Current user access context fetched successfully"))
+                .andExpect(jsonPath("$.data.user.email").value("admin@example.com"))
+                .andExpect(jsonPath("$.data.roles[0]").value("ADMIN"))
+                .andExpect(jsonPath("$.data.permissions[1]").value("booking.view"))
+                .andExpect(jsonPath("$.data.hasManagementAccess").value(true))
+                .andExpect(jsonPath("$.data.isSuperAdmin").value(false));
     }
 
     @Test

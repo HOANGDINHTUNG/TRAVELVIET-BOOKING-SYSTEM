@@ -146,7 +146,7 @@ public class WeatherApiClient {
             return null;
         }
 
-        String message = root.path("error").path("message").asText();
+        String message = root.path("error").path("message").asString();
         return StringUtils.hasText(message) ? message : null;
     }
 }

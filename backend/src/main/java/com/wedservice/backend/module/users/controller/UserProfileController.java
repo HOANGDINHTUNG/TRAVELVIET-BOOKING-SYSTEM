@@ -6,6 +6,7 @@ import com.wedservice.backend.module.users.dto.request.UserDeviceRequest;
 import com.wedservice.backend.module.users.dto.request.UserPreferenceRequest;
 import com.wedservice.backend.module.users.dto.request.UpdateMyProfileRequest;
 import com.wedservice.backend.module.users.dto.response.UserAddressResponse;
+import com.wedservice.backend.module.users.dto.response.UserAccessContextResponse;
 import com.wedservice.backend.module.users.dto.response.UserDeviceResponse;
 import com.wedservice.backend.module.users.dto.response.UserPreferenceResponse;
 import com.wedservice.backend.module.users.dto.response.UserResponse;
@@ -46,6 +47,17 @@ public class UserProfileController {
         return ApiResponse.<UserResponse>builder()
                 .success(true)
                 .message("Current user fetched successfully")
+                .data(response)
+                .build();
+    }
+
+    @GetMapping("/access-context")
+    public ApiResponse<UserAccessContextResponse> getMyAccessContext() {
+        UserAccessContextResponse response = userProfileFacade.getMyAccessContext();
+
+        return ApiResponse.<UserAccessContextResponse>builder()
+                .success(true)
+                .message("Current user access context fetched successfully")
                 .data(response)
                 .build();
     }

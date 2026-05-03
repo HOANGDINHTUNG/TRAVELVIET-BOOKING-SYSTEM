@@ -29,26 +29,26 @@ export type SpecialistRoleCode = 'OPERATOR' | 'CONTENT_EDITOR' | 'FIELD_STAFF'
 
 export const superAdminCommands = [
   {
-    title: 'Kiem soat tai khoan',
-    description: 'Tao, khoa, cap nhat nguoi dung va phan role theo tung bo phan.',
+    title: 'Kiểm soát tài khoản',
+    description: 'Tạo, khóa, cập nhật người dùng và phân role theo từng bộ phận.',
     icon: Users,
     tone: 'green',
   },
   {
     title: 'Role & permission',
-    description: 'Quan ly ma quyen, cap phat role, kiem tra quyen nhay cam.',
+    description: 'Quản lý mã quyền, cấp phát role, kiểm tra quyền nhạy cảm.',
     icon: KeyRound,
     tone: 'amber',
   },
   {
-    title: 'Audit & bao mat',
-    description: 'Theo doi thao tac quan trong, request loi, hanh vi can canh bao.',
+    title: 'Audit & bảo mật',
+    description: 'Theo dõi thao tác quan trọng, request lỗi, hành vi cần cảnh báo.',
     icon: ShieldCheck,
     tone: 'blue',
   },
   {
     title: 'Health check API',
-    description: 'Chay nhanh cac endpoint GET de xac nhan token va policy.',
+    description: 'Chạy nhanh các endpoint GET để xác nhận token và policy.',
     icon: ServerCog,
     tone: 'slate',
   },
@@ -76,7 +76,7 @@ export const superAdminLanes = [
 export const adminFocusCards: readonly DashboardFocusItem[] = [
   {
     title: 'User & access',
-    description: 'Mo danh sach user, tao tai khoan noi bo, khoa tai khoan va gan role.',
+    description: 'Mở danh sách user, tạo tài khoản nội bộ, khóa tài khoản và gán role.',
     moduleId: 'system',
     endpointIds: ['users-list', 'users-create', 'users-deactivate', 'roles-list'],
     icon: Users,
@@ -84,7 +84,7 @@ export const adminFocusCards: readonly DashboardFocusItem[] = [
   },
   {
     title: 'Destination review',
-    description: 'Duyet diem den, sua thong tin can thiet va kiem tra canh bao thoi tiet.',
+    description: 'Duyệt điểm đến, sửa thông tin cần thiết và kiểm tra cảnh báo thời tiết.',
     moduleId: 'destination',
     endpointIds: ['destination-list', 'destination-approve', 'weather-alert-list'],
     icon: MapPinned,
@@ -92,7 +92,7 @@ export const adminFocusCards: readonly DashboardFocusItem[] = [
   },
   {
     title: 'Tour planning',
-    description: 'Tao tour, cap nhat lich khoi hanh va dong lich khi het slot.',
+    description: 'Tạo tour, cập nhật lịch khởi hành và đóng lịch khi hết slot.',
     moduleId: 'tour-schedule',
     endpointIds: ['tour-public-list', 'tour-create', 'schedule-list', 'schedule-status'],
     icon: CalendarDays,
@@ -100,7 +100,7 @@ export const adminFocusCards: readonly DashboardFocusItem[] = [
   },
   {
     title: 'Booking support',
-    description: 'Theo doi booking, check-in, ho tro khach va xu ly hoan tien.',
+    description: 'Theo dõi booking, check-in, hỗ trợ khách và xử lý hoàn tiền.',
     moduleId: 'operation',
     endpointIds: ['booking-detail', 'booking-checkin', 'refund-approve', 'support-sessions'],
     icon: MessageSquareText,
@@ -108,7 +108,7 @@ export const adminFocusCards: readonly DashboardFocusItem[] = [
   },
   {
     title: 'Campaign control',
-    description: 'Quan ly voucher va promotion campaign dang chay tren he thong.',
+    description: 'Quản lý voucher và promotion campaign đang chạy trên hệ thống.',
     moduleId: 'promotion',
     endpointIds: ['vouchers-list', 'vouchers-create', 'campaign-list'],
     icon: TicketPercent,
@@ -118,18 +118,18 @@ export const adminFocusCards: readonly DashboardFocusItem[] = [
 
 export const adminWorkQueues = [
   {
-    title: 'Can duyet hom nay',
-    detail: 'Destination, tour va lich khoi hanh can duoc xem truoc khi publish.',
+    title: 'Cần duyệt hôm nay',
+    detail: 'Destination, tour và lịch khởi hành cần được xem trước khi publish.',
     icon: ClipboardCheck,
   },
   {
-    title: 'Can xu ly van hanh',
-    detail: 'Booking dang cho check-in, refund can duyet, support sessions dang mo.',
+    title: 'Cần xử lý vận hành',
+    detail: 'Booking đang chờ check-in, refund cần duyệt, support sessions đang mở.',
     icon: CreditCard,
   },
   {
-    title: 'Can kiem tra quyen',
-    detail: 'Tai khoan moi, role thay doi va cac endpoint nhay cam trong audit log.',
+    title: 'Cần kiểm tra quyền',
+    detail: 'Tài khoản mới, role thay đổi và các endpoint nhạy cảm trong audit log.',
     icon: ShieldCheck,
   },
 ] as const
@@ -147,14 +147,14 @@ export const specialistRoleDashboards: Record<
 > = {
   OPERATOR: {
     kicker: 'OPERATOR DESK',
-    title: 'Dieu phoi booking, refund va support',
+    title: 'Điều phối booking, refund và support',
     description:
-      'Man hinh nay uu tien cac viec can xu ly lien tuc trong ngay: booking, payment, refund, support va lich tour dang chay.',
+      'Màn hình này ưu tiên các việc cần xử lý liên tục trong ngày: booking, payment, refund, support và lịch tour đang chạy.',
     primaryAction: 'Run operation checks',
     focus: [
       {
         title: 'Booking flow',
-        description: 'Xem booking, tao booking ho tro, cap nhat trang thai va check-in khi can.',
+        description: 'Xem booking, tạo booking hỗ trợ, cập nhật trạng thái và check-in khi cần.',
         moduleId: 'operation',
         endpointIds: ['booking-detail', 'booking-create', 'booking-checkin'],
         icon: ClipboardCheck,
@@ -162,7 +162,7 @@ export const specialistRoleDashboards: Record<
       },
       {
         title: 'Refund desk',
-        description: 'Tiep nhan yeu cau hoan tien, duyet hoac tu choi theo quy trinh van hanh.',
+        description: 'Tiếp nhận yêu cầu hoàn tiền, duyệt hoặc từ chối theo quy trình vận hành.',
         moduleId: 'operation',
         endpointIds: ['refund-create', 'refund-approve'],
         icon: CreditCard,
@@ -170,7 +170,7 @@ export const specialistRoleDashboards: Record<
       },
       {
         title: 'Support routing',
-        description: 'Mo session ho tro, phan hoi khach va dieu phoi case cho bo phan lien quan.',
+        description: 'Mở session hỗ trợ, phản hồi khách và điều phối case cho bộ phận liên quan.',
         moduleId: 'operation',
         endpointIds: ['support-sessions', 'support-reply'],
         icon: MessageSquareText,
@@ -178,7 +178,7 @@ export const specialistRoleDashboards: Record<
       },
       {
         title: 'Schedule control',
-        description: 'Theo doi lich khoi hanh, tao lich va dong lich khi het slot hoac co su co.',
+        description: 'Theo dõi lịch khởi hành, tạo lịch và đóng lịch khi hết slot hoặc có sự cố.',
         moduleId: 'tour-schedule',
         endpointIds: ['schedule-list', 'schedule-create', 'schedule-status'],
         icon: CalendarDays,
@@ -186,22 +186,22 @@ export const specialistRoleDashboards: Record<
       },
     ],
     routines: [
-      'Mo support sessions dang cho phan hoi',
-      'Kiem tra booking can check-in trong ngay',
-      'Xu ly refund dang cho duyet',
-      'Doi chieu payment detail truoc khi escalated',
+      'Mở support sessions đang chờ phản hồi',
+      'Kiểm tra booking cần check-in trong ngày',
+      'Xử lý refund đang chờ duyệt',
+      'Đối chiếu payment detail trước khi escalated',
     ],
   },
   CONTENT_EDITOR: {
     kicker: 'CONTENT STUDIO',
-    title: 'Quan ly noi dung diem den va tour',
+    title: 'Quản lý nội dung điểm đến và tour',
     description:
-      'Khong gian cho editor tap trung vao noi dung: destination, weather context, tour listing va lich dang can publish.',
+      'Không gian cho editor tập trung vào nội dung: destination, weather context, tour listing và lịch đang cần publish.',
     primaryAction: 'Run content checks',
     focus: [
       {
         title: 'Destination content',
-        description: 'Tao, sua va duyet diem den de noi dung len public dung chuan.',
+        description: 'Tạo, sửa và duyệt điểm đến để nội dung lên public đúng chuẩn.',
         moduleId: 'destination',
         endpointIds: ['destination-list', 'destination-create', 'destination-update', 'destination-approve'],
         icon: MapPinned,
@@ -209,7 +209,7 @@ export const specialistRoleDashboards: Record<
       },
       {
         title: 'Weather context',
-        description: 'Kiem tra weather alerts va route estimates truoc khi cap nhat noi dung.',
+        description: 'Kiểm tra weather alerts và route estimates trước khi cập nhật nội dung.',
         moduleId: 'destination',
         endpointIds: ['weather-alert-list', 'route-estimates-list'],
         icon: Activity,
@@ -217,7 +217,7 @@ export const specialistRoleDashboards: Record<
       },
       {
         title: 'Tour publishing',
-        description: 'Doc danh sach tour, tao moi va cap nhat noi dung tour dang ban.',
+        description: 'Đọc danh sách tour, tạo mới và cập nhật nội dung tour đang bán.',
         moduleId: 'tour-schedule',
         endpointIds: ['tour-public-list', 'tour-create', 'tour-update'],
         icon: CalendarDays,
@@ -225,7 +225,7 @@ export const specialistRoleDashboards: Record<
       },
       {
         title: 'Schedule visibility',
-        description: 'Xem lich tour va chat room lien quan de noi dung khop voi thuc te van hanh.',
+        description: 'Xem lịch tour và chat room liên quan để nội dung khớp với thực tế vận hành.',
         moduleId: 'tour-schedule',
         endpointIds: ['schedule-list', 'chat-room'],
         icon: MessageSquareText,
@@ -233,22 +233,22 @@ export const specialistRoleDashboards: Record<
       },
     ],
     routines: [
-      'Duyet destination moi truoc khi publish',
-      'Cap nhat tour dang co thay doi lich',
-      'Kiem tra weather alerts cho diem den noi bat',
-      'Doi chieu noi dung voi chat room/schedule neu co thay doi',
+      'Duyệt destination mới trước khi publish',
+      'Cập nhật tour đang có thay đổi lịch',
+      'Kiểm tra weather alerts cho điểm đến nổi bật',
+      'Đối chiếu nội dung với chat room/schedule nếu có thay đổi',
     ],
   },
   FIELD_STAFF: {
     kicker: 'FIELD STAFF BOARD',
-    title: 'Cap nhat thuc dia va check-in khach',
+    title: 'Cập nhật thực địa và check-in khách',
     description:
-      'Giao dien gon cho nhan su thuc dia: xem lich, xem booking, check-in va gui cap nhat ve destination.',
+      'Giao diện gọn cho nhân sự thực địa: xem lịch, xem booking, check-in và gửi cập nhật về destination.',
     primaryAction: 'Run field checks',
     focus: [
       {
         title: 'Today schedules',
-        description: 'Xem lich khoi hanh, tour lien quan va chat room cua lich khi can phoi hop.',
+        description: 'Xem lịch khởi hành, tour liên quan và chat room của lịch khi cần phối hợp.',
         moduleId: 'tour-schedule',
         endpointIds: ['tour-public-list', 'schedule-list', 'chat-room'],
         icon: CalendarDays,
@@ -256,7 +256,7 @@ export const specialistRoleDashboards: Record<
       },
       {
         title: 'Guest check-in',
-        description: 'Mo booking va thuc hien check-in tai diem tap trung hoac diem den.',
+        description: 'Mở booking và thực hiện check-in tại điểm tập trung hoặc điểm đến.',
         moduleId: 'operation',
         endpointIds: ['booking-detail', 'booking-checkin'],
         icon: ClipboardCheck,
@@ -264,7 +264,7 @@ export const specialistRoleDashboards: Record<
       },
       {
         title: 'Destination update',
-        description: 'Xem, tao de xuat va cap nhat thong tin diem den tu hien truong.',
+        description: 'Xem, tạo đề xuất và cập nhật thông tin điểm đến từ hiện trường.',
         moduleId: 'destination',
         endpointIds: ['destination-list', 'destination-create', 'destination-update'],
         icon: MapPinned,
@@ -272,7 +272,7 @@ export const specialistRoleDashboards: Record<
       },
       {
         title: 'Route context',
-        description: 'Kiem tra route estimates va weather alerts de bao lai van hanh.',
+        description: 'Kiểm tra route estimates và weather alerts để báo lại vận hành.',
         moduleId: 'destination',
         endpointIds: ['route-estimates-list', 'weather-alert-list'],
         icon: Route,
@@ -280,10 +280,10 @@ export const specialistRoleDashboards: Record<
       },
     ],
     routines: [
-      'Mo lich tour phu trach truoc gio khoi hanh',
-      'Check-in booking ngay khi khach co mat',
-      'Cap nhat destination neu co thay doi tai thuc dia',
-      'Bao van hanh neu route/weather co rui ro',
+      'Mở lịch tour phụ trách trước giờ khởi hành',
+      'Check-in booking ngay khi khách có mặt',
+      'Cập nhật destination nếu có thay đổi tại thực địa',
+      'Báo vận hành nếu route/weather có rủi ro',
     ],
   },
 }

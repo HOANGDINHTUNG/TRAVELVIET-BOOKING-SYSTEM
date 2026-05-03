@@ -48,7 +48,7 @@ function SpecialistRoleDashboard({
     {
       label: 'Modules',
       value: modules.length.toString(),
-      detail: 'Khu vuc duoc phep thao tac',
+      detail: 'Khu vực được phép thao tác',
       icon: Database,
     },
     {
@@ -91,7 +91,7 @@ function SpecialistRoleDashboard({
         <aside className="mgmt-role-side-panel">
           <span>{roleProfile.domain}</span>
           <strong>{roleProfile.code}</strong>
-          <small>Current user roles: {userRoles}</small>
+          <small>Vai trò hiện tại: {userRoles}</small>
           <div className="mgmt-role-method-strip">
             {visibleMethods.map(([method, count]) => (
               <span className={`mgmt-method-tag method-${method.toLowerCase()}`} key={method}>
@@ -119,8 +119,8 @@ function SpecialistRoleDashboard({
       <section className="mgmt-role-workbench" id={`${roleCode.toLowerCase()}-workbench`}>
         <article className="mgmt-role-panel">
           <div className="mgmt-section-title">
-            <h3>Khong gian lam viec</h3>
-            <p>Cac card chi hien API ma role nay co quyen truy cap.</p>
+            <h3>Không gian làm việc</h3>
+            <p>Các card chỉ hiện API mà role này có quyền truy cập.</p>
           </div>
 
           <FocusGrid
@@ -134,8 +134,8 @@ function SpecialistRoleDashboard({
 
         <article className="mgmt-role-panel">
           <div className="mgmt-section-title">
-            <h3>Thu tu lam viec</h3>
-            <p>Danh sach thao tac nen dat len dau giao dien cho role nay.</p>
+            <h3>Thứ tự làm việc</h3>
+            <p>Danh sách thao tác nên đặt lên đầu giao diện cho role này.</p>
           </div>
 
           <ol className="mgmt-role-routine-list">
@@ -159,7 +159,7 @@ function SpecialistRoleDashboard({
       <section className="mgmt-section" id={`${roleCode.toLowerCase()}-api`}>
         <div className="mgmt-section-title">
           <h3>{roleProfile.label} API Map</h3>
-          <p>Endpoint theo module de tiep tuc tach thanh bang, form va nut action rieng.</p>
+          <p>Endpoint theo module để tiếp tục tách thành bảng, form và nút action riêng.</p>
         </div>
 
         <div className="mgmt-role-api-grid">

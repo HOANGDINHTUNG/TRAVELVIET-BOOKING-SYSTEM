@@ -55,8 +55,8 @@ function ManagementHubPage() {
       return
     }
 
-    if (!selectedRole || selectedRole !== normalizedRoleCode) {
-      navigate(`/management/${managerRoles[0]}`, { replace: true })
+    if (normalizedRoleCode && (!selectedRole || selectedRole !== normalizedRoleCode)) {
+      navigate('/management/dashboard', { replace: true })
     }
   }, [managerRoles, navigate, normalizedRoleCode, selectedRole])
 
@@ -156,7 +156,7 @@ function ManagementHubPage() {
       <section className="mgmt-section">
         <div className="mgmt-section-title">
           <h3>Controller Coverage</h3>
-          <p>Danh sach endpoint duoc map tu backend controllers hien co.</p>
+          <p>Danh sách endpoint được map từ backend controllers hiện có.</p>
         </div>
 
         <div className="mgmt-module-grid">

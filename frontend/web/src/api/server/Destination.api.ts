@@ -13,6 +13,7 @@ import { getRandomItems } from "./apiCollectionUtils";
 import { getBackendData } from "./serverApiClient";
 import {
   deleteBackendData,
+  patchBackendData,
   postBackendData,
   putBackendData,
 } from "./serverApiClient";
@@ -62,6 +63,82 @@ export type DestinationProposal = {
   region?: string;
   status?: string;
   submittedAt?: string;
+};
+
+export type AdminDestinationStatus = "pending" | "approved" | "rejected" | string;
+
+export type AdminDestination = {
+  uuid: string;
+  code?: string;
+  name?: string;
+  slug?: string;
+  countryCode?: string;
+  province?: string;
+  district?: string;
+  region?: string;
+  address?: string;
+  latitude?: number | string;
+  longitude?: number | string;
+  shortDescription?: string;
+  description?: string;
+  bestTimeFromMonth?: number;
+  bestTimeToMonth?: number;
+  crowdLevelDefault?: string;
+  isFeatured?: boolean;
+  isActive?: boolean;
+  status?: AdminDestinationStatus;
+  proposedBy?: string;
+  verifiedBy?: string;
+  rejectionReason?: string;
+  isOfficial?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+  deletedAt?: string;
+};
+
+export type AdminDestinationDetail = AdminDestination & {
+  mediaList?: Array<NonNullable<BackendDestinationDetail["mediaList"]>[number]>;
+  foods?: BackendDestinationDetail["foods"];
+  specialties?: BackendDestinationDetail["specialties"];
+  activities?: BackendDestinationDetail["activities"];
+  tips?: BackendDestinationDetail["tips"];
+  events?: BackendDestinationDetail["events"];
+};
+
+export type AdminDestinationQuery = {
+  keyword?: string;
+  province?: string;
+  region?: string;
+  crowdLevel?: string;
+  isFeatured?: boolean;
+  isActive?: boolean;
+  isOfficial?: boolean;
+  status?: AdminDestinationStatus;
+  page?: number;
+  size?: number;
+  sortBy?: string;
+  sortDir?: "asc" | "desc" | string;
+};
+
+export type AdminDestinationPayload = {
+  code: string;
+  name: string;
+  slug?: string;
+  countryCode?: string;
+  province: string;
+  district?: string;
+  region?: string;
+  address?: string;
+  latitude?: number | string;
+  longitude?: number | string;
+  shortDescription?: string;
+  description?: string;
+  bestTimeFromMonth?: number;
+  bestTimeToMonth?: number;
+  crowdLevelDefault?: string;
+  isFeatured?: boolean;
+  isActive?: boolean;
+  isOfficial?: boolean;
 };
 
 function mapDestination(item: BackendDestination): Destination {
@@ -179,6 +256,45 @@ export const destinationApi = {
 
   proposeDestination(payload: ProposeDestinationPayload) {
     return postBackendData<DestinationProposal>("destinations/propose", payload);
+  },
+
+  getAdminDestinations(params: AdminDestinationQuery = {}) {
+    return getBackendData<PageResponse<AdminDestination>>(
+      "admin/destinations",
+      params,
+    );
+  },
+
+  getAdminDestination(uuid: string) {
+    return getBackendData<AdminDestinationDetail>(`admin/destinations/${uuid}`);
+  },
+
+  createAdminDestination(payload: AdminDestinationPayload) {
+    return postBackendData<AdminDestinationDetail>("admin/destinations", payload);
+  },
+
+  updateAdminDestination(uuid: string, payload: AdminDestinationPayload) {
+    return putBackendData<AdminDestinationDetail>(
+      `admin/destinations/${uuid}`,
+      payload,
+    );
+  },
+
+  deleteAdminDestination(uuid: string) {
+    return deleteBackendData(`admin/destinations/${uuid}`);
+  },
+
+  approveAdminDestination(uuid: string) {
+    return patchBackendData<AdminDestinationDetail>(
+      `admin/destinations/${uuid}/approve`,
+    );
+  },
+
+  rejectAdminDestination(uuid: string, reason: string) {
+    return patchBackendData<AdminDestinationDetail>(
+      `admin/destinations/${uuid}/reject`,
+      { reason },
+    );
   },
 };
 

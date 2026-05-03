@@ -1,4 +1,7 @@
-import type { AuthUser } from '../../module/auth/database/interface/users'
+import type {
+  AuthUser,
+  UserAccessContext,
+} from '../../module/auth/database/interface/users'
 import {
   deleteBackendData,
   getBackendData,
@@ -65,6 +68,10 @@ export type UserDevicePayload = Omit<UserDevice, 'id' | 'createdAt'>
 export const userApi = {
   getMyProfile() {
     return getBackendData<UserProfile>('users/me')
+  },
+
+  getMyAccessContext() {
+    return getBackendData<UserAccessContext>('users/me/access-context')
   },
 
   updateMyProfile(payload: UpdateMyProfilePayload) {

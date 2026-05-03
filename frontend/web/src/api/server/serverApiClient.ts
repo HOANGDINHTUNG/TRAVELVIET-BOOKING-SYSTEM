@@ -26,6 +26,13 @@ async function requestBackendData<T>(
       params: config.params,
     })
 
+    if (
+      config.options?.allowEmpty &&
+      (response.status === 204 || response.data == null)
+    ) {
+      return undefined as T
+    }
+
     return unwrapApiResponse(response.data, fallback, config.options) as T
   } catch (error) {
     throw new Error(getApiErrorMessage(error, fallback))

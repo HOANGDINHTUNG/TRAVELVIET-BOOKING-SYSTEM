@@ -1,6 +1,6 @@
 import { createElement, lazy, Suspense } from "react";
 import type { ReactElement } from "react";
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 import App from "../App";
 
 const lazyHomePage = lazy(() => import("../module/home/pages/HomePage"));
@@ -44,12 +44,6 @@ const lazyManagementLayout = lazy(
 );
 const lazyManagementHubPage = lazy(
   () => import("../module/management/pages/ManagementHubPage"),
-);
-const lazyManageDestinationsPage = lazy(
-  () => import("../module/management/pages/ManageDestinationsPage"),
-);
-const lazyManageToursPage = lazy(
-  () => import("../module/management/pages/ManageToursPage"),
 );
 
 const withSuspense = (element: ReactElement) => (
@@ -128,15 +122,11 @@ const router = createBrowserRouter([
             children: [
               {
                 index: true,
+                element: <Navigate to="dashboard" replace />,
+              },
+              {
+                path: "dashboard",
                 element: withSuspense(createElement(lazyManagementHubPage)),
-              },
-              {
-                path: "destinations",
-                element: withSuspense(createElement(lazyManageDestinationsPage)),
-              },
-              {
-                path: "tours",
-                element: withSuspense(createElement(lazyManageToursPage)),
               },
               {
                 path: ":roleCode",
