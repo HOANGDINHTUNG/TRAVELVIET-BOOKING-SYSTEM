@@ -5,6 +5,7 @@ import com.wedservice.backend.module.users.dto.request.UserDeviceRequest;
 import com.wedservice.backend.module.users.dto.request.UserPreferenceRequest;
 import com.wedservice.backend.module.users.dto.request.UpdateMyProfileRequest;
 import com.wedservice.backend.module.users.dto.response.UserAddressResponse;
+import com.wedservice.backend.module.users.dto.response.UserAccessContextResponse;
 import com.wedservice.backend.module.users.dto.response.UserDeviceResponse;
 import com.wedservice.backend.module.users.dto.response.UserPreferenceResponse;
 import com.wedservice.backend.module.users.dto.response.UserResponse;
@@ -26,6 +27,10 @@ public class UserProfileFacade {
 
     public UserResponse getMyProfile() {
         return queryService.getMyProfile();
+    }
+
+    public UserAccessContextResponse getMyAccessContext() {
+        return queryService.getMyAccessContext();
     }
 
     public List<UserAddressResponse> getMyAddresses() {

@@ -9,13 +9,17 @@ import com.wedservice.backend.module.users.dto.request.UserDeviceRequest;
 import com.wedservice.backend.module.users.dto.request.UserPreferenceRequest;
 import com.wedservice.backend.module.users.dto.request.UpdateMyProfileRequest;
 import com.wedservice.backend.module.users.dto.response.UserAddressResponse;
+import com.wedservice.backend.module.users.dto.response.UserAccessContextResponse;
 import com.wedservice.backend.module.users.dto.response.UserDeviceResponse;
 import com.wedservice.backend.module.users.dto.response.UserPreferenceResponse;
 import com.wedservice.backend.module.users.dto.response.UserResponse;
+import com.wedservice.backend.module.users.entity.Permission;
+import com.wedservice.backend.module.users.entity.Role;
 import com.wedservice.backend.module.users.entity.User;
 import com.wedservice.backend.module.users.entity.UserAddress;
 import com.wedservice.backend.module.users.entity.UserDevice;
 import com.wedservice.backend.module.users.entity.UserPreference;
+import com.wedservice.backend.module.users.entity.UserRole;
 import com.wedservice.backend.module.users.mapper.UserMapper;
 import com.wedservice.backend.module.users.repository.UserAddressRepository;
 import com.wedservice.backend.module.users.repository.UserDeviceRepository;
@@ -26,15 +30,26 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class UserProfileService {
+
+    private static final List<String> MANAGEMENT_ROLE_CODES = List.of(
+            "SUPER_ADMIN",
+            "ADMIN",
+            "OPERATOR",
+            "FIELD_STAFF",
+            "CONTENT_EDITOR"
+    );
 
     private final UserRepository userRepository;
     private final UserAddressRepository userAddressRepository;
@@ -46,6 +61,25 @@ public class UserProfileService {
     @Transactional(readOnly = true)
     public UserResponse getMyProfile() {
         return userMapper.toDto(findCurrentUser());
+    }
+
+    @Transactional(readOnly = true)
+    public UserAccessContextResponse getMyAccessContext() {
+        User currentUser = findCurrentUser();
+        List<String> roles = resolveEffectiveRoleCodes(currentUser);
+        List<String> permissions = resolveEffectivePermissionCodes(currentUser);
+        List<String> managementRoles = MANAGEMENT_ROLE_CODES.stream()
+                .filter(roles::contains)
+                .toList();
+
+        return UserAccessContextResponse.builder()
+                .user(userMapper.toDto(currentUser))
+                .roles(roles)
+                .permissions(permissions)
+                .managementRoles(managementRoles)
+                .hasManagementAccess(!managementRoles.isEmpty())
+                .isSuperAdmin(roles.contains("SUPER_ADMIN"))
+                .build();
     }
 
     @Transactional
@@ -225,6 +259,54 @@ public class UserProfileService {
         }
 
         return user;
+    }
+
+    private List<String> resolveEffectiveRoleCodes(User user) {
+        return effectiveUserRoles(user).stream()
+                .map(UserRole::getRole)
+                .map(Role::getCode)
+                .filter(StringUtils::hasText)
+                .collect(java.util.stream.Collectors.collectingAndThen(
+                        java.util.stream.Collectors.toCollection(LinkedHashSet::new),
+                        List::copyOf
+                ));
+    }
+
+    private List<String> resolveEffectivePermissionCodes(User user) {
+        Set<String> permissions = new LinkedHashSet<>();
+        for (UserRole userRole : effectiveUserRoles(user)) {
+            Role role = userRole.getRole();
+            if (role.getPermissions() == null) {
+                continue;
+            }
+            for (Permission permission : role.getPermissions()) {
+                if (permission != null
+                        && Boolean.TRUE.equals(permission.getIsActive())
+                        && StringUtils.hasText(permission.getCode())) {
+                    permissions.add(permission.getCode());
+                }
+            }
+        }
+        return List.copyOf(permissions);
+    }
+
+    private List<UserRole> effectiveUserRoles(User user) {
+        LocalDateTime now = LocalDateTime.now();
+        return user.getUserRoles().stream()
+                .filter(userRole -> userRole != null && userRole.getRole() != null)
+                .filter(userRole -> StringUtils.hasText(userRole.getRole().getCode()))
+                .filter(userRole -> Boolean.TRUE.equals(userRole.getRole().getIsActive()))
+                .filter(userRole -> userRole.getExpiredAt() == null || userRole.getExpiredAt().isAfter(now))
+                .sorted(Comparator
+                        .comparing((UserRole userRole) -> Boolean.TRUE.equals(userRole.getIsPrimary())).reversed()
+                        .thenComparing(
+                                userRole -> userRole.getRole().getHierarchyLevel() == null
+                                        ? 0
+                                        : userRole.getRole().getHierarchyLevel(),
+                                Comparator.reverseOrder()
+                        )
+                        .thenComparing(userRole -> userRole.getRole().getCode(), String.CASE_INSENSITIVE_ORDER))
+                .toList();
     }
 
     private UserAddress findMyAddress(UUID userId, Long addressId) {

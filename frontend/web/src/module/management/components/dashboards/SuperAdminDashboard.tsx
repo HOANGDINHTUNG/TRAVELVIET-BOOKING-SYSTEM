@@ -49,19 +49,19 @@ function SuperAdminDashboard({
     {
       label: 'Modules',
       value: modules.length.toString(),
-      detail: 'Vung nghiep vu dang quan ly',
+      detail: 'Vùng nghiệp vụ đang quản lý',
       icon: Database,
     },
     {
       label: 'Endpoints',
       value: endpointCount.toString(),
-      detail: `${protectedEndpointCount} endpoint co permission`,
+      detail: `${protectedEndpointCount} endpoint có permission`,
       icon: Route,
     },
     {
       label: 'Checks',
       value: checks.length.toString(),
-      detail: 'Bai test nhanh cho token hien tai',
+      detail: 'Bài test nhanh cho token hiện tại',
       icon: ClipboardCheck,
     },
   ]
@@ -71,11 +71,11 @@ function SuperAdminDashboard({
       <section className="mgmt-super-hero">
         <div className="mgmt-super-hero-copy">
           <p className="mgmt-kicker">SUPER ADMIN COMMAND CENTER</p>
-          <h2>Quan tri toan he thong TravelViet</h2>
+          <h2>Quản trị toàn hệ thống TravelViet</h2>
           <p>
-            Man hinh nay gom cac vung can thao tac thuong xuyen: tai khoan,
-            phan quyen, module nghiep vu, audit va kiem tra API. Cac thong tin
-            duoc sap xep de nhin nhanh trang thai truoc khi di vao chi tiet.
+            Màn hình này gồm các vùng cần thao tác thường xuyên: tài khoản,
+            phân quyền, module nghiệp vụ, audit và kiểm tra API. Các thông tin
+            được sắp xếp để nhìn nhanh trạng thái trước khi đi vào chi tiết.
           </p>
           <div className="mgmt-super-actions">
             <button type="button" className="mgmt-primary-btn" onClick={onRunAllChecks}>
@@ -92,7 +92,7 @@ function SuperAdminDashboard({
         <aside className="mgmt-super-profile">
           <span>{roleProfile.domain}</span>
           <strong>{permissionCount === 1 ? 'Full permissions' : `${permissionCount} seed permissions`}</strong>
-          <small>Current user roles: {userRoles}</small>
+          <small>Vai trò hiện tại: {userRoles}</small>
         </aside>
       </section>
 
@@ -113,8 +113,8 @@ function SuperAdminDashboard({
       <section className="mgmt-super-workspace">
         <article className="mgmt-super-panel">
           <div className="mgmt-section-title">
-            <h3>Tac vu uu tien</h3>
-            <p>Nhung nhom thao tac superadmin can nhin thay dau tien.</p>
+            <h3>Tác vụ ưu tiên</h3>
+            <p>Những nhóm thao tác Super Admin cần nhìn thấy đầu tiên.</p>
           </div>
 
           <div className="mgmt-command-list">
@@ -135,8 +135,8 @@ function SuperAdminDashboard({
 
         <article className="mgmt-super-panel">
           <div className="mgmt-section-title">
-            <h3>Luon kiem soat</h3>
-            <p>Quy trinh doc tu tren xuong de khong bo sot vung quan trong.</p>
+            <h3>Luôn kiểm soát</h3>
+            <p>Quy trình đọc từ trên xuống để không bỏ sót vùng quan trọng.</p>
           </div>
 
           <div className="mgmt-governance-lanes">
@@ -163,7 +163,7 @@ function SuperAdminDashboard({
       <section className="mgmt-section" id="superadmin-modules">
         <div className="mgmt-section-title">
           <h3>Module coverage</h3>
-          <p>Toan bo khu vuc backend ma Super Admin co the quan sat va dieu phoi.</p>
+          <p>Toàn bộ khu vực backend mà Super Admin có thể quan sát và điều phối.</p>
         </div>
 
         <div className="mgmt-module-table">
@@ -200,25 +200,25 @@ function SuperAdminDashboard({
 
       <section className="mgmt-section">
         <div className="mgmt-section-title">
-          <h3>Rui ro can theo doi</h3>
-          <p>Nhung khu vuc nen duoc uu tien khi mo dashboard moi ngay.</p>
+          <h3>Rủi ro cần theo dõi</h3>
+          <p>Những khu vực nên được ưu tiên khi mở dashboard mỗi ngày.</p>
         </div>
 
         <div className="mgmt-risk-grid">
           <article>
             <AlertTriangle aria-hidden="true" />
-            <strong>Role thay doi bat thuong</strong>
-            <p>Kiem tra audit log sau moi lan cap role, khoa tai khoan, hoac sua permission.</p>
+            <strong>Role thay đổi bất thường</strong>
+            <p>Kiểm tra audit log sau mỗi lần cấp role, khóa tài khoản hoặc sửa permission.</p>
           </article>
           <article>
             <Activity aria-hidden="true" />
-            <strong>Endpoint loi lien tuc</strong>
-            <p>Chay quick checks de tach loi token, loi policy va loi service.</p>
+            <strong>Endpoint lỗi liên tục</strong>
+            <p>Chạy quick checks để tách lỗi token, lỗi policy và lỗi service.</p>
           </article>
           <article>
             <ShieldCheck aria-hidden="true" />
-            <strong>Quyen nhay cam</strong>
-            <p>Tap trung vao user.*, role.*, permission.*, refund.* va audit.view.</p>
+            <strong>Quyền nhạy cảm</strong>
+            <p>Tập trung vào user.*, role.*, permission.*, refund.* và audit.view.</p>
           </article>
         </div>
       </section>

@@ -8,9 +8,11 @@ import com.wedservice.backend.module.users.dto.request.UserDeviceRequest;
 import com.wedservice.backend.module.users.dto.request.UserPreferenceRequest;
 import com.wedservice.backend.module.users.dto.request.UpdateMyProfileRequest;
 import com.wedservice.backend.module.users.dto.response.UserAddressResponse;
+import com.wedservice.backend.module.users.dto.response.UserAccessContextResponse;
 import com.wedservice.backend.module.users.dto.response.UserDeviceResponse;
 import com.wedservice.backend.module.users.dto.response.UserPreferenceResponse;
 import com.wedservice.backend.module.users.entity.BudgetLevel;
+import com.wedservice.backend.module.users.entity.Permission;
 import com.wedservice.backend.module.users.entity.PreferredTripMode;
 import com.wedservice.backend.module.users.dto.response.UserResponse;
 import com.wedservice.backend.module.users.entity.Role;
@@ -110,6 +112,116 @@ class UserProfileServiceTest {
 
         assertThat(response.getId()).isEqualTo(id);
         assertThat(response.getEmail()).isEqualTo("current@example.com");
+    }
+
+    @Test
+    void getMyAccessContext_returnsOnlyEffectiveRolesAndPermissions() {
+        UUID id = UUID.randomUUID();
+        User currentUser = User.builder()
+                .id(id)
+                .fullName("Admin User")
+                .email("admin@example.com")
+                .passwordHash("encoded")
+                .phone("0987654321")
+                .status(Status.ACTIVE)
+                .build();
+
+        Role adminRole = Role.builder()
+                .code("ADMIN")
+                .name("Admin")
+                .hierarchyLevel(80)
+                .isActive(true)
+                .build();
+        adminRole.getPermissions().add(Permission.builder()
+                .code("user.view")
+                .name("View users")
+                .moduleName("user")
+                .actionName("view")
+                .isActive(true)
+                .build());
+        adminRole.getPermissions().add(Permission.builder()
+                .code("role.assign")
+                .name("Assign roles")
+                .moduleName("role")
+                .actionName("assign")
+                .isActive(false)
+                .build());
+
+        Role fieldRole = Role.builder()
+                .code("FIELD_STAFF")
+                .name("Field Staff")
+                .hierarchyLevel(50)
+                .isActive(true)
+                .build();
+        fieldRole.getPermissions().add(Permission.builder()
+                .code("booking.checkin")
+                .name("Check in booking")
+                .moduleName("booking")
+                .actionName("checkin")
+                .isActive(true)
+                .build());
+
+        Role expiredRole = Role.builder()
+                .code("OPERATOR")
+                .name("Operator")
+                .hierarchyLevel(55)
+                .isActive(true)
+                .build();
+        expiredRole.getPermissions().add(Permission.builder()
+                .code("booking.view")
+                .name("View bookings")
+                .moduleName("booking")
+                .actionName("view")
+                .isActive(true)
+                .build());
+
+        Role inactiveRole = Role.builder()
+                .code("CONTENT_EDITOR")
+                .name("Content Editor")
+                .hierarchyLevel(60)
+                .isActive(false)
+                .build();
+        inactiveRole.getPermissions().add(Permission.builder()
+                .code("destination.update")
+                .name("Update destination")
+                .moduleName("destination")
+                .actionName("update")
+                .isActive(true)
+                .build());
+
+        currentUser.getUserRoles().add(UserRole.builder()
+                .user(currentUser)
+                .role(adminRole)
+                .isPrimary(true)
+                .build());
+        currentUser.getUserRoles().add(UserRole.builder()
+                .user(currentUser)
+                .role(fieldRole)
+                .isPrimary(false)
+                .build());
+        currentUser.getUserRoles().add(UserRole.builder()
+                .user(currentUser)
+                .role(expiredRole)
+                .isPrimary(false)
+                .expiredAt(LocalDateTime.now().minusDays(1))
+                .build());
+        currentUser.getUserRoles().add(UserRole.builder()
+                .user(currentUser)
+                .role(inactiveRole)
+                .isPrimary(false)
+                .build());
+
+        when(authenticatedUserProvider.getRequiredCurrentUserId()).thenReturn(id);
+        when(userRepository.findById(id)).thenReturn(Optional.of(currentUser));
+
+        UserAccessContextResponse response = userProfileService.getMyAccessContext();
+
+        assertThat(response.getUser().getId()).isEqualTo(id);
+        assertThat(response.getRoles()).containsExactly("ADMIN", "FIELD_STAFF");
+        assertThat(response.getPermissions()).containsExactly("user.view", "booking.checkin");
+        assertThat(response.getManagementRoles()).containsExactly("ADMIN", "FIELD_STAFF");
+        assertThat(response.getHasManagementAccess()).isTrue();
+        assertThat(response.getIsSuperAdmin()).isFalse();
     }
 
     @Test

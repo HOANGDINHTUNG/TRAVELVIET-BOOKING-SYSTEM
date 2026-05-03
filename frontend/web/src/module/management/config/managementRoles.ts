@@ -17,31 +17,31 @@ export const managerRoleProfiles: Record<ManagerRoleCode, ManagerRoleProfile> = 
     code: 'SUPER_ADMIN',
     label: 'Super Admin',
     domain: 'SYSTEM',
-    summary: 'Toan quyen he thong',
+    summary: 'Toàn quyền hệ thống',
   },
   ADMIN: {
     code: 'ADMIN',
     label: 'Admin',
     domain: 'BACKOFFICE',
-    summary: 'Quan tri van hanh',
+    summary: 'Quản trị vận hành',
   },
   CONTENT_EDITOR: {
     code: 'CONTENT_EDITOR',
-    label: 'Content Editor',
+    label: 'Biên tập nội dung',
     domain: 'BACKOFFICE',
-    summary: 'Quan ly destination, tour, media, noi dung',
+    summary: 'Quản lý điểm đến, tour, media, nội dung',
   },
   FIELD_STAFF: {
     code: 'FIELD_STAFF',
-    label: 'Field Staff',
+    label: 'Nhân sự thực địa',
     domain: 'BACKOFFICE',
-    summary: 'Nhan su thuc dia, cap nhat du lieu, check-in',
+    summary: 'Nhân sự thực địa, cập nhật dữ liệu, check-in',
   },
   OPERATOR: {
     code: 'OPERATOR',
     label: 'Operator',
     domain: 'BACKOFFICE',
-    summary: 'Dieu phoi lich, booking, refund, support',
+    summary: 'Điều phối lịch, booking, refund, support',
   },
 }
 

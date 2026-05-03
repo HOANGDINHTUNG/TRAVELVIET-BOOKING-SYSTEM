@@ -53,13 +53,13 @@ function AdminDashboard({
     {
       label: 'Modules',
       value: modules.length.toString(),
-      detail: 'Vung nghiep vu admin co quyen dieu phoi',
+      detail: 'Vùng nghiệp vụ admin có quyền điều phối',
       icon: Database,
     },
     {
       label: 'Endpoints',
       value: endpointCount.toString(),
-      detail: 'API duoc map theo controller hien co',
+      detail: 'API được map theo controller hiện có',
       icon: Route,
     },
     {
@@ -75,11 +75,11 @@ function AdminDashboard({
       <section className="mgmt-admin-hero">
         <div className="mgmt-admin-hero-copy">
           <p className="mgmt-kicker">ADMIN OPERATIONS CONSOLE</p>
-          <h2>Quan tri van hanh theo endpoint thuc te</h2>
+          <h2>Quản trị vận hành theo endpoint thực tế</h2>
           <p>
-            Dashboard nay gom cac khu vuc admin can dung moi ngay: nguoi dung,
-            diem den, tour, lich khoi hanh, booking, support va campaign. Cac
-            card ben duoi lay truc tiep tu catalog API de de doi chieu voi backend.
+            Dashboard này gồm các khu vực admin cần dùng mỗi ngày: người dùng,
+            điểm đến, tour, lịch khởi hành, booking, support và campaign. Các
+            card bên dưới lấy trực tiếp từ catalog API để dễ đối chiếu với backend.
           </p>
           <div className="mgmt-super-actions">
             <button type="button" className="mgmt-primary-btn" onClick={onRunAllChecks}>
@@ -100,7 +100,7 @@ function AdminDashboard({
         <aside className="mgmt-admin-status-panel">
           <span>{roleProfile.domain}</span>
           <strong>{roleProfile.label}</strong>
-          <small>Current user roles: {userRoles}</small>
+          <small>Vai trò hiện tại: {userRoles}</small>
           <div className="mgmt-admin-check-strip" aria-label="Admin check summary">
             <span>Idle {checkSummary.idle}</span>
             <span>Run {checkSummary.loading}</span>
@@ -127,8 +127,8 @@ function AdminDashboard({
       <section className="mgmt-admin-workbench" id="admin-workbench">
         <article className="mgmt-admin-panel">
           <div className="mgmt-section-title">
-            <h3>Tac vu theo role Admin</h3>
-            <p>Moi nhom hien endpoint dang co quyen dung, khong hien API bi chan boi role.</p>
+            <h3>Tác vụ theo role Admin</h3>
+            <p>Mỗi nhóm hiện endpoint đang có quyền dùng, không hiện API bị chặn bởi role.</p>
           </div>
 
           <FocusGrid
@@ -142,8 +142,8 @@ function AdminDashboard({
 
         <article className="mgmt-admin-panel">
           <div className="mgmt-section-title">
-            <h3>Hang doi van hanh</h3>
-            <p>Cach sap xep man hinh chinh cho admin khi bat dau ca lam.</p>
+            <h3>Hàng đợi vận hành</h3>
+            <p>Cách sắp xếp màn hình chính cho admin khi bắt đầu ca làm.</p>
           </div>
 
           <div className="mgmt-admin-queue-list">
@@ -189,7 +189,7 @@ function AdminDashboard({
       <section className="mgmt-section" id="admin-endpoints">
         <div className="mgmt-section-title">
           <h3>Admin API Map</h3>
-          <p>Danh sach endpoint nen duoc dung de lap cac bang, form va action tiep theo.</p>
+          <p>Danh sách endpoint nên được dùng để lập các bảng, form và action tiếp theo.</p>
         </div>
 
         <div className="mgmt-admin-module-board">

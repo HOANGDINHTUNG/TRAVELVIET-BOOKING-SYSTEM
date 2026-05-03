@@ -6,6 +6,7 @@ import { ScrollToPlugin } from 'gsap/ScrollToPlugin'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import {
   Languages,
+  LayoutDashboard,
   LifeBuoy,
   LogOut,
   Moon,
@@ -15,26 +16,21 @@ import {
   UserRound,
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { userApi } from '../../api/server/User.api'
 import { useAppDispatch, useAppSelector } from '../../hooks/reduxHooks'
+import type { AuthUser } from '../../module/auth/api/authApi'
 import {
   clearAuthSession,
   getStoredAccessToken,
   getStoredAuthUser,
+  persistStoredAuthUser,
 } from '../../module/auth/api/authApi'
 import { setLanguage, setTheme } from '../../stores/slices/preferencesSlice'
 import './Navbar.css'
 
 gsap.registerPlugin(ScrollToPlugin, ScrollTrigger)
 
-type NavAuthUser = {
-  fullName?: string
-  displayName?: string
-  email?: string
-  phone?: string
-  status?: string
-  memberLevel?: string
-  avatarUrl?: string | null
-}
+type NavAuthUser = Partial<AuthUser>
 
 const navItems = [
   { href: '#home', labelKey: 'nav.home' },
@@ -49,7 +45,7 @@ function readStoredUser() {
     return null
   }
 
-  return (getStoredAuthUser() as NavAuthUser | null) ?? (getStoredAccessToken() ? {} : null)
+  return getStoredAuthUser() ?? (getStoredAccessToken() ? {} : null)
 }
 
 function getUserInitial(user: NavAuthUser | null) {
@@ -65,6 +61,7 @@ function getAccountLabels(language: string) {
       accountPage: 'Account center',
       supportCenter: 'Support center',
       passport: 'Travel passport',
+      managementPage: 'Management',
       profileDetails: 'Personal details',
       fullName: 'Full name',
       displayName: 'Display name',
@@ -88,7 +85,8 @@ function getAccountLabels(language: string) {
     account: 'Tài khoản',
     accountPage: 'Trang tài khoản',
     supportCenter: 'Hỗ trợ',
-    passport: 'Passport',
+    passport: 'Passport du lịch',
+    managementPage: 'Trang quản lý',
     profileDetails: 'Thông tin cá nhân',
     fullName: 'Họ tên',
     displayName: 'Tên hiển thị',
@@ -113,6 +111,7 @@ export function Navbar() {
   const { language, theme } = useAppSelector((state) => state.preferences)
   const [isScrolled, setIsScrolled] = useState(false)
   const [authUser, setAuthUser] = useState<NavAuthUser | null>(() => readStoredUser())
+  const [hasManagementAccess, setHasManagementAccess] = useState(false)
   const [isAccountOpen, setIsAccountOpen] = useState(false)
   const [showProfileDetails, setShowProfileDetails] = useState(false)
   const navRef = useRef<HTMLElement | null>(null)
@@ -167,6 +166,7 @@ export function Navbar() {
       setAuthUser(nextUser)
 
       if (!nextUser) {
+        setHasManagementAccess(false)
         setIsAccountOpen(false)
         setShowProfileDetails(false)
       }
@@ -182,6 +182,38 @@ export function Navbar() {
       window.removeEventListener('travelviet:logout', syncAuthUser)
     }
   }, [])
+
+  useEffect(() => {
+    let isCancelled = false
+
+    const syncAccessContext = async () => {
+      if (!authUser || !getStoredAccessToken()) {
+        setHasManagementAccess(false)
+        return
+      }
+
+      try {
+        const accessContext = await userApi.getMyAccessContext()
+        if (isCancelled) {
+          return
+        }
+
+        setHasManagementAccess(Boolean(accessContext.hasManagementAccess))
+        setAuthUser(accessContext.user)
+        persistStoredAuthUser(accessContext.user)
+      } catch {
+        if (!isCancelled) {
+          setHasManagementAccess(false)
+        }
+      }
+    }
+
+    syncAccessContext()
+
+    return () => {
+      isCancelled = true
+    }
+  }, [authUser?.id])
 
   useEffect(() => {
     if (!isAccountOpen) {
@@ -345,6 +377,17 @@ export function Navbar() {
                   <span>{accountLabels.accountPage}</span>
                 </Link>
 
+                {hasManagementAccess && (
+                  <Link
+                    className="account-menu-button account-management"
+                    to="/management/dashboard"
+                    onClick={() => setIsAccountOpen(false)}
+                  >
+                    <LayoutDashboard aria-hidden="true" />
+                    <span>{accountLabels.managementPage}</span>
+                  </Link>
+                )}
+
                 <Link
                   className="account-menu-button"
                   to="/support"
@@ -443,7 +486,7 @@ export function Navbar() {
           </div>
         ) : (
           <>
-            <Link className="nav-auth-link" to="/login" aria-label="Dang nhap">
+            <Link className="nav-auth-link" to="/login" aria-label="Đăng nhập">
               <UserRound aria-hidden="true" />
             </Link>
             <a

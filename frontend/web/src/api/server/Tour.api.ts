@@ -5,7 +5,13 @@ import type {
   Tour,
 } from "../../module/home/database/interface/publicTravel";
 import { buildAssetUrl } from "../../utils/buildAssetUrl";
-import { getBackendData } from "./serverApiClient";
+import {
+  deleteBackendData,
+  getBackendData,
+  patchBackendData,
+  postBackendData,
+  putBackendData,
+} from "./serverApiClient";
 
 function toNumber(value: number | string | undefined, fallback = 0) {
   if (value === undefined || value === null || value === "") {
@@ -92,6 +98,57 @@ export const tourApi = {
       `tours/${tourId}/schedules/${scheduleId}`,
     );
     return schedule;
+  },
+
+  getAdminTours(params: Record<string, unknown> = {}) {
+    return getBackendData<PageResponse<BackendTour>>("tours", params);
+  },
+
+  createAdminTour(payload: unknown) {
+    return postBackendData<BackendTour>("admin/tours", payload);
+  },
+
+  updateAdminTour(id: number, payload: unknown) {
+    return putBackendData<BackendTour>(`admin/tours/${id}`, payload);
+  },
+
+  deleteAdminTour(id: number) {
+    return deleteBackendData(`admin/tours/${id}`);
+  },
+
+  getAdminSchedules(tourId: number) {
+    return getBackendData<BackendTourSchedule[]>(`admin/tours/${tourId}/schedules`);
+  },
+
+  getAdminSchedule(tourId: number, scheduleId: number) {
+    return getBackendData<BackendTourSchedule>(
+      `admin/tours/${tourId}/schedules/${scheduleId}`,
+    );
+  },
+
+  createAdminSchedule(tourId: number, payload: unknown) {
+    return postBackendData<BackendTourSchedule>(
+      `admin/tours/${tourId}/schedules`,
+      payload,
+    );
+  },
+
+  updateAdminSchedule(tourId: number, scheduleId: number, payload: unknown) {
+    return putBackendData<BackendTourSchedule>(
+      `admin/tours/${tourId}/schedules/${scheduleId}`,
+      payload,
+    );
+  },
+
+  updateAdminScheduleStatus(
+    tourId: number,
+    scheduleId: number,
+    status: string,
+  ) {
+    return patchBackendData<BackendTourSchedule>(
+      `admin/tours/${tourId}/schedules/${scheduleId}/status`,
+      { status },
+    );
   },
 };
 

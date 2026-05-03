@@ -20,8 +20,8 @@ import {
 type SystemTab = 'users' | 'roles' | 'audit'
 
 const tabs: Array<{ id: SystemTab; label: string }> = [
-  { id: 'users', label: 'Users' },
-  { id: 'roles', label: 'Roles & permissions' },
+  { id: 'users', label: 'Người dùng' },
+  { id: 'roles', label: 'Vai trò & quyền' },
   { id: 'audit', label: 'Audit' },
 ]
 
@@ -104,7 +104,7 @@ export default function SystemGovernancePanel() {
       setPermissions(permissionList)
       setAuditLogs(auditPage.content ?? [])
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Khong the tai du lieu he thong.')
+      setMessage(error instanceof Error ? error.message : 'Không thể tải dữ liệu hệ thống.')
     } finally {
       setLoading(false)
     }
@@ -123,9 +123,9 @@ export default function SystemGovernancePanel() {
       setUsers((current) =>
         current.map((item) => (item.id === updated.id ? updated : item)),
       )
-      setMessage('Da deactivate user.')
+      setMessage('Đã khóa người dùng.')
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Khong the deactivate user.')
+      setMessage(error instanceof Error ? error.message : 'Không thể khóa người dùng.')
     } finally {
       setWorkingUserId(null)
     }
@@ -136,10 +136,10 @@ export default function SystemGovernancePanel() {
       <header className="mgmt-system-head">
         <div>
           <p className="mgmt-kicker">SYSTEM GOVERNANCE</p>
-          <h3>Kiem soat user, role va audit log</h3>
+          <h3>Kiểm soát user, role và audit log</h3>
           <p>
-            Dung API users, roles, permissions va audit-logs de nhin nhanh
-            tai khoan noi bo, phan quyen hien co va hanh dong gan day.
+            Dùng API users, roles, permissions và audit-logs để nhìn nhanh
+            tài khoản nội bộ, phân quyền hiện có và hành động gần đây.
           </p>
         </div>
         <div className="mgmt-system-summary">
@@ -203,12 +203,12 @@ export default function SystemGovernancePanel() {
 
         <button type="button" onClick={() => void loadData()} disabled={loading}>
           <RefreshCcw aria-hidden="true" />
-          Tai lai
+          Tải lại
         </button>
       </div>
 
       {loading ? (
-        <p className="mgmt-system-empty">Dang tai du lieu he thong...</p>
+        <p className="mgmt-system-empty">Đang tải dữ liệu hệ thống...</p>
       ) : (
         <>
           {activeTab === 'users' && (
@@ -231,7 +231,7 @@ export default function SystemGovernancePanel() {
                     disabled={isInactive(user) || workingUserId === user.id}
                   >
                     <UserMinus aria-hidden="true" />
-                    Deactivate
+                    Khóa
                   </button>
                 </article>
               ))}
@@ -243,7 +243,7 @@ export default function SystemGovernancePanel() {
               <article className="mgmt-system-permission-panel">
                 <header>
                   <ShieldCheck aria-hidden="true" />
-                  <h4>Permission modules</h4>
+                  <h4>Module quyền</h4>
                 </header>
                 <div>
                   {Object.entries(permissionModules).map(([moduleName, count]) => (
@@ -305,7 +305,7 @@ export default function SystemGovernancePanel() {
         ((activeTab === 'users' && users.length === 0) ||
           (activeTab === 'roles' && roles.length === 0) ||
           (activeTab === 'audit' && auditLogs.length === 0)) && (
-          <p className="mgmt-system-empty">Khong co du lieu phu hop.</p>
+          <p className="mgmt-system-empty">Không có dữ liệu phù hợp.</p>
         )}
 
       {message && <p className="mgmt-system-message">{message}</p>}

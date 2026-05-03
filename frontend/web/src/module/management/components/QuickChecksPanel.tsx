@@ -12,7 +12,7 @@ function QuickChecksPanel({
     <section className="mgmt-section">
       <div className="mgmt-section-title">
         <h3>Quick API Checks</h3>
-        <p>Goi thu endpoint GET de kiem tra access theo token hien tai.</p>
+        <p>Gọi thử endpoint GET để kiểm tra access theo token hiện tại.</p>
       </div>
 
       <div className="mgmt-check-toolbar">

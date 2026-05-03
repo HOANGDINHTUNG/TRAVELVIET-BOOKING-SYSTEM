@@ -1,6 +1,7 @@
 package com.wedservice.backend.module.users.service.query.impl;
 
 import com.wedservice.backend.module.users.dto.response.UserAddressResponse;
+import com.wedservice.backend.module.users.dto.response.UserAccessContextResponse;
 import com.wedservice.backend.module.users.dto.response.UserDeviceResponse;
 import com.wedservice.backend.module.users.dto.response.UserPreferenceResponse;
 import com.wedservice.backend.module.users.dto.response.UserResponse;
@@ -20,6 +21,11 @@ public class UserProfileQueryServiceImpl implements UserProfileQueryService {
     @Override
     public UserResponse getMyProfile() {
         return userProfileService.getMyProfile();
+    }
+
+    @Override
+    public UserAccessContextResponse getMyAccessContext() {
+        return userProfileService.getMyAccessContext();
     }
 
     @Override

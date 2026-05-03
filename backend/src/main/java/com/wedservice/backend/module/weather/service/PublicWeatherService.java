@@ -57,8 +57,7 @@ public class PublicWeatherService {
                 log.warn(
                         "WeatherAPI.com forecast failed for destination {}. Falling back to stored forecasts. Cause: {}",
                         destinationUuid,
-                        ex.getMessage()
-                );
+                        ex.getMessage());
             }
         }
 
@@ -74,8 +73,7 @@ public class PublicWeatherService {
                 normalizeQuery(query),
                 normalizeForecastDays(days),
                 normalizeYesNo(aqi, "aqi"),
-                normalizeYesNo(alerts, "alerts")
-        );
+                normalizeYesNo(alerts, "alerts"));
     }
 
     public JsonNode searchLocations(String query) {
@@ -88,9 +86,8 @@ public class PublicWeatherService {
 
     private List<WeatherForecastResponse> getStoredDestinationForecasts(Destination destination) {
         return weatherForecastRepository.findByDestinationIdAndForecastDateGreaterThanEqualOrderByForecastDateAsc(
-                        destination.getId(),
-                        LocalDate.now()
-                ).stream()
+                destination.getId(),
+                LocalDate.now()).stream()
                 .map(this::toForecastResponse)
                 .toList();
     }
@@ -100,8 +97,7 @@ public class PublicWeatherService {
                 buildWeatherApiLocationQuery(destination),
                 normalizeForecastDays(weatherApiProperties.getForecastDays()),
                 normalizeYesNo(weatherApiProperties.getAqi(), "aqi"),
-                normalizeYesNo(weatherApiProperties.getAlerts(), "alerts")
-        );
+                normalizeYesNo(weatherApiProperties.getAlerts(), "alerts"));
         JsonNode forecastDays = payload.path("forecast").path("forecastday");
 
         if (!forecastDays.isArray()) {
@@ -123,8 +119,8 @@ public class PublicWeatherService {
                 .findByDestinationIdAndIsActiveTrueAndValidFromLessThanEqualAndValidToGreaterThanEqualOrderByValidFromDesc(
                         destination.getId(),
                         now,
-                        now
-                ).stream()
+                        now)
+                .stream()
                 .map(this::toAlertResponse)
                 .toList();
     }
@@ -133,9 +129,8 @@ public class PublicWeatherService {
     public List<CrowdPredictionResponse> getDestinationCrowdPredictions(UUID destinationUuid) {
         Destination destination = findPublicDestination(destinationUuid);
         return crowdPredictionRepository.findByDestinationIdAndPredictionDateGreaterThanEqualOrderByPredictionDateAsc(
-                        destination.getId(),
-                        LocalDate.now()
-                ).stream()
+                destination.getId(),
+                LocalDate.now()).stream()
                 .map(this::toCrowdPredictionResponse)
                 .toList();
     }
@@ -154,7 +149,8 @@ public class PublicWeatherService {
 
     private Destination findPublicDestination(UUID destinationUuid) {
         Destination destination = destinationRepository.findByUuid(destinationUuid)
-                .orElseThrow(() -> new ResourceNotFoundException("Destination not found with uuid: " + destinationUuid));
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("Destination not found with uuid: " + destinationUuid));
 
         if (destination.getDeletedAt() != null
                 || destination.getStatus() != DestinationStatus.APPROVED
@@ -170,9 +166,9 @@ public class PublicWeatherService {
 
         return WeatherForecastResponse.builder()
                 .destinationId(destination.getId())
-                .forecastDate(parseDate(forecastDay.path("date").asText()))
-                .weatherCode(textToNull(condition.path("code").asText()))
-                .summary(textToNull(condition.path("text").asText()))
+                .forecastDate(parseDate(forecastDay.path("date").asString()))
+                .weatherCode(textToNull(condition.path("code").asString()))
+                .summary(textToNull(condition.path("text").asString()))
                 .tempMin(decimalValue(day.path("mintemp_c")))
                 .tempMax(decimalValue(day.path("maxtemp_c")))
                 .humidityPercent(decimalValue(day.path("avghumidity")))
@@ -316,7 +312,7 @@ public class PublicWeatherService {
             return null;
         }
 
-        String rawValue = value.asText();
+        String rawValue = value.asString();
         if (!StringUtils.hasText(rawValue)) {
             return null;
         }
