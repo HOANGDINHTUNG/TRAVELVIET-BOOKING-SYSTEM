@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
+import { ArrowRight } from 'lucide-react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import type { Destination } from '../../database/travelData'
@@ -82,6 +83,10 @@ export function DestinationsSection({ destinations }: DestinationsSectionProps) 
         <p className="eyebrow">{t('destinations.eyebrow')}</p>
         <h2>{t('destinations.title')}</h2>
         <p>{t('destinations.copy')}</p>
+        <Link className="destination-more-link" to="/destinations">
+          Xem thêm điểm đến
+          <ArrowRight size={17} strokeWidth={2.2} aria-hidden="true" />
+        </Link>
       </div>
       <div className="destination-gallery-wrapper" ref={wrapperRef}>
         <div className="destination-gallery-strip" ref={stripRef}>

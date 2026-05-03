@@ -19,7 +19,7 @@ minio:
 
 weatherapi:
   base-url: ${WEATHERAPI_BASE_URL:https://api.weatherapi.com/v1}
-  api-key: ${WEATHERAPI_KEY:}
+  api-key: ${WEATHERAPI_KEY:663999078ab543f3be084845261104}
   forecast-days: ${WEATHERAPI_FORECAST_DAYS:1}
   aqi: ${WEATHERAPI_AQI:no}
   alerts: ${WEATHERAPI_ALERTS:no}

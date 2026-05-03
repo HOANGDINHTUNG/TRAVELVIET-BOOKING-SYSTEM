@@ -27,6 +27,43 @@
   font-size: 17px;
 }
 
+.destination-more-link {
+  width: fit-content;
+  min-height: 44px;
+  margin-top: 22px;
+  border: 1px solid color-mix(in srgb, var(--color-primary) 54%, transparent);
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 0 16px;
+  color: #fff;
+  background: var(--color-primary);
+  font-size: 14px;
+  font-weight: 900;
+  text-decoration: none;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    background 180ms ease;
+}
+
+.destination-more-link:hover {
+  transform: translateY(-2px);
+  background: color-mix(in srgb, var(--color-primary) 84%, #000);
+  box-shadow: 0 14px 30px rgba(45, 106, 79, 0.18);
+}
+
+.destination-more-link svg {
+  flex: 0 0 auto;
+  transition: transform 180ms ease;
+}
+
+.destination-more-link:hover svg {
+  transform: translateX(2px);
+}
+
 .destination-gallery-wrapper {
   width: 100vw;
   margin-left: calc(50% - 50vw);

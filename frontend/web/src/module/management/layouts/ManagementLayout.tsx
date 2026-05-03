@@ -1,7 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
-import { userApi } from '../../../api/server/User.api'
-import type { UserAccessContext } from '../../auth/api/authApi'
 import {
   clearAuthSession,
   getStoredAuthUser,
@@ -14,6 +12,21 @@ import {
 } from '../config/managementRoles'
 import { getVisibleManagementGroups } from '../config/managementNavigation'
 import '../pages/ManagementHubPage.css'
+
+const contentLinks = [
+  {
+    to: '/management/destinations',
+    label: 'Destinations',
+    domain: 'View, edit, approve, delete',
+    icon: MapPinned,
+  },
+  {
+    to: '/management/tours',
+    label: 'Tours',
+    domain: 'View, edit, delete',
+    icon: Plane,
+  },
+]
 
 function ManagementLayout() {
   const navigate = useNavigate()
@@ -96,35 +109,18 @@ function ManagementLayout() {
           <span>{roleSummary || 'Đang kiểm tra quyền'}</span>
         </div>
 
-        <nav className="mgmt-side-nav" aria-label="Điều hướng quản lý">
-          {isAccessLoading && (
-            <div className="mgmt-side-status">Đang tải quyền truy cập...</div>
-          )}
-
-          {accessError && !isAccessLoading && (
-            <div className="mgmt-side-status error">{accessError}</div>
-          )}
-
-          {!isAccessLoading && !accessError && visibleGroups.map((group) => (
-            <div className="mgmt-side-group" key={group.id}>
-              <p>{group.label}</p>
-              {group.items.map((item) => {
-                const Icon = item.icon
-
-                return (
-                  <NavLink
-                    key={item.id}
-                    to={item.path}
-                    className={({ isActive }) =>
-                      isActive ? 'mgmt-side-link active' : 'mgmt-side-link'
-                    }
-                  >
-                    <Icon aria-hidden="true" />
-                    <span>{item.label}</span>
-                  </NavLink>
-                )
-              })}
-            </div>
+        <nav className="mgmt-role-nav" aria-label="Role navigation">
+          {availableRoles.map((roleCode) => (
+            <NavLink
+              key={roleCode}
+              to={`/management/${roleCode}`}
+              className={({ isActive }) =>
+                isActive ? 'mgmt-role-link active' : 'mgmt-role-link'
+              }
+            >
+              <span>{managerRoleProfiles[roleCode].label}</span>
+              <small>{managerRoleProfiles[roleCode].domain}</small>
+            </NavLink>
           ))}
         </nav>
 

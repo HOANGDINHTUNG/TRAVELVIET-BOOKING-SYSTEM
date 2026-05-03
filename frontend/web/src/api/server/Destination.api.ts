@@ -18,7 +18,7 @@ import {
   putBackendData,
 } from "./serverApiClient";
 
-const destinationFetchSize = 50;
+const destinationFetchSize = 100;
 const featuredDestinationLimit = 10;
 
 export type DestinationFollowPayload = Partial<{
@@ -156,10 +156,6 @@ function mapDestination(item: BackendDestination): Destination {
   };
 }
 
-function hasActiveTours(item: BackendDestination) {
-  return (item.activeTourCount ?? 0) > 0;
-}
-
 function isVideoMedia(mediaType: string | undefined) {
   return mediaType?.toLowerCase() === "video";
 }
@@ -205,7 +201,7 @@ function mapDestinationDetail(
 }
 
 export const destinationApi = {
-  async getDestinations() {
+  async getAllDestinations() {
     const page = await getBackendData<PageResponse<BackendDestination>>(
       "destinations",
       {
@@ -216,8 +212,14 @@ export const destinationApi = {
       },
     );
 
+    return page.content.map(mapDestination);
+  },
+
+  async getDestinations() {
+    const destinations = await this.getAllDestinations();
+
     return getRandomItems(
-      page.content.filter(hasActiveTours).map(mapDestination),
+      destinations.filter((item) => Number.parseInt(item.tours, 10) > 0),
       featuredDestinationLimit,
     );
   },

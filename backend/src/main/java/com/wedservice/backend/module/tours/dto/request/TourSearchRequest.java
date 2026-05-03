@@ -71,6 +71,13 @@ public class TourSearchRequest {
     )
     private String tripMode;
 
+    @Pattern(
+            regexp = "draft|active|inactive|archived",
+            flags = Pattern.Flag.CASE_INSENSITIVE,
+            message = "status must be one of draft, active, inactive, archived"
+    )
+    private String status;
+
     @DecimalMin(value = "0.0", inclusive = true, message = "minRating must be greater than or equal to 0")
     @jakarta.validation.constraints.DecimalMax(value = "5.0", inclusive = true, message = "minRating must be less than or equal to 5")
     private BigDecimal minRating;

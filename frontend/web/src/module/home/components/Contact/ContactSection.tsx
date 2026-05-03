@@ -18,7 +18,16 @@ export function ContactSection({
   onTourChange,
   onSubmit,
 }: ContactSectionProps) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+
+  const getTourTitle = (tour: Tour) => {
+    if (!tour.translationKey) {
+      return tour.title
+    }
+
+    const key = `data.tours.${tour.translationKey}.title`
+    return i18n.exists(key) ? t(key) : tour.title
+  }
 
   return (
     <section className="contact-section" id="contact">
@@ -53,9 +62,7 @@ export function ContactSection({
           >
             {tours.map((tour) => (
               <option key={tour.id} value={tour.title}>
-                {tour.translationKey
-                  ? t(`data.tours.${tour.translationKey}.title`)
-                  : tour.title}
+                {getTourTitle(tour)}
               </option>
             ))}
           </select>
