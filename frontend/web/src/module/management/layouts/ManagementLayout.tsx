@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
-import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { Outlet, useNavigate } from 'react-router-dom'
+import { userApi } from '../../../api/server/User.api'
+import type { UserAccessContext } from '../../auth/api/authApi'
 import {
   clearAuthSession,
   getStoredAuthUser,
@@ -11,22 +13,8 @@ import {
   resolveManagerRolesForUser,
 } from '../config/managementRoles'
 import { getVisibleManagementGroups } from '../config/managementNavigation'
-import '../pages/ManagementHubPage.css'
-
-const contentLinks = [
-  {
-    to: '/management/destinations',
-    label: 'Destinations',
-    domain: 'View, edit, approve, delete',
-    icon: MapPinned,
-  },
-  {
-    to: '/management/tours',
-    label: 'Tours',
-    domain: 'View, edit, delete',
-    icon: Plane,
-  },
-]
+import ManagementSidebar from './ManagementSidebar'
+import './managementLayout.css'
 
 function ManagementLayout() {
   const navigate = useNavigate()
@@ -98,36 +86,15 @@ function ManagementLayout() {
 
   return (
     <div className="mgmt-layout">
-      <aside className="mgmt-sidebar">
-        <div className="mgmt-brand">
-          <p>TravelViet</p>
-          <h1>Trang quản lý</h1>
-        </div>
-
-        <div className="mgmt-profile">
-          <strong>{displayName}</strong>
-          <span>{roleSummary || 'Đang kiểm tra quyền'}</span>
-        </div>
-
-        <nav className="mgmt-role-nav" aria-label="Role navigation">
-          {availableRoles.map((roleCode) => (
-            <NavLink
-              key={roleCode}
-              to={`/management/${roleCode}`}
-              className={({ isActive }) =>
-                isActive ? 'mgmt-role-link active' : 'mgmt-role-link'
-              }
-            >
-              <span>{managerRoleProfiles[roleCode].label}</span>
-              <small>{managerRoleProfiles[roleCode].domain}</small>
-            </NavLink>
-          ))}
-        </nav>
-
-        <button className="mgmt-logout-btn" type="button" onClick={handleLogout}>
-          Đăng xuất
-        </button>
-      </aside>
+      <ManagementSidebar
+        accessContext={accessContext}
+        accessError={accessError}
+        displayName={displayName}
+        isAccessLoading={isAccessLoading}
+        onLogout={handleLogout}
+        roleSummary={roleSummary}
+        visibleGroups={visibleGroups}
+      />
 
       <main className="mgmt-main">
         <Outlet context={{ accessContext }} />
