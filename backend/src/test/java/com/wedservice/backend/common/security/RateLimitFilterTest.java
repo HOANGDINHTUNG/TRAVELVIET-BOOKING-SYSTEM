@@ -33,6 +33,7 @@ class RateLimitFilterTest {
     // MockMvc does NOT use the configured context-path — paths start at the servlet root.
     private static final String LOGIN_URL    = "/auth/login";
     private static final String REGISTER_URL = "/auth/register";
+    private static final String AI_CHAT_URL  = "/ai/chat";
     private static final int RATE_LIMIT = 10;
 
     // ------------------------------------------------------------------ //
@@ -108,6 +109,28 @@ class RateLimitFilterTest {
                 .andExpect(status().isTooManyRequests())
                 .andExpect(header().exists("Retry-After"))
                 .andExpect(jsonPath("$.success").value(false));
+    }
+
+    @Test
+    @DisplayName("Should return 429 after exceeding rate limit on /ai/chat")
+    void shouldReturn429AfterExceedingRateLimitOnAiChat() throws Exception {
+        String isolatedIp = "10.0.0.5";
+
+        for (int i = 0; i < RATE_LIMIT; i++) {
+            mockMvc.perform(post(AI_CHAT_URL)
+                    .header("X-Forwarded-For", isolatedIp)
+                    .contentType("application/json")
+                    .content("{\"message\":\"Tôi muốn đi Đà Lạt\"}"));
+        }
+
+        mockMvc.perform(post(AI_CHAT_URL)
+                        .header("X-Forwarded-For", isolatedIp)
+                        .contentType("application/json")
+                        .content("{\"message\":\"Tôi muốn đi Đà Lạt\"}"))
+                .andExpect(status().isTooManyRequests())
+                .andExpect(header().exists("Retry-After"))
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.status").value(429));
     }
 
     // ------------------------------------------------------------------ //

@@ -47,8 +47,8 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
         String path = request.getRequestURI();
 
-        // Only apply rate limit to sensitive auth endpoints
-        if (path.contains("/auth/login") || path.contains("/auth/register")) {
+        // Only apply rate limit to sensitive auth and AI endpoints
+        if (path.contains("/auth/login") || path.contains("/auth/register") || path.contains("/ai/chat")) {
             String clientIp = resolveClientIp(request);
             Bucket bucket = buckets.computeIfAbsent(clientIp, k -> createNewBucket());
 
