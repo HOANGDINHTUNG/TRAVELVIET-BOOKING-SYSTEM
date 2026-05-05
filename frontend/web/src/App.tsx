@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Outlet, useLocation } from 'react-router-dom'
+import { AiChatBox } from './components/ai/AiChatBox'
 import { FloatingUtilities } from './components/FloatingUtilities/FloatingUtilities'
 import { useAppSelector } from './hooks/reduxHooks'
 import SmoothScrollLayout from './components/common/ux/SmoothScrollLayout'
@@ -61,7 +62,12 @@ function App() {
           <SiteMotion />
         </Suspense>
       )}
-      {!isManagementPage && <FloatingUtilities />}
+      {!isManagementPage && (
+        <>
+          <AiChatBox />
+          <FloatingUtilities />
+        </>
+      )}
     </div>
   )
 }

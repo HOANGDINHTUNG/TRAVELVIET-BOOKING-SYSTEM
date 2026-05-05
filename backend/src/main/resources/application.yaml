@@ -4,6 +4,7 @@ app:
       - "/auth/register"
       - "/auth/login"
       - "/auth/refresh"
+      - "/ai/chat"
       - "/actuator/health/**"
       - "/actuator/info"
     jwt:
@@ -24,7 +25,17 @@ weatherapi:
   aqi: ${WEATHERAPI_AQI:no}
   alerts: ${WEATHERAPI_ALERTS:no}
 
+gemini:
+  api-key: ${GEMINI_API_KEY:}
+  model: ${GEMINI_MODEL:gemini-2.5-flash}
+  base-url: ${GEMINI_BASE_URL:https://generativelanguage.googleapis.com/v1beta/models}
+  timeout: ${GEMINI_TIMEOUT:15s}
+
 spring:
+  config:
+    import:
+      - optional:file:.env[.properties]
+      - optional:file:backend/.env[.properties]
   application:
     name: wedservice-backend
   profiles:
