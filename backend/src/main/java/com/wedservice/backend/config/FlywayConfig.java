@@ -18,12 +18,16 @@ public class FlywayConfig {
     @Value("${spring.flyway.baseline-on-migrate:true}")
     private boolean baselineOnMigrate;
 
+    @Value("${spring.flyway.validate-on-migrate:true}")
+    private boolean validateOnMigrate;
+
     @Bean(initMethod = "migrate")
     public Flyway flyway(DataSource dataSource) {
         Flyway flyway = Flyway.configure()
                 .dataSource(dataSource)
                 .locations(locations)
                 .baselineOnMigrate(baselineOnMigrate)
+                .validateOnMigrate(validateOnMigrate)
                 .load();
         return flyway;
     }

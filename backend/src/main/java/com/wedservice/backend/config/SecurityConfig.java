@@ -68,6 +68,8 @@ public class SecurityConfig {
                                 "/weather/**",
                                 "/tours",
                                 "/tours/**",
+                                "/promotion-campaigns/public",
+                                "/testimonials/public",
                                 "/reviews/tours/**",
                                 "/route-estimates"
                         ).permitAll()

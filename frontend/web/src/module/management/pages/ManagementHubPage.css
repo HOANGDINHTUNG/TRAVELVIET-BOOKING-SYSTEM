@@ -1334,6 +1334,64 @@
   resize: vertical;
 }
 
+.mgmt-promo-admin-preview {
+  min-height: 180px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+  background: var(--color-surface-soft);
+}
+
+.mgmt-promo-admin-preview img {
+  width: 100%;
+  height: 220px;
+  display: block;
+  object-fit: cover;
+}
+
+.mgmt-promo-admin-preview::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(14, 44, 53, 0.78), rgba(14, 44, 53, 0.12));
+  pointer-events: none;
+}
+
+.mgmt-promo-admin-preview div {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 18px;
+  z-index: 1;
+  display: grid;
+  gap: 7px;
+  color: #fff;
+}
+
+.mgmt-promo-admin-preview span {
+  width: fit-content;
+  border-radius: 999px;
+  padding: 5px 10px;
+  background: var(--color-primary);
+  color: var(--color-primary-contrast);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.mgmt-promo-admin-preview strong {
+  font-size: clamp(20px, 3vw, 32px);
+  line-height: 1;
+}
+
+.mgmt-promo-admin-preview p {
+  max-width: 560px;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 14px;
+}
+
 .mgmt-promo-admin-wide {
   grid-column: 1 / -1;
 }

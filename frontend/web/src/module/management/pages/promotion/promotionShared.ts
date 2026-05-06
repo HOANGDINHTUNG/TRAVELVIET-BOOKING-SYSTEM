@@ -21,6 +21,15 @@ export type CampaignFormState = {
   code: string
   name: string
   description: string
+  imageUrl: string
+  imageAlt: string
+  displayTitle: string
+  displaySubtitle: string
+  badgeText: string
+  ctaLabel: string
+  ctaUrl: string
+  sortOrder: string
+  isFeatured: boolean
   startAt: string
   endAt: string
   targetMemberLevel: string
@@ -76,6 +85,15 @@ export function createEmptyCampaignForm(): CampaignFormState {
     code: '',
     name: '',
     description: '',
+    imageUrl: '',
+    imageAlt: '',
+    displayTitle: '',
+    displaySubtitle: '',
+    badgeText: '',
+    ctaLabel: '',
+    ctaUrl: '',
+    sortOrder: '0',
+    isFeatured: false,
     startAt: '',
     endAt: '',
     targetMemberLevel: '',
@@ -196,6 +214,15 @@ export function toCampaignForm(item: PromotionCampaign): CampaignFormState {
     code: item.code ?? '',
     name: item.name ?? '',
     description: item.description ?? '',
+    imageUrl: item.imageUrl ?? '',
+    imageAlt: item.imageAlt ?? '',
+    displayTitle: item.displayTitle ?? '',
+    displaySubtitle: item.displaySubtitle ?? '',
+    badgeText: item.badgeText ?? '',
+    ctaLabel: item.ctaLabel ?? '',
+    ctaUrl: item.ctaUrl ?? '',
+    sortOrder: item.sortOrder?.toString() ?? '0',
+    isFeatured: Boolean(item.isFeatured),
     startAt: toDateTimeField(item.startAt),
     endAt: toDateTimeField(item.endAt),
     targetMemberLevel: item.targetMemberLevel ?? '',
@@ -234,6 +261,15 @@ export function buildCampaignPayload(form: CampaignFormState): PromotionCampaign
     code: form.code.trim(),
     name: form.name.trim(),
     description: form.description.trim() || undefined,
+    imageUrl: form.imageUrl.trim() || undefined,
+    imageAlt: form.imageAlt.trim() || undefined,
+    displayTitle: form.displayTitle.trim() || undefined,
+    displaySubtitle: form.displaySubtitle.trim() || undefined,
+    badgeText: form.badgeText.trim() || undefined,
+    ctaLabel: form.ctaLabel.trim() || undefined,
+    ctaUrl: form.ctaUrl.trim() || undefined,
+    sortOrder: toOptionalNumber(form.sortOrder) ?? 0,
+    isFeatured: form.isFeatured,
     startAt: `${form.startAt}:00`,
     endAt: `${form.endAt}:00`,
     targetMemberLevel: form.targetMemberLevel.trim() || undefined,

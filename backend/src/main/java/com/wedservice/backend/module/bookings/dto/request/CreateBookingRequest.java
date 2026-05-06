@@ -13,7 +13,6 @@ import lombok.*;
 @Builder
 public class CreateBookingRequest {
 
-    @NotNull
     private String userId;
 
     @NotNull

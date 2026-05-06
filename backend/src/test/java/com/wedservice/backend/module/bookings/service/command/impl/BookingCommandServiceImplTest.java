@@ -90,6 +90,46 @@ class BookingCommandServiceImplTest {
     }
 
     @Test
+    void createBooking_withoutUserIdForCustomerUsesCurrentUser() {
+        UUID currentUserId = UUID.randomUUID();
+        CreateBookingRequest request = CreateBookingRequest.builder()
+                .tourId(10L)
+                .scheduleId(22L)
+                .contactName("Nguyen Van A")
+                .contactPhone("0909000000")
+                .adults(1)
+                .build();
+
+        when(authenticatedUserProvider.getRequiredCurrentUserId()).thenReturn(currentUserId);
+        when(authenticatedUserProvider.isCurrentUserBackoffice()).thenReturn(false);
+        when(bookingPricingService.quoteBookingForUser(org.mockito.ArgumentMatchers.eq(currentUserId), any(BookingQuoteRequest.class)))
+                .thenReturn(BookingQuoteResponse.builder()
+                        .tourId(10L)
+                        .scheduleId(22L)
+                        .subtotalAmount(new BigDecimal("1200000"))
+                        .discountAmount(BigDecimal.ZERO)
+                        .voucherDiscountAmount(BigDecimal.ZERO)
+                        .loyaltyDiscountAmount(BigDecimal.ZERO)
+                        .addonAmount(BigDecimal.ZERO)
+                        .taxAmount(BigDecimal.ZERO)
+                        .finalAmount(new BigDecimal("1200000"))
+                        .currency("VND")
+                        .build());
+        when(bookingRepository.save(any(Booking.class))).thenAnswer(invocation -> {
+            Booking booking = invocation.getArgument(0);
+            booking.setId(100L);
+            return booking;
+        });
+
+        BookingResponse response = bookingCommandService.createBooking(request);
+
+        ArgumentCaptor<Booking> bookingCaptor = ArgumentCaptor.forClass(Booking.class);
+        verify(bookingRepository).save(bookingCaptor.capture());
+        assertThat(bookingCaptor.getValue().getUserId()).isEqualTo(currentUserId);
+        assertThat(response.getId()).isEqualTo(100L);
+    }
+
+    @Test
     void createBooking_usesCurrentUserCalculatesAmountsAndMapsPassengers() {
         UUID currentUserId = UUID.randomUUID();
         CreateBookingRequest request = CreateBookingRequest.builder()

@@ -88,24 +88,24 @@ public class IntentDetectionService {
         if (containsAny(text, "van chuyen", "shipment", "giao hang", "tracking", "dang o dau")) {
             return ChatIntent.SHIPMENT_TRACKING;
         }
-        if (containsAny(text, "booking", "dat cho", "dat tour", "ve cua toi", "lich dat", "ma booking")) {
-            return ChatIntent.BOOKING_LOOKUP;
-        }
         if (containsAny(text, "ho tro", "khieu nai", "lien he", "tu van vien", "cham soc khach hang")) {
             return ChatIntent.SUPPORT_REQUEST;
+        }
+        if (containsAny(text, "booking", "dat cho", "ve cua toi", "lich dat", "ma booking", "trang thai dat tour", "don dat tour cua toi")) {
+            return ChatIntent.BOOKING_LOOKUP;
         }
         if (looksLikePriceAdvice(text, result)) {
             return ChatIntent.PRICE_ADVICE;
         }
+        if (containsAny(text, "chuan bi", "hanh ly", "mang gi", "can mang", "luu y", "kinh nghiem", "hoi dap", "faq", "cau hoi thuong gap", "huong dan")) {
+            return ChatIntent.GENERAL_FAQ;
+        }
         if (containsAny(text, "dia diem", "nen di dau", "tham quan", "check-in", "checkin", "du lich o dau", "danh lam", "khu du lich")) {
             return ChatIntent.DESTINATION_SEARCH;
         }
-        if (containsAny(text, "tour", "du lich", "lich trinh", "combo", "gia tour")
+        if (containsAny(text, "tour", "dat tour", "tim tour", "lich trinh", "combo", "gia tour")
                 || looksLikeTripSearch(text, result)) {
             return ChatIntent.TOUR_SEARCH;
-        }
-        if (containsAny(text, "hoi dap", "faq", "cau hoi thuong gap", "huong dan")) {
-            return ChatIntent.GENERAL_FAQ;
         }
         return ChatIntent.UNKNOWN;
     }

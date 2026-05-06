@@ -16,13 +16,25 @@ public class AiDataResult {
     private boolean dataFound;
     private String context;
     private List<String> suggestions;
+    private List<AiRelatedItem> relatedItems;
     private String fallbackAnswer;
 
     public static AiDataResult found(String context, List<String> suggestions) {
+        return found(context, suggestions, List.of(), null);
+    }
+
+    public static AiDataResult found(
+            String context,
+            List<String> suggestions,
+            List<AiRelatedItem> relatedItems,
+            String fallbackAnswer
+    ) {
         return AiDataResult.builder()
                 .dataFound(true)
                 .context(context)
                 .suggestions(suggestions == null ? List.of() : suggestions)
+                .relatedItems(relatedItems == null ? List.of() : relatedItems)
+                .fallbackAnswer(fallbackAnswer)
                 .build();
     }
 
@@ -36,6 +48,7 @@ public class AiDataResult {
                 .context(AiChatMessages.NO_DATA_CONTEXT)
                 .fallbackAnswer(fallbackAnswer)
                 .suggestions(suggestions == null ? List.of() : suggestions)
+                .relatedItems(List.of())
                 .build();
     }
 }

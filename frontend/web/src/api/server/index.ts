@@ -13,6 +13,7 @@ export { reviewApi } from './Review.api'
 export { scheduleChatApi } from './ScheduleChat.api'
 export { supportApi } from './Support.api'
 export { systemAdminApi } from './SystemAdmin.api'
+export { testimonialApi } from './Testimonial.api'
 export { tourApi } from './Tour.api'
 export { userApi } from './User.api'
 export { voucherApi } from './Voucher.api'
@@ -105,6 +106,7 @@ export type {
   SupportSessionStatus,
   UpdateSupportSessionStatusPayload,
 } from './Support.api'
+export type { CustomerTestimonial } from './Testimonial.api'
 export type {
   AdminCreateUserPayload,
   AdminUpdateUserPayload,

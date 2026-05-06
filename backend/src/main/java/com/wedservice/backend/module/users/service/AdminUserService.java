@@ -10,6 +10,7 @@ import com.wedservice.backend.module.users.dto.request.AdminCreateUserRequest;
 import com.wedservice.backend.module.users.dto.request.AdminUpdateUserRequest;
 import com.wedservice.backend.module.users.dto.request.UserSearchRequest;
 import com.wedservice.backend.module.users.dto.response.UserResponse;
+import com.wedservice.backend.module.users.entity.Role;
 import com.wedservice.backend.module.users.entity.Status;
 import com.wedservice.backend.module.users.entity.User;
 import com.wedservice.backend.module.users.mapper.UserMapper;
@@ -28,6 +29,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.util.Set;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.UUID;
 
 import com.wedservice.backend.common.service.BaseService;
@@ -158,17 +164,7 @@ public class AdminUserService extends BaseService<User, UUID> {
 
         userMapper.applyAdminUpdate(user, request, email, phone, encodedPassword);
 
-        if (request.getRoleCodes() != null) {
-            user.getUserRoles().clear();
-            java.util.List<com.wedservice.backend.module.users.entity.Role> roles = roleRepository.findAllByCodeIn(request.getRoleCodes());
-            for (int i = 0; i < roles.size(); i++) {
-                user.getUserRoles().add(UserRole.builder()
-                        .user(user)
-                        .role(roles.get(i))
-                        .isPrimary(i == 0)
-                        .build());
-            }
-        }
+        syncUserRoles(user, request.getRoleCodes());
 
         User updatedUser = userRepository.save(user);
         UserResponse response = userMapper.toDto(updatedUser);
@@ -215,6 +211,55 @@ public class AdminUserService extends BaseService<User, UUID> {
                     : userRepository.existsByPhoneAndIdNot(phone, currentUserId);
             if (phoneExists) {
                 throw new BadRequestException("Phone already exists");
+            }
+        }
+    }
+
+    private void syncUserRoles(User user, List<String> roleCodes) {
+        if (roleCodes == null) {
+            return;
+        }
+
+        LinkedHashSet<String> requestedCodes = roleCodes.stream()
+                .filter(StringUtils::hasText)
+                .map(String::trim)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        user.getUserRoles().removeIf(userRole ->
+                userRole.getRole() == null || !requestedCodes.contains(userRole.getRole().getCode()));
+
+        if (requestedCodes.isEmpty()) {
+            return;
+        }
+
+        Map<String, UserRole> existingAssignmentsByCode = user.getUserRoles().stream()
+                .filter(userRole -> userRole.getRole() != null && StringUtils.hasText(userRole.getRole().getCode()))
+                .collect(Collectors.toMap(
+                        userRole -> userRole.getRole().getCode(),
+                        Function.identity(),
+                        (left, right) -> left
+                ));
+        Map<String, Role> rolesByCode = roleRepository.findAllByCodeIn(List.copyOf(requestedCodes)).stream()
+                .collect(Collectors.toMap(Role::getCode, Function.identity(), (left, right) -> left));
+
+        boolean primaryAssigned = false;
+        for (String roleCode : requestedCodes) {
+            Role role = rolesByCode.get(roleCode);
+            UserRole assignment = existingAssignmentsByCode.get(roleCode);
+
+            if (assignment == null && role != null) {
+                assignment = UserRole.builder()
+                        .user(user)
+                        .role(role)
+                        .build();
+                user.getUserRoles().add(assignment);
+            } else if (assignment != null && role != null) {
+                assignment.setRole(role);
+            }
+
+            if (assignment != null) {
+                assignment.setIsPrimary(!primaryAssigned);
+                primaryAssigned = true;
             }
         }
     }

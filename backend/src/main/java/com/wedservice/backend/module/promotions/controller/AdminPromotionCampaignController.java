@@ -27,6 +27,24 @@ public class AdminPromotionCampaignController {
 
     private final AdminPromotionCampaignFacade adminPromotionCampaignFacade;
 
+    @GetMapping("/public")
+    @PreAuthorize("permitAll()")
+    public ApiResponse<PageResponse<PromotionCampaignResponse>> getPublicPromotionCampaigns() {
+        PromotionCampaignSearchRequest request = new PromotionCampaignSearchRequest();
+        request.setPage(0);
+        request.setSize(6);
+        request.setIsActive(true);
+        request.setIsFeatured(true);
+        request.setSortBy("sortOrder");
+        request.setSortDir("asc");
+
+        return ApiResponse.<PageResponse<PromotionCampaignResponse>>builder()
+                .success(true)
+                .message("Public promotion campaign list fetched successfully")
+                .data(adminPromotionCampaignFacade.getPromotionCampaigns(request))
+                .build();
+    }
+
     @GetMapping
     @PreAuthorize("hasAuthority('voucher.view')")
     public ApiResponse<PageResponse<PromotionCampaignResponse>> getPromotionCampaigns(

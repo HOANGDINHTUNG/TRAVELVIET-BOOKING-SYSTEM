@@ -6,9 +6,11 @@ import com.wedservice.backend.module.users.dto.request.AdminCreateUserRequest;
 import com.wedservice.backend.module.users.dto.request.AdminUpdateUserRequest;
 import com.wedservice.backend.module.users.dto.request.UserSearchRequest;
 import com.wedservice.backend.module.users.dto.response.UserResponse;
+import com.wedservice.backend.module.users.entity.MemberLevel;
 import com.wedservice.backend.module.users.entity.Role;
 import com.wedservice.backend.module.users.entity.Status;
 import com.wedservice.backend.module.users.entity.User;
+import com.wedservice.backend.module.users.entity.UserCategory;
 import com.wedservice.backend.module.users.entity.UserRole;
 import com.wedservice.backend.module.users.mapper.UserMapper;
 import com.wedservice.backend.module.users.repository.RoleRepository;
@@ -267,5 +269,53 @@ class AdminUserServiceTest {
         assertThat(response.getEmail()).isEqualTo("updated@example.com");
         assertThat(existingUser.getRoleName()).isEqualTo("ADMIN");
         verify(auditTrailRecorder).record(eq(AuditActionType.USER_UPDATE), eq(id), any(UserResponse.class), any(UserResponse.class));
+    }
+
+    @Test
+    void updateUser_changesStatusWithoutRecreatingExistingRole() {
+        AdminUpdateUserRequest request = new AdminUpdateUserRequest();
+        request.setFullName("Status User");
+        request.setEmail("status@example.com");
+        request.setPhone("0900111222");
+        request.setUserCategory(UserCategory.CUSTOMER);
+        request.setStatus(Status.BLOCKED);
+        request.setMemberLevel(MemberLevel.BRONZE);
+        request.setRoleCodes(List.of("ADMIN"));
+
+        UUID id = UUID.randomUUID();
+        Role adminRole = Role.builder()
+                .id(6L)
+                .code("ADMIN")
+                .build();
+        User existingUser = User.builder()
+                .id(id)
+                .fullName("Status User")
+                .email("status@example.com")
+                .passwordHash("encoded")
+                .phone("0900111222")
+                .status(Status.ACTIVE)
+                .build();
+        UserRole existingAssignment = UserRole.builder()
+                .id(99L)
+                .user(existingUser)
+                .role(adminRole)
+                .isPrimary(true)
+                .build();
+        existingUser.getUserRoles().add(existingAssignment);
+
+        when(userRepository.findById(id)).thenReturn(Optional.of(existingUser));
+        when(userRepository.existsByEmailIgnoreCaseAndIdNot("status@example.com", id)).thenReturn(false);
+        when(userRepository.existsByPhoneAndIdNot("0900111222", id)).thenReturn(false);
+        when(roleRepository.findAllByCodeIn(List.of("ADMIN"))).thenReturn(List.of(adminRole));
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        UserResponse response = adminUserService.updateUser(id, request);
+
+        assertThat(response.getStatus()).isEqualTo(Status.BLOCKED);
+        assertThat(existingUser.getStatus()).isEqualTo(Status.BLOCKED);
+        assertThat(existingUser.getUserRoles()).containsExactly(existingAssignment);
+        assertThat(existingAssignment.getId()).isEqualTo(99L);
+        assertThat(existingAssignment.getIsPrimary()).isTrue();
+        verify(userRepository).save(eq(existingUser));
     }
 }

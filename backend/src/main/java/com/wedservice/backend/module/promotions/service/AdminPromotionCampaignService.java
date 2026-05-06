@@ -113,6 +113,15 @@ public class AdminPromotionCampaignService {
         campaign.setCode(normalizedCode);
         campaign.setName(normalizeRequiredText(request.getName(), "name"));
         campaign.setDescription(normalizeNullable(request.getDescription()));
+        campaign.setImageUrl(normalizeNullable(request.getImageUrl()));
+        campaign.setImageAlt(normalizeNullable(request.getImageAlt()));
+        campaign.setDisplayTitle(normalizeNullable(request.getDisplayTitle()));
+        campaign.setDisplaySubtitle(normalizeNullable(request.getDisplaySubtitle()));
+        campaign.setBadgeText(normalizeNullable(request.getBadgeText()));
+        campaign.setCtaLabel(normalizeNullable(request.getCtaLabel()));
+        campaign.setCtaUrl(normalizeNullable(request.getCtaUrl()));
+        campaign.setSortOrder(request.getSortOrder() == null ? 0 : request.getSortOrder());
+        campaign.setIsFeatured(request.getIsFeatured() == null ? false : request.getIsFeatured());
         campaign.setStartAt(request.getStartAt());
         campaign.setEndAt(request.getEndAt());
         campaign.setTargetMemberLevel(request.getTargetMemberLevel());
@@ -155,6 +164,10 @@ public class AdminPromotionCampaignService {
                 predicates.add(cb.equal(root.get("isActive"), request.getIsActive()));
             }
 
+            if (request.getIsFeatured() != null) {
+                predicates.add(cb.equal(root.get("isFeatured"), request.getIsFeatured()));
+            }
+
             if (request.getTargetMemberLevel() != null) {
                 predicates.add(cb.equal(root.get("targetMemberLevel"), request.getTargetMemberLevel()));
             }
@@ -182,6 +195,15 @@ public class AdminPromotionCampaignService {
                 .code(campaign.getCode())
                 .name(campaign.getName())
                 .description(campaign.getDescription())
+                .imageUrl(campaign.getImageUrl())
+                .imageAlt(campaign.getImageAlt())
+                .displayTitle(campaign.getDisplayTitle())
+                .displaySubtitle(campaign.getDisplaySubtitle())
+                .badgeText(campaign.getBadgeText())
+                .ctaLabel(campaign.getCtaLabel())
+                .ctaUrl(campaign.getCtaUrl())
+                .sortOrder(campaign.getSortOrder())
+                .isFeatured(campaign.getIsFeatured())
                 .startAt(campaign.getStartAt())
                 .endAt(campaign.getEndAt())
                 .targetMemberLevel(campaign.getTargetMemberLevel())

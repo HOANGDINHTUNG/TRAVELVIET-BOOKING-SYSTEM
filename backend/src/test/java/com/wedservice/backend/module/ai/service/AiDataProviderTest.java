@@ -8,6 +8,7 @@ import com.wedservice.backend.module.destinations.dto.request.DestinationSearchR
 import com.wedservice.backend.module.destinations.dto.response.DestinationPublicResponse;
 import com.wedservice.backend.module.destinations.service.query.DestinationQueryService;
 import com.wedservice.backend.module.tours.dto.request.TourSearchRequest;
+import com.wedservice.backend.module.tours.dto.response.TourMediaResponse;
 import com.wedservice.backend.module.tours.dto.response.TourResponse;
 import com.wedservice.backend.module.tours.service.query.TourQueryService;
 import org.junit.jupiter.api.AfterEach;
@@ -54,7 +55,7 @@ class AiDataProviderTest {
         );
 
         assertThat(result.isDataFound()).isFalse();
-        assertThat(result.getFallbackAnswer()).isEqualTo(AiChatMessages.NO_DATA);
+        assertThat(result.getFallbackAnswer()).contains("chưa có thông tin phù hợp");
         verifyNoInteractions(tourQueryService, destinationQueryService, bookingQueryService);
     }
 
@@ -77,6 +78,7 @@ class AiDataProviderTest {
     void tourSearchFormatsContextFromTourServiceData() {
         when(tourQueryService.searchTours(any(TourSearchRequest.class))).thenReturn(new PageImpl<>(List.of(
                 TourResponse.builder()
+                        .id(10L)
                         .code("DL3N2D")
                         .name("Tour Đà Lạt 3 ngày 2 đêm")
                         .basePrice(new BigDecimal("4500000"))
@@ -85,6 +87,12 @@ class AiDataProviderTest {
                         .durationNights(2)
                         .shortDescription("Khám phá Đà Lạt theo dữ liệu hệ thống.")
                         .status("active")
+                        .media(List.of(TourMediaResponse.builder()
+                                .mediaType("cover")
+                                .mediaUrl("tour-images/dalat.jpg")
+                                .isActive(true)
+                                .sortOrder(1)
+                                .build()))
                         .build()
         )));
 
@@ -104,6 +112,10 @@ class AiDataProviderTest {
 
         assertThat(result.isDataFound()).isTrue();
         assertThat(result.getContext()).contains("DL3N2D", "Tour Đà Lạt 3 ngày 2 đêm", "4.500.000 VND");
+        assertThat(result.getFallbackAnswer()).contains("Gợi ý nổi bật", "Tour Đà Lạt 3 ngày 2 đêm");
+        assertThat(result.getRelatedItems()).hasSize(1);
+        assertThat(result.getRelatedItems().get(0).getDetailUrl()).isEqualTo("/tours/10");
+        assertThat(result.getRelatedItems().get(0).getImageUrl()).isEqualTo("tour-images/dalat.jpg");
         assertThat(requestCaptor.getValue().getKeyword()).isEqualTo("Đà Lạt");
         assertThat(requestCaptor.getValue().getMaxPrice()).isEqualByComparingTo(new BigDecimal("5000000"));
         assertThat(requestCaptor.getValue().getMinDurationDays()).isEqualTo(3);
@@ -120,6 +132,7 @@ class AiDataProviderTest {
                                 .province("Quảng Nam")
                                 .region("Miền Trung")
                                 .shortDescription("Phố cổ trong dữ liệu hệ thống.")
+                                .coverImageUrl("destination-images/hoi-an.jpg")
                                 .bestTimeFromMonth(2)
                                 .bestTimeToMonth(8)
                                 .isFeatured(true)
@@ -147,6 +160,10 @@ class AiDataProviderTest {
 
         assertThat(result.isDataFound()).isTrue();
         assertThat(result.getContext()).contains("Hội An", "Quảng Nam", "Miền Trung", "Số tour đang hoạt động: 4");
+        assertThat(result.getFallbackAnswer()).contains("Gợi ý đầu tiên", "Hội An");
+        assertThat(result.getRelatedItems()).hasSize(1);
+        assertThat(result.getRelatedItems().get(0).getDetailUrl()).isEqualTo("/destinations/11111111-1111-1111-1111-111111111111");
+        assertThat(result.getRelatedItems().get(0).getImageUrl()).isEqualTo("destination-images/hoi-an.jpg");
         assertThat(requestCaptor.getValue().getKeyword()).isNull();
         assertThat(requestCaptor.getValue().getRegion()).isEqualTo("Miền Trung");
     }

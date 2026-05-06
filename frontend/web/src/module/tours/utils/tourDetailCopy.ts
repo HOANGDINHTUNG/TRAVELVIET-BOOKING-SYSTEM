@@ -98,6 +98,12 @@ export type TourDetailCopy = {
   finalAmount: string;
   appliedVoucher: string;
   requiredField: string;
+  loginRequired: string;
+  noBookableSchedules: string;
+  seatLimitExceeded: (remainingSeats: number) => string;
+  travellerLimitExceeded: (limit: number) => string;
+  invalidEmail: string;
+  remainingSeatsLabel: (remainingSeats: number) => string;
   facts: Record<string, string>;
 };
 
@@ -202,6 +208,14 @@ export const tourDetailCopyByLocale: Record<TourDetailLocale, TourDetailCopy> = 
     finalAmount: "Can thanh toan",
     appliedVoucher: "Voucher da ap dung",
     requiredField: "Vui long nhap day du thong tin bat buoc.",
+    loginRequired: "Vui long dang nhap de dat tour.",
+    noBookableSchedules: "Hien chua co lich nao con mo ban de dat tour.",
+    seatLimitExceeded: (remainingSeats) =>
+      `Lich nay chi con ${remainingSeats} cho co the dat.`,
+    travellerLimitExceeded: (limit) =>
+      `Moi booking toi da ${limit} khach. Vui long tach thanh booking khac neu can.`,
+    invalidEmail: "Email lien he khong hop le.",
+    remainingSeatsLabel: (remainingSeats) => `Con ${remainingSeats} cho co the dat.`,
     facts: {
       code: "Ma tour",
       slug: "Slug",
@@ -316,6 +330,14 @@ export const tourDetailCopyByLocale: Record<TourDetailLocale, TourDetailCopy> = 
     finalAmount: "Amount due",
     appliedVoucher: "Applied voucher",
     requiredField: "Please fill in all required information.",
+    loginRequired: "Please sign in before booking this tour.",
+    noBookableSchedules: "No departure is currently open for booking.",
+    seatLimitExceeded: (remainingSeats) =>
+      `This departure only has ${remainingSeats} bookable seats left.`,
+    travellerLimitExceeded: (limit) =>
+      `Each booking supports up to ${limit} travellers. Please split larger groups.`,
+    invalidEmail: "Contact email is not valid.",
+    remainingSeatsLabel: (remainingSeats) => `${remainingSeats} seats available for booking.`,
     facts: {
       code: "Tour code",
       slug: "Slug",

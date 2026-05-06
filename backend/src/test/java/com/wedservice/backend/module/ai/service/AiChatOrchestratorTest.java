@@ -27,7 +27,7 @@ class AiChatOrchestratorTest {
     );
 
     @Test
-    void returnsFallbackWithoutCallingGeminiWhenNoDataFound() {
+    void returnsFallbackWithoutCallingGeminiForUnsupportedNoDataIntent() {
         String message = "Hộp hàng SBX123 có bị va đập không?";
         IntentResult intent = IntentResult.builder()
                 .intent(ChatIntent.SENSOR_STATUS)
@@ -42,8 +42,49 @@ class AiChatOrchestratorTest {
 
         assertThat(response.getIntent()).isEqualTo(ChatIntent.SENSOR_STATUS.name());
         assertThat(response.isDataFound()).isFalse();
-        assertThat(response.getAnswer()).isEqualTo(AiChatMessages.NO_DATA);
+        assertThat(response.getAnswer()).contains("chưa có thông tin phù hợp");
         verifyNoInteractions(promptBuilderService, geminiService);
+    }
+
+    @Test
+    void callsGeminiForGeneralNoDataQuestion() {
+        String message = "Tôi nên chuẩn bị gì khi đi du lịch?";
+        IntentResult intent = IntentResult.builder()
+                .intent(ChatIntent.UNKNOWN)
+                .build();
+        AiDataResult data = AiDataResult.noData(List.of("Tìm tour phù hợp"));
+
+        when(intentDetectionService.detect(message)).thenReturn(intent);
+        when(aiDataProvider.getData(intent, message)).thenReturn(data);
+        when(promptBuilderService.buildPrompt(message, intent, data)).thenReturn("general prompt");
+        when(geminiService.generateAnswer("general prompt")).thenReturn("Bạn nên chuẩn bị giấy tờ, hành lý gọn và ngân sách dự phòng.");
+
+        var response = orchestrator.handle(AiChatRequest.builder().message(message).build());
+
+        assertThat(response.getIntent()).isEqualTo(ChatIntent.UNKNOWN.name());
+        assertThat(response.isDataFound()).isFalse();
+        assertThat(response.getAnswer()).contains("giấy tờ");
+        verify(geminiService).generateAnswer("general prompt");
+    }
+
+    @Test
+    void returnsUsefulGeneralFallbackWhenGeminiFails() {
+        String message = "Tôi nên chuẩn bị gì khi đi du lịch?";
+        IntentResult intent = IntentResult.builder()
+                .intent(ChatIntent.GENERAL_FAQ)
+                .build();
+        AiDataResult data = AiDataResult.noData(List.of("Tìm tour phù hợp"));
+
+        when(intentDetectionService.detect(message)).thenReturn(intent);
+        when(aiDataProvider.getData(intent, message)).thenReturn(data);
+        when(promptBuilderService.buildPrompt(message, intent, data)).thenReturn("general prompt");
+        when(geminiService.generateAnswer("general prompt")).thenReturn(GeminiService.ERROR_ANSWER);
+
+        var response = orchestrator.handle(AiChatRequest.builder().message(message).build());
+
+        assertThat(response.getIntent()).isEqualTo(ChatIntent.GENERAL_FAQ.name());
+        assertThat(response.isDataFound()).isFalse();
+        assertThat(response.getAnswer()).contains("Giấy tờ cá nhân", "điểm đến và số ngày đi");
     }
 
     @Test
@@ -69,7 +110,7 @@ class AiChatOrchestratorTest {
     }
 
     @Test
-    void returnsErrorContractWhenGeminiFails() {
+    void returnsDeterministicFallbackWhenGeminiFails() {
         String message = "Tôi muốn đi Đà Lạt";
         IntentResult intent = IntentResult.builder()
                 .intent(ChatIntent.TOUR_SEARCH)
@@ -84,9 +125,9 @@ class AiChatOrchestratorTest {
 
         var response = orchestrator.handle(AiChatRequest.builder().message(message).build());
 
-        assertThat(response.getIntent()).isEqualTo(ChatIntent.UNKNOWN.name());
-        assertThat(response.isDataFound()).isFalse();
-        assertThat(response.getAnswer()).isEqualTo(GeminiService.ERROR_ANSWER);
-        assertThat(response.getSuggestions()).isEmpty();
+        assertThat(response.getIntent()).isEqualTo(ChatIntent.TOUR_SEARCH.name());
+        assertThat(response.isDataFound()).isTrue();
+        assertThat(response.getAnswer()).contains("Mình tìm thấy một vài thông tin phù hợp");
+        assertThat(response.getSuggestions()).contains("Tour giá dưới 5 triệu");
     }
 }
