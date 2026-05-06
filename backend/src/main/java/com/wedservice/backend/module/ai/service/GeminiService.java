@@ -46,7 +46,9 @@ public class GeminiService {
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() < 200 || response.statusCode() >= 300) {
-                log.warn("Gemini request failed with status {}", response.statusCode());
+                log.warn("Gemini request failed with status {} and body {}",
+                        response.statusCode(),
+                        sanitizeForLog(response.body()));
                 return ERROR_ANSWER;
             }
 
@@ -92,6 +94,19 @@ public class GeminiService {
             return ERROR_ANSWER;
         }
         return text.trim();
+    }
+
+    private String sanitizeForLog(String body) {
+        if (!StringUtils.hasText(body)) {
+            return "<empty>";
+        }
+
+        String sanitized = body;
+        if (StringUtils.hasText(properties.getApiKey())) {
+            sanitized = sanitized.replace(properties.getApiKey(), "<redacted>");
+        }
+        sanitized = sanitized.replaceAll("\\s+", " ").trim();
+        return sanitized.length() > 1000 ? sanitized.substring(0, 1000) + "..." : sanitized;
     }
 
     private Duration resolveTimeout() {

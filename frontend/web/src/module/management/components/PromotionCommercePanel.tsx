@@ -305,12 +305,12 @@ export default function PromotionCommercePanel() {
                     <span>{item.code}</span>
                     <strong>{statusLabel(item.isActive)}</strong>
                   </header>
-                  <h4>{item.name}</h4>
-                  <p>{item.description || 'Promotion campaign'}</p>
+                  <h4>{item.displayTitle || item.name}</h4>
+                  <p>{item.displaySubtitle || item.description || 'Promotion campaign'}</p>
                   <dl>
                     <div>
-                      <dt>Level</dt>
-                      <dd>{item.targetMemberLevel || 'ALL'}</dd>
+                      <dt>Hien thi</dt>
+                      <dd>{item.isFeatured ? 'Featured' : item.targetMemberLevel || 'ALL'}</dd>
                     </div>
                     <div>
                       <dt>Bat dau</dt>

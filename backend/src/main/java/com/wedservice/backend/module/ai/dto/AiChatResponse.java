@@ -16,4 +16,5 @@ public class AiChatResponse {
     private String answer;
     private boolean dataFound;
     private List<String> suggestions;
+    private List<AiRelatedItem> relatedItems;
 }

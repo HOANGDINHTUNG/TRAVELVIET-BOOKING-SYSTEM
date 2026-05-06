@@ -15,6 +15,7 @@ import {
 import { getVisibleManagementGroups } from '../config/managementNavigation'
 import ManagementSidebar from './ManagementSidebar'
 import './managementLayout.css'
+import '../pages/ManagementHubPage.css'
 
 function ManagementLayout() {
   const navigate = useNavigate()

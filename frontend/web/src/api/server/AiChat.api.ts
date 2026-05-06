@@ -5,11 +5,23 @@ export type AiChatRequest = {
   conversationId?: string | null
 }
 
+export type AiRelatedItem = {
+  type: 'TOUR' | 'DESTINATION' | 'BOOKING' | string
+  id?: string | null
+  title: string
+  subtitle?: string | null
+  description?: string | null
+  imageUrl?: string | null
+  detailUrl?: string | null
+  meta?: string | null
+}
+
 export type AiChatResponse = {
   intent: string
   answer: string
   dataFound: boolean
   suggestions: string[]
+  relatedItems?: AiRelatedItem[]
 }
 
 export async function sendAiMessage(message: string, conversationId?: string | null) {

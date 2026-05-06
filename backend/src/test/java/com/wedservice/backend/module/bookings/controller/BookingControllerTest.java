@@ -2,8 +2,10 @@ package com.wedservice.backend.module.bookings.controller;
 
 import com.wedservice.backend.common.exception.GlobalExceptionHandler;
 import com.wedservice.backend.module.bookings.dto.request.BookingQuoteRequest;
+import com.wedservice.backend.module.bookings.dto.request.CreateBookingRequest;
 import com.wedservice.backend.module.bookings.dto.response.AppliedVoucherQuoteResponse;
 import com.wedservice.backend.module.bookings.dto.response.BookingQuoteResponse;
+import com.wedservice.backend.module.bookings.dto.response.BookingResponse;
 import com.wedservice.backend.module.bookings.facade.BookingFacade;
 import com.wedservice.backend.module.promotions.entity.VoucherDiscountType;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,6 +43,29 @@ class BookingControllerTest {
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .setMessageConverters(new JacksonJsonHttpMessageConverter(objectMapper))
                 .build();
+    }
+
+    @Test
+    void createBooking_acceptsMissingUserIdBecauseOwnerComesFromAuthentication() throws Exception {
+        when(bookingFacade.createBooking(any(CreateBookingRequest.class)))
+                .thenReturn(BookingResponse.builder()
+                        .id(77L)
+                        .bookingCode("BK77")
+                        .build());
+
+        mockMvc.perform(post("/bookings")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(CreateBookingRequest.builder()
+                                .tourId(10L)
+                                .scheduleId(22L)
+                                .contactName("Nguyen Van A")
+                                .contactPhone("0909000000")
+                                .adults(1)
+                                .build())))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.message").value("Booking created"))
+                .andExpect(jsonPath("$.data.bookingCode").value("BK77"));
     }
 
     @Test

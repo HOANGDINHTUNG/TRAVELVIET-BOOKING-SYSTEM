@@ -1,6 +1,7 @@
 package com.wedservice.backend.module.promotions.dto.request;
 
 import com.wedservice.backend.module.users.entity.MemberLevel;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -27,6 +28,31 @@ public class PromotionCampaignRequest {
     private String name;
 
     private String description;
+
+    private String imageUrl;
+
+    @Size(max = 180, message = "imageAlt must not exceed 180 characters")
+    private String imageAlt;
+
+    @Size(max = 160, message = "displayTitle must not exceed 160 characters")
+    private String displayTitle;
+
+    @Size(max = 255, message = "displaySubtitle must not exceed 255 characters")
+    private String displaySubtitle;
+
+    @Size(max = 80, message = "badgeText must not exceed 80 characters")
+    private String badgeText;
+
+    @Size(max = 80, message = "ctaLabel must not exceed 80 characters")
+    private String ctaLabel;
+
+    @Size(max = 255, message = "ctaUrl must not exceed 255 characters")
+    private String ctaUrl;
+
+    @Min(value = 0, message = "sortOrder must be >= 0")
+    private Integer sortOrder;
+
+    private Boolean isFeatured;
 
     @NotNull(message = "startAt is required")
     private LocalDateTime startAt;

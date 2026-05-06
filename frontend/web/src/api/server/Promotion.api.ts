@@ -85,6 +85,15 @@ export type PromotionCampaign = {
   code?: string
   name?: string
   description?: string
+  imageUrl?: string
+  imageAlt?: string
+  displayTitle?: string
+  displaySubtitle?: string
+  badgeText?: string
+  ctaLabel?: string
+  ctaUrl?: string
+  sortOrder?: number
+  isFeatured?: boolean
   startAt?: string
   endAt?: string
   targetMemberLevel?: string
@@ -97,6 +106,7 @@ export type PromotionCampaign = {
 
 export type PromotionCampaignQuery = PageQuery & {
   targetMemberLevel?: string
+  isFeatured?: boolean
   startsFrom?: string
   endsTo?: string
 }
@@ -105,6 +115,15 @@ export type PromotionCampaignPayload = {
   code: string
   name: string
   description?: string
+  imageUrl?: string
+  imageAlt?: string
+  displayTitle?: string
+  displaySubtitle?: string
+  badgeText?: string
+  ctaLabel?: string
+  ctaUrl?: string
+  sortOrder?: number
+  isFeatured?: boolean
   startAt: string
   endAt: string
   targetMemberLevel?: string
@@ -142,6 +161,12 @@ export const promotionApi = {
     return getBackendData<PageResponse<PromotionCampaign>>(
       'promotion-campaigns',
       params,
+    )
+  },
+
+  getPublicCampaigns() {
+    return getBackendData<PageResponse<PromotionCampaign>>(
+      'promotion-campaigns/public',
     )
   },
 

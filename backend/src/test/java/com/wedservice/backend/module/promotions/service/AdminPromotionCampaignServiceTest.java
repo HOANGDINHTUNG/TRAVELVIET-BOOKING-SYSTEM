@@ -59,6 +59,15 @@ class AdminPromotionCampaignServiceTest {
                 .code(" spring_sale ")
                 .name(" Spring Sale ")
                 .description(" Limited campaign ")
+                .imageUrl(" https://cdn.example.com/spring.jpg ")
+                .imageAlt(" Spring campaign banner ")
+                .displayTitle(" Spring escape ")
+                .displaySubtitle(" Save more on group tours ")
+                .badgeText(" Featured ")
+                .ctaLabel(" Book now ")
+                .ctaUrl(" /promotions/spring ")
+                .sortOrder(2)
+                .isFeatured(true)
                 .startAt(LocalDateTime.of(2026, 4, 20, 0, 0))
                 .endAt(LocalDateTime.of(2026, 4, 30, 23, 59))
                 .targetMemberLevel(MemberLevel.SILVER)
@@ -82,6 +91,15 @@ class AdminPromotionCampaignServiceTest {
         assertThat(response.getCode()).isEqualTo("SPRING_SALE");
         assertThat(response.getName()).isEqualTo("Spring Sale");
         assertThat(response.getDescription()).isEqualTo("Limited campaign");
+        assertThat(response.getImageUrl()).isEqualTo("https://cdn.example.com/spring.jpg");
+        assertThat(response.getImageAlt()).isEqualTo("Spring campaign banner");
+        assertThat(response.getDisplayTitle()).isEqualTo("Spring escape");
+        assertThat(response.getDisplaySubtitle()).isEqualTo("Save more on group tours");
+        assertThat(response.getBadgeText()).isEqualTo("Featured");
+        assertThat(response.getCtaLabel()).isEqualTo("Book now");
+        assertThat(response.getCtaUrl()).isEqualTo("/promotions/spring");
+        assertThat(response.getSortOrder()).isEqualTo(2);
+        assertThat(response.getIsFeatured()).isTrue();
         assertThat(response.getTargetMemberLevel()).isEqualTo(MemberLevel.SILVER);
         assertThat(response.getConditionsJson().get("minOrder").asInt()).isEqualTo(2000000);
         verify(auditTrailRecorder).record(

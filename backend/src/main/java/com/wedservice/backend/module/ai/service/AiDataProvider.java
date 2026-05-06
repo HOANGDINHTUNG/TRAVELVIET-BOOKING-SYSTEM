@@ -2,6 +2,7 @@ package com.wedservice.backend.module.ai.service;
 
 import com.wedservice.backend.common.exception.UnauthorizedException;
 import com.wedservice.backend.common.response.PageResponse;
+import com.wedservice.backend.module.ai.dto.AiRelatedItem;
 import com.wedservice.backend.module.ai.dto.AiDataResult;
 import com.wedservice.backend.module.ai.dto.IntentResult;
 import com.wedservice.backend.module.ai.enums.ChatIntent;
@@ -11,6 +12,7 @@ import com.wedservice.backend.module.destinations.dto.request.DestinationSearchR
 import com.wedservice.backend.module.destinations.dto.response.DestinationPublicResponse;
 import com.wedservice.backend.module.destinations.service.query.DestinationQueryService;
 import com.wedservice.backend.module.tours.dto.request.TourSearchRequest;
+import com.wedservice.backend.module.tours.dto.response.TourMediaResponse;
 import com.wedservice.backend.module.tours.dto.response.TourResponse;
 import com.wedservice.backend.module.tours.service.query.TourQueryService;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +27,7 @@ import org.springframework.util.StringUtils;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -34,6 +37,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class AiDataProvider {
     private static final int AI_RESULT_LIMIT = 5;
+    private static final int AI_CARD_LIMIT = 3;
 
     private final TourQueryService tourQueryService;
     private final DestinationQueryService destinationQueryService;
@@ -76,17 +80,28 @@ public class AiDataProvider {
                     .toList();
 
             if (tours.isEmpty()) {
-                return AiDataResult.noData(suggestionsFor(intentResult.getIntent()));
+                return AiDataResult.noData(
+                        "Hiện chưa có thông tin tour phù hợp với câu hỏi này.",
+                        suggestionsFor(intentResult.getIntent())
+                );
             }
 
             String context = tours.stream()
                     .map(this::formatTour)
                     .reduce((left, right) -> left + "\n-------------------------\n" + right)
                     .orElse("");
-            return AiDataResult.found(context, suggestionsFor(intentResult.getIntent()));
+            return AiDataResult.found(
+                    context,
+                    suggestionsFor(intentResult.getIntent()),
+                    tours.stream().limit(AI_CARD_LIMIT).map(this::tourRelatedItem).toList(),
+                    tourFallback(tours)
+            );
         } catch (Exception e) {
             log.warn("Could not load tour AI data: {}", e.getMessage());
-            return AiDataResult.noData(suggestionsFor(intentResult.getIntent()));
+            return AiDataResult.noData(
+                    "Hiện chưa có thông tin tour phù hợp với câu hỏi này.",
+                    suggestionsFor(intentResult.getIntent())
+            );
         }
     }
 
@@ -108,17 +123,28 @@ public class AiDataProvider {
                     .toList();
 
             if (destinations.isEmpty()) {
-                return AiDataResult.noData(suggestionsFor(ChatIntent.DESTINATION_SEARCH));
+                return AiDataResult.noData(
+                        "Hiện chưa có thông tin điểm đến phù hợp với câu hỏi này.",
+                        suggestionsFor(ChatIntent.DESTINATION_SEARCH)
+                );
             }
 
             String context = destinations.stream()
                     .map(this::formatDestination)
                     .reduce((left, right) -> left + "\n-------------------------\n" + right)
                     .orElse("");
-            return AiDataResult.found(context, suggestionsFor(ChatIntent.DESTINATION_SEARCH));
+            return AiDataResult.found(
+                    context,
+                    suggestionsFor(ChatIntent.DESTINATION_SEARCH),
+                    destinations.stream().limit(AI_CARD_LIMIT).map(this::destinationRelatedItem).toList(),
+                    destinationFallback(destinations)
+            );
         } catch (Exception e) {
             log.warn("Could not load destination AI data: {}", e.getMessage());
-            return AiDataResult.noData(suggestionsFor(ChatIntent.DESTINATION_SEARCH));
+            return AiDataResult.noData(
+                    "Hiện chưa có thông tin điểm đến phù hợp với câu hỏi này.",
+                    suggestionsFor(ChatIntent.DESTINATION_SEARCH)
+            );
         }
     }
 
@@ -150,19 +176,30 @@ public class AiDataProvider {
                     .toList();
 
             if (bookings.isEmpty()) {
-                return AiDataResult.noData(suggestionsFor(ChatIntent.BOOKING_LOOKUP));
+                return AiDataResult.noData(
+                        "Hiện chưa có thông tin booking phù hợp với câu hỏi này.",
+                        suggestionsFor(ChatIntent.BOOKING_LOOKUP)
+                );
             }
 
             String context = bookings.stream()
                     .map(this::formatBooking)
                     .reduce((left, right) -> left + "\n-------------------------\n" + right)
                     .orElse("");
-            return AiDataResult.found(context, suggestionsFor(ChatIntent.BOOKING_LOOKUP));
+            return AiDataResult.found(
+                    context,
+                    suggestionsFor(ChatIntent.BOOKING_LOOKUP),
+                    bookings.stream().limit(AI_CARD_LIMIT).map(this::bookingRelatedItem).toList(),
+                    bookingFallback(bookings)
+            );
         } catch (UnauthorizedException e) {
             return AiDataResult.noData(AiChatMessages.LOGIN_REQUIRED, suggestionsFor(ChatIntent.BOOKING_LOOKUP));
         } catch (Exception e) {
             log.warn("Could not load booking AI data: {}", e.getMessage());
-            return AiDataResult.noData(suggestionsFor(ChatIntent.BOOKING_LOOKUP));
+            return AiDataResult.noData(
+                    "Hiện chưa có thông tin booking phù hợp với câu hỏi này.",
+                    suggestionsFor(ChatIntent.BOOKING_LOOKUP)
+            );
         }
     }
 
@@ -173,11 +210,112 @@ public class AiDataProvider {
                 - Nếu vấn đề liên quan đến booking cá nhân, người dùng cần đăng nhập để hệ thống kiểm tra đúng dữ liệu.
                 - Không có dữ liệu phiên hỗ trợ cụ thể được tìm thấy trong câu hỏi hiện tại.
                 """;
-        return AiDataResult.found(context, suggestionsFor(ChatIntent.SUPPORT_REQUEST));
+        return AiDataResult.found(
+                context,
+                suggestionsFor(ChatIntent.SUPPORT_REQUEST),
+                List.of(),
+                "Mình có thể hỗ trợ bạn về đặt tour, thanh toán, hủy hoặc đổi lịch. Nếu vấn đề liên quan đến booking cá nhân, bạn hãy đăng nhập rồi gửi mã booking để mình kiểm tra đúng thông tin."
+        );
     }
 
     private AiDataResult unsupportedPersonalData() {
-        return AiDataResult.noData(AiChatMessages.NO_DATA, List.of("Tìm tour phù hợp", "Liên hệ hỗ trợ"));
+        return AiDataResult.noData(
+                "Hiện chưa có thông tin phù hợp cho yêu cầu này.",
+                List.of("Tìm tour phù hợp", "Liên hệ hỗ trợ")
+        );
+    }
+
+    private AiRelatedItem tourRelatedItem(TourResponse tour) {
+        return AiRelatedItem.builder()
+                .type("TOUR")
+                .id(tour.getId() == null ? null : tour.getId().toString())
+                .title(safe(tour.getName()))
+                .subtitle(durationText(tour.getDurationDays(), tour.getDurationNights()))
+                .description(safe(tour.getShortDescription()))
+                .imageUrl(tourImageUrl(tour))
+                .detailUrl(tour.getId() == null ? null : "/tours/" + tour.getId())
+                .meta(money(tour.getBasePrice(), tour.getCurrency()))
+                .build();
+    }
+
+    private AiRelatedItem destinationRelatedItem(DestinationPublicResponse destination) {
+        String id = destination.getUuid() == null ? null : destination.getUuid().toString();
+        return AiRelatedItem.builder()
+                .type("DESTINATION")
+                .id(id)
+                .title(safe(destination.getName()))
+                .subtitle(joinNonBlank(destination.getProvince(), destination.getRegion()))
+                .description(safe(destination.getShortDescription()))
+                .imageUrl(destination.getCoverImageUrl())
+                .detailUrl(id == null ? null : "/destinations/" + id)
+                .meta(destination.getActiveTourCount() == null
+                        ? bestTime(destination.getBestTimeFromMonth(), destination.getBestTimeToMonth())
+                        : destination.getActiveTourCount() + " tour đang hoạt động")
+                .build();
+    }
+
+    private AiRelatedItem bookingRelatedItem(BookingResponse booking) {
+        String id = booking.getId() == null ? null : booking.getId().toString();
+        return AiRelatedItem.builder()
+                .type("BOOKING")
+                .id(id)
+                .title("Booking " + safe(booking.getBookingCode()))
+                .subtitle("Trạng thái: " + safe(booking.getStatus()))
+                .description("Thanh toán: " + safe(booking.getPaymentStatus()))
+                .detailUrl(id == null ? null : "/bookings/" + id)
+                .meta(money(booking.getFinalAmount(), booking.getCurrency()))
+                .build();
+    }
+
+    private String tourFallback(List<TourResponse> tours) {
+        TourResponse first = tours.get(0);
+        String opening = tours.size() == 1
+                ? "Mình tìm thấy một tour phù hợp với câu hỏi của bạn."
+                : "Mình tìm thấy " + tours.size() + " tour phù hợp với câu hỏi của bạn.";
+        return opening + " Gợi ý nổi bật là " + safe(first.getName())
+                + ", " + durationText(first.getDurationDays(), first.getDurationNights())
+                + ", giá " + money(first.getBasePrice(), first.getCurrency())
+                + ". Bạn có thể mở thẻ bên dưới để xem ảnh, lịch trình và thông tin chi tiết.";
+    }
+
+    private String destinationFallback(List<DestinationPublicResponse> destinations) {
+        DestinationPublicResponse first = destinations.get(0);
+        String opening = destinations.size() == 1
+                ? "Mình tìm thấy một điểm đến phù hợp."
+                : "Mình tìm thấy " + destinations.size() + " điểm đến phù hợp.";
+        return opening + " Gợi ý đầu tiên là " + safe(first.getName())
+                + joinPrefix(", ", joinNonBlank(first.getProvince(), first.getRegion()))
+                + ". Bạn có thể mở thẻ bên dưới để xem ảnh và thông tin chi tiết.";
+    }
+
+    private String bookingFallback(List<BookingResponse> bookings) {
+        BookingResponse first = bookings.get(0);
+        String opening = bookings.size() == 1
+                ? "Mình tìm thấy booking của bạn."
+                : "Mình tìm thấy " + bookings.size() + " booking gần nhất của bạn.";
+        return opening + " Booking " + safe(first.getBookingCode())
+                + " đang ở trạng thái " + safe(first.getStatus())
+                + ", thanh toán " + safe(first.getPaymentStatus())
+                + ", tổng tiền " + money(first.getFinalAmount(), first.getCurrency()) + ".";
+    }
+
+    private String tourImageUrl(TourResponse tour) {
+        if (tour.getMedia() == null) {
+            return null;
+        }
+
+        return tour.getMedia().stream()
+                .filter(Objects::nonNull)
+                .filter(media -> media.getIsActive() == null || Boolean.TRUE.equals(media.getIsActive()))
+                .filter(media -> StringUtils.hasText(media.getMediaUrl()))
+                .filter(media -> !StringUtils.hasText(media.getMediaType())
+                        || !"video".equalsIgnoreCase(media.getMediaType()))
+                .min(Comparator.comparing(
+                        TourMediaResponse::getSortOrder,
+                        Comparator.nullsLast(Integer::compareTo)
+                ))
+                .map(TourMediaResponse::getMediaUrl)
+                .orElse(null);
     }
 
     private String formatTour(TourResponse tour) {
@@ -330,6 +468,17 @@ public class AiDataProvider {
 
     private String safe(String value) {
         return StringUtils.hasText(value) ? value : AiChatMessages.UNKNOWN_VALUE;
+    }
+
+    private String joinNonBlank(String... values) {
+        return java.util.Arrays.stream(values)
+                .filter(StringUtils::hasText)
+                .reduce((left, right) -> left + " - " + right)
+                .orElse(AiChatMessages.UNKNOWN_VALUE);
+    }
+
+    private String joinPrefix(String prefix, String value) {
+        return StringUtils.hasText(value) && !AiChatMessages.UNKNOWN_VALUE.equals(value) ? prefix + value : "";
     }
 
     private int valueOrZero(Integer value) {

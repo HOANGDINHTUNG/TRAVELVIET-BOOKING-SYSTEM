@@ -25,6 +25,8 @@ public class PromotionCampaignSearchRequest {
 
     private Boolean isActive;
 
+    private Boolean isFeatured;
+
     private MemberLevel targetMemberLevel;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
@@ -34,7 +36,7 @@ public class PromotionCampaignSearchRequest {
     private LocalDateTime endsTo;
 
     @Pattern(
-            regexp = "code|name|startAt|endAt|targetMemberLevel|isActive|createdAt|updatedAt",
+            regexp = "code|name|startAt|endAt|targetMemberLevel|isActive|isFeatured|sortOrder|createdAt|updatedAt",
             flags = Pattern.Flag.CASE_INSENSITIVE,
             message = "sortBy is invalid"
     )

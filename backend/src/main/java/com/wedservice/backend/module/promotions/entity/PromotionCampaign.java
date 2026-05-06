@@ -41,6 +41,35 @@ public class PromotionCampaign {
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
+    @Column(name = "image_url", columnDefinition = "TEXT")
+    private String imageUrl;
+
+    @Column(name = "image_alt", length = 180)
+    private String imageAlt;
+
+    @Column(name = "display_title", length = 160)
+    private String displayTitle;
+
+    @Column(name = "display_subtitle", length = 255)
+    private String displaySubtitle;
+
+    @Column(name = "badge_text", length = 80)
+    private String badgeText;
+
+    @Column(name = "cta_label", length = 80)
+    private String ctaLabel;
+
+    @Column(name = "cta_url", length = 255)
+    private String ctaUrl;
+
+    @Column(name = "sort_order", nullable = false)
+    @Builder.Default
+    private Integer sortOrder = 0;
+
+    @Column(name = "is_featured", nullable = false)
+    @Builder.Default
+    private Boolean isFeatured = false;
+
     @Column(name = "start_at", nullable = false)
     private LocalDateTime startAt;
 
@@ -79,6 +108,12 @@ public class PromotionCampaign {
         if (isActive == null) {
             isActive = true;
         }
+        if (sortOrder == null) {
+            sortOrder = 0;
+        }
+        if (isFeatured == null) {
+            isFeatured = false;
+        }
     }
 
     @PreUpdate
@@ -86,6 +121,12 @@ public class PromotionCampaign {
         updatedAt = LocalDateTime.now();
         if (isActive == null) {
             isActive = true;
+        }
+        if (sortOrder == null) {
+            sortOrder = 0;
+        }
+        if (isFeatured == null) {
+            isFeatured = false;
         }
     }
 }

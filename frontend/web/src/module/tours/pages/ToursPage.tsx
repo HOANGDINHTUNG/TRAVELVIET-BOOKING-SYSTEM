@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import {
   ArrowLeft,
   ArrowRight,
@@ -34,11 +34,14 @@ function normalizeText(value: string) {
 
 function ToursPage() {
   const { t, i18n } = useTranslation()
+  const [searchParams] = useSearchParams()
   const [tours, setTours] = useState<Tour[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState(ALL_FILTER)
+  const [searchQuery, setSearchQuery] = useState(() => searchParams.get('query') ?? '')
+  const [selectedCategory, setSelectedCategory] = useState(
+    () => searchParams.get('category') ?? ALL_FILTER,
+  )
 
   useEffect(() => {
     let isActive = true

@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router-dom'
+import { CalendarDays, MapPin, Plane, Search, Tags } from 'lucide-react'
 import {
   heroSlides,
-  type Destination,
   type HeroSlide,
+  type Tour,
 } from '../../database/travelData'
 import './Hero.css'
 
@@ -25,10 +27,16 @@ const directions: Direction[] = [
 ]
 
 const thumbnailCopies = [0, 1, 2]
-const heroDestinationLimit = 5
+const heroTourLimit = 5
 
 type HeroProps = {
-  destinations?: Destination[]
+  tours?: Tour[]
+}
+
+type HeroTourSlide = HeroSlide & {
+  tourId?: number
+  duration?: string
+  priceLabel?: string
 }
 
 const directionConfig: Record<Direction, DirectionConfig> = {
@@ -63,40 +71,61 @@ function pickRandomDirection(lastDirection: Direction) {
   return pool[Math.floor(Math.random() * pool.length)]
 }
 
-function toDestinationHeroSlide(destination: Destination): HeroSlide {
-  const location = destination.province || destination.region || 'TravelViet'
+function formatTourPrice(tour: Tour) {
+  if (!tour.price) {
+    return 'TravelViet tour'
+  }
+
+  const currency = tour.currency || 'VND'
+  return new Intl.NumberFormat('vi-VN', {
+    style: 'currency',
+    currency,
+    maximumFractionDigits: 0,
+  }).format(tour.price)
+}
+
+function toTourHeroSlide(tour: Tour): HeroTourSlide {
+  const titleTop = tour.location || tour.category || 'TravelViet'
 
   return {
-    titleTop: location,
-    titleMain: destination.name,
-    kicker: destination.region || destination.province || 'TravelViet destination',
+    tourId: tour.id,
+    titleTop,
+    titleMain: tour.title,
+    kicker: tour.category || 'TravelViet tour',
     copy:
-      destination.shortDescription ||
-      `Explore ${destination.name} with a TravelViet itinerary built around local experiences.`,
-    image: destination.image,
+      tour.description ||
+      tour.highlights[0] ||
+      `Book ${tour.title} with a TravelViet itinerary built around local experiences.`,
+    image: tour.image,
+    duration: tour.days,
+    priceLabel: formatTourPrice(tour),
   }
 }
 
-export function Hero({ destinations = [] }: HeroProps) {
+export function Hero({ tours = [] }: HeroProps) {
   const { t } = useTranslation()
-  const slides = useMemo(() => {
-    const destinationSlides = destinations
-      .filter((destination) => destination.name && destination.image)
-      .slice(0, heroDestinationLimit)
-      .map(toDestinationHeroSlide)
+  const [selectedCategory, setSelectedCategory] = useState('')
+  const [selectedTourId, setSelectedTourId] = useState('')
+  const [selectedDuration, setSelectedDuration] = useState('')
+  const [departureDate, setDepartureDate] = useState('')
+  const slides = useMemo<HeroTourSlide[]>(() => {
+    const tourSlides = tours
+      .filter((tour) => tour.title && tour.image)
+      .slice(0, heroTourLimit)
+      .map(toTourHeroSlide)
 
-    if (destinationSlides.length > 0) {
-      return destinationSlides
+    if (tourSlides.length > 0) {
+      return tourSlides
     }
 
-    return heroSlides.map((slide, index) => ({
+    return heroSlides.map<HeroTourSlide>((slide, index) => ({
       ...slide,
       titleTop: t(`hero.slides.${index}.titleTop`),
       titleMain: t(`hero.slides.${index}.titleMain`),
       kicker: t(`hero.slides.${index}.kicker`),
       copy: t(`hero.slides.${index}.copy`),
     }))
-  }, [destinations, t])
+  }, [t, tours])
   const [activeSlide, setActiveSlide] = useState(0)
   const [previousSlide, setPreviousSlide] = useState<number | null>(null)
   const [transitionStep, setTransitionStep] = useState(0)
@@ -106,6 +135,7 @@ export function Hero({ destinations = [] }: HeroProps) {
   const animatingRef = useRef(false)
   const titleRef = useRef<HTMLHeadingElement | null>(null)
   const copyRef = useRef<HTMLParagraphElement | null>(null)
+  const metaRef = useRef<HTMLDivElement | null>(null)
   const ctaRef = useRef<HTMLAnchorElement | null>(null)
   const activeBgRef = useRef<HTMLImageElement | null>(null)
   const oldBgRef = useRef<HTMLImageElement | null>(null)
@@ -114,8 +144,30 @@ export function Hero({ destinations = [] }: HeroProps) {
   const thumbnailPositionRef = useRef(slides.length)
 
   const activeSlideIndex = Math.min(activeSlide, slides.length - 1)
-  const activeHero = slides[activeSlideIndex] ?? slides[0]
+  const activeHero = (slides[activeSlideIndex] ?? slides[0]) as HeroTourSlide
   const oldHero = previousSlide === null ? null : slides[previousSlide] ?? null
+  const activeTourHref = activeHero.tourId ? `/tours/${activeHero.tourId}` : '#packages'
+  const categoryOptions = useMemo(
+    () => Array.from(new Set(tours.map((tour) => tour.category).filter(Boolean))),
+    [tours],
+  )
+  const durationOptions = useMemo(
+    () => Array.from(new Set(tours.map((tour) => tour.days).filter(Boolean))),
+    [tours],
+  )
+  const searchHref = useMemo(() => {
+    if (selectedTourId) {
+      return `/tours/${selectedTourId}`
+    }
+
+    const params = new URLSearchParams()
+    if (selectedCategory) params.set('category', selectedCategory)
+    if (selectedDuration) params.set('query', selectedDuration)
+    if (departureDate) params.set('departureDate', departureDate)
+    const query = params.toString()
+
+    return query ? `/tours?${query}` : '/tours'
+  }, [departureDate, selectedCategory, selectedDuration, selectedTourId])
 
   useEffect(() => {
     activeSlideRef.current = activeSlideIndex
@@ -185,7 +237,7 @@ export function Hero({ destinations = [] }: HeroProps) {
         0,
       )
       .to(
-        [copyRef.current, ctaRef.current],
+        [copyRef.current, metaRef.current, ctaRef.current],
         {
           autoAlpha: 0,
           duration: 0.62,
@@ -241,7 +293,7 @@ export function Hero({ destinations = [] }: HeroProps) {
           0,
         )
         .fromTo(
-          [copyRef.current, ctaRef.current],
+          [copyRef.current, metaRef.current, ctaRef.current],
           { autoAlpha: 0 },
           {
             autoAlpha: 1,
@@ -267,11 +319,12 @@ export function Hero({ destinations = [] }: HeroProps) {
     const activeBg = activeBgRef.current
     const title = titleRef.current
     const copy = copyRef.current
+    const meta = metaRef.current
     const cta = ctaRef.current
     const ripple = rippleRef.current
     const thumbnailTrack = thumbnailTrackRef.current
 
-    if (!activeBg || !title || !copy || !cta) {
+    if (!activeBg || !title || !copy || !meta || !cta) {
       return undefined
     }
 
@@ -398,7 +451,7 @@ export function Hero({ destinations = [] }: HeroProps) {
         0.22,
       )
       .fromTo(
-        [copy, cta],
+        [copy, meta, cta],
         { autoAlpha: 0, y: 0 },
         {
           autoAlpha: 1,
@@ -467,21 +520,90 @@ export function Hero({ destinations = [] }: HeroProps) {
 
       <div className="hero-content">
         <p className="eyebrow">{activeHero.kicker}</p>
-        <h1 ref={titleRef}>
-          <span>{activeHero.titleTop}</span>
-          {activeHero.titleMain}
-        </h1>
+        <h1 ref={titleRef}>{activeHero.titleMain}</h1>
         <p className="hero-copy" ref={copyRef}>
           {activeHero.copy}
         </p>
-        <a className="primary-button" ref={ctaRef} href="#destinations">
-          {t('hero.cta')}
-        </a>
+        <div className="hero-tour-meta" ref={metaRef} aria-label="Tour summary">
+          <span className="hero-tour-location">{activeHero.titleTop}</span>
+          {activeHero.duration && <span>{activeHero.duration}</span>}
+          {activeHero.priceLabel && (
+            <strong className="hero-tour-price">{activeHero.priceLabel}</strong>
+          )}
+        </div>
+        <Link className="primary-button" ref={ctaRef} to={activeTourHref}>
+          Booking now
+        </Link>
+      </div>
+
+      <div className="hero-search-card" aria-label="Tim tour nhanh">
+        <label className="hero-search-field">
+          <MapPin size={20} strokeWidth={2.4} aria-hidden="true" />
+          <select
+            value={selectedTourId}
+            onChange={(event) => setSelectedTourId(event.target.value)}
+            aria-label="Chon tour"
+          >
+            <option value="">Chon tour...</option>
+            {tours.map((tour) => (
+              <option value={tour.id} key={tour.id}>
+                {tour.title}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="hero-search-field">
+          <Plane size={20} strokeWidth={2.4} aria-hidden="true" />
+          <select
+            value={selectedCategory}
+            onChange={(event) => setSelectedCategory(event.target.value)}
+            aria-label="Loai tour"
+          >
+            <option value="">Loai tour...</option>
+            {categoryOptions.map((category) => (
+              <option value={category} key={category}>
+                {category}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="hero-search-field">
+          <Tags size={20} strokeWidth={2.4} aria-hidden="true" />
+          <select
+            value={selectedDuration}
+            onChange={(event) => setSelectedDuration(event.target.value)}
+            aria-label="Thoi luong"
+          >
+            <option value="">Thoi luong...</option>
+            {durationOptions.map((duration) => (
+              <option value={duration} key={duration}>
+                {duration}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="hero-search-field">
+          <CalendarDays size={20} strokeWidth={2.4} aria-hidden="true" />
+          <input
+            type="date"
+            value={departureDate}
+            onChange={(event) => setDepartureDate(event.target.value)}
+            aria-label="Ngay khoi hanh"
+          />
+        </label>
+
+        <Link className="hero-search-submit" to={searchHref}>
+          <Search size={18} strokeWidth={2.6} aria-hidden="true" />
+          Search
+        </Link>
       </div>
 
       <div
         className="hero-thumbnails"
-        aria-label="Featured trip images"
+        aria-label="Featured tour images"
       >
         <div className="hero-thumbnails-track" ref={thumbnailTrackRef}>
           {thumbnailCopies.map((copyIndex) =>

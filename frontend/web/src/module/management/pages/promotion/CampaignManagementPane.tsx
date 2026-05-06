@@ -61,9 +61,9 @@ function CampaignManagementPane({
               >
                 <div>
                   <strong>{item.name || item.code}</strong>
-                  <small>{item.code || '-'}</small>
+                  <small>{item.displayTitle || item.code || '-'}</small>
                 </div>
-                <span>{item.targetMemberLevel || 'ALL'}</span>
+                <span>{item.isFeatured ? 'FEATURED' : item.targetMemberLevel || 'ALL'}</span>
                 <em>{statusLabel(item.isActive)}</em>
               </button>
             ))}
@@ -96,15 +96,37 @@ function CampaignManagementPane({
             <div className="mgmt-promo-admin-form">
               <label><span>Mã campaign</span><input value={campaignForm.code} onChange={(event) => onChangeForm({ code: event.target.value })} /></label>
               <label><span>Tên campaign</span><input value={campaignForm.name} onChange={(event) => onChangeForm({ name: event.target.value })} /></label>
+              <label><span>Tiêu đề hiển thị</span><input value={campaignForm.displayTitle} onChange={(event) => onChangeForm({ displayTitle: event.target.value })} /></label>
+              <label><span>Dòng phụ</span><input value={campaignForm.displaySubtitle} onChange={(event) => onChangeForm({ displaySubtitle: event.target.value })} /></label>
+              <label><span>Badge</span><input value={campaignForm.badgeText} onChange={(event) => onChangeForm({ badgeText: event.target.value })} placeholder="Ưu đãi hè" /></label>
+              <label><span>Thứ tự</span><input type="number" value={campaignForm.sortOrder} onChange={(event) => onChangeForm({ sortOrder: event.target.value })} /></label>
               <label><span>Bắt đầu</span><input type="datetime-local" value={campaignForm.startAt} onChange={(event) => onChangeForm({ startAt: event.target.value })} /></label>
               <label><span>Kết thúc</span><input type="datetime-local" value={campaignForm.endAt} onChange={(event) => onChangeForm({ endAt: event.target.value })} /></label>
               <label><span>Hạng thành viên</span><input value={campaignForm.targetMemberLevel} onChange={(event) => onChangeForm({ targetMemberLevel: event.target.value })} placeholder="bronze, silver..." /></label>
+              <label><span>Nút CTA</span><input value={campaignForm.ctaLabel} onChange={(event) => onChangeForm({ ctaLabel: event.target.value })} placeholder="Xem ưu đãi" /></label>
+              <label><span>Link CTA</span><input value={campaignForm.ctaUrl} onChange={(event) => onChangeForm({ ctaUrl: event.target.value })} placeholder="/promotions/..." /></label>
+              <label className="mgmt-promo-admin-wide"><span>URL ảnh khuyến mãi</span><input value={campaignForm.imageUrl} onChange={(event) => onChangeForm({ imageUrl: event.target.value })} placeholder="https://..." /></label>
+              <label className="mgmt-promo-admin-wide"><span>Mô tả ảnh</span><input value={campaignForm.imageAlt} onChange={(event) => onChangeForm({ imageAlt: event.target.value })} /></label>
+              {campaignForm.imageUrl && (
+                <div className="mgmt-promo-admin-preview mgmt-promo-admin-wide">
+                  <img src={campaignForm.imageUrl} alt={campaignForm.imageAlt || campaignForm.displayTitle || campaignForm.name} />
+                  <div>
+                    <span>{campaignForm.badgeText || 'Promotion'}</span>
+                    <strong>{campaignForm.displayTitle || campaignForm.name || 'Campaign preview'}</strong>
+                    <p>{campaignForm.displaySubtitle || campaignForm.description || 'No display subtitle'}</p>
+                  </div>
+                </div>
+              )}
               <label className="mgmt-promo-admin-wide"><span>Mô tả</span><textarea value={campaignForm.description} onChange={(event) => onChangeForm({ description: event.target.value })} /></label>
               <label className="mgmt-promo-admin-wide"><span>Điều kiện áp dụng (JSON)</span><textarea value={campaignForm.conditionsJson} onChange={(event) => onChangeForm({ conditionsJson: event.target.value })} placeholder='{"minBookings": 3}' /></label>
               <label className="mgmt-promo-admin-wide"><span>Cấu hình ưu đãi (JSON)</span><textarea value={campaignForm.rewardJson} onChange={(event) => onChangeForm({ rewardJson: event.target.value })} placeholder='{"type": "discount", "value": 10}' /></label>
               <label className="mgmt-promo-admin-toggle mgmt-promo-admin-wide">
                 <input type="checkbox" checked={campaignForm.isActive} onChange={(event) => onChangeForm({ isActive: event.target.checked })} />
                 <span>Đang bật</span>
+              </label>
+              <label className="mgmt-promo-admin-toggle mgmt-promo-admin-wide">
+                <input type="checkbox" checked={campaignForm.isFeatured} onChange={(event) => onChangeForm({ isFeatured: event.target.checked })} />
+                <span>Hiển thị ở khu khuyến mãi nổi bật</span>
               </label>
               <div className="mgmt-crud-actions mgmt-promo-admin-wide">
                 <button type="button" onClick={() => void onSave()} disabled={saving || (campaignForm.id ? !canUpdate : !canCreate)}>

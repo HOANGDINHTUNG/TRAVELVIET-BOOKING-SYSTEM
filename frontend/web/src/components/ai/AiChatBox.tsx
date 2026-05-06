@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import type { FormEvent, KeyboardEvent } from 'react'
-import { MessageCircle, Send, Sparkles, X } from 'lucide-react'
+import { ArrowRight, MessageCircle, Send, Sparkles, X } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { sendAiMessage } from '../../api/server/AiChat.api'
+import type { AiRelatedItem } from '../../api/server/AiChat.api'
+import { buildAssetUrl } from '../../utils/buildAssetUrl'
 import './AiChatBox.css'
 
 type ChatMessage = {
@@ -10,18 +13,63 @@ type ChatMessage = {
   text: string
   createdAt: Date
   suggestions?: string[]
+  relatedItems?: AiRelatedItem[]
 }
 
 const initialMessage: ChatMessage = {
   id: 'welcome',
   role: 'ai',
-  text: 'Xin chào, tôi có thể tư vấn tour, địa điểm và hỗ trợ thông tin đặt tour dựa trên dữ liệu hiện có của TravelViet.',
+  text: 'Xin chào, mình có thể tìm tour, gợi ý điểm đến và hỗ trợ thông tin đặt tour dựa trên dữ liệu hiện có của TravelViet.',
   createdAt: new Date(),
   suggestions: [
-    'Tôi muốn đi Đà Lạt 3 ngày 2 đêm',
+    'Tìm tour Đà Lạt 3 ngày 2 đêm',
     'Tôi có 5 triệu nên đi đâu?',
     'Có địa điểm nào đẹp ở miền Trung không?',
   ],
+}
+
+function relatedItemLabel(type: string) {
+  switch (type) {
+    case 'TOUR':
+      return 'Tour'
+    case 'DESTINATION':
+      return 'Điểm đến'
+    case 'BOOKING':
+      return 'Booking'
+    default:
+      return 'Gợi ý'
+  }
+}
+
+function renderRelatedItem(item: AiRelatedItem) {
+  const imageUrl = buildAssetUrl(item.imageUrl)
+
+  return (
+    <article className="ai-chatbox-related-card" key={`${item.type}-${item.id ?? item.title}`}>
+      {imageUrl ? (
+        <img src={imageUrl} alt={item.title} loading="lazy" />
+      ) : (
+        <div className="ai-chatbox-related-empty" aria-hidden="true">
+          <Sparkles size={18} />
+        </div>
+      )}
+      <div className="ai-chatbox-related-body">
+        <span className="ai-chatbox-related-type">{relatedItemLabel(item.type)}</span>
+        <strong>{item.title}</strong>
+        {item.subtitle ? <small>{item.subtitle}</small> : null}
+        {item.description ? <p>{item.description}</p> : null}
+        <div className="ai-chatbox-related-footer">
+          {item.meta ? <span>{item.meta}</span> : <span />}
+          {item.detailUrl ? (
+            <Link to={item.detailUrl}>
+              Xem chi tiết
+              <ArrowRight size={14} />
+            </Link>
+          ) : null}
+        </div>
+      </div>
+    </article>
+  )
 }
 
 export function AiChatBox() {
@@ -69,6 +117,7 @@ export function AiChatBox() {
         text: response.answer,
         createdAt: new Date(),
         suggestions: response.suggestions,
+        relatedItems: response.relatedItems ?? [],
       }
 
       setMessages((currentMessages) => [...currentMessages, aiMessage])
@@ -135,15 +184,22 @@ export function AiChatBox() {
           <div className="ai-chatbox-messages" ref={messagesRef}>
             {messages.map((message) => (
               <article
-                className={`ai-chatbox-message is-${message.role}`}
+                className={`ai-chatbox-message is-${message.role} ${
+                  message.relatedItems?.length ? 'has-related' : ''
+                }`}
                 key={message.id}
               >
                 <p>{message.text}</p>
+                {message.relatedItems?.length ? (
+                  <div className="ai-chatbox-related-list">
+                    {message.relatedItems.map(renderRelatedItem)}
+                  </div>
+                ) : null}
               </article>
             ))}
             {loading && (
               <article className="ai-chatbox-message is-ai">
-                <p>AI đang trả lời...</p>
+                <p>Đang tìm thông tin phù hợp...</p>
               </article>
             )}
           </div>

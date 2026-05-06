@@ -37,6 +37,20 @@ class IntentDetectionServiceTest {
     }
 
     @Test
+    void detectsGeneralTravelPreparationQuestionAsFaq() {
+        var result = service.detect("Tôi nên chuẩn bị gì khi đi du lịch?");
+
+        assertThat(result.getIntent()).isEqualTo(ChatIntent.GENERAL_FAQ);
+    }
+
+    @Test
+    void detectsSupportBeforeBookingLookup() {
+        var result = service.detect("Tôi cần hỗ trợ đặt tour");
+
+        assertThat(result.getIntent()).isEqualTo(ChatIntent.SUPPORT_REQUEST);
+    }
+
+    @Test
     void detectsSensorQuestionBeforeSmartBoxStatus() {
         var result = service.detect("Hộp hàng SBX123 có bị va đập không?");
 

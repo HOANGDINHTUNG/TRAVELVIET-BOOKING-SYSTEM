@@ -956,6 +956,7 @@
 
 .tour-booking-field.full,
 .tour-booking-counter-grid,
+.tour-booking-help,
 .tour-booking-actions {
   grid-column: 1 / -1;
 }
@@ -983,6 +984,22 @@
 .tour-booking-field input:focus,
 .tour-booking-field select:focus {
   border-color: var(--color-ocean, #087f9c);
+}
+
+.tour-booking-help {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: -4px 0 0;
+  color: var(--color-muted, #52645b);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.tour-booking-help svg {
+  flex: 0 0 auto;
+  color: var(--color-ocean, #087f9c);
 }
 
 .tour-booking-counter-grid {
@@ -1020,7 +1037,7 @@
 }
 
 .tour-booking-actions button:disabled {
-  cursor: wait;
+  cursor: not-allowed;
   opacity: 0.68;
 }
 
@@ -1109,6 +1126,10 @@
 
 .tour-booking-alert.error {
   color: var(--color-danger, #bc6c25);
+}
+
+.tour-booking-alert.info {
+  color: var(--color-muted, #52645b);
 }
 
 .tour-booking-cta {

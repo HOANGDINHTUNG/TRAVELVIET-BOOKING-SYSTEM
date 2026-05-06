@@ -25,7 +25,9 @@ class PromptBuilderServiceTest {
                 AiDataResult.found("Tên tour: Đà Lạt mùa hoa\nGiá: 4500000 VNĐ", List.of())
         );
 
-        assertThat(prompt).contains("Chỉ dùng dữ liệu trong phần \"DỮ LIỆU HỆ THỐNG\"");
+        assertThat(prompt).contains("Với thông tin cụ thể của TravelViet");
+        assertThat(prompt).contains("Trạng thái dữ liệu hệ thống");
+        assertThat(prompt).contains("Có dữ liệu phù hợp.");
         assertThat(prompt).contains("Không tự bịa thông tin");
         assertThat(prompt).contains("TOUR_SEARCH");
         assertThat(prompt).contains("Tên tour: Đà Lạt mùa hoa");
