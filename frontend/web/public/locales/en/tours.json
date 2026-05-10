@@ -1,0 +1,31 @@
+{
+  "detail": {
+    "backToList": "Back to tours",
+    "errorTitle": "Tour not found",
+    "errorMessage": "Could not load this tour. Please retry.",
+    "notFound": "This tour no longer exists or has been removed.",
+    "noMedia": "No media available for this tour.",
+    "thumbnail": "Thumbnail",
+    "fromPrice": "From",
+    "daysShort": "days",
+    "nightsShort": "nights",
+    "featured": "Featured",
+    "descriptionTitle": "Description",
+    "highlightsTitle": "Trip highlights",
+    "itineraryTitle": "Itinerary",
+    "inclusionsTitle": "What's included",
+    "exclusionsTitle": "What's excluded",
+    "schedulesTitle": "Pick a departure date",
+    "itinerary": {
+      "empty": "Itinerary is being updated.",
+      "dayLabel": "Day",
+      "untitledDay": "Daily activities",
+      "overnight": "Overnight at destination"
+    },
+    "schedules": {
+      "loading": "Loading schedules...",
+      "empty": "No open schedules available right now.",
+      "remaining": "Left"
+    }
+  }
+}

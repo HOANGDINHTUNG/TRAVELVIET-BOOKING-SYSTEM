@@ -7,6 +7,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "tours")
@@ -136,4 +138,8 @@ public class Tour extends AuditableEntity {
 
     @Column(name = "updated_by", length = 36)
     private java.util.UUID updatedBy;
+
+    @OneToMany(mappedBy = "tour")
+    @Builder.Default
+    private List<TourTranslation> translations = new ArrayList<>();
 }

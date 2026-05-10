@@ -66,7 +66,7 @@ public class AdminPromotionCampaignService {
 
         String normalizedCode = normalizeCode(request.getCode());
         if (promotionCampaignRepository.findByCodeIgnoreCase(normalizedCode).isPresent()) {
-            throw new BadRequestException("Promotion campaign code already exists");
+            throw BadRequestException.i18n("api.error.promo.campaign.codeExists");
         }
 
         PromotionCampaign campaign = PromotionCampaign.builder().build();
@@ -87,7 +87,7 @@ public class AdminPromotionCampaignService {
         String normalizedCode = normalizeCode(request.getCode());
 
         if (promotionCampaignRepository.existsByCodeIgnoreCaseAndIdNot(normalizedCode, id)) {
-            throw new BadRequestException("Promotion campaign code already exists");
+            throw BadRequestException.i18n("api.error.promo.campaign.codeExists");
         }
 
         applyRequest(campaign, request, normalizedCode);
@@ -137,13 +137,13 @@ public class AdminPromotionCampaignService {
 
     private void validateCampaignRequest(PromotionCampaignRequest request) {
         if (!request.getEndAt().isAfter(request.getStartAt())) {
-            throw new BadRequestException("endAt must be after startAt");
+            throw BadRequestException.i18n("api.error.promo.campaign.endAfterStart");
         }
     }
 
     private void validateSearchRequest(PromotionCampaignSearchRequest request) {
         if (request.getStartsFrom() != null && request.getEndsTo() != null && request.getStartsFrom().isAfter(request.getEndsTo())) {
-            throw new BadRequestException("startsFrom must be before or equal to endsTo");
+            throw BadRequestException.i18n("api.error.promo.campaign.startsFromEndsToOrder");
         }
     }
 
@@ -222,7 +222,7 @@ public class AdminPromotionCampaignService {
     private String normalizeRequiredText(String value, String fieldName) {
         String normalized = normalizeNullable(value);
         if (!StringUtils.hasText(normalized)) {
-            throw new BadRequestException(fieldName + " is required");
+            throw BadRequestException.i18n("api.error.common.fieldRequired", fieldName);
         }
         return normalized;
     }
@@ -239,7 +239,7 @@ public class AdminPromotionCampaignService {
         try {
             return jsonMapper.writeValueAsString(node);
         } catch (Exception ex) {
-            throw new BadRequestException("Invalid JSON payload");
+            throw BadRequestException.i18n("api.error.promo.campaign.invalidJsonPayload");
         }
     }
 
@@ -250,7 +250,7 @@ public class AdminPromotionCampaignService {
         try {
             return jsonMapper.readTree(rawJson);
         } catch (Exception ex) {
-            throw new BadRequestException("Stored JSON payload is invalid");
+            throw BadRequestException.i18n("api.error.promo.campaign.storedJsonInvalid");
         }
     }
 }

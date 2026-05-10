@@ -3,8 +3,11 @@ package com.wedservice.backend.module.tours.facade;
 import com.wedservice.backend.module.tours.dto.request.TourRequest;
 import com.wedservice.backend.module.tours.dto.request.TourSearchRequest;
 import com.wedservice.backend.module.tours.dto.request.TourScheduleRequest;
+import com.wedservice.backend.module.tours.dto.request.UpsertTourTranslationRequest;
 import com.wedservice.backend.module.tours.dto.response.TourResponse;
 import com.wedservice.backend.module.tours.dto.response.TourScheduleResponse;
+import com.wedservice.backend.module.tours.dto.response.TourTranslationResponse;
+import com.wedservice.backend.module.tours.service.TourTranslationAdminService;
 import com.wedservice.backend.module.tours.service.command.TourCommandService;
 import com.wedservice.backend.module.tours.service.query.TourQueryService;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +22,7 @@ public class TourFacade {
 
     private final TourCommandService tourCommandService;
     private final TourQueryService tourQueryService;
+    private final TourTranslationAdminService tourTranslationAdminService;
 
     public Page<TourResponse> searchTours(TourSearchRequest request) {
         return tourQueryService.searchTours(request);
@@ -58,6 +62,18 @@ public class TourFacade {
 
     public void deleteTour(Long id) {
         tourCommandService.deleteTour(id);
+    }
+
+    public List<TourTranslationResponse> listTourTranslations(Long tourId) {
+        return tourTranslationAdminService.listByTourId(tourId);
+    }
+
+    public TourTranslationResponse upsertTourTranslation(Long tourId, String locale, UpsertTourTranslationRequest request) {
+        return tourTranslationAdminService.upsert(tourId, locale, request);
+    }
+
+    public void deleteTourTranslation(Long tourId, String locale) {
+        tourTranslationAdminService.delete(tourId, locale);
     }
 
     public TourScheduleResponse createTourSchedule(Long tourId, TourScheduleRequest request) {

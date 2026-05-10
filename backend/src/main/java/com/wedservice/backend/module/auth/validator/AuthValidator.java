@@ -14,7 +14,7 @@ public class AuthValidator {
 
     public void validateRequiredContact(String email, String phone) {
         if (!StringUtils.hasText(email) && !StringUtils.hasText(phone)) {
-            throw new BadRequestException("At least email or phone must be provided");
+            throw BadRequestException.i18n("api.error.common.contactRequired");
         }
     }
 
@@ -23,14 +23,14 @@ public class AuthValidator {
             boolean emailExists = currentUserId == null
                     ? userRepository.existsByEmailIgnoreCase(email)
                     : userRepository.existsByEmailIgnoreCaseAndIdNot(email, currentUserId);
-            if (emailExists) throw new BadRequestException("Email already exists");
+            if (emailExists) throw BadRequestException.i18n("api.error.common.emailExists");
         }
 
         if (StringUtils.hasText(phone)) {
             boolean phoneExists = currentUserId == null
                     ? userRepository.existsByPhone(phone)
                     : userRepository.existsByPhoneAndIdNot(phone, currentUserId);
-            if (phoneExists) throw new BadRequestException("Phone already exists");
+            if (phoneExists) throw BadRequestException.i18n("api.error.common.phoneExists");
         }
     }
 }

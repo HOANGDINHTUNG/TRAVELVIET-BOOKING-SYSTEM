@@ -16,16 +16,16 @@ public class UserProfileValidator {
 
     public void validateRequiredContact(String email, String phone) {
         if (!StringUtils.hasText(email) && !StringUtils.hasText(phone)) {
-            throw new BadRequestException("At least email or phone must be provided");
+            throw BadRequestException.i18n("api.error.common.contactRequired");
         }
     }
 
     public void validateUniqueContacts(String email, String phone, UUID currentUserId) {
         if (StringUtils.hasText(email) && userRepository.existsByEmailIgnoreCaseAndIdNot(email, currentUserId)) {
-            throw new BadRequestException("Email already exists");
+            throw BadRequestException.i18n("api.error.common.emailExists");
         }
         if (StringUtils.hasText(phone) && userRepository.existsByPhoneAndIdNot(phone, currentUserId)) {
-            throw new BadRequestException("Phone already exists");
+            throw BadRequestException.i18n("api.error.common.phoneExists");
         }
     }
 }

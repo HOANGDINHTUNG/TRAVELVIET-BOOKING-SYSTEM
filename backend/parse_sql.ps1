@@ -1,4 +1,5 @@
-$sql = Get-Content -Path "d:\TRAVELVIET-BOOKING-SYSTEM\backend\src\main\resources\db\migration\V1__init_schema.sql"
+$migrationDir = Join-Path $PSScriptRoot "src\main\resources\db\migration"
+$sql = Get-Content -Path (Join-Path $migrationDir "V1__tables.sql")
 $current_table = ""
 foreach ($line in $sql) {
     if ($line -match "CREATE TABLE IF NOT EXISTS\s+([a-zA-Z0-9_]+)") {

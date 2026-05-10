@@ -150,7 +150,7 @@ public class UserProfileService {
         Boolean requestedDefault = request.getIsDefault();
 
         if (Boolean.FALSE.equals(requestedDefault) && isCurrentlyDefault) {
-            throw new BadRequestException("Default address cannot be unset directly. Set another address as default or delete it.");
+            throw BadRequestException.i18n("api.error.user.profile.defaultAddressUnset");
         }
 
         if (Boolean.TRUE.equals(requestedDefault)) {
@@ -213,7 +213,7 @@ public class UserProfileService {
         String normalizedDeviceName = normalizeNullable(request.getDeviceName());
 
         if (!StringUtils.hasText(normalizedPushToken) && !StringUtils.hasText(normalizedDeviceName)) {
-            throw new BadRequestException("At least deviceName or pushToken must be provided");
+            throw BadRequestException.i18n("api.error.user.profile.deviceNameOrToken");
         }
 
         UserDevice device = null;
@@ -221,7 +221,7 @@ public class UserProfileService {
             Optional<UserDevice> existing = userDeviceRepository.findFirstByUserIdAndPushToken(userId, normalizedPushToken);
             if (existing.isPresent()) {
                 if (Boolean.TRUE.equals(existing.get().getIsActive())) {
-                    throw new BadRequestException("Device with this push token is already registered and active.");
+                    throw BadRequestException.i18n("api.error.user.profile.pushTokenActive");
                 }
                 device = existing.get();
             }
@@ -243,7 +243,7 @@ public class UserProfileService {
         UUID userId = findCurrentUser().getId();
         UserDevice device = findMyDevice(userId, id);
         if (!Boolean.TRUE.equals(device.getIsActive())) {
-            throw new BadRequestException("Device has already been removed or is inactive.");
+            throw BadRequestException.i18n("api.error.user.profile.deviceRemoved");
         }
         device.setIsActive(false);
         userDeviceRepository.save(device);
@@ -351,7 +351,7 @@ public class UserProfileService {
     ) {
         String platform = normalizeNullable(request.getPlatform());
         if (!StringUtils.hasText(platform)) {
-            throw new BadRequestException("platform is required");
+            throw BadRequestException.i18n("api.error.user.profile.platformRequired");
         }
 
         device.setPlatform(platform.toLowerCase(java.util.Locale.ROOT));
@@ -452,17 +452,17 @@ public class UserProfileService {
 
     private void validateRequiredContact(String email, String phone) {
         if (!StringUtils.hasText(email) && !StringUtils.hasText(phone)) {
-            throw new BadRequestException("At least email or phone must be provided");
+            throw BadRequestException.i18n("api.error.common.contactRequired");
         }
     }
 
     private void validateUniqueContacts(String email, String phone, UUID currentUserId) {
         if (StringUtils.hasText(email) && userRepository.existsByEmailIgnoreCaseAndIdNot(email, currentUserId)) {
-            throw new BadRequestException("Email already exists");
+            throw BadRequestException.i18n("api.error.common.emailExists");
         }
 
         if (StringUtils.hasText(phone) && userRepository.existsByPhoneAndIdNot(phone, currentUserId)) {
-            throw new BadRequestException("Phone already exists");
+            throw BadRequestException.i18n("api.error.common.phoneExists");
         }
     }
 }

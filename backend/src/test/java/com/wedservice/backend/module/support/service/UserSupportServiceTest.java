@@ -133,7 +133,7 @@ class UserSupportServiceTest {
                 .messageText("xin chao")
                 .build()))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessage("Support session is already closed");
+                .hasMessage("api.error.support.sessionClosed");
     }
 
     @Test

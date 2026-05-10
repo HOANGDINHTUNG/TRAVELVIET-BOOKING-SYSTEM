@@ -1,0 +1,161 @@
+{
+  "panel": {
+    "title": "Đặt chỗ cho đợt",
+    "selectSchedulePrompt": "Vui lòng chọn 1 đợt khởi hành ở bên trái để bắt đầu đặt chỗ.",
+    "passengers": {
+      "adult": "Người lớn",
+      "child": "Trẻ em",
+      "infant": "Em bé",
+      "senior": "Người cao tuổi"
+    },
+    "voucher": {
+      "label": "Mã giảm giá",
+      "placeholder": "Nhập mã voucher",
+      "apply": "Áp dụng",
+      "clear": "Bỏ áp dụng",
+      "appliedHint": "Voucher hợp lệ:",
+      "invalid": "Voucher không hợp lệ hoặc không áp dụng cho đợt này."
+    },
+    "contact": {
+      "name": "Họ và tên người đặt",
+      "phone": "Số điện thoại",
+      "email": "Email (tuỳ chọn)",
+      "note": "Yêu cầu đặc biệt (tuỳ chọn)"
+    },
+    "summary": {
+      "subtotal": "Tạm tính",
+      "discount": "Giảm giá",
+      "voucherDiscount": "Giảm từ voucher",
+      "total": "Tổng cộng",
+      "totalSeats": "Số chỗ chiếm dụng"
+    },
+    "submit": "Đặt ngay",
+    "submitting": "Đang xử lý...",
+    "loginToBook": "Đăng nhập để đặt chỗ",
+    "authRequired": "Bạn cần đăng nhập trước khi đặt tour.",
+    "contactRequired": "Vui lòng nhập họ tên và số điện thoại liên hệ.",
+    "overCapacity": "Số chỗ chọn vượt quá số chỗ còn trống của đợt khởi hành này.",
+    "disclaimer": "Bằng việc nhấn 'Đặt ngay', bạn đồng ý với điều khoản dịch vụ của TravelViet."
+  },
+  "toast": {
+    "createSuccess": "Đặt chỗ thành công! Đang chuyển sang trang xác nhận...",
+    "createFailed": "Không tạo được đơn đặt chỗ. Vui lòng thử lại.",
+    "cancelSuccess": "Đã hủy đơn đặt chỗ.",
+    "cancelFailed": "Không hủy được đơn. Vui lòng thử lại."
+  },
+  "confirmation": {
+    "loading": "Đang tải thông tin đơn đặt chỗ...",
+    "errorTitle": "Không tìm thấy đơn đặt chỗ",
+    "errorMessage": "Không tải được thông tin đơn. Vui lòng thử lại.",
+    "notFound": "Đơn đặt chỗ không tồn tại hoặc bạn không có quyền xem.",
+    "back": "Quay lại tài khoản",
+    "title": "Đặt chỗ thành công!",
+    "subtitle": "Mã đơn: {{code}}",
+    "bookingCode": "Mã đặt chỗ",
+    "tourId": "Tour ID",
+    "scheduleId": "Mã đợt",
+    "status": "Trạng thái",
+    "passengers": "Khách",
+    "contact": "Người đặt",
+    "subtotal": "Tạm tính",
+    "voucherDiscount": "Giảm từ voucher",
+    "total": "Tổng cộng",
+    "payNow": "Thanh toán ngay qua VNPay",
+    "payRedirecting": "Đang chuyển hướng tới VNPay...",
+    "payNote": "Bạn sẽ được chuyển đến cổng thanh toán VNPay an toàn.",
+    "disclaimer": "Cảm ơn bạn đã đặt tour cùng TravelViet. Bộ phận CSKH sẽ liên hệ để xác nhận trong thời gian sớm nhất."
+  },
+  "status": {
+    "booking": {
+      "pending": "Chờ xử lý",
+      "confirmed": "Đã xác nhận",
+      "paid": "Đã thanh toán",
+      "checked_in": "Đã check-in",
+      "completed": "Đã hoàn thành",
+      "cancelled": "Đã hủy",
+      "no_show": "Không đến",
+      "refunded": "Đã hoàn tiền"
+    },
+    "payment": {
+      "pending": "Chờ thanh toán",
+      "processing": "Đang xử lý",
+      "paid": "Đã thanh toán",
+      "failed": "Thanh toán thất bại",
+      "refunded": "Đã hoàn tiền",
+      "partially_refunded": "Hoàn tiền một phần"
+    }
+  },
+  "vnpay": {
+    "toast": {
+      "checkoutFailed": "Không khởi tạo được phiên thanh toán VNPay. Vui lòng thử lại."
+    },
+    "errorCodes": {
+      "success": "Giao dịch thành công",
+      "suspicious": "Giao dịch nghi ngờ gian lận",
+      "cardNotEnrolled": "Thẻ chưa đăng ký InternetBanking",
+      "verifyTooMany": "Xác thực sai quá nhiều lần",
+      "paymentExpired": "Phiên thanh toán hết hạn",
+      "cardLocked": "Thẻ/tài khoản bị khóa",
+      "wrongOtp": "Sai mã OTP",
+      "cancelled": "Khách hàng hủy giao dịch",
+      "insufficient": "Tài khoản không đủ số dư",
+      "overLimit": "Vượt hạn mức giao dịch",
+      "bankMaintenance": "Ngân hàng đang bảo trì",
+      "wrongPin": "Sai mã PIN",
+      "unknown": "Lỗi không xác định"
+    }
+  },
+  "paymentReturn": {
+    "lookupFailedTitle": "Không tìm thấy đơn liên quan",
+    "lookupFailedMessage": "Không xác định được đơn hàng từ phiên thanh toán này. Vui lòng kiểm tra ở mục Đơn của tôi.",
+    "viewMyBookings": "Xem đơn của tôi",
+    "viewBooking": "Xem chi tiết đơn",
+    "pollingTitle": "Đang xác nhận thanh toán...",
+    "pollingMessage": "Hệ thống đang đồng bộ kết quả với cổng VNPay. Vui lòng chờ trong giây lát.",
+    "fetchErrorTitle": "Không tải được thông tin đơn",
+    "fetchErrorMessage": "Không thể tải đơn để cập nhật trạng thái. Hãy thử Cập nhật lại.",
+    "refresh": "Cập nhật ngay",
+    "failureTitle": "Thanh toán không thành công",
+    "failureMessage": "Mã lỗi: {{code}} ({{reason}})",
+    "retryPay": "Thanh toán lại",
+    "waitingIpnTitle": "Thanh toán đang được xử lý",
+    "waitingIpnMessage": "VNPay đã xác nhận, hệ thống đang cập nhật trạng thái cuối cùng. Có thể mất vài giây.",
+    "successTitle": "Thanh toán thành công",
+    "successMessage": "Đơn của bạn đã được thanh toán đầy đủ. Bộ phận CSKH sẽ liên hệ để xác nhận hành trình.",
+    "settledNotPaidTitle": "Trạng thái thanh toán đặc biệt",
+    "settledNotPaidMessage": "Trạng thái hiện tại: {{status}}",
+    "summary": {
+      "bookingCode": "Mã đơn",
+      "status": "Trạng thái",
+      "amount": "Tổng tiền",
+      "reportedAmount": "VNPay báo về"
+    }
+  },
+  "myBookings": {
+    "title": "Đơn của tôi",
+    "subtitle": "Quản lý các đơn tour bạn đã đặt — thanh toán, hủy hoặc xem lại chi tiết.",
+    "loading": "Đang tải danh sách đơn...",
+    "errorMessage": "Không tải được danh sách đơn. Vui lòng thử lại.",
+    "empty": "Bạn chưa có đơn đặt tour nào.",
+    "tourLabel": "Tour",
+    "scheduleLabel": "Đợt",
+    "bookedAt": "Đặt lúc",
+    "passengers": "Khách",
+    "total": "Tổng tiền",
+    "viewDetail": "Xem chi tiết",
+    "payNow": "Thanh toán",
+    "payAgain": "Thanh toán lại",
+    "payingRedirect": "Đang chuyển...",
+    "cancel": "Hủy đơn",
+    "cancelConfirm": "Bạn chắc chắn?",
+    "cancelKeep": "Giữ đơn",
+    "cancelConfirmYes": "Hủy",
+    "filters": {
+      "all": "Tất cả",
+      "pending": "Chờ thanh toán",
+      "paid": "Đã thanh toán",
+      "cancelled": "Đã hủy",
+      "completed": "Đã đi"
+    }
+  }
+}

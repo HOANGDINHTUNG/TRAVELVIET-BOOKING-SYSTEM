@@ -31,7 +31,7 @@ class WeatherApiControllerTest {
     void setUp() {
         objectMapper = JsonMapper.builder().findAndAddModules().build();
         mockMvc = MockMvcBuilders.standaloneSetup(new WeatherApiController(weatherFacade))
-                .setControllerAdvice(new GlobalExceptionHandler())
+                .setControllerAdvice(GlobalExceptionHandler.standalone())
                 .setMessageConverters(new JacksonJsonHttpMessageConverter(objectMapper))
                 .build();
     }

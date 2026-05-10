@@ -40,7 +40,7 @@ class AdminSupportControllerTest {
     void setUp() {
         objectMapper = JsonMapper.builder().findAndAddModules().build();
         mockMvc = MockMvcBuilders.standaloneSetup(new AdminSupportController(adminSupportFacade))
-                .setControllerAdvice(new GlobalExceptionHandler())
+                .setControllerAdvice(GlobalExceptionHandler.standalone())
                 .setMessageConverters(new JacksonJsonHttpMessageConverter(objectMapper))
                 .build();
     }

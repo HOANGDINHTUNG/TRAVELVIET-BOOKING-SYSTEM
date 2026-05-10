@@ -397,7 +397,7 @@ class TourCommandServiceImplTest {
 
         assertThatThrownBy(() -> tourCommandService.createTour(request))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessage("Destination has been deleted");
+                .hasMessage("api.error.tour.destinationDeleted");
     }
 
     @Test
@@ -526,6 +526,6 @@ class TourCommandServiceImplTest {
 
         assertThatThrownBy(() -> tourCommandService.createTourSchedule(15L, request))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessage("Only active guides can be assigned to schedules");
+                .hasMessage("api.error.tour.guidesOnlyActive");
     }
 }

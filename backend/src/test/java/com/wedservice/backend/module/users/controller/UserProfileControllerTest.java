@@ -55,7 +55,7 @@ class UserProfileControllerTest {
         LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
         validator.afterPropertiesSet();
         mockMvc = MockMvcBuilders.standaloneSetup(new UserProfileController(userProfileFacade))
-                .setControllerAdvice(new GlobalExceptionHandler())
+                .setControllerAdvice(GlobalExceptionHandler.standalone())
                 .setValidator(validator)
                 .setMessageConverters(new JacksonJsonHttpMessageConverter(objectMapper))
                 .build();

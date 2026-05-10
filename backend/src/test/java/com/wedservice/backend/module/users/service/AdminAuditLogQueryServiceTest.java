@@ -82,6 +82,6 @@ class AdminAuditLogQueryServiceTest {
 
         assertThatThrownBy(() -> adminAuditLogQueryService.getAuditLogs(request))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessage("from must be before or equal to to");
+                .hasMessage("api.error.audit.fromBeforeTo");
     }
 }

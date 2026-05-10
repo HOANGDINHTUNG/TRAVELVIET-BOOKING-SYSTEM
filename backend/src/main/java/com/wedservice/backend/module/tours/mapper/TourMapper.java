@@ -13,6 +13,10 @@ import com.wedservice.backend.module.tours.dto.request.TourRequest;
 import com.wedservice.backend.module.tours.dto.response.TourResponse;
 import com.wedservice.backend.module.tours.entity.Tour;
 
+/**
+ * Entity/DTO mapping for admin tour writes. Public read models merge {@code tour_translations}
+ * at runtime in {@link TourTranslationMergeHelper} inside {@code TourQueryServiceImpl}.
+ */
 @Mapper(componentModel = "spring",
         unmappedTargetPolicy = ReportingPolicy.IGNORE,
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,

@@ -1,13 +1,12 @@
 .partner-marquee {
   --marquee-text: #283618;
   --marquee-muted: #606c38;
-  min-height: 184px;
+  min-height: 120px;
   position: relative;
   z-index: 1;
   display: grid;
   place-items: center;
   overflow: hidden;
-  padding-top: 64px;
   border-block: 1px solid var(--color-border);
   background:
     radial-gradient(circle at 16% 50%, color-mix(in srgb, var(--color-primary) 22%, transparent), transparent 30%),

@@ -27,6 +27,9 @@ public class Payment extends AuditableEntity {
     @Column(name = "booking_id", nullable = false)
     private Long bookingId;
 
+    @Column(name = "order_id")
+    private Long orderId;
+
     @Column(name = "payment_method", length = 30, nullable = false)
     private String paymentMethod;
 

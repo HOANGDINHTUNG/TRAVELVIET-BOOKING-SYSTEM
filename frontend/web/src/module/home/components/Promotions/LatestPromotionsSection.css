@@ -10,7 +10,7 @@
 .latest-promotions-heading h2 {
   margin: 0;
   color: var(--color-ocean);
-  font-size: clamp(24px, 2.4vw, 34px);
+  font-size: clamp(24px, 2.0vw, 20px);
   font-weight: 900;
   line-height: 1.08;
   letter-spacing: 0;

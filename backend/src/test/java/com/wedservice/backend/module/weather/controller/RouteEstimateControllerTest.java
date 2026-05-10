@@ -32,7 +32,7 @@ class RouteEstimateControllerTest {
     void setUp() {
         JsonMapper objectMapper = JsonMapper.builder().findAndAddModules().build();
         mockMvc = MockMvcBuilders.standaloneSetup(new RouteEstimateController(weatherFacade))
-                .setControllerAdvice(new GlobalExceptionHandler())
+                .setControllerAdvice(GlobalExceptionHandler.standalone())
                 .setMessageConverters(new JacksonJsonHttpMessageConverter(objectMapper))
                 .build();
     }

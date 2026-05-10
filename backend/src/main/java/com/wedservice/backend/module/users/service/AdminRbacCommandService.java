@@ -39,7 +39,7 @@ public class AdminRbacCommandService {
     public RoleResponse createRole(CreateRoleRequest request) {
         String normalizedCode = normalizeRoleCode(request.getCode());
         if (roleRepository.findByCodeIgnoreCase(normalizedCode).isPresent()) {
-            throw new BadRequestException("Role code already exists");
+            throw BadRequestException.i18n("api.error.rbac.roleCodeExists");
         }
 
         RoleScope roleScope = request.getRoleScope();
@@ -70,7 +70,7 @@ public class AdminRbacCommandService {
 
         String normalizedCode = normalizeRoleCode(request.getCode());
         if (roleRepository.existsByCodeIgnoreCaseAndIdNot(normalizedCode, id)) {
-            throw new BadRequestException("Role code already exists");
+            throw BadRequestException.i18n("api.error.rbac.roleCodeExists");
         }
 
         validateSystemRoleMutationAllowed(request.getRoleScope(), request.getIsSystemRole(), role);
@@ -111,7 +111,7 @@ public class AdminRbacCommandService {
                 .filter(code -> !foundCodes.contains(code))
                 .toList();
         if (!missingCodes.isEmpty()) {
-            throw new BadRequestException("Permission code not found: " + String.join(", ", missingCodes));
+            throw BadRequestException.i18n("api.error.rbac.permissionCodesNotFound", String.join(", ", missingCodes));
         }
 
         List<String> inactiveCodes = permissions.stream()
@@ -120,7 +120,7 @@ public class AdminRbacCommandService {
                 .sorted(String.CASE_INSENSITIVE_ORDER)
                 .toList();
         if (!inactiveCodes.isEmpty()) {
-            throw new BadRequestException("Inactive permissions cannot be assigned: " + String.join(", ", inactiveCodes));
+            throw BadRequestException.i18n("api.error.rbac.inactivePermissions", String.join(", ", inactiveCodes));
         }
 
         role.setPermissions(new java.util.HashSet<>(permissions));
@@ -138,7 +138,7 @@ public class AdminRbacCommandService {
                 || (existingRole != null && existingRole.getRoleScope() == RoleScope.SYSTEM);
 
         if (touchesSystemRole && !isSuperAdmin) {
-            throw new BadRequestException("Only SUPER_ADMIN can create or modify system roles");
+            throw BadRequestException.i18n("api.error.rbac.onlySuperAdminSystemRoles");
         }
     }
 
@@ -165,7 +165,7 @@ public class AdminRbacCommandService {
     private String normalizeRequiredText(String value, String fieldName) {
         String normalized = normalizeNullable(value);
         if (!StringUtils.hasText(normalized)) {
-            throw new BadRequestException(fieldName + " is required");
+            throw BadRequestException.i18n("api.error.common.fieldRequired", fieldName);
         }
         return normalized;
     }

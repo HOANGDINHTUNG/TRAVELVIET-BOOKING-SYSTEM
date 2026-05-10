@@ -21,10 +21,10 @@ public class DestinationValidator {
     public void validatePropose(DestinationRequest request) {
         if (request == null) return;
         if (request.getCode() != null && destinationRepository.existsByCodeIgnoreCase(request.getCode())) {
-            throw new BadRequestException("Destination code already exists: " + request.getCode());
+            throw BadRequestException.i18n("api.error.destination.codeExists", request.getCode());
         }
         if (request.getSlug() != null && destinationRepository.existsBySlugIgnoreCase(request.getSlug())) {
-            throw new BadRequestException("Destination slug already exists: " + request.getSlug());
+            throw BadRequestException.i18n("api.error.destination.slugExists", request.getSlug());
         }
     }
 
@@ -47,7 +47,7 @@ public class DestinationValidator {
         );
 
         if (alreadySubmitted) {
-            throw new BadRequestException("Destination has already been submitted or approved");
+            throw BadRequestException.i18n("api.error.destination.proposeDuplicate");
         }
     }
 }

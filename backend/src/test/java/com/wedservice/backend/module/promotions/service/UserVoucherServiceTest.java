@@ -102,7 +102,7 @@ class UserVoucherServiceTest {
                 .voucherCode("SPRING10")
                 .build()))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessage("Voucher already claimed");
+                .hasMessage("api.error.voucher.alreadyClaimed");
     }
 
     @Test
@@ -120,7 +120,7 @@ class UserVoucherServiceTest {
                 .voucherCode("SPRING10")
                 .build()))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessage("Voucher is not available for your member level");
+                .hasMessage("api.error.voucher.memberLevel");
     }
 
     @Test

@@ -40,7 +40,7 @@ class AdminBadgeControllerTest {
     void setUp() {
         objectMapper = JsonMapper.builder().findAndAddModules().build();
         mockMvc = MockMvcBuilders.standaloneSetup(new AdminBadgeController(adminBadgeFacade))
-                .setControllerAdvice(new GlobalExceptionHandler())
+                .setControllerAdvice(GlobalExceptionHandler.standalone())
                 .setMessageConverters(new JacksonJsonHttpMessageConverter(objectMapper))
                 .build();
     }

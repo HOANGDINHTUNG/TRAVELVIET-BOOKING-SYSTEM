@@ -1,5 +1,6 @@
 package com.wedservice.backend.common.response;
 
+import com.wedservice.backend.common.i18n.Translator;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,9 +16,13 @@ public class ApiResponse<T> {
     private T data;
 
     public static <T> ApiResponse<T> success(T data) {
+        String msg = Translator.toLocale("api.success");
+        if ("api.success".equals(msg)) {
+            msg = "Success";
+        }
         return ApiResponse.<T>builder()
                 .success(true)
-                .message("Success")
+                .message(msg)
                 .data(data)
                 .build();
     }

@@ -58,7 +58,7 @@ public class WeatherApiClient {
 
     private Map<String, Object> baseParams(String query) {
         if (!StringUtils.hasText(query)) {
-            throw new BadRequestException("q is required");
+            throw BadRequestException.i18n("api.error.weather.qRequired");
         }
 
         Map<String, Object> params = new LinkedHashMap<>();
@@ -69,7 +69,7 @@ public class WeatherApiClient {
 
     private String requireApiKey() {
         if (!isConfigured()) {
-            throw new BadRequestException("WeatherAPI.com key is not configured. Set WEATHERAPI_KEY.");
+            throw BadRequestException.i18n("api.error.weather.apiKeyMissing");
         }
         return properties.getApiKey().trim();
     }
@@ -106,7 +106,7 @@ public class WeatherApiClient {
             JsonNode root = jsonMapper.readTree(body);
             String errorMessage = extractErrorMessage(root);
             if (StringUtils.hasText(errorMessage)) {
-                throw new BadRequestException("WeatherAPI.com error: " + errorMessage);
+                throw BadRequestException.i18n("api.error.weather.remoteErrorDetail", errorMessage);
             }
             return root;
         } catch (BadRequestException ex) {
@@ -123,7 +123,10 @@ public class WeatherApiClient {
                 : "WeatherAPI.com request failed with status " + ex.getStatusCode();
 
         if (ex.getStatusCode().is4xxClientError()) {
-            throw new BadRequestException(message);
+            if (StringUtils.hasText(weatherApiMessage)) {
+                throw BadRequestException.i18n("api.error.weather.remoteErrorDetail", weatherApiMessage);
+            }
+            throw BadRequestException.i18n("api.error.weather.requestFailedStatus", ex.getStatusCode().value());
         }
 
         throw new ExternalServiceException(message, ex);

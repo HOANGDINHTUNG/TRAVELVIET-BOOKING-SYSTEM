@@ -260,7 +260,7 @@ public class TourCommandServiceImpl implements TourCommandService {
         Destination destination = destinationRepository.findById(destinationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Destination not found with id: " + destinationId));
         if (destination.getDeletedAt() != null) {
-            throw new BadRequestException("Destination has been deleted");
+            throw BadRequestException.i18n("api.error.tour.destinationDeleted");
         }
         return destination;
     }
@@ -277,11 +277,11 @@ public class TourCommandServiceImpl implements TourCommandService {
     private CancellationPolicy resolveCancellationPolicy(Long cancellationPolicyId) {
         CancellationPolicy policy = cancellationPolicyId == null
                 ? cancellationPolicyRepository.findFirstByIsDefaultTrueAndIsActiveTrue()
-                .orElseThrow(() -> new BadRequestException("Default active cancellation policy is not configured"))
+                .orElseThrow(() -> BadRequestException.i18n("api.error.tour.policyDefaultMissing"))
                 : cancellationPolicyRepository.findByIdAndIsActiveTrue(cancellationPolicyId)
-                .orElseThrow(() -> new BadRequestException("Cancellation policy is invalid or inactive"));
+                .orElseThrow(() -> BadRequestException.i18n("api.error.tour.policyInvalid"));
         if (!cancellationPolicyRuleRepository.existsByPolicyId(policy.getId())) {
-            throw new BadRequestException("Cancellation policy must have at least one rule");
+            throw BadRequestException.i18n("api.error.tour.policyNeedsRule");
         }
         return policy;
     }
@@ -359,7 +359,7 @@ public class TourCommandServiceImpl implements TourCommandService {
         }
         List<Tag> activeTags = tagRepository.findByIdInAndIsActiveTrue(tagIds);
         if (activeTags.size() != tagIds.size()) {
-            throw new BadRequestException("One or more tags are invalid or inactive");
+            throw BadRequestException.i18n("api.error.tour.tagsInvalid");
         }
         List<TourTag> tourTags = tagIds.stream()
                 .map(tagId -> TourTag.builder()
@@ -575,12 +575,12 @@ public class TourCommandServiceImpl implements TourCommandService {
     private Map<Long, Guide> resolveActiveGuides(Collection<Long> guideIds) {
         Map<Long, Guide> guideMap = loadGuideMap(guideIds);
         if (guideMap.size() != guideIds.size()) {
-            throw new BadRequestException("One or more guides do not exist");
+            throw BadRequestException.i18n("api.error.tour.guidesNotExist");
         }
         boolean hasUnavailableGuide = guideMap.values().stream()
                 .anyMatch(guide -> !"active".equalsIgnoreCase(guide.getStatus()));
         if (hasUnavailableGuide) {
-            throw new BadRequestException("Only active guides can be assigned to schedules");
+            throw BadRequestException.i18n("api.error.tour.guidesOnlyActive");
         }
         return guideMap;
     }
@@ -594,12 +594,26 @@ public class TourCommandServiceImpl implements TourCommandService {
     }
 
     private TourResponse toResponse(Tour t, boolean includeContent) {
+        Long destinationId = null;
+        String destinationCountryCode = null;
+        String destinationName = null;
+        String destinationProvince = null;
+        if (t.getDestination() != null) {
+            var d = t.getDestination();
+            destinationId = d.getId();
+            destinationCountryCode = d.getCountryCode();
+            destinationName = d.getName();
+            destinationProvince = d.getProvince();
+        }
         TourResponse.TourResponseBuilder builder = TourResponse.builder()
                 .id(t.getId())
                 .code(t.getCode())
                 .name(t.getName())
                 .slug(t.getSlug())
-                .destinationId(t.getDestination() != null ? t.getDestination().getId() : null)
+                .destinationId(destinationId)
+                .destinationCountryCode(destinationCountryCode)
+                .destinationName(destinationName)
+                .destinationProvince(destinationProvince)
                 .cancellationPolicyId(t.getCancellationPolicyId())
                 .basePrice(t.getBasePrice())
                 .currency(t.getCurrency())
@@ -614,7 +628,9 @@ public class TourCommandServiceImpl implements TourCommandService {
                 .exclusions(t.getExclusions())
                 .notes(t.getNotes())
                 .isFeatured(t.getIsFeatured())
-                .status(t.getStatus() != null ? t.getStatus().getValue() : null);
+                .status(t.getStatus() != null ? t.getStatus().getValue() : null)
+                .translationKey(t.getSlug())
+                .itinerarySummary(null);
 
         if (includeContent) {
             builder.tags(loadTagResponses(t.getId()))

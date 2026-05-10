@@ -43,7 +43,7 @@ class AdminPromotionCampaignControllerTest {
     void setUp() {
         objectMapper = JsonMapper.builder().findAndAddModules().build();
         mockMvc = MockMvcBuilders.standaloneSetup(new AdminPromotionCampaignController(adminPromotionCampaignFacade))
-                .setControllerAdvice(new GlobalExceptionHandler())
+                .setControllerAdvice(GlobalExceptionHandler.standalone())
                 .setMessageConverters(new JacksonJsonHttpMessageConverter(objectMapper))
                 .build();
     }

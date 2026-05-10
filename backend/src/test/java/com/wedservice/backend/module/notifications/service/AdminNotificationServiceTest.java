@@ -108,7 +108,7 @@ class AdminNotificationServiceTest {
 
         assertThatThrownBy(() -> adminNotificationService.createNotification(request))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessage("Future scheduling is not supported yet");
+                .hasMessage("api.error.notification.futureUnsupported");
     }
 
     @Test
@@ -132,6 +132,6 @@ class AdminNotificationServiceTest {
 
         assertThatThrownBy(() -> adminNotificationService.createNotification(request))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessage("payload must be valid JSON");
+                .hasMessage("api.error.notification.payloadJson");
     }
 }

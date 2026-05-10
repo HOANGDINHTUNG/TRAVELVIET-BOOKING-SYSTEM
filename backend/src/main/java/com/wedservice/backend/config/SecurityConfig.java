@@ -97,8 +97,15 @@ public class SecurityConfig {
                 "http://127.0.0.1:*"
         ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "X-Requested-With", "X-Request-ID"));
-        configuration.setExposedHeaders(List.of("X-Request-ID"));
+        configuration.setAllowedHeaders(List.of(
+                "Authorization",
+                "Content-Type",
+                "Accept",
+                "Accept-Language",
+                "X-Requested-With",
+                "X-Request-ID"
+        ));
+        configuration.setExposedHeaders(List.of("X-Request-ID", "Content-Language"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

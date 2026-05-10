@@ -3,6 +3,8 @@ package com.wedservice.backend.module.tours.service.query.impl;
 import com.querydsl.core.BooleanBuilder;
 import com.wedservice.backend.common.exception.BadRequestException;
 import com.wedservice.backend.common.exception.ResourceNotFoundException;
+import com.wedservice.backend.common.i18n.LocaleTagUtil;
+import com.wedservice.backend.module.destinations.entity.Destination;
 import com.wedservice.backend.module.tours.dto.request.TourSearchRequest;
 import com.wedservice.backend.module.tours.dto.response.CancellationPolicyResponse;
 import com.wedservice.backend.module.tours.dto.response.CancellationPolicyRuleResponse;
@@ -20,6 +22,7 @@ import com.wedservice.backend.module.tours.entity.QTour;
 import com.wedservice.backend.module.tours.entity.CancellationPolicy;
 import com.wedservice.backend.module.tours.entity.CancellationPolicyRule;
 import com.wedservice.backend.module.tours.entity.Guide;
+import com.wedservice.backend.module.tours.entity.GuideTranslation;
 import com.wedservice.backend.module.tours.entity.Tag;
 import com.wedservice.backend.module.tours.entity.TourChecklistItem;
 import com.wedservice.backend.module.tours.entity.Tour;
@@ -28,10 +31,14 @@ import com.wedservice.backend.module.tours.entity.TourSchedule;
 import com.wedservice.backend.module.tours.entity.TourScheduleGuide;
 import com.wedservice.backend.module.tours.entity.TourScheduleStatus;
 import com.wedservice.backend.module.tours.entity.TourStatus;
+import com.wedservice.backend.module.tours.entity.TourTranslation;
+import com.wedservice.backend.module.tours.mapper.TourTranslationMergeHelper;
+import com.wedservice.backend.module.tours.mapper.TourTranslationMergeHelper.MergedTourTexts;
 import com.wedservice.backend.module.tours.repository.ItineraryItemRepository;
 import com.wedservice.backend.module.tours.repository.CancellationPolicyRepository;
 import com.wedservice.backend.module.tours.repository.CancellationPolicyRuleRepository;
 import com.wedservice.backend.module.tours.repository.GuideRepository;
+import com.wedservice.backend.module.tours.repository.GuideTranslationRepository;
 import com.wedservice.backend.module.tours.repository.TagRepository;
 import com.wedservice.backend.module.tours.repository.TourRepository;
 import com.wedservice.backend.module.tours.repository.TourChecklistItemRepository;
@@ -42,6 +49,7 @@ import com.wedservice.backend.module.tours.repository.TourScheduleGuideRepositor
 import com.wedservice.backend.module.tours.repository.TourSchedulePickupPointRepository;
 import com.wedservice.backend.module.tours.repository.TourScheduleRepository;
 import com.wedservice.backend.module.tours.repository.TourTagRepository;
+import com.wedservice.backend.module.tours.repository.TourTranslationRepository;
 import com.wedservice.backend.module.tours.service.query.TourQueryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -54,8 +62,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -87,6 +97,7 @@ public class TourQueryServiceImpl implements TourQueryService {
     private final CancellationPolicyRepository cancellationPolicyRepository;
     private final CancellationPolicyRuleRepository cancellationPolicyRuleRepository;
     private final GuideRepository guideRepository;
+    private final GuideTranslationRepository guideTranslationRepository;
     private final TourMediaRepository tourMediaRepository;
     private final TagRepository tagRepository;
     private final TourTagRepository tourTagRepository;
@@ -97,9 +108,11 @@ public class TourQueryServiceImpl implements TourQueryService {
     private final TourScheduleRepository tourScheduleRepository;
     private final TourSchedulePickupPointRepository tourSchedulePickupPointRepository;
     private final TourScheduleGuideRepository tourScheduleGuideRepository;
+    private final TourTranslationRepository tourTranslationRepository;
+    private final TourTranslationMergeHelper tourTranslationMergeHelper;
 
     @Override
-    @Cacheable(value = "tours", key = "#request")
+    @Cacheable(value = "tours", keyGenerator = "tourSearchCacheKeyGenerator")
     @Transactional(readOnly = true)
     public Page<TourResponse> searchTours(TourSearchRequest request) {
         return searchTours(request, true);
@@ -127,6 +140,13 @@ public class TourQueryServiceImpl implements TourQueryService {
         if (request.getDestinationId() != null) {
             builder.and(qTour.destination.id.eq(request.getDestinationId()));
         }
+        if (Boolean.TRUE.equals(request.getDomesticOnly())) {
+            builder.and(qTour.destination.countryCode.equalsIgnoreCase("VN"));
+        } else if (Boolean.TRUE.equals(request.getInternationalOnly())) {
+            builder.and(qTour.destination.countryCode.toLowerCase().ne("vn"));
+        } else if (StringUtils.hasText(request.getDestinationCountryCode())) {
+            builder.and(qTour.destination.countryCode.equalsIgnoreCase(request.getDestinationCountryCode().trim()));
+        }
         if (StringUtils.hasText(request.getKeyword())) {
             String keyword = request.getKeyword().trim();
             builder.and(qTour.name.containsIgnoreCase(keyword)
@@ -135,8 +155,13 @@ public class TourQueryServiceImpl implements TourQueryService {
                     .or(qTour.description.containsIgnoreCase(keyword))
                     .or(qTour.highlights.containsIgnoreCase(keyword)));
         }
-        if (request.getTagIds() != null && !request.getTagIds().isEmpty()) {
-            List<Long> matchingTourIds = resolveTourIdsByTagIds(request.getTagIds());
+        boolean requestedTagFilter = requestedTagFilter(request);
+        if (requestedTagFilter) {
+            List<Long> effectiveTagIds = resolveEffectiveTagIds(request);
+            if (effectiveTagIds.isEmpty()) {
+                return Page.empty(pr);
+            }
+            List<Long> matchingTourIds = resolveTourIdsByTagIds(effectiveTagIds);
             if (matchingTourIds.isEmpty()) {
                 return Page.empty(pr);
             }
@@ -198,13 +223,22 @@ public class TourQueryServiceImpl implements TourQueryService {
         }
 
         Page<Tour> page = tourRepository.findAll(builder, pr);
-        
-        // Limit to 6 most featured tours for the public list if needed
-        // However, the user said "phần hiện thị tour chỉ nên hiển thị 6 cái thôi"
-        // If this is for the homepage, we should ideally let the frontend limit it,
-        // but the user asked to do it in the API.
-        
-        return page.map(this::toResponse);
+
+        if (publicOnly) {
+            String lang = LocaleTagUtil.currentLanguageTag();
+            List<Long> tourIds = page.getContent().stream().map(Tour::getId).toList();
+            Map<Long, TourTranslation> primaryMap = loadTourTranslationsMap(tourIds, lang);
+            Map<Long, TourTranslation> viMap =
+                    "vi".equals(lang) ? primaryMap : loadTourTranslationsMap(tourIds, "vi");
+            return page.map(t -> buildSearchListRow(
+                    t,
+                    tourTranslationMergeHelper.merge(
+                            primaryMap.get(t.getId()),
+                            viMap.get(t.getId()),
+                            t)));
+        }
+
+        return page.map(t -> buildSearchListRow(t, tourTranslationMergeHelper.merge(null, null, t)));
     }
 
     @Override
@@ -212,7 +246,12 @@ public class TourQueryServiceImpl implements TourQueryService {
     public TourResponse getTour(Long id) {
         try {
             Tour tour = findActiveTour(id);
-            return toResponse(tour, true);
+            String lang = LocaleTagUtil.currentLanguageTag();
+            TourTranslation primary = tourTranslationRepository.findByTour_IdAndLocale(id, lang).orElse(null);
+            TourTranslation vi = "vi".equals(lang)
+                    ? primary
+                    : tourTranslationRepository.findByTour_IdAndLocale(id, "vi").orElse(null);
+            return toResponse(tour, true, primary, vi);
         } catch (ResourceNotFoundException e) {
             throw e;
         } catch (Exception e) {
@@ -226,7 +265,7 @@ public class TourQueryServiceImpl implements TourQueryService {
     public TourResponse getAdminTour(Long id) {
         try {
             Tour tour = findActiveTour(id);
-            return toResponse(tour, true);
+            return toResponse(tour, true, null, null);
         } catch (ResourceNotFoundException e) {
             throw e;
         } catch (Exception e) {
@@ -279,6 +318,55 @@ public class TourQueryServiceImpl implements TourQueryService {
         return tour;
     }
 
+    /**
+     * Batch-loads {@link TourTranslation} rows for the given locale (e.g. {@code en}, {@code vi}).
+     */
+    private Map<Long, TourTranslation> loadTourTranslationsMap(Collection<Long> tourIds, String locale) {
+        if (tourIds == null || tourIds.isEmpty()) {
+            return Map.of();
+        }
+        List<TourTranslation> list = tourTranslationRepository.findByTour_IdInAndLocale(tourIds, locale);
+        Map<Long, TourTranslation> map = new HashMap<>();
+        for (TourTranslation tr : list) {
+            Long tid = tr.getTour() != null ? tr.getTour().getId() : null;
+            if (tid != null) {
+                map.putIfAbsent(tid, tr);
+            }
+        }
+        return map;
+    }
+
+    private boolean requestedTagFilter(TourSearchRequest request) {
+        if (request.getTagIds() != null && !request.getTagIds().isEmpty()) {
+            return true;
+        }
+        if (request.getTagCodes() == null || request.getTagCodes().isEmpty()) {
+            return false;
+        }
+        return request.getTagCodes().stream().anyMatch(StringUtils::hasText);
+    }
+
+    private List<Long> resolveEffectiveTagIds(TourSearchRequest request) {
+        LinkedHashSet<Long> ids = new LinkedHashSet<>();
+        if (request.getTagIds() != null) {
+            for (Long id : request.getTagIds()) {
+                if (id != null) {
+                    ids.add(id);
+                }
+            }
+        }
+        if (request.getTagCodes() != null && !request.getTagCodes().isEmpty()) {
+            List<String> codes = request.getTagCodes().stream()
+                    .filter(StringUtils::hasText)
+                    .map(s -> s.trim())
+                    .toList();
+            if (!codes.isEmpty()) {
+                tagRepository.findByCodeInIgnoreCaseAndIsActiveTrue(codes).forEach(tag -> ids.add(tag.getId()));
+            }
+        }
+        return new ArrayList<>(ids);
+    }
+
     private List<Long> resolveTourIdsByTagIds(Collection<Long> tagIds) {
         return new java.util.ArrayList<>(tourTagRepository.findByIdTagIdIn(tagIds).stream()
                 .map(tourTag -> tourTag.getId().getTourId())
@@ -295,12 +383,24 @@ public class TourQueryServiceImpl implements TourQueryService {
         BigDecimal minPrice = request.getMinPrice();
         BigDecimal maxPrice = request.getMaxPrice();
         if (minPrice != null && maxPrice != null && maxPrice.compareTo(minPrice) < 0) {
-            throw new BadRequestException("maxPrice must be greater than or equal to minPrice");
+            throw BadRequestException.i18n("api.error.tour.search.maxPriceGteMin");
         }
         Integer minDurationDays = request.getMinDurationDays();
         Integer maxDurationDays = request.getMaxDurationDays();
         if (minDurationDays != null && maxDurationDays != null && maxDurationDays < minDurationDays) {
-            throw new BadRequestException("maxDurationDays must be greater than or equal to minDurationDays");
+            throw BadRequestException.i18n("api.error.tour.search.maxDurationGteMin");
+        }
+        if (Boolean.TRUE.equals(request.getDomesticOnly()) && Boolean.TRUE.equals(request.getInternationalOnly())) {
+            throw BadRequestException.i18n("api.error.tour.search.domesticInternationalExclusive");
+        }
+        if (StringUtils.hasText(request.getDestinationCountryCode())) {
+            String cc = request.getDestinationCountryCode().trim();
+            if (Boolean.TRUE.equals(request.getDomesticOnly()) && !"VN".equalsIgnoreCase(cc)) {
+                throw BadRequestException.i18n("api.error.tour.search.countryConflictDomestic");
+            }
+            if (Boolean.TRUE.equals(request.getInternationalOnly()) && "VN".equalsIgnoreCase(cc)) {
+                throw BadRequestException.i18n("api.error.tour.search.countryConflictInternational");
+            }
         }
     }
 
@@ -320,13 +420,29 @@ public class TourQueryServiceImpl implements TourQueryService {
         return Sort.by(direction, sortBy);
     }
 
-    private TourResponse toResponse(Tour t, boolean includeContent) {
-        if (t == null) return null;
-        
+    /**
+     * Full tour payload. When {@code primary} and {@code vi} are both null (admin), canonical
+     * {@link Tour} text columns are returned; otherwise strings follow Accept-Language with
+     * Vietnamese fallback (see {@link TourTranslationMergeHelper}).
+     */
+    private TourResponse toResponse(Tour t, boolean includeContent, TourTranslation primary, TourTranslation vi) {
+        if (t == null) {
+            return null;
+        }
+
+        MergedTourTexts m = tourTranslationMergeHelper.merge(primary, vi, t);
+
         Long destinationId = null;
+        String destinationCountryCode = null;
+        String destinationName = null;
+        String destinationProvince = null;
         try {
             if (t.getDestination() != null) {
-                destinationId = t.getDestination().getId();
+                Destination d = t.getDestination();
+                destinationId = d.getId();
+                destinationCountryCode = d.getCountryCode();
+                destinationName = d.getName();
+                destinationProvince = d.getProvince();
             }
         } catch (Exception e) {
             log.warn("Could not load destination for tour {}: {}", t.getId(), e.getMessage());
@@ -335,28 +451,32 @@ public class TourQueryServiceImpl implements TourQueryService {
         TourResponse.TourResponseBuilder builder = TourResponse.builder()
                 .id(t.getId())
                 .code(t.getCode())
-                .name(t.getName())
+                .name(m.name())
                 .slug(t.getSlug())
                 .destinationId(destinationId)
+                .destinationCountryCode(destinationCountryCode)
+                .destinationName(destinationName)
+                .destinationProvince(destinationProvince)
                 .cancellationPolicyId(t.getCancellationPolicyId())
                 .basePrice(t.getBasePrice())
                 .currency(t.getCurrency())
                 .durationDays(t.getDurationDays())
                 .durationNights(t.getDurationNights() != null ? t.getDurationNights() : 0)
-                .shortDescription(t.getShortDescription())
-                .description(t.getDescription())
+                .shortDescription(m.shortDescription())
+                .description(m.description())
                 .transportType(t.getTransportType())
                 .tripMode(t.getTripMode())
-                .highlights(t.getHighlights())
-                .inclusions(t.getInclusions())
-                .exclusions(t.getExclusions())
-                .notes(t.getNotes())
+                .highlights(m.highlights())
+                .inclusions(m.inclusions())
+                .exclusions(m.exclusions())
+                .notes(m.notes())
                 .isFeatured(t.getIsFeatured())
                 .status(t.getStatus() != null ? t.getStatus().getValue() : null)
                 .averageRating(t.getAverageRating())
                 .totalReviews(t.getTotalReviews())
                 .totalBookings(t.getTotalBookings())
-                .translationKey(t.getSlug()); 
+                .translationKey(t.getSlug())
+                .itinerarySummary(m.itinerarySummary());
 
         if (includeContent) {
             try {
@@ -374,18 +494,35 @@ public class TourQueryServiceImpl implements TourQueryService {
         return builder.build();
     }
 
-    private TourResponse toResponse(Tour t) {
+    /**
+     * Search/list card: merged localized title and teaser; media and tags included for gallery-style lists.
+     */
+    private TourResponse buildSearchListRow(Tour t, MergedTourTexts m) {
+        Long destinationId = null;
+        String destinationCountryCode = null;
+        String destinationName = null;
+        String destinationProvince = null;
+        if (t.getDestination() != null) {
+            Destination d = t.getDestination();
+            destinationId = d.getId();
+            destinationCountryCode = d.getCountryCode();
+            destinationName = d.getName();
+            destinationProvince = d.getProvince();
+        }
         return TourResponse.builder()
                 .id(t.getId())
                 .code(t.getCode())
-                .name(t.getName())
+                .name(m.name())
                 .slug(t.getSlug())
-                .destinationId(t.getDestination() != null ? t.getDestination().getId() : null)
+                .destinationId(destinationId)
+                .destinationCountryCode(destinationCountryCode)
+                .destinationName(destinationName)
+                .destinationProvince(destinationProvince)
                 .basePrice(t.getBasePrice())
                 .currency(t.getCurrency())
                 .durationDays(t.getDurationDays())
                 .durationNights(t.getDurationNights())
-                .shortDescription(t.getShortDescription())
+                .shortDescription(m.shortDescription())
                 .transportType(t.getTransportType())
                 .tripMode(t.getTripMode())
                 .isFeatured(t.getIsFeatured())
@@ -396,6 +533,7 @@ public class TourQueryServiceImpl implements TourQueryService {
                 .media(loadMediaResponses(t.getId()))
                 .tags(loadTagResponses(t.getId()))
                 .translationKey(t.getSlug())
+                .itinerarySummary(m.itinerarySummary())
                 .build();
     }
 
@@ -461,15 +599,18 @@ public class TourQueryServiceImpl implements TourQueryService {
                     .filter(guide -> guide.getDeletedAt() == null)
                     .toList();
             Map<Long, Guide> guideMap = loadGuideMap(assignedGuides.stream().map(TourScheduleGuide::getGuideId).toList());
+            String lang = LocaleTagUtil.currentLanguageTag();
+            Map<Long, GuideTranslation> guideTr = loadGuideTranslations(guideMap.keySet(), lang);
             return assignedGuides
                     .stream()
                     .map(guide -> {
                         Guide guideProfile = guideMap.get(guide.getGuideId());
+                        GuideTranslation tr = guide.getGuideId() != null ? guideTr.get(guide.getGuideId()) : null;
                         return TourScheduleGuideResponse.builder()
                                 .id(guide.getId())
                                 .guideId(guide.getGuideId())
                                 .guideCode(guideProfile != null ? guideProfile.getCode() : null)
-                                .guideFullName(guideProfile != null ? guideProfile.getFullName() : null)
+                                .guideFullName(resolveGuideFullName(guideProfile, tr))
                                 .guidePhone(guideProfile != null ? guideProfile.getPhone() : null)
                                 .guideEmail(guideProfile != null ? guideProfile.getEmail() : null)
                                 .guideStatus(guideProfile != null ? guideProfile.getStatus() : null)
@@ -630,5 +771,30 @@ public class TourQueryServiceImpl implements TourQueryService {
         return guideRepository.findByIdIn(safeIds).stream()
                 .filter(g -> g != null && g.getId() != null)
                 .collect(java.util.stream.Collectors.toMap(Guide::getId, guide -> guide, (left, right) -> left));
+    }
+
+    private Map<Long, GuideTranslation> loadGuideTranslations(Collection<Long> guideIds, String locale) {
+        if (guideIds == null || guideIds.isEmpty()) {
+            return Map.of();
+        }
+        List<GuideTranslation> list = guideTranslationRepository.findByGuide_IdInAndLocale(guideIds, locale);
+        Map<Long, GuideTranslation> map = new HashMap<>();
+        for (GuideTranslation t : list) {
+            Long id = t.getGuide() != null ? t.getGuide().getId() : null;
+            if (id != null) {
+                map.putIfAbsent(id, t);
+            }
+        }
+        return map;
+    }
+
+    private static String resolveGuideFullName(Guide guide, GuideTranslation tr) {
+        if (guide == null) {
+            return null;
+        }
+        if (tr != null && StringUtils.hasText(tr.getFullName())) {
+            return tr.getFullName();
+        }
+        return guide.getFullName();
     }
 }

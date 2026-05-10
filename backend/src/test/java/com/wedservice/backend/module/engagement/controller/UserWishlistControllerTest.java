@@ -35,7 +35,7 @@ class UserWishlistControllerTest {
     void setUp() {
         JsonMapper objectMapper = JsonMapper.builder().findAndAddModules().build();
         mockMvc = MockMvcBuilders.standaloneSetup(new UserWishlistController(userWishlistFacade))
-                .setControllerAdvice(new GlobalExceptionHandler())
+                .setControllerAdvice(GlobalExceptionHandler.standalone())
                 .setMessageConverters(new org.springframework.http.converter.json.JacksonJsonHttpMessageConverter(objectMapper))
                 .build();
     }

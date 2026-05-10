@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "bookings")
@@ -32,6 +33,9 @@ public class Booking extends AuditableEntity {
 
     @Column(name = "schedule_id", nullable = false)
     private Long scheduleId;
+
+    @Column(name = "order_id")
+    private Long orderId;
 
     @Convert(converter = BookingStatusConverter.class)
     @Column(name = "status", length = 30, nullable = false)
@@ -105,5 +109,21 @@ public class Booking extends AuditableEntity {
     @Column(name = "currency", length = 3, nullable = false)
     @Builder.Default
     private String currency = "VND";
+
+    @Column(name = "booking_source", length = 30, nullable = false)
+    @Builder.Default
+    private String bookingSource = "app";
+
+    @Column(name = "special_requests", columnDefinition = "TEXT")
+    private String specialRequests;
+
+    @Column(name = "cancel_reason", columnDefinition = "TEXT")
+    private String cancelReason;
+
+    @Column(name = "cancelled_at")
+    private LocalDateTime cancelledAt;
+
+    @Column(name = "completed_at")
+    private LocalDateTime completedAt;
 
 }

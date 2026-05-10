@@ -115,7 +115,7 @@ class AdminSupportServiceTest {
                 .assignedStaffId(staffId.toString())
                 .build()))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessage("assignedStaffId must reference an active internal staff user");
+                .hasMessage("api.error.support.assignedStaffActive");
     }
 
     @Test

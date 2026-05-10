@@ -50,4 +50,7 @@ public class DestinationDetailResponse {
     private List<DestinationActivityResponse> activities;
     private List<DestinationTipResponse> tips;
     private List<DestinationEventResponse> events;
+
+    /** All persisted locale rows (admin). Public API merges by {@code Accept-Language} without exposing this list. */
+    private List<DestinationTranslationResponse> translations;
 }

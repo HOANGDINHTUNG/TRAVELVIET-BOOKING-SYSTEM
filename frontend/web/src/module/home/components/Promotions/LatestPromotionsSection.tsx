@@ -17,6 +17,7 @@ type PromotionCard = {
   ctaUrl: string;
 };
 
+/** Shown only when the public API returns no rows (or fails). Not DB-backed. */
 const fallbackPromotions: PromotionCard[] = [
   {
     id: -1,
@@ -53,6 +54,10 @@ const fallbackPromotions: PromotionCard[] = [
   },
 ];
 
+/** Generic image when API row exists but `image_url` is still empty (e.g. old rows before V7). */
+const PLACEHOLDER_PROMO_IMAGE =
+  "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80";
+
 function toPromotionCard(item: PromotionCampaign): PromotionCard {
   const safeCtaUrl =
     item.ctaUrl?.startsWith("/") && !item.ctaUrl.startsWith("/promotions")
@@ -64,7 +69,7 @@ function toPromotionCard(item: PromotionCampaign): PromotionCard {
     title: item.displayTitle || item.name || item.code || "Promotion",
     subtitle: item.displaySubtitle || item.description || "Uu dai tour moi nhat",
     badge: item.badgeText || "Promotion",
-    imageUrl: item.imageUrl || fallbackPromotions[0].imageUrl,
+    imageUrl: item.imageUrl?.trim() ? item.imageUrl : PLACEHOLDER_PROMO_IMAGE,
     imageAlt:
       item.imageAlt ||
       item.displayTitle ||
@@ -107,12 +112,17 @@ export function LatestPromotionsSection() {
 
   const cards = useMemo(() => {
     const activeCards = promotions
-      .filter((item) => item.imageUrl || item.displayTitle || item.name)
+      .filter((item) => item.name || item.displayTitle || item.code)
       .sort((left, right) => (left.sortOrder ?? 0) - (right.sortOrder ?? 0))
       .slice(0, 3)
       .map(toPromotionCard);
 
-    return activeCards.length > 0 ? activeCards : fallbackPromotions;
+    // API returned real rows: show them (image may be placeholder until DB has image_url).
+    if (activeCards.length > 0) {
+      return activeCards;
+    }
+    // No rows from server: static demo cards so the section is not empty.
+    return fallbackPromotions;
   }, [promotions]);
 
   return (

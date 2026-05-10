@@ -1,3 +1,5 @@
 @echo off
 echo Starting TravelViet Backend...
-.\mvnw.cmd spring-boot:run -Dmaven.test.skip=true
+REM Force dev profile so datasource/application-dev.yaml is loaded
+REM After DB/refactor, avoid stale target/classes causing NoClassDefFoundError
+.\mvnw.cmd clean spring-boot:run -Dmaven.test.skip=true -Dspring-boot.run.profiles=dev

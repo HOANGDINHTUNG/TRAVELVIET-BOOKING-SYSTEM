@@ -152,6 +152,6 @@ class ReviewServiceImplTest {
 
         assertThatThrownBy(() -> reviewService.createReview(request))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessage("Only checked-in or completed bookings can be reviewed");
+                .hasMessage("api.error.review.bookingStateInvalid");
     }
 }

@@ -1,23 +1,33 @@
 package com.wedservice.backend.module.bookings.service.command.impl;
 
 import com.wedservice.backend.common.security.AuthenticatedUserProvider;
+import com.wedservice.backend.module.bookings.dto.request.BookingProductLineRequest;
 import com.wedservice.backend.module.bookings.dto.request.BookingQuoteRequest;
 import com.wedservice.backend.module.bookings.dto.request.CreateBookingRequest;
 import com.wedservice.backend.module.bookings.dto.request.CreatePassengerRequest;
 import com.wedservice.backend.module.bookings.dto.response.AppliedComboQuoteResponse;
+import com.wedservice.backend.module.bookings.dto.response.AppliedProductQuoteResponse;
 import com.wedservice.backend.module.bookings.dto.response.BookingQuoteResponse;
 import com.wedservice.backend.module.bookings.dto.response.BookingResponse;
 import com.wedservice.backend.module.bookings.service.BookingPricingService;
 import com.wedservice.backend.module.bookings.service.BookingStatusHistoryRecorder;
 import com.wedservice.backend.module.bookings.entity.Booking;
 import com.wedservice.backend.module.bookings.entity.BookingComboItem;
+import com.wedservice.backend.module.bookings.entity.BookingProduct;
 import com.wedservice.backend.module.bookings.entity.BookingPassenger;
 import com.wedservice.backend.module.bookings.entity.BookingPaymentStatus;
 import com.wedservice.backend.module.bookings.entity.BookingStatus;
 import com.wedservice.backend.module.bookings.repository.BookingComboItemRepository;
+import com.wedservice.backend.module.bookings.repository.BookingProductRepository;
 import com.wedservice.backend.module.bookings.repository.BookingPassengerRepository;
 import com.wedservice.backend.module.bookings.repository.BookingRepository;
 import com.wedservice.backend.module.bookings.validator.BookingValidator;
+import com.wedservice.backend.module.commerce.repository.ProductRepository;
+import com.wedservice.backend.module.orders.entity.Order;
+import com.wedservice.backend.module.orders.repository.OrderItemRepository;
+import com.wedservice.backend.module.orders.repository.OrderRepository;
+import com.wedservice.backend.module.tours.entity.Tour;
+import com.wedservice.backend.module.tours.repository.TourRepository;
 import com.wedservice.backend.module.loyalty.service.MissionTrackerService;
 import com.wedservice.backend.module.loyalty.service.UserPassportService;
 import com.wedservice.backend.module.tours.service.TourRuntimeStatsSyncService;
@@ -37,6 +47,8 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -52,6 +64,12 @@ class BookingCommandServiceImplTest {
 
     @Mock
     private BookingComboItemRepository bookingComboItemRepository;
+
+    @Mock
+    private BookingProductRepository bookingProductRepository;
+
+    @Mock
+    private ProductRepository productRepository;
 
     @Mock
     private BookingPricingService bookingPricingService;
@@ -71,6 +89,15 @@ class BookingCommandServiceImplTest {
     @Mock
     private MissionTrackerService missionTrackerService;
 
+    @Mock
+    private OrderRepository orderRepository;
+
+    @Mock
+    private OrderItemRepository orderItemRepository;
+
+    @Mock
+    private TourRepository tourRepository;
+
     private BookingCommandServiceImpl bookingCommandService;
 
     @BeforeEach
@@ -78,6 +105,8 @@ class BookingCommandServiceImplTest {
         bookingCommandService = new BookingCommandServiceImpl(
                 bookingRepository,
                 bookingComboItemRepository,
+                bookingProductRepository,
+                productRepository,
                 passengerRepository,
                 authenticatedUserProvider,
                 new BookingValidator(),
@@ -85,7 +114,10 @@ class BookingCommandServiceImplTest {
                 bookingStatusHistoryRecorder,
                 tourRuntimeStatsSyncService,
                 userPassportService,
-                missionTrackerService
+                missionTrackerService,
+                orderRepository,
+                orderItemRepository,
+                tourRepository
         );
     }
 
@@ -115,6 +147,13 @@ class BookingCommandServiceImplTest {
                         .finalAmount(new BigDecimal("1200000"))
                         .currency("VND")
                         .build());
+        stubTourLookup(10L);
+        when(orderRepository.save(any(Order.class))).thenAnswer(invocation -> {
+            Order order = invocation.getArgument(0);
+            order.setId(500L);
+            return order;
+        });
+        when(orderItemRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         when(bookingRepository.save(any(Booking.class))).thenAnswer(invocation -> {
             Booking booking = invocation.getArgument(0);
             booking.setId(100L);
@@ -126,7 +165,79 @@ class BookingCommandServiceImplTest {
         ArgumentCaptor<Booking> bookingCaptor = ArgumentCaptor.forClass(Booking.class);
         verify(bookingRepository).save(bookingCaptor.capture());
         assertThat(bookingCaptor.getValue().getUserId()).isEqualTo(currentUserId);
+        assertThat(bookingCaptor.getValue().getOrderId()).isEqualTo(500L);
         assertThat(response.getId()).isEqualTo(100L);
+        verify(orderRepository).save(any(Order.class));
+        verify(orderItemRepository).save(any());
+        verify(bookingProductRepository, never()).save(any(BookingProduct.class));
+        verify(productRepository, never()).decrementStockIfEnough(any(Long.class), any(Integer.class));
+    }
+
+    @Test
+    void createBooking_persistsProductLinesAndDecrementsStock() {
+        UUID currentUserId = UUID.randomUUID();
+        CreateBookingRequest request = CreateBookingRequest.builder()
+                .tourId(10L)
+                .scheduleId(22L)
+                .contactName("Nguyen Van A")
+                .contactPhone("0909000000")
+                .adults(1)
+                .bookingProducts(List.of(
+                        BookingProductLineRequest.builder().productId(3L).quantity(2).build()
+                ))
+                .build();
+
+        when(authenticatedUserProvider.getRequiredCurrentUserId()).thenReturn(currentUserId);
+        when(authenticatedUserProvider.isCurrentUserBackoffice()).thenReturn(false);
+        when(bookingPricingService.quoteBookingForUser(eq(currentUserId), any(BookingQuoteRequest.class)))
+                .thenReturn(BookingQuoteResponse.builder()
+                        .tourId(10L)
+                        .scheduleId(22L)
+                        .subtotalAmount(new BigDecimal("100.00"))
+                        .discountAmount(BigDecimal.ZERO)
+                        .voucherDiscountAmount(BigDecimal.ZERO)
+                        .loyaltyDiscountAmount(BigDecimal.ZERO)
+                        .addonAmount(new BigDecimal("30.00"))
+                        .productsAmount(new BigDecimal("30.00"))
+                        .taxAmount(BigDecimal.ZERO)
+                        .finalAmount(new BigDecimal("130.00"))
+                        .currency("VND")
+                        .appliedProducts(List.of(
+                                AppliedProductQuoteResponse.builder()
+                                        .productId(3L)
+                                        .sku("SKU3")
+                                        .name("Hat")
+                                        .quantity(2)
+                                        .unitPrice(new BigDecimal("15.00"))
+                                        .lineTotal(new BigDecimal("30.00"))
+                                        .build()
+                        ))
+                        .build());
+        stubTourLookup(10L);
+        when(orderRepository.save(any(Order.class))).thenAnswer(invocation -> {
+            Order order = invocation.getArgument(0);
+            order.setId(502L);
+            return order;
+        });
+        when(orderItemRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(bookingRepository.save(any(Booking.class))).thenAnswer(invocation -> {
+            Booking booking = invocation.getArgument(0);
+            booking.setId(101L);
+            return booking;
+        });
+        when(bookingProductRepository.save(any(BookingProduct.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(productRepository.decrementStockIfEnough(3L, 2)).thenReturn(1);
+
+        bookingCommandService.createBooking(request);
+
+        ArgumentCaptor<BookingProduct> productCaptor = ArgumentCaptor.forClass(BookingProduct.class);
+        verify(bookingProductRepository).save(productCaptor.capture());
+        assertThat(productCaptor.getValue().getBookingId()).isEqualTo(101L);
+        assertThat(productCaptor.getValue().getProductId()).isEqualTo(3L);
+        assertThat(productCaptor.getValue().getQuantity()).isEqualTo(2);
+        assertThat(productCaptor.getValue().getUnitPrice()).isEqualByComparingTo("15.00");
+        assertThat(productCaptor.getValue().getLineTotal()).isEqualByComparingTo("30.00");
+        verify(productRepository).decrementStockIfEnough(3L, 2);
     }
 
     @Test
@@ -188,6 +299,13 @@ class BookingCommandServiceImplTest {
                                 .finalPrice(new java.math.BigDecimal("200.00"))
                                 .build())
                         .build());
+        stubTourLookup(10L);
+        when(orderRepository.save(any(Order.class))).thenAnswer(invocation -> {
+            Order order = invocation.getArgument(0);
+            order.setId(501L);
+            return order;
+        });
+        when(orderItemRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         when(bookingRepository.save(any(Booking.class))).thenAnswer(invocation -> {
             Booking booking = invocation.getArgument(0);
             booking.setId(99L);
@@ -245,6 +363,15 @@ class BookingCommandServiceImplTest {
         );
         verify(tourRuntimeStatsSyncService).syncScheduleState(22L);
         verify(tourRuntimeStatsSyncService).syncTourBookingStats(10L);
+        verify(orderRepository).save(any(Order.class));
+        verify(orderItemRepository).save(any());
+    }
+
+    private void stubTourLookup(long tourId) {
+        Tour tour = new Tour();
+        tour.setId(tourId);
+        tour.setName("Test tour " + tourId);
+        when(tourRepository.findById(tourId)).thenReturn(Optional.of(tour));
     }
 
     @Test
@@ -262,10 +389,10 @@ class BookingCommandServiceImplTest {
         when(authenticatedUserProvider.getRequiredCurrentUserId()).thenReturn(currentUserId);
         when(authenticatedUserProvider.isCurrentUserBackoffice()).thenReturn(false);
         when(bookingPricingService.quoteBookingForUser(org.mockito.ArgumentMatchers.eq(currentUserId), any(BookingQuoteRequest.class)))
-                .thenThrow(new com.wedservice.backend.common.exception.BadRequestException("Schedule does not belong to the requested tour"));
+                .thenThrow(com.wedservice.backend.common.exception.BadRequestException.i18n("api.error.booking.scheduleWrongTour"));
 
         assertThatThrownBy(() -> bookingCommandService.createBooking(request))
-                .hasMessageContaining("Schedule does not belong to the requested tour");
+                .hasMessageContaining("api.error.booking.scheduleWrongTour");
     }
 
     @Test
@@ -314,7 +441,7 @@ class BookingCommandServiceImplTest {
         when(bookingRepository.findById(45L)).thenReturn(Optional.of(booking));
 
         assertThatThrownBy(() -> bookingCommandService.checkInBooking(45L, "Arrival at gate"))
-                .hasMessageContaining("Only confirmed bookings can be checked in");
+                .hasMessageContaining("api.error.booking.checkInRequiresConfirmed");
     }
 
     @Test

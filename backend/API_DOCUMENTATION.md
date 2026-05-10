@@ -4,6 +4,49 @@
 > Content-Type: `application/json`
 > Authentication: `Authorization: Bearer <token>`
 
+## Nhật ký cập nhật (API & hợp đồng response)
+
+| Ngày | Thay đổi |
+|------|----------|
+| 2026-05-09 | **Locale & tài liệu:** mô tả header **`Accept-Language`** / **`Content-Language`**, lỗi nghiệp vụ **`api.error.*`**, và endpoint admin **bản dịch** (destination / guide). |
+| 2026-05-09 | **Đơn hàng (bảng `orders` / `order_items`)**: Mỗi lần `POST /bookings` tạo một `orders` + một dòng `order_items` (`item_type = booking`, `item_ref_id = booking.id`), gán `bookings.order_id`. Response booking bổ sung `orderId`, `bookingSource`, `specialRequests`, và các trường hủy/hoàn thành khi có dữ liệu. **Thanh toán**: `POST /payments` ghi thêm `payments.order_id` (theo booking) và cập nhật đơn: `orders.status = paid`, `orders.payment_status = paid`, `placed_at` (lần đầu). **Hủy / hoàn thành booking**: đồng bộ `orders.status` → `cancelled` hoặc `completed` và mốc thời gian tương ứng. Chưa có REST riêng cho đơn hàng; tra cứu qua DB hoặc `orderId` trên booking. |
+
+---
+
+## 0. Locale, thông điệp lỗi & header HTTP
+
+### 0.1 `Accept-Language` (tùy chọn)
+
+- Client có thể gửi **`Accept-Language`** để chọn ngôn ngữ giao diện API (thông điệp `ApiResponse`, lỗi validation, v.v.).
+- **Hỗ trợ:** `vi`, `en` (ví dụ `Accept-Language: vi`, `en`, `en-US`). Resolver: `AcceptHeaderLocaleResolver`.
+- **Mặc định:** **`vi`** khi không gửi header hoặc ngôn ngữ không nằm trong danh sách hỗ trợ.
+
+### 0.2 `Content-Language` (response)
+
+- Mọi response JSON (và các converter tương thích) có thể kèm header **`Content-Language`** theo locale đã resolve (`ContentLanguageResponseAdvice`).
+- CORS đã **expose** `Content-Language` (cùng `X-Request-ID`) để client đọc từ trình duyệt.
+
+### 0.3 Lỗi 400 nghiệp vụ (`BadRequestException`)
+
+- Thân lỗi dùng `ErrorResponse` (`success`, `message`, `errorCode`, `errors`, …).
+- `message` thường là **chuỗi đã dịch** theo locale; mã nội bộ tương ứng là key dạng **`api.error.*`** (bundle `i18n/messages` + `i18n/business`). Client có thể hiển thị `message` trực tiếp; `errorCode` ví dụ `BAD_REQUEST` để phân loại.
+
+### 0.4 Admin — API bản dịch (translations)
+
+Cùng prefix **`/api/v1`**. `locale` trên path: chuỗi locale (ví dụ `vi`, `en`); server chuẩn hóa tag và chỉ chấp nhận **`en`** / **`vi`**.
+
+| Method | Path | Permission | Mô tả |
+| ------ | ---- | ---------- | ----- |
+| `GET` | `/admin/destinations/{destinationUuid}/translations` | `destination.view` | Liệt kê các bản ghi dịch theo destination. |
+| `PUT` | `/admin/destinations/{destinationUuid}/translations/{locale}` | `destination.update` | Tạo/cập nhật một locale; body `UpsertDestinationTranslationRequest` (name, shortDescription, description — ít nhất một trường có nội dung). Thông báo thành công: key `api.admin.translation.saved`. |
+| `GET` | `/admin/guides/{guideId}/translations` | `tour.update` | Liệt kê bản dịch hướng dẫn viên. |
+| `PUT` | `/admin/guides/{guideId}/translations/{locale}` | `tour.update` | Tạo/cập nhật bản dịch (`UpsertGuideTranslationRequest`: fullName, bio). Thông báo thành công: `api.admin.translation.saved`. |
+| `GET` | `/admin/tours/{tourId}/translations` | `tour.update` | Liệt kê bản dịch tour (`TourTranslationResponse`). |
+| `PUT` | `/admin/tours/{tourId}/translations/{locale}` | `tour.update` | Tạo/cập nhật bản dịch (`UpsertTourTranslationRequest`: name, shortDescription, description, highlights, inclusions, exclusions, notes, itinerarySummary — ít nhất một trường có nội dung). Thông báo: `api.admin.translation.saved`. |
+| `DELETE` | `/admin/tours/{tourId}/translations/{locale}` | `tour.update` | Xóa bản dịch; nếu không tồn tại: lỗi i18n `api.error.tour.translation_not_found`. |
+
+**Lưu ý:** API public **`GET /tours`**, **`GET /tours/{id}`** merge các trường nội dung từ `tour_translations` theo `Accept-Language`, fallback **`vi`**, rồi cột gốc `tours`; **`itinerarySummary`** chỉ đến từ bản dịch (lịch chi tiết theo ngày vẫn ở `itineraryDays`). Admin list/detail tour (`/admin/tours`) trả **bản gốc** trên `tours` (không merge). Admin translation API trả đủ hàng trong DB cho CMS.
+
 ---
 
 ## 1. Mô Hình Phân Quyền
@@ -52,7 +95,10 @@ Hệ thống đang dùng:
 ```http
 Authorization: Bearer <ACCESS_TOKEN>
 Content-Type: application/json
+Accept-Language: vi
 ```
+
+Phản hồi có thể kèm `Content-Language: vi` (hoặc `en`) theo locale đã áp dụng — xem mục **0**.
 
 ### 2.2 Biến test gợi ý
 
@@ -64,12 +110,31 @@ DESTINATION_UUID=3fa85f64-5717-4562-b3fc-2c963f66afa6
 TOUR_ID=1
 SCHEDULE_ID=5
 BOOKING_ID=1
+ORDER_ID=1
 PAYMENT_ID=1
 REFUND_ID=1
 REVIEW_ID=1
 ```
 
-### 2.3 User test để dùng lại
+### 2.3 Bộ biến Postman (environment mẫu)
+
+Sau khi `login` / `register`, gán `ACCESS_TOKEN` vào environment. Các ID dưới đây là **ví dụ** — thay bằng giá trị thật từ response hoặc từ DB sau khi chạy Flyway + `V7__seed_data.sql`.
+
+```json
+{
+  "baseUrl": "http://localhost:8088/api/v1",
+  "ACCESS_TOKEN": "",
+  "USER_ID": "550e8400-e29b-41d4-a716-446655440000",
+  "DESTINATION_UUID": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "TOUR_ID": "1",
+  "SCHEDULE_ID": "5",
+  "BOOKING_ID": "",
+  "ORDER_ID": "",
+  "PAYMENT_ID": ""
+}
+```
+
+### 2.4 User test để dùng lại
 
 ```json
 {
@@ -83,7 +148,7 @@ REVIEW_ID=1
 }
 ```
 
-### 2.4 Response wrapper chung
+### 2.5 Response wrapper chung
 
 Mọi API đều trả theo `ApiResponse<T>`:
 
@@ -105,6 +170,31 @@ Nếu là phân trang, `data` thường là `PageResponse<T>`:
   "totalElements": 0,
   "totalPages": 0,
   "last": true
+}
+```
+
+### 2.6 Luồng Postman gợi ý (tạo booking → thanh toán)
+
+1. `POST {{baseUrl}}/auth/login` — lưu `data.accessToken` → `ACCESS_TOKEN`.
+2. `POST {{baseUrl}}/bookings/quote` — kiểm tra giá (permission `booking.create`).
+3. `POST {{baseUrl}}/bookings` — lưu `data.id` → `BOOKING_ID`, `data.orderId` → `ORDER_ID`.
+4. `POST {{baseUrl}}/payments` với `bookingId` = `BOOKING_ID`, `amount` = đúng `data.finalAmount` của booking — lưu `data.orderId` (trùng `ORDER_ID` nếu booking có đơn).
+
+Ví dụ body bước 3 (bổ sung tùy chọn so với trước):
+
+```json
+{
+  "tourId": 1,
+  "scheduleId": 5,
+  "contactName": "Nguyễn Văn An",
+  "contactPhone": "+84901234567",
+  "contactEmail": "an.nguyen+api@gmail.com",
+  "adults": 2,
+  "children": 0,
+  "infants": 0,
+  "seniors": 0,
+  "bookingSource": "app",
+  "specialRequests": "Ăn chay buổi trưa, khởi hành muộn 30 phút nếu có thể."
 }
 ```
 
@@ -2572,6 +2662,9 @@ GET http://localhost:8088/api/v1/tours?keyword=Da+Nang&destinationId=1&tagIds=4&
 - `passengers[].dateOfBirth` được parse theo định dạng `yyyy-MM-dd` và map xuống entity
 - `passengers[].passengerType` hợp lệ: `adult`, `child`, `infant`, `senior`
 - `passengers[].gender` hợp lệ: `male`, `female`, `other`, `unknown`; nếu để trống backend sẽ dùng `unknown`
+- Backend tạo **`orders`** (cùng breakdown tiền) và một dòng **`order_items`** (`item_type = booking`, `item_ref_id` = id booking); **`bookings.order_id`** trỏ tới đơn.
+- **`bookingSource`** (tùy chọn, tối đa 30 ký tự, ASCII `a-zA-Z0-9._-`), mặc định `app` nếu bỏ trống.
+- **`specialRequests`** (tùy chọn, tối đa 4000 ký tự) lưu vào `bookings.special_requests` và `orders.note`.
 
 **Request**
 
@@ -2587,6 +2680,8 @@ GET http://localhost:8088/api/v1/tours?keyword=Da+Nang&destinationId=1&tagIds=4&
   "children": 1,
   "infants": 0,
   "seniors": 0,
+  "bookingSource": "app",
+  "specialRequests": "Phòng gần cửa sổ, ăn chay.",
   "comboId": 6,
   "voucherCode": "SPRING10",
   "passengers": [
@@ -2620,14 +2715,35 @@ GET http://localhost:8088/api/v1/tours?keyword=Da+Nang&destinationId=1&tagIds=4&
   "data": {
     "id": 1,
     "bookingCode": "BK1713115800000",
+    "orderId": 42,
+    "tourId": 1,
+    "scheduleId": 5,
     "status": "pending_payment",
+    "paymentStatus": "unpaid",
+    "contactName": "Nguyễn Văn An",
+    "contactPhone": "+84901234567",
+    "contactEmail": "an.nguyen+api@gmail.com",
+    "adults": 2,
+    "children": 1,
+    "infants": 0,
+    "seniors": 0,
     "subtotalAmount": 3000000,
     "discountAmount": 200000,
     "voucherDiscountAmount": 150000,
+    "loyaltyDiscountAmount": 0,
     "addonAmount": 50000,
+    "taxAmount": 0,
     "finalAmount": 2850000,
     "voucherId": 5,
-    "comboId": 6
+    "comboId": 6,
+    "currency": "VND",
+    "bookingSource": "app",
+    "specialRequests": "Phòng gần cửa sổ, ăn chay.",
+    "cancelReason": null,
+    "cancelledAt": null,
+    "completedAt": null,
+    "createdAt": "2026-05-09T10:15:00",
+    "updatedAt": "2026-05-09T10:15:00"
   }
 }
 ```
@@ -2650,6 +2766,7 @@ GET http://localhost:8088/api/v1/tours?keyword=Da+Nang&destinationId=1&tagIds=4&
 - Chỉ cho phép khi booking đang ở `pending_payment` hoặc `confirmed`
 - Nếu booking đã thanh toán, backend chuyển sang `cancel_requested`
 - Nếu booking chưa thanh toán, backend chuyển thẳng sang `cancelled`
+- Booking gắn `orderId`: **`orders.status` → `cancelled`**, ghi `orders.cancelled_at`; booking lưu `cancelReason` (nếu body có `reason`) và `cancelledAt`.
 - Backend ghi thêm `booking_status_history`
 
 **Request**
@@ -2678,6 +2795,7 @@ GET http://localhost:8088/api/v1/tours?keyword=Da+Nang&destinationId=1&tagIds=4&
 
 - Chỉ booking `checked_in` mới được complete
 - Backend chuyển status sang `completed`
+- Booking có `orderId`: **`orders.status` → `completed`**, ghi `orders.completed_at`; booking ghi `completedAt`.
 - Backend ghi thêm `booking_status_history`
 
 ---
@@ -2700,26 +2818,28 @@ GET http://localhost:8088/api/v1/tours?keyword=Da+Nang&destinationId=1&tagIds=4&
   - `currency = "VND"`
   - `status = "paid"`
   - `paidAt = now()`
+  - `orderId` = `booking.orderId` (luồng hiện tại: mỗi booking mới đều có đơn sau `POST /bookings`)
 
 **Additional notes**
 
+- Bản ghi **`orders`** tương ứng (nếu có) được cập nhật: `status = paid`, `payment_status = paid`, và `placed_at` ghi nhận lần đầu thanh toán thành công.
 - After creating the payment, booking `status` is updated to `confirmed`
 - After creating the payment, booking `paymentStatus` is updated to `paid`
 - If the booking has `voucherId`, the service increments both:
   - `vouchers.usedCount`
   - `voucher_user_claims.usedCount` for `(voucherId, booking.userId)`
 - The service also rejects duplicate successful payments for the same booking
-- `paymentMethod` is currently accepted as a plain `string`; the DTO layer does not enforce an enum yet
+- Cột DB `payments.payment_method` là ENUM: `cash`, `bank_transfer`, `credit_card`, `e_wallet`, `qr`, `gateway`. Nên gửi đúng một trong các giá trị này (ví dụ cổng VNPay → thường dùng `gateway` hoặc `qr`). DTO Java vẫn nhận chuỗi tự do nên giá trị lạ có thể gây lỗi lúc ghi DB.
 
 **Request**
 
 ```json
 {
   "bookingId": 1,
-  "paymentMethod": "VNPAY",
-  "provider": "VNPay",
+  "paymentMethod": "gateway",
+  "provider": "vnpay",
   "transactionRef": "VNPAY-TXN-20260414-001",
-  "amount": 3000000
+  "amount": 2850000
 }
 ```
 
@@ -2733,7 +2853,8 @@ GET http://localhost:8088/api/v1/tours?keyword=Da+Nang&destinationId=1&tagIds=4&
     "id": 1,
     "paymentCode": "PM1713115900000",
     "bookingId": 1,
-    "amount": 3000000,
+    "orderId": 42,
+    "amount": 2850000,
     "status": "paid"
   }
 }

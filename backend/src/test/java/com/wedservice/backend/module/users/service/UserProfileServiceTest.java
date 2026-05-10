@@ -288,7 +288,7 @@ class UserProfileServiceTest {
 
         assertThatThrownBy(() -> userProfileService.updateMyProfile(request))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessage("Email already exists");
+                .hasMessage("api.error.common.emailExists");
     }
 
     @Test
@@ -386,7 +386,7 @@ class UserProfileServiceTest {
 
         assertThatThrownBy(() -> userProfileService.updateMyAddress(21L, request))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessage("Default address cannot be unset directly. Set another address as default or delete it.");
+                .hasMessage("api.error.user.profile.defaultAddressUnset");
 
         verify(userAddressRepository, never()).save(any(UserAddress.class));
     }
@@ -669,7 +669,7 @@ class UserProfileServiceTest {
 
         assertThatThrownBy(() -> userProfileService.registerMyDevice(request))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessage("Device with this push token is already registered and active.");
+                .hasMessage("api.error.user.profile.pushTokenActive");
 
         verify(userDeviceRepository, never()).save(any(UserDevice.class));
     }
@@ -689,7 +689,7 @@ class UserProfileServiceTest {
 
         assertThatThrownBy(() -> userProfileService.registerMyDevice(request))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessage("At least deviceName or pushToken must be provided");
+                .hasMessage("api.error.user.profile.deviceNameOrToken");
     }
 
     @Test
@@ -733,7 +733,7 @@ class UserProfileServiceTest {
 
         assertThatThrownBy(() -> userProfileService.deleteMyDevice(92L))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessage("Device has already been removed or is inactive.");
+                .hasMessage("api.error.user.profile.deviceRemoved");
 
         verify(userDeviceRepository, never()).save(any(UserDevice.class));
     }

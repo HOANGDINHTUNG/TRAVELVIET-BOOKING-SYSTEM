@@ -77,7 +77,7 @@ class AdminBadgeServiceTest {
                 .conditionJson("{invalid")
                 .build()))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessage("conditionJson must be valid JSON");
+                .hasMessage("api.error.common.fieldMustBeValidJson");
     }
 
     @Test

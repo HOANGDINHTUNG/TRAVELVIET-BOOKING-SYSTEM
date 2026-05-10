@@ -137,7 +137,7 @@ class AdminVoucherServiceTest {
 
         assertThatThrownBy(() -> adminVoucherService.createVoucher(request))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessage("discountValue must be <= 100 for percentage vouchers");
+                .hasMessage("api.error.voucher.discountPercentMax");
     }
 
     @Test
@@ -155,7 +155,7 @@ class AdminVoucherServiceTest {
 
         assertThatThrownBy(() -> adminVoucherService.createVoucher(request))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessage("applicableTourId is required when applicableScope is tour");
+                .hasMessage("api.error.voucher.scopeTourNeedsTourId");
     }
 
     @Test

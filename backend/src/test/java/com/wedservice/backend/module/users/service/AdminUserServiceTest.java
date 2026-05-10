@@ -117,7 +117,7 @@ class AdminUserServiceTest {
 
         assertThatThrownBy(() -> adminUserService.createUser(request))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessage("Email already exists");
+                .hasMessage("api.error.common.emailExists");
     }
 
     @Test
@@ -169,7 +169,7 @@ class AdminUserServiceTest {
 
         assertThatThrownBy(() -> adminUserService.getUsers(request))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessageContaining("sortBy must be one of");
+                .hasMessageContaining("api.error.user.sortByInvalid");
     }
 
     @Test
@@ -201,7 +201,7 @@ class AdminUserServiceTest {
 
         assertThatThrownBy(() -> adminUserService.updateUser(id, request))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessage("Email already exists");
+                .hasMessage("api.error.common.emailExists");
     }
 
     @Test

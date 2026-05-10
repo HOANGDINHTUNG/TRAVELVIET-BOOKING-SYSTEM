@@ -84,7 +84,7 @@ public class AdminAuditLogQueryService {
 
     private void validateDateRange(LocalDateTime from, LocalDateTime to) {
         if (from != null && to != null && from.isAfter(to)) {
-            throw new BadRequestException("from must be before or equal to to");
+            throw BadRequestException.i18n("api.error.audit.fromBeforeTo");
         }
     }
 

@@ -1,0 +1,161 @@
+{
+  "panel": {
+    "title": "Booking schedule",
+    "selectSchedulePrompt": "Please pick a departure date from the left to start booking.",
+    "passengers": {
+      "adult": "Adult",
+      "child": "Child",
+      "infant": "Infant",
+      "senior": "Senior"
+    },
+    "voucher": {
+      "label": "Voucher code",
+      "placeholder": "Enter voucher code",
+      "apply": "Apply",
+      "clear": "Clear",
+      "appliedHint": "Voucher applied:",
+      "invalid": "Voucher is invalid or not applicable to this departure."
+    },
+    "contact": {
+      "name": "Booker's full name",
+      "phone": "Phone number",
+      "email": "Email (optional)",
+      "note": "Special requests (optional)"
+    },
+    "summary": {
+      "subtotal": "Subtotal",
+      "discount": "Discount",
+      "voucherDiscount": "Voucher discount",
+      "total": "Total",
+      "totalSeats": "Seats used"
+    },
+    "submit": "Book now",
+    "submitting": "Processing...",
+    "loginToBook": "Sign in to book",
+    "authRequired": "Please sign in before booking a tour.",
+    "contactRequired": "Please provide booker name and phone number.",
+    "overCapacity": "Selected guests exceed the remaining seats for this schedule.",
+    "disclaimer": "By clicking 'Book now' you agree to TravelViet's terms of service."
+  },
+  "toast": {
+    "createSuccess": "Booking created! Redirecting to confirmation...",
+    "createFailed": "Could not create booking. Please retry.",
+    "cancelSuccess": "Booking cancelled.",
+    "cancelFailed": "Could not cancel booking. Please retry."
+  },
+  "confirmation": {
+    "loading": "Loading booking details...",
+    "errorTitle": "Booking not found",
+    "errorMessage": "Could not load booking details. Please retry.",
+    "notFound": "This booking does not exist or you do not have permission.",
+    "back": "Back to account",
+    "title": "Booking confirmed!",
+    "subtitle": "Booking code: {{code}}",
+    "bookingCode": "Booking code",
+    "tourId": "Tour ID",
+    "scheduleId": "Schedule ID",
+    "status": "Status",
+    "passengers": "Guests",
+    "contact": "Booker",
+    "subtotal": "Subtotal",
+    "voucherDiscount": "Voucher discount",
+    "total": "Total",
+    "payNow": "Pay now with VNPay",
+    "payRedirecting": "Redirecting to VNPay...",
+    "payNote": "You will be redirected to the secure VNPay payment gateway.",
+    "disclaimer": "Thank you for booking with TravelViet. Our team will reach out to confirm soon."
+  },
+  "status": {
+    "booking": {
+      "pending": "Pending",
+      "confirmed": "Confirmed",
+      "paid": "Paid",
+      "checked_in": "Checked in",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "no_show": "No show",
+      "refunded": "Refunded"
+    },
+    "payment": {
+      "pending": "Awaiting payment",
+      "processing": "Processing",
+      "paid": "Paid",
+      "failed": "Failed",
+      "refunded": "Refunded",
+      "partially_refunded": "Partially refunded"
+    }
+  },
+  "vnpay": {
+    "toast": {
+      "checkoutFailed": "Could not start a VNPay session. Please retry."
+    },
+    "errorCodes": {
+      "success": "Transaction successful",
+      "suspicious": "Suspicious transaction",
+      "cardNotEnrolled": "Card not enrolled in InternetBanking",
+      "verifyTooMany": "Too many verification attempts",
+      "paymentExpired": "Payment session expired",
+      "cardLocked": "Card or account locked",
+      "wrongOtp": "Wrong OTP",
+      "cancelled": "Cancelled by customer",
+      "insufficient": "Insufficient balance",
+      "overLimit": "Transaction limit exceeded",
+      "bankMaintenance": "Bank under maintenance",
+      "wrongPin": "Wrong PIN",
+      "unknown": "Unknown error"
+    }
+  },
+  "paymentReturn": {
+    "lookupFailedTitle": "Could not match this payment to a booking",
+    "lookupFailedMessage": "We can't identify the booking from this payment session. Please check your bookings page.",
+    "viewMyBookings": "View my bookings",
+    "viewBooking": "View booking",
+    "pollingTitle": "Confirming payment...",
+    "pollingMessage": "Syncing the result with VNPay. Please wait a moment.",
+    "fetchErrorTitle": "Could not load booking",
+    "fetchErrorMessage": "We could not load this booking to check status. Try refreshing.",
+    "refresh": "Refresh",
+    "failureTitle": "Payment failed",
+    "failureMessage": "Error code: {{code}} ({{reason}})",
+    "retryPay": "Retry payment",
+    "waitingIpnTitle": "Payment is being processed",
+    "waitingIpnMessage": "VNPay confirmed your payment. We're updating the final status — this may take a few seconds.",
+    "successTitle": "Payment successful",
+    "successMessage": "Your booking has been fully paid. Our team will contact you to confirm the trip.",
+    "settledNotPaidTitle": "Special payment status",
+    "settledNotPaidMessage": "Current status: {{status}}",
+    "summary": {
+      "bookingCode": "Booking code",
+      "status": "Status",
+      "amount": "Total",
+      "reportedAmount": "VNPay reported"
+    }
+  },
+  "myBookings": {
+    "title": "My bookings",
+    "subtitle": "Manage tours you've booked — pay, cancel, or review details.",
+    "loading": "Loading bookings...",
+    "errorMessage": "Could not load bookings. Please retry.",
+    "empty": "You have no bookings yet.",
+    "tourLabel": "Tour",
+    "scheduleLabel": "Schedule",
+    "bookedAt": "Booked at",
+    "passengers": "Guests",
+    "total": "Total",
+    "viewDetail": "View details",
+    "payNow": "Pay",
+    "payAgain": "Pay again",
+    "payingRedirect": "Redirecting...",
+    "cancel": "Cancel booking",
+    "cancelConfirm": "Are you sure?",
+    "cancelKeep": "Keep",
+    "cancelConfirmYes": "Cancel",
+    "filters": {
+      "all": "All",
+      "pending": "Awaiting payment",
+      "paid": "Paid",
+      "cancelled": "Cancelled",
+      "completed": "Completed"
+    }
+  }
+}

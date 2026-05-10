@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 public class BookingResponse {
     private Long id;
     private String bookingCode;
+    private Long orderId;
     private Long tourId;
     private Long scheduleId;
     private String status;
@@ -34,6 +35,11 @@ public class BookingResponse {
     private Long voucherId;
     private Long comboId;
     private String currency;
+    private String bookingSource;
+    private String specialRequests;
+    private String cancelReason;
+    private LocalDateTime cancelledAt;
+    private LocalDateTime completedAt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

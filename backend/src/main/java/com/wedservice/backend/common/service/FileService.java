@@ -27,7 +27,7 @@ public class FileService {
 
     public String uploadFile(MultipartFile file) throws Exception {
         if (file == null || file.isEmpty()) {
-            throw new BadRequestException("Uploaded file must not be empty");
+            throw BadRequestException.i18n("api.error.file.uploadEmpty");
         }
 
         ensureBucketExists();

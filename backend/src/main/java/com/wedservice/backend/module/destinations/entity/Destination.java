@@ -145,6 +145,10 @@ public class Destination extends AuditableEntity {
     @Builder.Default
     private List<DestinationEvent> events = new ArrayList<>();
 
+    @OneToMany(mappedBy = "destination")
+    @Builder.Default
+    private List<DestinationTranslation> translations = new ArrayList<>();
+
     @jakarta.persistence.PrePersist
     protected void beforeInsert() {
         if (uuid == null) {

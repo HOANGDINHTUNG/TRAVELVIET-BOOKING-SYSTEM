@@ -108,7 +108,7 @@ public class UserSupportService {
                 .orElseThrow(() -> new ResourceNotFoundException("Support session not found with id: " + sessionId));
 
         if (session.getStatus() != SupportSessionStatus.RESOLVED && session.getStatus() != SupportSessionStatus.CLOSED) {
-            throw new BadRequestException("Only resolved or closed sessions can be rated");
+            throw BadRequestException.i18n("api.error.support.rateOnlyResolved");
         }
 
         session.setRating(request.getRating());
@@ -122,20 +122,20 @@ public class UserSupportService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
         if (user.getDeletedAt() != null || user.getStatus() != Status.ACTIVE) {
-            throw new BadRequestException("Current user cannot create support sessions");
+            throw BadRequestException.i18n("api.error.support.userCannotCreate");
         }
     }
 
     private void ensureSessionCanReceiveMessage(SupportSession session) {
         if (session.getStatus() == SupportSessionStatus.RESOLVED || session.getStatus() == SupportSessionStatus.CLOSED) {
-            throw new BadRequestException("Support session is already closed");
+            throw BadRequestException.i18n("api.error.support.sessionClosed");
         }
     }
 
     private String normalizeRequiredMessage(String value) {
         String normalized = normalizeNullable(value);
         if (!StringUtils.hasText(normalized)) {
-            throw new BadRequestException("messageText is required");
+            throw BadRequestException.i18n("api.error.support.messageRequired");
         }
         return normalized;
     }

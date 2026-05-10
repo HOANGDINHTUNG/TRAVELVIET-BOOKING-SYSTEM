@@ -1,5 +1,6 @@
 package com.wedservice.backend.module.destinations.controller;
 
+import com.wedservice.backend.common.i18n.Translator;
 import com.wedservice.backend.common.response.ApiResponse;
 import com.wedservice.backend.common.response.PageResponse;
 import com.wedservice.backend.module.destinations.dto.request.DestinationSearchRequest;
@@ -43,6 +44,6 @@ public class DestinationController {
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAnyAuthority('destination.propose','destination.create')")
     public ApiResponse<DestinationProposalResponse> proposeDestination(@Valid @RequestBody ProposeDestinationRequest request) {
-    return ApiResponse.success(destinationFacade.proposeDestination(request), "Propose destination successfully, please wait for admin review");
+    return ApiResponse.success(destinationFacade.proposeDestination(request), Translator.toLocale("api.destination.proposeSuccess"));
     }
 }

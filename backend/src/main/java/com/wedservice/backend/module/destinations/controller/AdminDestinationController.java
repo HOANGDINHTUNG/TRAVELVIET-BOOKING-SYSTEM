@@ -1,6 +1,7 @@
 package com.wedservice.backend.module.destinations.controller;
 
 import com.wedservice.backend.common.service.FileService;
+import com.wedservice.backend.common.i18n.Translator;
 import com.wedservice.backend.common.response.ApiResponse;
 import com.wedservice.backend.common.response.PageResponse;
 import com.wedservice.backend.module.destinations.dto.request.DestinationMediaRequest;
@@ -57,7 +58,7 @@ public class AdminDestinationController {
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAuthority('destination.create')")
     public ApiResponse<DestinationDetailResponse> createDestination(@Valid @RequestBody DestinationRequest request) {
-    return ApiResponse.success(adminDestinationFacade.createDestination(request), "Create destination successfully");
+    return ApiResponse.success(adminDestinationFacade.createDestination(request), Translator.toLocale("api.admin.destination.createSuccess"));
     }
 
     @PostMapping(consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -69,7 +70,7 @@ public class AdminDestinationController {
             @RequestPart(value = "videoFiles", required = false) List<MultipartFile> videoFiles
     ) throws Exception {
         attachUploadedMedia(request, imageFiles, videoFiles);
-        return ApiResponse.success(adminDestinationFacade.createDestination(request), "Create destination successfully");
+        return ApiResponse.success(adminDestinationFacade.createDestination(request), Translator.toLocale("api.admin.destination.createSuccess"));
     }
 
     @PutMapping("/{uuid}")
@@ -78,7 +79,7 @@ public class AdminDestinationController {
             @PathVariable UUID uuid,
             @Valid @RequestBody DestinationRequest request
     ) {
-    return ApiResponse.success(adminDestinationFacade.updateDestination(uuid, request), "Update destination successfully");
+    return ApiResponse.success(adminDestinationFacade.updateDestination(uuid, request), Translator.toLocale("api.admin.destination.updateSuccess"));
     }
 
     @PutMapping(value = "/{uuid}", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -90,7 +91,7 @@ public class AdminDestinationController {
             @RequestPart(value = "videoFiles", required = false) List<MultipartFile> videoFiles
     ) throws Exception {
         attachUploadedMedia(request, imageFiles, videoFiles);
-        return ApiResponse.success(adminDestinationFacade.updateDestination(uuid, request), "Update destination successfully");
+        return ApiResponse.success(adminDestinationFacade.updateDestination(uuid, request), Translator.toLocale("api.admin.destination.updateSuccess"));
     }
 
     @DeleteMapping("/{uuid}")
@@ -98,13 +99,13 @@ public class AdminDestinationController {
     @PreAuthorize("hasAuthority('destination.delete')")
     public ApiResponse<Void> deleteDestination(@PathVariable UUID uuid) {
     adminDestinationFacade.deleteDestination(uuid);
-        return ApiResponse.success(null, "Delete destination successfully");
+        return ApiResponse.success(null, Translator.toLocale("api.admin.destination.deleteSuccess"));
     }
 
     @PatchMapping("/{uuid}/approve")
     @PreAuthorize("hasAnyAuthority('destination.review','destination.publish')")
     public ApiResponse<DestinationDetailResponse> approveProposal(@PathVariable UUID uuid) {
-    return ApiResponse.success(adminDestinationFacade.approveProposal(uuid), "Approve proposal successfully");
+    return ApiResponse.success(adminDestinationFacade.approveProposal(uuid), Translator.toLocale("api.admin.destination.approveSuccess"));
     }
 
     @PatchMapping("/{uuid}/reject")
@@ -113,7 +114,7 @@ public class AdminDestinationController {
             @PathVariable UUID uuid,
             @Valid @RequestBody RejectProposalRequest request
     ) {
-    return ApiResponse.success(adminDestinationFacade.rejectProposal(uuid, request), "Reject proposal successfully");
+    return ApiResponse.success(adminDestinationFacade.rejectProposal(uuid, request), Translator.toLocale("api.admin.destination.rejectSuccess"));
     }
 
     private void attachUploadedMedia(

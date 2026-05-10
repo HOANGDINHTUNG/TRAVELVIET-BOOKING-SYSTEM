@@ -240,7 +240,7 @@ public class AdminWeatherService {
 
     private void validateForecastRequest(LocalDate forecastDate, AdminUpsertWeatherForecastRequest request) {
         if (forecastDate == null) {
-            throw new BadRequestException("forecastDate is required");
+            throw BadRequestException.i18n("api.error.weather.forecastDateRequired");
         }
         validateNonNegative(request.getHumidityPercent(), "humidityPercent");
         validateNonNegative(request.getWindSpeed(), "windSpeed");
@@ -249,14 +249,14 @@ public class AdminWeatherService {
         validatePercent(request.getRainProbability(), "rainProbability");
         if (request.getTempMin() != null && request.getTempMax() != null
                 && request.getTempMin().compareTo(request.getTempMax()) > 0) {
-            throw new BadRequestException("tempMin cannot be greater than tempMax");
+            throw BadRequestException.i18n("api.error.weather.tempMinMaxOrder");
         }
         validateJson(request.getRawPayload(), "rawPayload");
     }
 
     private void validateAlertRequest(Destination destination, AdminWeatherAlertRequest request) {
         if (request.getValidTo().isBefore(request.getValidFrom())) {
-            throw new BadRequestException("validTo must be greater than or equal to validFrom");
+            throw BadRequestException.i18n("api.error.weather.validToFromOrder");
         }
         if (request.getScheduleId() != null) {
             validateScheduleDestination(destination, request.getScheduleId());
@@ -265,13 +265,13 @@ public class AdminWeatherService {
 
     private void validateCrowdPredictionRequest(LocalDate predictionDate, AdminUpsertCrowdPredictionRequest request) {
         if (predictionDate == null) {
-            throw new BadRequestException("predictionDate is required");
+            throw BadRequestException.i18n("api.error.weather.predictionDateRequired");
         }
         if (request.getCrowdLevel() == null) {
-            throw new BadRequestException("crowdLevel is required");
+            throw BadRequestException.i18n("api.error.weather.crowdLevelRequired");
         }
         if (request.getPredictedVisitors() != null && request.getPredictedVisitors() < 0) {
-            throw new BadRequestException("predictedVisitors must be greater than or equal to 0");
+            throw BadRequestException.i18n("api.error.weather.predictedVisitorsGteZero");
         }
         validateNonNegative(request.getConfidenceScore(), "confidenceScore");
         validatePercent(request.getConfidenceScore(), "confidenceScore");
@@ -287,7 +287,7 @@ public class AdminWeatherService {
         validateLongitude(request.getToLongitude(), "toLongitude");
         validateNonNegative(request.getDistanceKm(), "distanceKm");
         if (request.getDurationMinutes() != null && request.getDurationMinutes() < 0) {
-            throw new BadRequestException("durationMinutes must be greater than or equal to 0");
+            throw BadRequestException.i18n("api.error.weather.durationMinutesGteZero");
         }
     }
 
@@ -299,19 +299,19 @@ public class AdminWeatherService {
 
         Long tourDestinationId = tour.getDestination() == null ? null : tour.getDestination().getId();
         if (!destination.getId().equals(tourDestinationId)) {
-            throw new BadRequestException("scheduleId does not belong to the destination");
+            throw BadRequestException.i18n("api.error.weather.scheduleNotDestination");
         }
     }
 
     private void validateNonNegative(BigDecimal value, String fieldName) {
         if (value != null && value.compareTo(BigDecimal.ZERO) < 0) {
-            throw new BadRequestException(fieldName + " must be greater than or equal to 0");
+            throw BadRequestException.i18n("api.error.common.fieldGteZero", fieldName);
         }
     }
 
     private void validatePercent(BigDecimal value, String fieldName) {
         if (value != null && value.compareTo(BigDecimal.valueOf(100)) > 0) {
-            throw new BadRequestException(fieldName + " must be less than or equal to 100");
+            throw BadRequestException.i18n("api.error.common.fieldLteHundred", fieldName);
         }
     }
 
@@ -320,7 +320,7 @@ public class AdminWeatherService {
             return;
         }
         if (value.compareTo(BigDecimal.valueOf(-90)) < 0 || value.compareTo(BigDecimal.valueOf(90)) > 0) {
-            throw new BadRequestException(fieldName + " must be between -90 and 90");
+            throw BadRequestException.i18n("api.error.common.fieldLatRange", fieldName);
         }
     }
 
@@ -329,13 +329,13 @@ public class AdminWeatherService {
             return;
         }
         if (value.compareTo(BigDecimal.valueOf(-180)) < 0 || value.compareTo(BigDecimal.valueOf(180)) > 0) {
-            throw new BadRequestException(fieldName + " must be between -180 and 180");
+            throw BadRequestException.i18n("api.error.common.fieldLonRange", fieldName);
         }
     }
 
     private void validateCoordinatePair(BigDecimal latitude, BigDecimal longitude, String prefix) {
         if ((latitude == null) != (longitude == null)) {
-            throw new BadRequestException(prefix + " latitude/longitude must be provided together");
+            throw BadRequestException.i18n("api.error.common.fieldLatLonTogether", prefix);
         }
     }
 
@@ -346,7 +346,7 @@ public class AdminWeatherService {
         try {
             jsonMapper.readTree(rawJson);
         } catch (Exception ex) {
-            throw new BadRequestException(fieldName + " must be valid JSON");
+            throw BadRequestException.i18n("api.error.common.fieldMustBeValidJson", fieldName);
         }
     }
 
@@ -373,7 +373,7 @@ public class AdminWeatherService {
     private String normalizeRequiredRouteLabel(String value, String fieldName) {
         String normalized = trimToNull(value);
         if (!StringUtils.hasText(normalized)) {
-            throw new BadRequestException(fieldName + " is required");
+            throw BadRequestException.i18n("api.error.common.fieldRequired", fieldName);
         }
         return normalized;
     }

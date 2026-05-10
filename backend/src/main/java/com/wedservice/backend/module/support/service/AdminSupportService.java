@@ -78,7 +78,7 @@ public class AdminSupportService {
             User staff = userRepository.findById(assignedStaffId)
                     .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + assignedStaffId));
             if (staff.getDeletedAt() != null || staff.getStatus() != Status.ACTIVE || !isAssignableStaff(staff)) {
-                throw new BadRequestException("assignedStaffId must reference an active internal staff user");
+                throw BadRequestException.i18n("api.error.support.assignedStaffActive");
             }
         }
         session.setAssignedStaffId(assignedStaffId);
@@ -114,7 +114,7 @@ public class AdminSupportService {
         User staff = userRepository.findById(staffUserId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + staffUserId));
         if (staff.getDeletedAt() != null || staff.getStatus() != Status.ACTIVE || !isAssignableStaff(staff)) {
-            throw new BadRequestException("Current user cannot reply to support sessions");
+            throw BadRequestException.i18n("api.error.support.userCannotReply");
         }
 
         LocalDateTime now = LocalDateTime.now();
@@ -168,7 +168,7 @@ public class AdminSupportService {
 
     private void ensureSessionCanReceiveMessage(SupportSession session) {
         if (session.getStatus() == SupportSessionStatus.RESOLVED || session.getStatus() == SupportSessionStatus.CLOSED) {
-            throw new BadRequestException("Support session is already closed");
+            throw BadRequestException.i18n("api.error.support.sessionClosed");
         }
     }
 
@@ -180,14 +180,14 @@ public class AdminSupportService {
         try {
             return UUID.fromString(normalized);
         } catch (Exception ex) {
-            throw new BadRequestException(fieldName + " must be a valid UUID");
+            throw BadRequestException.i18n("api.error.common.fieldMustBeValidUuid", fieldName);
         }
     }
 
     private String normalizeRequiredMessage(String value) {
         String normalized = normalizeNullable(value);
         if (!StringUtils.hasText(normalized)) {
-            throw new BadRequestException("messageText is required");
+            throw BadRequestException.i18n("api.error.support.messageRequired");
         }
         return normalized;
     }

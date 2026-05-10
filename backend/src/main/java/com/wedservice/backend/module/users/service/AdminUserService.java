@@ -191,7 +191,7 @@ public class AdminUserService extends BaseService<User, UUID> {
 
     private void validateRequiredContact(String email, String phone) {
         if (!StringUtils.hasText(email) && !StringUtils.hasText(phone)) {
-            throw new BadRequestException("At least email or phone must be provided");
+            throw BadRequestException.i18n("api.error.common.contactRequired");
         }
     }
 
@@ -201,7 +201,7 @@ public class AdminUserService extends BaseService<User, UUID> {
                     ? userRepository.existsByEmailIgnoreCase(email)
                     : userRepository.existsByEmailIgnoreCaseAndIdNot(email, currentUserId);
             if (emailExists) {
-                throw new BadRequestException("Email already exists");
+                throw BadRequestException.i18n("api.error.common.emailExists");
             }
         }
 
@@ -210,7 +210,7 @@ public class AdminUserService extends BaseService<User, UUID> {
                     ? userRepository.existsByPhone(phone)
                     : userRepository.existsByPhoneAndIdNot(phone, currentUserId);
             if (phoneExists) {
-                throw new BadRequestException("Phone already exists");
+                throw BadRequestException.i18n("api.error.common.phoneExists");
             }
         }
     }
@@ -267,7 +267,7 @@ public class AdminUserService extends BaseService<User, UUID> {
     private Pageable buildPageable(UserSearchRequest request) {
         String sortBy = request.getSortBy();
         if (!ALLOWED_SORT_FIELDS.contains(sortBy)) {
-            throw new BadRequestException("sortBy must be one of " + ALLOWED_SORT_FIELDS);
+            throw BadRequestException.i18n("api.error.user.sortByInvalid", ALLOWED_SORT_FIELDS.toString());
         }
 
         Sort.Direction direction = Sort.Direction.fromString(request.getSortDir());

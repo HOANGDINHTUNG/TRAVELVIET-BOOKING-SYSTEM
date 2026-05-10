@@ -182,46 +182,46 @@ public class RefundServiceImpl implements RefundCommandService, RefundQueryServi
 
     private void validateCreateRefundRequest(CreateRefundRequest request, Booking booking) {
         if (booking.getPaymentStatus() != BookingPaymentStatus.PAID) {
-            throw new BadRequestException("Only paid bookings can create a refund request");
+            throw BadRequestException.i18n("api.error.refund.onlyPaidCreateRequest");
         }
         if (booking.getStatus() == BookingStatus.REFUNDED || booking.getPaymentStatus() == BookingPaymentStatus.REFUNDED) {
-            throw new BadRequestException("Booking has already been refunded");
+            throw BadRequestException.i18n("api.error.refund.bookingAlreadyRefunded");
         }
         if (refundRepository.existsByBookingIdAndStatusIn(request.getBookingId(), ACTIVE_REFUND_STATUSES)) {
-            throw new BadRequestException("An active refund request already exists for this booking");
+            throw BadRequestException.i18n("api.error.refund.activeRequestExists");
         }
         if (booking.getFinalAmount() == null || booking.getFinalAmount().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new BadRequestException("Booking does not have a refundable amount");
+            throw BadRequestException.i18n("api.error.refund.noRefundableAmount");
         }
         if (request.getRequestedAmount().compareTo(booking.getFinalAmount()) > 0) {
-            throw new BadRequestException("Requested refund amount cannot exceed booking final amount");
+            throw BadRequestException.i18n("api.error.refund.requestedExceedsFinal");
         }
     }
 
     private void validateRefundQuote(BigDecimal quotedAmount, BigDecimal requestedAmount) {
         if (quotedAmount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new BadRequestException("Booking is not eligible for refund");
+            throw BadRequestException.i18n("api.error.refund.notEligible");
         }
         if (requestedAmount.compareTo(quotedAmount) > 0) {
-            throw new BadRequestException("Requested refund amount cannot exceed quoted refundable amount");
+            throw BadRequestException.i18n("api.error.refund.requestedExceedsQuoted");
         }
     }
 
     private void validateApproveRefund(RefundRequest refund, Booking booking, BigDecimal approvedAmount) {
         if (refund.getStatus() != RefundStatus.REQUESTED) {
-            throw new BadRequestException("Refund request is not awaiting approval");
+            throw BadRequestException.i18n("api.error.refund.notAwaitingApproval");
         }
         if (booking.getPaymentStatus() != BookingPaymentStatus.PAID) {
-            throw new BadRequestException("Only paid bookings can be refunded");
+            throw BadRequestException.i18n("api.error.refund.onlyPaidApprove");
         }
         if (approvedAmount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new BadRequestException("Approved refund amount must be greater than 0");
+            throw BadRequestException.i18n("api.error.refund.approvedMustBePositive");
         }
         if (approvedAmount.compareTo(refund.getRequestedAmount()) > 0) {
-            throw new BadRequestException("Approved refund amount cannot exceed requested amount");
+            throw BadRequestException.i18n("api.error.refund.approvedExceedsRequested");
         }
         if (approvedAmount.compareTo(refund.getQuotedAmount()) > 0) {
-            throw new BadRequestException("Approved refund amount cannot exceed quoted refundable amount");
+            throw BadRequestException.i18n("api.error.refund.approvedExceedsQuoted");
         }
     }
 
@@ -230,7 +230,7 @@ public class RefundServiceImpl implements RefundCommandService, RefundQueryServi
             try {
                 return UUID.fromString(requestedBy);
             } catch (IllegalArgumentException ex) {
-                throw new BadRequestException("requestedBy must be a valid UUID");
+                throw BadRequestException.i18n("api.error.refund.requestedByUuid");
             }
         }
         return authenticatedUserProvider.getRequiredCurrentUserId();
@@ -243,7 +243,7 @@ public class RefundServiceImpl implements RefundCommandService, RefundQueryServi
         try {
             return UUID.fromString(processedBy);
         } catch (IllegalArgumentException ex) {
-            throw new BadRequestException("processedBy must be a valid UUID");
+            throw BadRequestException.i18n("api.error.refund.processedByUuid");
         }
     }
 

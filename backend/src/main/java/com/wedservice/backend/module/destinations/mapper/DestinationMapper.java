@@ -92,6 +92,7 @@ public interface DestinationMapper extends BaseMapper<DestinationResponse, Desti
     );
 
     @Mapping(target = "uuid", source = "uuid")
+    @Mapping(target = "translations", ignore = true)
     DestinationDetailResponse toDetailResponse(Destination destination);
 
     @Mapping(target = "id", ignore = true)

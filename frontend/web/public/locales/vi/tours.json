@@ -1,0 +1,31 @@
+{
+  "detail": {
+    "backToList": "Quay lại danh sách tour",
+    "errorTitle": "Không tìm thấy tour",
+    "errorMessage": "Không tải được thông tin tour. Vui lòng thử lại.",
+    "notFound": "Tour bạn tìm không còn tồn tại hoặc đã bị gỡ.",
+    "noMedia": "Tour chưa có hình ảnh.",
+    "thumbnail": "Ảnh nhỏ",
+    "fromPrice": "Từ",
+    "daysShort": "ngày",
+    "nightsShort": "đêm",
+    "featured": "Nổi bật",
+    "descriptionTitle": "Mô tả chi tiết",
+    "highlightsTitle": "Điểm nhấn hành trình",
+    "itineraryTitle": "Lịch trình",
+    "inclusionsTitle": "Chi phí bao gồm",
+    "exclusionsTitle": "Chi phí không bao gồm",
+    "schedulesTitle": "Chọn ngày khởi hành",
+    "itinerary": {
+      "empty": "Lịch trình đang được cập nhật.",
+      "dayLabel": "Ngày",
+      "untitledDay": "Hoạt động trong ngày",
+      "overnight": "Nghỉ đêm tại điểm đến"
+    },
+    "schedules": {
+      "loading": "Đang tải lịch khởi hành...",
+      "empty": "Hiện chưa có đợt khởi hành đang mở bán.",
+      "remaining": "Còn"
+    }
+  }
+}

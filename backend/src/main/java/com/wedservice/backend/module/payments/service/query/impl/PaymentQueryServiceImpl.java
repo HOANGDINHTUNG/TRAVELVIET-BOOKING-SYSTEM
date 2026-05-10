@@ -30,6 +30,7 @@ public class PaymentQueryServiceImpl implements PaymentQueryService {
                 .id(p.getId())
                 .paymentCode(p.getPaymentCode())
                 .bookingId(p.getBookingId())
+                .orderId(p.getOrderId())
                 .amount(p.getAmount())
                 .status(p.getStatus().getValue())
                 .build();

@@ -2,11 +2,15 @@ package com.wedservice.backend.module.bookings.service;
 
 import com.wedservice.backend.common.exception.BadRequestException;
 import com.wedservice.backend.common.security.AuthenticatedUserProvider;
+import com.wedservice.backend.module.bookings.dto.request.BookingProductLineRequest;
 import com.wedservice.backend.module.bookings.dto.request.BookingQuoteRequest;
 import com.wedservice.backend.module.bookings.dto.response.BookingQuoteResponse;
 import com.wedservice.backend.module.bookings.validator.BookingValidator;
 import com.wedservice.backend.module.commerce.entity.ComboPackage;
+import com.wedservice.backend.module.commerce.entity.Product;
+import com.wedservice.backend.module.commerce.entity.ProductType;
 import com.wedservice.backend.module.commerce.repository.ComboPackageRepository;
+import com.wedservice.backend.module.commerce.repository.ProductRepository;
 import com.wedservice.backend.module.promotions.entity.Voucher;
 import com.wedservice.backend.module.promotions.entity.VoucherApplicableScope;
 import com.wedservice.backend.module.promotions.entity.VoucherDiscountType;
@@ -30,6 +34,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -48,6 +53,9 @@ class BookingPricingServiceTest {
 
     @Mock
     private ComboPackageRepository comboPackageRepository;
+
+    @Mock
+    private ProductRepository productRepository;
 
     @Mock
     private VoucherRepository voucherRepository;
@@ -69,6 +77,7 @@ class BookingPricingServiceTest {
                 tourScheduleRepository,
                 tourRepository,
                 comboPackageRepository,
+                productRepository,
                 voucherRepository,
                 voucherUserClaimRepository,
                 userRepository,
@@ -175,7 +184,7 @@ class BookingPricingServiceTest {
                 .voucherCode("SPRING10")
                 .build()))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessage("Voucher must be claimed before it can be applied");
+                .hasMessage("api.error.bookingPricing.voucherMustBeClaimed");
     }
 
     @Test
@@ -211,7 +220,7 @@ class BookingPricingServiceTest {
                 .voucherCode("CASHBACK50")
                 .build()))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessage("Only percentage and fixed_amount vouchers are supported in booking pricing");
+                .hasMessage("api.error.bookingPricing.voucherTypeUnsupported");
     }
 
     @Test
@@ -247,6 +256,46 @@ class BookingPricingServiceTest {
         assertThat(response.getAppliedCombo()).isNotNull();
         assertThat(response.getAppliedCombo().getComboCode()).isEqualTo("COMBO-001");
         assertThat(response.getAppliedCombo().getFinalPrice()).isEqualByComparingTo("200.00");
+    }
+
+    @Test
+    void quoteBooking_addsStandaloneProductsAndMergesDuplicateLines() {
+        UUID userId = UUID.randomUUID();
+        Product product = Product.builder()
+                .id(3L)
+                .sku("SKU3")
+                .name("Travel hat")
+                .productType(ProductType.GEAR)
+                .unitPrice(new BigDecimal("15.00"))
+                .stockQty(10)
+                .isActive(true)
+                .build();
+
+        when(authenticatedUserProvider.getRequiredCurrentUserId()).thenReturn(userId);
+        when(tourScheduleRepository.findById(22L)).thenReturn(Optional.of(openSchedule()));
+        when(tourRepository.findById(10L)).thenReturn(Optional.of(Tour.builder().id(10L).build()));
+        when(productRepository.findAllById(List.of(3L))).thenReturn(List.of(product));
+
+        BookingQuoteResponse response = bookingPricingService.quoteBooking(BookingQuoteRequest.builder()
+                .tourId(10L)
+                .scheduleId(22L)
+                .adults(1)
+                .children(0)
+                .infants(0)
+                .seniors(0)
+                .bookingProducts(List.of(
+                        BookingProductLineRequest.builder().productId(3L).quantity(2).build(),
+                        BookingProductLineRequest.builder().productId(3L).quantity(1).build()
+                ))
+                .build());
+
+        assertThat(response.getSubtotalAmount()).isEqualByComparingTo("100.00");
+        assertThat(response.getProductsAmount()).isEqualByComparingTo("45.00");
+        assertThat(response.getAddonAmount()).isEqualByComparingTo("45.00");
+        assertThat(response.getFinalAmount()).isEqualByComparingTo("145.00");
+        assertThat(response.getAppliedProducts()).hasSize(1);
+        assertThat(response.getAppliedProducts().get(0).getQuantity()).isEqualTo(3);
+        assertThat(response.getAppliedProducts().get(0).getLineTotal()).isEqualByComparingTo("45.00");
     }
 
     private User activeUser(UUID userId) {

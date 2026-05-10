@@ -14,6 +14,8 @@ import type {
 type HomePublicData = {
   destinations: Destination[]
   tours: Tour[]
+  toursDomesticBeach: Tour[]
+  toursInternationalHot: Tour[]
 }
 
 type HomeWeatherData = {
@@ -33,6 +35,8 @@ type HomeState = HomePublicData &
 const initialState: HomeState = {
   destinations: [],
   tours: [],
+  toursDomesticBeach: [],
+  toursInternationalHot: [],
   forecasts: [],
   alerts: [],
   crowdPredictions: [],
@@ -55,19 +59,51 @@ export const fetchHomePublicData = createAsyncThunk<
   void,
   { rejectValue: string }
 >('home/fetchPublicData', async (_unused, { rejectWithValue }) => {
-  const [destinationResult, tourResult] = await Promise.allSettled([
+  const [
+    destinationResult,
+    tourResult,
+    domesticBeachResult,
+    internationalHotResult,
+  ] = await Promise.allSettled([
     destinationApi.getDestinations(),
     tourApi.getTours(),
+    tourApi.searchPublicTours({
+      domesticOnly: true,
+      tagCodes: ['BIEN'],
+      featuredOnly: true,
+      size: 12,
+      sortBy: 'totalBookings',
+      sortDir: 'desc',
+    }),
+    tourApi.searchPublicTours({
+      internationalOnly: true,
+      featuredOnly: true,
+      size: 12,
+      sortBy: 'totalBookings',
+      sortDir: 'desc',
+    }),
   ])
 
   if (destinationResult.status === 'fulfilled') {
     return {
       destinations: destinationResult.value,
       tours: tourResult.status === 'fulfilled' ? tourResult.value : [],
+      toursDomesticBeach:
+        domesticBeachResult.status === 'fulfilled'
+          ? domesticBeachResult.value
+          : [],
+      toursInternationalHot:
+        internationalHotResult.status === 'fulfilled'
+          ? internationalHotResult.value
+          : [],
     }
   }
 
-  const error = getSettledError(destinationResult) ?? getSettledError(tourResult)
+  const error =
+    getSettledError(destinationResult) ??
+    getSettledError(tourResult) ??
+    getSettledError(domesticBeachResult) ??
+    getSettledError(internationalHotResult)
 
   if (error) {
     return rejectWithValue(
@@ -120,6 +156,8 @@ const homeSlice = createSlice({
         state.loading = false
         state.destinations = action.payload.destinations
         state.tours = action.payload.tours
+        state.toursDomesticBeach = action.payload.toursDomesticBeach
+        state.toursInternationalHot = action.payload.toursInternationalHot
       })
       .addCase(fetchHomePublicData.rejected, (state, action) => {
         state.loading = false

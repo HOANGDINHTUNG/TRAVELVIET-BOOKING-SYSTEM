@@ -96,7 +96,7 @@ public class AdminBadgeService {
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
         BadgeDefinition badge = findBadge(badgeId);
         if (!Boolean.TRUE.equals(badge.getIsActive())) {
-            throw new BadRequestException("Badge is inactive");
+            throw BadRequestException.i18n("api.error.loyalty.badge.inactive");
         }
 
         TravelPassport passport = userPassportService.ensurePassport(user);
@@ -134,7 +134,7 @@ public class AdminBadgeService {
                 ? badgeDefinitionRepository.existsByCodeIgnoreCase(normalizedCode)
                 : badgeDefinitionRepository.existsByCodeIgnoreCaseAndIdNot(normalizedCode, currentId);
         if (duplicate) {
-            throw new BadRequestException("Badge code already exists");
+            throw BadRequestException.i18n("api.error.loyalty.badge.codeExists");
         }
         validateJson(request.getConditionJson(), "conditionJson");
     }
@@ -156,7 +156,7 @@ public class AdminBadgeService {
         try {
             jsonMapper.readTree(rawJson);
         } catch (Exception ex) {
-            throw new BadRequestException(fieldName + " must be valid JSON");
+            throw BadRequestException.i18n("api.error.common.fieldMustBeValidJson", fieldName);
         }
     }
 

@@ -21,7 +21,10 @@ public class FlywayConfig {
     @Value("${spring.flyway.validate-on-migrate:true}")
     private boolean validateOnMigrate;
 
-    @Bean(initMethod = "migrate")
+    @Value("${spring.flyway.repair-on-migrate:true}")
+    private boolean repairOnMigrate;
+
+    @Bean
     public Flyway flyway(DataSource dataSource) {
         Flyway flyway = Flyway.configure()
                 .dataSource(dataSource)
@@ -29,6 +32,10 @@ public class FlywayConfig {
                 .baselineOnMigrate(baselineOnMigrate)
                 .validateOnMigrate(validateOnMigrate)
                 .load();
+        if (repairOnMigrate) {
+            flyway.repair();
+        }
+        flyway.migrate();
         return flyway;
     }
 }

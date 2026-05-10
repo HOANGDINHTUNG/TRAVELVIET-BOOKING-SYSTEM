@@ -71,7 +71,7 @@ public class AdminComboPackageService {
 
         String normalizedCode = normalizeRequiredText(request.getCode(), "code").toUpperCase(Locale.ROOT);
         if (comboPackageRepository.findByCodeIgnoreCase(normalizedCode).isPresent()) {
-            throw new BadRequestException("Combo package code already exists");
+            throw BadRequestException.i18n("api.error.commerce.combo.codeExists");
         }
 
         ComboPackage comboPackage = ComboPackage.builder().build();
@@ -90,7 +90,7 @@ public class AdminComboPackageService {
 
         String normalizedCode = normalizeRequiredText(request.getCode(), "code").toUpperCase(Locale.ROOT);
         if (comboPackageRepository.existsByCodeIgnoreCaseAndIdNot(normalizedCode, id)) {
-            throw new BadRequestException("Combo package code already exists");
+            throw BadRequestException.i18n("api.error.commerce.combo.codeExists");
         }
 
         ComboPackageResponse oldState = toResponse(comboPackage, true);
@@ -141,13 +141,13 @@ public class AdminComboPackageService {
 
     private void validateRequest(ComboPackageRequest request) {
         if (request.getBasePrice().compareTo(BigDecimal.ZERO) < 0) {
-            throw new BadRequestException("basePrice must be >= 0");
+            throw BadRequestException.i18n("api.error.commerce.combo.basePriceGteZero");
         }
         if (request.getDiscountAmount().compareTo(BigDecimal.ZERO) < 0) {
-            throw new BadRequestException("discountAmount must be >= 0");
+            throw BadRequestException.i18n("api.error.commerce.combo.discountGteZero");
         }
         if (request.getDiscountAmount().compareTo(request.getBasePrice()) > 0) {
-            throw new BadRequestException("discountAmount must be <= basePrice");
+            throw BadRequestException.i18n("api.error.commerce.combo.discountLteBase");
         }
 
         BigDecimal computedBasePrice = BigDecimal.ZERO;
@@ -157,26 +157,26 @@ public class AdminComboPackageService {
         }
 
         if (computedBasePrice.compareTo(request.getBasePrice()) != 0) {
-            throw new BadRequestException("basePrice must equal the sum of combo item list prices");
+            throw BadRequestException.i18n("api.error.commerce.combo.basePriceSumMismatch");
         }
     }
 
     private void validateItemRequest(ComboPackageItemRequest request) {
         if (request.getQuantity() <= 0) {
-            throw new BadRequestException("quantity must be >= 1");
+            throw BadRequestException.i18n("api.error.commerce.combo.quantityGteOne");
         }
         if (request.getUnitPrice().compareTo(BigDecimal.ZERO) < 0) {
-            throw new BadRequestException("unitPrice must be >= 0");
+            throw BadRequestException.i18n("api.error.commerce.combo.unitPriceGteZero");
         }
 
         String itemType = normalizeItemType(request.getItemType());
         if (!ALLOWED_ITEM_TYPES.contains(itemType)) {
-            throw new BadRequestException("itemType is invalid");
+            throw BadRequestException.i18n("api.error.commerce.combo.itemTypeInvalid");
         }
 
         if ("product".equals(itemType)) {
             if (request.getItemRefId() == null) {
-                throw new BadRequestException("itemRefId is required when itemType is product");
+                throw BadRequestException.i18n("api.error.commerce.combo.itemRefProduct");
             }
             productRepository.findById(request.getItemRefId())
                     .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + request.getItemRefId()));
@@ -184,7 +184,7 @@ public class AdminComboPackageService {
 
         if ("tour".equals(itemType)) {
             if (request.getItemRefId() == null) {
-                throw new BadRequestException("itemRefId is required when itemType is tour");
+                throw BadRequestException.i18n("api.error.commerce.combo.itemRefTour");
             }
             tourRepository.findById(request.getItemRefId())
                     .orElseThrow(() -> new ResourceNotFoundException("Tour not found with id: " + request.getItemRefId()));
@@ -262,7 +262,7 @@ public class AdminComboPackageService {
     private String normalizeRequiredText(String value, String fieldName) {
         String normalized = normalizeNullable(value);
         if (!StringUtils.hasText(normalized)) {
-            throw new BadRequestException(fieldName + " is required");
+            throw BadRequestException.i18n("api.error.common.fieldRequired", fieldName);
         }
         return normalized;
     }

@@ -36,11 +36,19 @@ const lazyRegisterPage = lazy(
 );
 const lazyNotFoundPage = lazy(() => import("../components/error/NotFoundPage"));
 const lazyRequireAuthenticated = lazy(
-  () => import("./RequireAuthenticated"),
+  () => import("./guards/RequireAuthenticated"),
 );
-const lazyRequireManagerAccess = lazy(() => import("./RequireManagerAccess"));
+const lazyRequireManagerAccess = lazy(
+  () => import("./guards/RequireManagerAccess"),
+);
 const lazyManagementLayout = lazy(
   () => import("../module/management/layouts/ManagementLayout"),
+);
+const lazyManagementLayoutNew = lazy(
+  () => import("../components/layout/ManagementLayout"),
+);
+const lazyManagementToursPage = lazy(
+  () => import("../module/management/tours/pages/ManagementToursPage"),
 );
 const lazyManagementHubPage = lazy(
   () => import("../module/management/pages/ManagementHubPage"),
@@ -66,6 +74,21 @@ const lazyManagementSupportPage = lazy(
 const lazyManagementPromotionPage = lazy(
   () => import("../module/management/pages/ManagementPromotionPage"),
 );
+const lazyTourPublicDetailPage = lazy(
+  () => import("../module/tours/pages/TourPublicDetailPage"),
+);
+const lazyBookingConfirmationPage = lazy(
+  () => import("../module/bookings/pages/BookingConfirmationPage"),
+);
+const lazyPaymentReturnPage = lazy(
+  () => import("../module/bookings/pages/PaymentReturnPage"),
+);
+const lazyMyBookingsPage = lazy(
+  () => import("../module/bookings/pages/MyBookingsPage"),
+);
+const lazyManagementBookingsPage = lazy(
+  () => import("../module/management/bookings/pages/ManagementBookingsPage"),
+);
 
 const withSuspense = (element: ReactElement) => (
   <Suspense fallback={<div className="min-h-screen">Đang tải...</div>}>
@@ -89,6 +112,12 @@ const router = createBrowserRouter([
         element: withSuspense(createElement(lazyToursPage)),
       },
       {
+        // Public tour detail (Phase 7) — slug-friendly URL
+        // /tour/:slug (slug encode id ở cuối, vd: halong-bay-3-days-42)
+        path: "tour/:slug",
+        element: withSuspense(createElement(lazyTourPublicDetailPage)),
+      },
+      {
         element: withSuspense(createElement(lazyRequireAuthenticated)),
         children: [
           {
@@ -102,6 +131,21 @@ const router = createBrowserRouter([
           {
             path: "bookings/:id",
             element: withSuspense(createElement(lazyBookingDetailPage)),
+          },
+          {
+            // Phase 7 — confirmation sau khi tạo booking thành công
+            path: "booking-confirmation/:bookingId",
+            element: withSuspense(createElement(lazyBookingConfirmationPage)),
+          },
+          {
+            // Phase 8 — VNPay return URL
+            path: "payment/vnpay-return",
+            element: withSuspense(createElement(lazyPaymentReturnPage)),
+          },
+          {
+            // Phase 8 — danh sách booking của user hiện tại
+            path: "my-bookings",
+            element: withSuspense(createElement(lazyMyBookingsPage)),
           },
           {
             path: "account",
@@ -214,6 +258,29 @@ const router = createBrowserRouter([
                 element: withSuspense(createElement(lazyManagementHubPage)),
               },
             ],
+          },
+        ],
+      },
+      {
+        // Backoffice v2 (Tailwind layout, tự bọc 2 lớp guard)
+        // Đặt ngoài cây `management/*` legacy để không phá routes hiện hữu.
+        path: "management/tours-v2",
+        element: withSuspense(createElement(lazyManagementLayoutNew)),
+        children: [
+          {
+            index: true,
+            element: withSuspense(createElement(lazyManagementToursPage)),
+          },
+        ],
+      },
+      {
+        // Phase 8 — Backoffice booking management (tự bọc guards)
+        path: "management/bookings-v2",
+        element: withSuspense(createElement(lazyManagementLayoutNew)),
+        children: [
+          {
+            index: true,
+            element: withSuspense(createElement(lazyManagementBookingsPage)),
           },
         ],
       },

@@ -68,10 +68,10 @@ public class ReviewServiceImpl implements ReviewCommandService, ReviewQueryServi
             throw new AccessDeniedException("You do not have permission to review this booking");
         }
         if (!ALLOWED_REVIEW_BOOKING_STATUS.contains(booking.getStatus())) {
-            throw new BadRequestException("Only checked-in or completed bookings can be reviewed");
+            throw BadRequestException.i18n("api.error.review.bookingStateInvalid");
         }
         if (reviewRepository.existsByBookingId(request.getBookingId())) {
-            throw new BadRequestException("Review for this booking already exists");
+            throw BadRequestException.i18n("api.error.review.alreadyExists");
         }
 
         reviewValidator.validateRating(request.getOverallRating(), "overallRating");
@@ -159,7 +159,7 @@ public class ReviewServiceImpl implements ReviewCommandService, ReviewQueryServi
             reviewValidator.validateRating(aspect.getAspectRating(), "aspectRating");
             String normalizedAspectName = aspect.getAspectName() == null ? "" : aspect.getAspectName().trim().toLowerCase();
             if (!uniqueAspectNames.add(normalizedAspectName)) {
-                throw new BadRequestException("Duplicate aspect name: " + aspect.getAspectName());
+                throw BadRequestException.i18n("api.error.review.duplicateAspect", aspect.getAspectName());
             }
             ReviewAspect entity = ReviewAspect.builder()
                     .reviewId(reviewId)

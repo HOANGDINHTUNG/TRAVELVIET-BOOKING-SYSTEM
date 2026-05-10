@@ -158,7 +158,7 @@ class RefundServiceImplTest {
         when(authenticatedUserProvider.getRequiredCurrentUserId()).thenReturn(userId);
 
         assertThatThrownBy(() -> refundService.createRefundRequest(request))
-                .hasMessageContaining("Only paid bookings can create a refund request");
+                .hasMessageContaining("api.error.refund.onlyPaidCreateRequest");
 
         verify(refundRepository, never()).save(any(RefundRequest.class));
     }
@@ -247,7 +247,7 @@ class RefundServiceImplTest {
         when(authenticatedUserProvider.getRequiredCurrentUserId()).thenReturn(userId);
 
         assertThatThrownBy(() -> refundService.approveRefund(90L, null, new BigDecimal("1100000")))
-                .hasMessageContaining("Approved refund amount cannot exceed quoted refundable amount");
+                .hasMessageContaining("api.error.refund.approvedExceedsQuoted");
 
         verify(refundRepository, never()).save(any(RefundRequest.class));
         verify(paymentRepository, never()).save(any(Payment.class));

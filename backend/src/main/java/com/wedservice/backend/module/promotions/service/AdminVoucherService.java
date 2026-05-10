@@ -75,7 +75,7 @@ public class AdminVoucherService {
 
         String normalizedCode = normalizeCode(request.getCode());
         if (voucherRepository.findByCodeIgnoreCase(normalizedCode).isPresent()) {
-            throw new BadRequestException("Voucher code already exists");
+            throw BadRequestException.i18n("api.error.voucher.codeExists");
         }
 
         Voucher voucher = Voucher.builder().build();
@@ -94,7 +94,7 @@ public class AdminVoucherService {
 
         String normalizedCode = normalizeCode(request.getCode());
         if (voucherRepository.existsByCodeIgnoreCaseAndIdNot(normalizedCode, id)) {
-            throw new BadRequestException("Voucher code already exists");
+            throw BadRequestException.i18n("api.error.voucher.codeExists");
         }
 
         VoucherResponse oldState = toResponse(voucher);
@@ -152,47 +152,47 @@ public class AdminVoucherService {
 
     private void validateVoucherRequest(VoucherRequest request, Voucher existingVoucher) {
         if (!request.getEndAt().isAfter(request.getStartAt())) {
-            throw new BadRequestException("endAt must be after startAt");
+            throw BadRequestException.i18n("api.error.voucher.endAfterStart");
         }
 
         if (request.getDiscountValue().compareTo(BigDecimal.ZERO) < 0) {
-            throw new BadRequestException("discountValue must be >= 0");
+            throw BadRequestException.i18n("api.error.voucher.discountGteZero");
         }
 
         if (request.getDiscountType() != VoucherDiscountType.GIFT && request.getDiscountValue().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new BadRequestException("discountValue must be > 0 for non-gift vouchers");
+            throw BadRequestException.i18n("api.error.voucher.discountPositiveNonGift");
         }
 
         if (request.getDiscountType() == VoucherDiscountType.PERCENTAGE && request.getDiscountValue().compareTo(ONE_HUNDRED) > 0) {
-            throw new BadRequestException("discountValue must be <= 100 for percentage vouchers");
+            throw BadRequestException.i18n("api.error.voucher.discountPercentMax");
         }
 
         if (request.getMaxDiscountAmount() != null && request.getMaxDiscountAmount().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new BadRequestException("maxDiscountAmount must be > 0");
+            throw BadRequestException.i18n("api.error.voucher.maxDiscountPositive");
         }
 
         if (request.getMinOrderValue().compareTo(BigDecimal.ZERO) < 0) {
-            throw new BadRequestException("minOrderValue must be >= 0");
+            throw BadRequestException.i18n("api.error.voucher.minOrderGteZero");
         }
 
         if (request.getUsageLimitTotal() != null && request.getUsageLimitTotal() <= 0) {
-            throw new BadRequestException("usageLimitTotal must be >= 1");
+            throw BadRequestException.i18n("api.error.voucher.usageTotalGteOne");
         }
 
         if (request.getUsageLimitPerUser() != null && request.getUsageLimitPerUser() <= 0) {
-            throw new BadRequestException("usageLimitPerUser must be >= 1");
+            throw BadRequestException.i18n("api.error.voucher.usagePerUserGteOne");
         }
 
         if (existingVoucher != null
                 && request.getUsageLimitTotal() != null
                 && request.getUsageLimitTotal() < safeInteger(existingVoucher.getUsedCount())) {
-            throw new BadRequestException("usageLimitTotal cannot be less than usedCount");
+            throw BadRequestException.i18n("api.error.voucher.usageTotalVsUsed");
         }
     }
 
     private void validateSearchRequest(VoucherSearchRequest request) {
         if (request.getStartsFrom() != null && request.getEndsTo() != null && request.getStartsFrom().isAfter(request.getEndsTo())) {
-            throw new BadRequestException("startsFrom must be before or equal to endsTo");
+            throw BadRequestException.i18n("api.error.voucher.startsFromEndsToOrder");
         }
     }
 
@@ -211,24 +211,24 @@ public class AdminVoucherService {
         }
 
         if (startAt.isBefore(campaign.getStartAt()) || endAt.isAfter(campaign.getEndAt())) {
-            throw new BadRequestException("Voucher active window must stay within the campaign window");
+            throw BadRequestException.i18n("api.error.voucher.windowWithinCampaign");
         }
     }
 
     private void validateScopeReferences(VoucherApplicableScope scope, Long applicableTourId, Long applicableDestinationId) {
         if (scope == VoucherApplicableScope.ALL) {
             if (applicableTourId != null || applicableDestinationId != null) {
-                throw new BadRequestException("applicableTourId and applicableDestinationId must be null when applicableScope is all");
+                throw BadRequestException.i18n("api.error.voucher.scopeAllNullIds");
             }
             return;
         }
 
         if (scope == VoucherApplicableScope.TOUR) {
             if (applicableTourId == null) {
-                throw new BadRequestException("applicableTourId is required when applicableScope is tour");
+                throw BadRequestException.i18n("api.error.voucher.scopeTourNeedsTourId");
             }
             if (applicableDestinationId != null) {
-                throw new BadRequestException("applicableDestinationId must be null when applicableScope is tour");
+                throw BadRequestException.i18n("api.error.voucher.scopeTourNoDestinationId");
             }
             tourRepository.findById(applicableTourId)
                     .orElseThrow(() -> new ResourceNotFoundException("Tour not found with id: " + applicableTourId));
@@ -236,10 +236,10 @@ public class AdminVoucherService {
         }
 
         if (applicableDestinationId == null) {
-            throw new BadRequestException("applicableDestinationId is required when applicableScope is destination");
+            throw BadRequestException.i18n("api.error.voucher.scopeDestinationNeedsDestinationId");
         }
         if (applicableTourId != null) {
-            throw new BadRequestException("applicableTourId must be null when applicableScope is destination");
+            throw BadRequestException.i18n("api.error.voucher.scopeDestinationNoTourId");
         }
         destinationRepository.findById(applicableDestinationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Destination not found with id: " + applicableDestinationId));
@@ -333,7 +333,7 @@ public class AdminVoucherService {
     private String normalizeRequiredText(String value, String fieldName) {
         String normalized = normalizeNullable(value);
         if (!StringUtils.hasText(normalized)) {
-            throw new BadRequestException(fieldName + " is required");
+            throw BadRequestException.i18n("api.error.common.fieldRequired", fieldName);
         }
         return normalized;
     }

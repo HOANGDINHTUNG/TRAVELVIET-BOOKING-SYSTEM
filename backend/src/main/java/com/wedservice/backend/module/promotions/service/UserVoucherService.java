@@ -52,7 +52,7 @@ public class UserVoucherService {
 
         voucherUserClaimRepository.findByVoucherIdAndUserId(voucher.getId(), currentUser.getId())
                 .ifPresent(existingClaim -> {
-                    throw new BadRequestException("Voucher already claimed");
+                    throw BadRequestException.i18n("api.error.voucher.alreadyClaimed");
                 });
 
         VoucherUserClaim claim = VoucherUserClaim.builder()
@@ -92,19 +92,19 @@ public class UserVoucherService {
         LocalDateTime now = LocalDateTime.now();
 
         if (!Boolean.TRUE.equals(voucher.getIsActive())) {
-            throw new BadRequestException("Voucher is inactive");
+            throw BadRequestException.i18n("api.error.voucher.inactive");
         }
 
         if (now.isBefore(voucher.getStartAt()) || now.isAfter(voucher.getEndAt())) {
-            throw new BadRequestException("Voucher is not claimable at this time");
+            throw BadRequestException.i18n("api.error.voucher.notClaimableNow");
         }
 
         if (voucher.getApplicableMemberLevel() != null && voucher.getApplicableMemberLevel() != user.getMemberLevel()) {
-            throw new BadRequestException("Voucher is not available for your member level");
+            throw BadRequestException.i18n("api.error.voucher.memberLevel");
         }
 
         if (voucher.getUsageLimitTotal() != null && safeInteger(voucher.getUsedCount()) >= voucher.getUsageLimitTotal()) {
-            throw new BadRequestException("Voucher has reached total usage limit");
+            throw BadRequestException.i18n("api.error.voucher.totalUsageLimit");
         }
     }
 
@@ -166,7 +166,7 @@ public class UserVoucherService {
     private String normalizeRequiredCode(String rawValue) {
         String normalized = DataNormalizer.normalize(rawValue);
         if (!StringUtils.hasText(normalized)) {
-            throw new BadRequestException("voucherCode is required");
+            throw BadRequestException.i18n("api.error.voucher.codeRequired");
         }
         return normalized.toUpperCase(Locale.ROOT);
     }

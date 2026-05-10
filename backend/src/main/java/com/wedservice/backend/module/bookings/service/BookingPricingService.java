@@ -5,13 +5,17 @@ import com.wedservice.backend.common.exception.ResourceNotFoundException;
 import com.wedservice.backend.common.exception.UnauthorizedException;
 import com.wedservice.backend.common.security.AuthenticatedUserProvider;
 import com.wedservice.backend.common.util.DataNormalizer;
+import com.wedservice.backend.module.bookings.dto.request.BookingProductLineRequest;
 import com.wedservice.backend.module.bookings.dto.request.BookingQuoteRequest;
 import com.wedservice.backend.module.bookings.dto.response.AppliedComboQuoteResponse;
+import com.wedservice.backend.module.bookings.dto.response.AppliedProductQuoteResponse;
 import com.wedservice.backend.module.bookings.dto.response.AppliedVoucherQuoteResponse;
 import com.wedservice.backend.module.bookings.dto.response.BookingQuoteResponse;
 import com.wedservice.backend.module.bookings.validator.BookingValidator;
 import com.wedservice.backend.module.commerce.entity.ComboPackage;
+import com.wedservice.backend.module.commerce.entity.Product;
 import com.wedservice.backend.module.commerce.repository.ComboPackageRepository;
+import com.wedservice.backend.module.commerce.repository.ProductRepository;
 import com.wedservice.backend.module.promotions.entity.Voucher;
 import com.wedservice.backend.module.promotions.entity.VoucherApplicableScope;
 import com.wedservice.backend.module.promotions.entity.VoucherDiscountType;
@@ -31,8 +35,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -45,6 +54,7 @@ public class BookingPricingService {
     private final TourScheduleRepository tourScheduleRepository;
     private final TourRepository tourRepository;
     private final ComboPackageRepository comboPackageRepository;
+    private final ProductRepository productRepository;
     private final VoucherRepository voucherRepository;
     private final VoucherUserClaimRepository voucherUserClaimRepository;
     private final UserRepository userRepository;
@@ -61,17 +71,20 @@ public class BookingPricingService {
         bookingValidator.validateQuoteRequest(request);
 
         TourSchedule schedule = tourScheduleRepository.findById(request.getScheduleId())
-                .orElseThrow(() -> new BadRequestException("Schedule not found"));
+                .orElseThrow(() -> BadRequestException.i18n("api.error.bookingPricing.scheduleNotFound"));
         bookingValidator.validateScheduleForBooking(toCreateLikeRequest(request), schedule, LocalDateTime.now());
         Tour tour = tourRepository.findById(request.getTourId())
                 .orElseThrow(() -> new ResourceNotFoundException("Tour not found with id: " + request.getTourId()));
 
         BigDecimal subtotalAmount = bookingValidator.calculateSubtotal(request, schedule);
         ComboQuote comboQuote = resolveComboQuote(request.getComboId());
+        ProductsQuote productsQuote = resolveProductsQuote(request.getBookingProducts());
         VoucherQuote voucherQuote = resolveVoucherQuote(request.getVoucherCode(), userId, tour, subtotalAmount);
+        BigDecimal addonAmount = comboQuote.finalPrice().add(productsQuote.productsAmount());
         BigDecimal finalAmount = subtotalAmount
                 .subtract(voucherQuote.voucherDiscountAmount())
-                .add(comboQuote.finalPrice());
+                .add(comboQuote.finalPrice())
+                .add(productsQuote.productsAmount());
 
         return BookingQuoteResponse.builder()
                 .tourId(request.getTourId())
@@ -91,13 +104,71 @@ public class BookingPricingService {
                 .discountAmount(voucherQuote.voucherDiscountAmount().add(comboQuote.discountAmount()))
                 .voucherDiscountAmount(voucherQuote.voucherDiscountAmount())
                 .loyaltyDiscountAmount(ZERO)
-                .addonAmount(comboQuote.finalPrice())
+                .addonAmount(addonAmount)
+                .productsAmount(productsQuote.productsAmount())
                 .taxAmount(ZERO)
                 .finalAmount(finalAmount.max(ZERO))
                 .currency("VND")
                 .appliedVoucher(voucherQuote.appliedVoucher())
                 .appliedCombo(comboQuote.appliedCombo())
+                .appliedProducts(productsQuote.appliedProducts())
                 .build();
+    }
+
+    private ProductsQuote resolveProductsQuote(List<BookingProductLineRequest> rawLines) {
+        if (rawLines == null || rawLines.isEmpty()) {
+            return new ProductsQuote(ZERO, List.of());
+        }
+
+        Map<Long, Integer> merged = new LinkedHashMap<>();
+        for (BookingProductLineRequest line : rawLines) {
+            merged.merge(line.getProductId(), line.getQuantity(), Integer::sum);
+        }
+
+        List<Long> ids = new ArrayList<>(merged.keySet());
+        List<Product> loaded = productRepository.findAllById(ids);
+        if (loaded.size() != ids.size()) {
+            throw new ResourceNotFoundException("One or more products were not found");
+        }
+
+        Map<Long, Product> byId = new LinkedHashMap<>();
+        for (Product p : loaded) {
+            byId.put(p.getId(), p);
+        }
+
+        List<AppliedProductQuoteResponse> applied = new ArrayList<>();
+        BigDecimal productsAmount = ZERO;
+
+        for (Map.Entry<Long, Integer> e : merged.entrySet()) {
+            Long productId = e.getKey();
+            int qty = e.getValue();
+            Product product = byId.get(productId);
+            if (product == null) {
+                throw new ResourceNotFoundException("Product not found with id: " + productId);
+            }
+            if (!Boolean.TRUE.equals(product.getIsActive())) {
+                throw BadRequestException.i18n("api.error.product.inactive");
+            }
+            int stock = product.getStockQty() == null ? 0 : product.getStockQty();
+            if (stock < qty) {
+                throw BadRequestException.i18n("api.error.product.out_of_stock");
+            }
+
+            BigDecimal unitPrice = product.getUnitPrice() == null ? ZERO : product.getUnitPrice();
+            BigDecimal lineTotal = unitPrice.multiply(BigDecimal.valueOf(qty)).setScale(2, RoundingMode.HALF_UP);
+            productsAmount = productsAmount.add(lineTotal);
+
+            applied.add(AppliedProductQuoteResponse.builder()
+                    .productId(product.getId())
+                    .sku(product.getSku())
+                    .name(product.getName())
+                    .quantity(qty)
+                    .unitPrice(unitPrice)
+                    .lineTotal(lineTotal)
+                    .build());
+        }
+
+        return new ProductsQuote(productsAmount, applied);
     }
 
     private ComboQuote resolveComboQuote(Long comboId) {
@@ -109,7 +180,7 @@ public class BookingPricingService {
                 .orElseThrow(() -> new ResourceNotFoundException("Combo package not found with id: " + comboId));
 
         if (!Boolean.TRUE.equals(comboPackage.getIsActive())) {
-            throw new BadRequestException("Combo package is inactive");
+            throw BadRequestException.i18n("api.error.bookingPricing.comboInactive");
         }
 
         BigDecimal finalPrice = comboPackage.getBasePrice().subtract(comboPackage.getDiscountAmount()).max(ZERO);
@@ -136,7 +207,7 @@ public class BookingPricingService {
                 .orElseThrow(() -> new ResourceNotFoundException("Voucher not found with code: " + voucherCode));
 
         VoucherUserClaim claim = voucherUserClaimRepository.findByVoucherIdAndUserId(voucher.getId(), user.getId())
-                .orElseThrow(() -> new BadRequestException("Voucher must be claimed before it can be applied"));
+                .orElseThrow(() -> BadRequestException.i18n("api.error.bookingPricing.voucherMustBeClaimed"));
 
         validateVoucherForQuote(voucher, claim, user, tour, subtotalAmount);
 
@@ -158,35 +229,35 @@ public class BookingPricingService {
         LocalDateTime now = LocalDateTime.now();
 
         if (!Boolean.TRUE.equals(voucher.getIsActive())) {
-            throw new BadRequestException("Voucher is inactive");
+            throw BadRequestException.i18n("api.error.bookingPricing.voucherInactive");
         }
         if (now.isBefore(voucher.getStartAt()) || now.isAfter(voucher.getEndAt())) {
-            throw new BadRequestException("Voucher is not applicable at this time");
+            throw BadRequestException.i18n("api.error.bookingPricing.voucherNotApplicableNow");
         }
         if (voucher.getApplicableMemberLevel() != null && voucher.getApplicableMemberLevel() != user.getMemberLevel()) {
-            throw new BadRequestException("Voucher is not available for your member level");
+            throw BadRequestException.i18n("api.error.bookingPricing.voucherMemberLevel");
         }
         if (voucher.getUsageLimitTotal() != null && safeInteger(voucher.getUsedCount()) >= voucher.getUsageLimitTotal()) {
-            throw new BadRequestException("Voucher has reached total usage limit");
+            throw BadRequestException.i18n("api.error.bookingPricing.voucherTotalLimit");
         }
         if (voucher.getUsageLimitPerUser() != null && safeInteger(claim.getUsedCount()) >= voucher.getUsageLimitPerUser()) {
-            throw new BadRequestException("Voucher has reached per-user usage limit");
+            throw BadRequestException.i18n("api.error.bookingPricing.voucherPerUserLimit");
         }
         if (voucher.getMinOrderValue() != null && subtotalAmount.compareTo(voucher.getMinOrderValue()) < 0) {
-            throw new BadRequestException("Subtotal does not meet voucher minimum order value");
+            throw BadRequestException.i18n("api.error.bookingPricing.voucherMinOrderNotMet");
         }
         if (voucher.getDiscountType() != VoucherDiscountType.PERCENTAGE && voucher.getDiscountType() != VoucherDiscountType.FIXED_AMOUNT) {
-            throw new BadRequestException("Only percentage and fixed_amount vouchers are supported in booking pricing");
+            throw BadRequestException.i18n("api.error.bookingPricing.voucherTypeUnsupported");
         }
 
         if (voucher.getApplicableScope() == VoucherApplicableScope.TOUR) {
             if (!tour.getId().equals(voucher.getApplicableTourId())) {
-                throw new BadRequestException("Voucher does not apply to the selected tour");
+                throw BadRequestException.i18n("api.error.bookingPricing.voucherNotTour");
             }
         } else if (voucher.getApplicableScope() == VoucherApplicableScope.DESTINATION) {
             Long destinationId = tour.getDestination() == null ? null : tour.getDestination().getId();
             if (destinationId == null || !destinationId.equals(voucher.getApplicableDestinationId())) {
-                throw new BadRequestException("Voucher does not apply to the selected destination");
+                throw BadRequestException.i18n("api.error.bookingPricing.voucherNotDestination");
             }
         }
     }
@@ -226,7 +297,7 @@ public class BookingPricingService {
     private String normalizeVoucherCode(String rawValue) {
         String normalized = DataNormalizer.normalize(rawValue);
         if (!StringUtils.hasText(normalized)) {
-            throw new BadRequestException("voucherCode is required");
+            throw BadRequestException.i18n("api.error.bookingPricing.voucherCodeRequired");
         }
         return normalized.toUpperCase(Locale.ROOT);
     }
@@ -246,6 +317,7 @@ public class BookingPricingService {
                 .infants(request.getInfants())
                 .seniors(request.getSeniors())
                 .comboId(request.getComboId())
+                .bookingProducts(request.getBookingProducts())
                 .build();
     }
 
@@ -253,5 +325,8 @@ public class BookingPricingService {
     }
 
     private record ComboQuote(BigDecimal discountAmount, BigDecimal finalPrice, AppliedComboQuoteResponse appliedCombo) {
+    }
+
+    private record ProductsQuote(BigDecimal productsAmount, List<AppliedProductQuoteResponse> appliedProducts) {
     }
 }

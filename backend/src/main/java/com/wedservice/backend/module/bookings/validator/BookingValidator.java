@@ -1,6 +1,7 @@
 package com.wedservice.backend.module.bookings.validator;
 
 import com.wedservice.backend.common.exception.BadRequestException;
+import com.wedservice.backend.module.bookings.dto.request.BookingProductLineRequest;
 import com.wedservice.backend.module.bookings.dto.request.BookingQuoteRequest;
 import com.wedservice.backend.module.bookings.dto.request.CreateBookingRequest;
 import com.wedservice.backend.module.bookings.dto.request.CreatePassengerRequest;
@@ -26,6 +27,7 @@ public class BookingValidator {
 
     public void validateCreateRequest(CreateBookingRequest request) {
         validateTravellerCounts(request.getAdults(), request.getChildren(), request.getInfants(), request.getSeniors());
+        validateBookingProductLines(request.getBookingProducts());
 
         int totalTravellers = request.getAdults() + request.getChildren() + request.getInfants() + request.getSeniors();
         validatePassengerManifest(request, totalTravellers);
@@ -33,20 +35,38 @@ public class BookingValidator {
 
     public void validateQuoteRequest(BookingQuoteRequest request) {
         validateTravellerCounts(request.getAdults(), request.getChildren(), request.getInfants(), request.getSeniors());
+        validateBookingProductLines(request.getBookingProducts());
+    }
+
+    public void validateBookingProductLines(List<BookingProductLineRequest> lines) {
+        if (lines == null || lines.isEmpty()) {
+            return;
+        }
+        for (BookingProductLineRequest line : lines) {
+            if (line == null) {
+                throw BadRequestException.i18n("api.error.booking.invalidProductLine");
+            }
+            if (line.getProductId() == null) {
+                throw BadRequestException.i18n("api.error.booking.invalidProductLine");
+            }
+            if (line.getQuantity() == null || line.getQuantity() < 1) {
+                throw BadRequestException.i18n("api.error.booking.invalidProductLine");
+            }
+        }
     }
 
     public void validateScheduleForBooking(CreateBookingRequest request, TourSchedule schedule, LocalDateTime now) {
         if (!schedule.getTourId().equals(request.getTourId())) {
-            throw new BadRequestException("Schedule does not belong to the requested tour");
+            throw BadRequestException.i18n("api.error.booking.scheduleWrongTour");
         }
         if (schedule.getStatus() != TourScheduleStatus.OPEN) {
-            throw new BadRequestException("Schedule is not open for booking");
+            throw BadRequestException.i18n("api.error.booking.scheduleNotOpen");
         }
         if (schedule.getBookingOpenAt() != null && now.isBefore(schedule.getBookingOpenAt())) {
-            throw new BadRequestException("Booking window has not opened yet");
+            throw BadRequestException.i18n("api.error.booking.windowNotOpen");
         }
         if (schedule.getBookingCloseAt() != null && now.isAfter(schedule.getBookingCloseAt())) {
-            throw new BadRequestException("Booking window has already closed");
+            throw BadRequestException.i18n("api.error.booking.windowClosed");
         }
 
         int requestedSeats = request.getAdults() + request.getChildren() + request.getSeniors();
@@ -54,10 +74,10 @@ public class BookingValidator {
         int capacityTotal = schedule.getCapacityTotal() == null ? 0 : schedule.getCapacityTotal();
 
         if (requestedSeats <= 0) {
-            throw new BadRequestException("Booking must include at least one seat-taking traveller");
+            throw BadRequestException.i18n("api.error.booking.needsSeatTakingTraveller");
         }
         if (capacityTotal > 0 && bookedSeats + requestedSeats > capacityTotal) {
-            throw new BadRequestException("Schedule does not have enough remaining seats");
+            throw BadRequestException.i18n("api.error.booking.notEnoughSeats");
         }
     }
 
@@ -86,11 +106,11 @@ public class BookingValidator {
 
     public String normalizePassengerType(String rawValue) {
         if (!StringUtils.hasText(rawValue)) {
-            throw new BadRequestException("passengerType is required for each passenger");
+            throw BadRequestException.i18n("api.error.booking.passengerTypeRequired");
         }
         String normalized = rawValue.trim().toLowerCase(Locale.ROOT);
         if (!ALLOWED_PASSENGER_TYPES.contains(normalized)) {
-            throw new BadRequestException("Invalid passengerType: " + rawValue);
+            throw BadRequestException.i18n("api.error.booking.invalidPassengerType", rawValue);
         }
         return normalized;
     }
@@ -101,7 +121,7 @@ public class BookingValidator {
         }
         String normalized = rawValue.trim().toLowerCase(Locale.ROOT);
         if (!ALLOWED_PASSENGER_GENDERS.contains(normalized)) {
-            throw new BadRequestException("Invalid passenger gender: " + rawValue);
+            throw BadRequestException.i18n("api.error.booking.invalidPassengerGender", rawValue);
         }
         return normalized;
     }
@@ -113,7 +133,7 @@ public class BookingValidator {
         try {
             return LocalDate.parse(rawValue.trim());
         } catch (DateTimeParseException ex) {
-            throw new BadRequestException("dateOfBirth must use yyyy-MM-dd format");
+            throw BadRequestException.i18n("api.error.booking.dateOfBirthFormat");
         }
     }
 
@@ -123,7 +143,7 @@ public class BookingValidator {
             return;
         }
         if (passengers.size() > totalTravellers) {
-            throw new BadRequestException("Passenger list cannot exceed total traveller count");
+            throw BadRequestException.i18n("api.error.booking.passengerListTooLarge");
         }
 
         validatePassengerTypeCount(passengers, request.getAdults(), "adult");
@@ -134,12 +154,12 @@ public class BookingValidator {
 
     private void validateTravellerCounts(int adults, int children, int infants, int seniors) {
         if (children < 0 || infants < 0 || seniors < 0) {
-            throw new BadRequestException("Passenger counts cannot be negative");
+            throw BadRequestException.i18n("api.error.booking.passengerCountsNegative");
         }
 
         int totalTravellers = calculateTravellerCount(adults, children, infants, seniors);
         if (totalTravellers <= 0) {
-            throw new BadRequestException("Booking must include at least one traveller");
+            throw BadRequestException.i18n("api.error.booking.needsTraveller");
         }
     }
 
@@ -153,7 +173,7 @@ public class BookingValidator {
                 .sum();
 
         if (actualCount > allowedCount) {
-            throw new BadRequestException("Passenger list contains too many " + passengerType + " entries");
+            throw BadRequestException.i18n("api.error.booking.tooManyPassengerType", passengerType);
         }
     }
 

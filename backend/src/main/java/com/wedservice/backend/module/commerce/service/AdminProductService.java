@@ -61,7 +61,7 @@ public class AdminProductService {
 
         String normalizedSku = normalizeRequiredText(request.getSku(), "sku").toUpperCase(Locale.ROOT);
         if (productRepository.findBySkuIgnoreCase(normalizedSku).isPresent()) {
-            throw new BadRequestException("Product sku already exists");
+            throw BadRequestException.i18n("api.error.commerce.product.skuExists");
         }
 
         Product product = Product.builder().build();
@@ -80,7 +80,7 @@ public class AdminProductService {
 
         String normalizedSku = normalizeRequiredText(request.getSku(), "sku").toUpperCase(Locale.ROOT);
         if (productRepository.existsBySkuIgnoreCaseAndIdNot(normalizedSku, id)) {
-            throw new BadRequestException("Product sku already exists");
+            throw BadRequestException.i18n("api.error.commerce.product.skuExists");
         }
 
         ProductResponse oldState = toResponse(product);
@@ -122,10 +122,10 @@ public class AdminProductService {
 
     private void validateRequest(ProductRequest request) {
         if (request.getUnitPrice().compareTo(BigDecimal.ZERO) < 0) {
-            throw new BadRequestException("unitPrice must be >= 0");
+            throw BadRequestException.i18n("api.error.commerce.product.unitPriceGteZero");
         }
         if (request.getStockQty() < 0) {
-            throw new BadRequestException("stockQty must be >= 0");
+            throw BadRequestException.i18n("api.error.commerce.product.stockQtyGteZero");
         }
     }
 
@@ -181,7 +181,7 @@ public class AdminProductService {
     private String normalizeRequiredText(String value, String fieldName) {
         String normalized = normalizeNullable(value);
         if (!StringUtils.hasText(normalized)) {
-            throw new BadRequestException(fieldName + " is required");
+            throw BadRequestException.i18n("api.error.common.fieldRequired", fieldName);
         }
         return normalized;
     }

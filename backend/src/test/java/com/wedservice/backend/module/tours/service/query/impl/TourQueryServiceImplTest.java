@@ -1,5 +1,6 @@
 package com.wedservice.backend.module.tours.service.query.impl;
 
+import com.querydsl.core.types.Predicate;
 import com.wedservice.backend.common.exception.ResourceNotFoundException;
 import com.wedservice.backend.common.exception.BadRequestException;
 import com.wedservice.backend.module.destinations.entity.Destination;
@@ -24,6 +25,7 @@ import com.wedservice.backend.module.tours.repository.ItineraryItemRepository;
 import com.wedservice.backend.module.tours.repository.CancellationPolicyRepository;
 import com.wedservice.backend.module.tours.repository.CancellationPolicyRuleRepository;
 import com.wedservice.backend.module.tours.repository.GuideRepository;
+import com.wedservice.backend.module.tours.repository.GuideTranslationRepository;
 import com.wedservice.backend.module.tours.repository.TagRepository;
 import com.wedservice.backend.module.tours.repository.TourRepository;
 import com.wedservice.backend.module.tours.repository.TourChecklistItemRepository;
@@ -34,6 +36,8 @@ import com.wedservice.backend.module.tours.repository.TourScheduleGuideRepositor
 import com.wedservice.backend.module.tours.repository.TourSchedulePickupPointRepository;
 import com.wedservice.backend.module.tours.repository.TourScheduleRepository;
 import com.wedservice.backend.module.tours.repository.TourTagRepository;
+import com.wedservice.backend.module.tours.repository.TourTranslationRepository;
+import com.wedservice.backend.module.tours.mapper.TourTranslationMergeHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -52,6 +56,8 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -69,6 +75,9 @@ class TourQueryServiceImplTest {
 
     @Mock
     private GuideRepository guideRepository;
+
+    @Mock
+    private GuideTranslationRepository guideTranslationRepository;
 
     @Mock
     private TourMediaRepository tourMediaRepository;
@@ -100,6 +109,9 @@ class TourQueryServiceImplTest {
     @Mock
     private TourScheduleGuideRepository tourScheduleGuideRepository;
 
+    @Mock
+    private TourTranslationRepository tourTranslationRepository;
+
     private TourQueryServiceImpl tourQueryService;
 
     @BeforeEach
@@ -109,6 +121,7 @@ class TourQueryServiceImplTest {
                 cancellationPolicyRepository,
                 cancellationPolicyRuleRepository,
                 guideRepository,
+                guideTranslationRepository,
                 tourMediaRepository,
                 tagRepository,
                 tourTagRepository,
@@ -118,7 +131,9 @@ class TourQueryServiceImplTest {
                 tourChecklistItemRepository,
                 tourScheduleRepository,
                 tourSchedulePickupPointRepository,
-                tourScheduleGuideRepository
+                tourScheduleGuideRepository,
+                tourTranslationRepository,
+                new TourTranslationMergeHelper()
         );
     }
 
@@ -511,7 +526,7 @@ class TourQueryServiceImplTest {
 
         assertThatThrownBy(() -> tourQueryService.searchTours(request))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessage("maxDurationDays must be greater than or equal to minDurationDays");
+                .hasMessage("api.error.tour.search.maxDurationGteMin");
     }
 
     @Test
@@ -590,5 +605,100 @@ class TourQueryServiceImplTest {
 
         assertThat(page.getContent()).hasSize(1);
         assertThat(predicateCaptor.getValue().toString()).contains("4.50");
+    }
+
+    @Test
+    void searchTours_returnsEmptyWhenTagCodesResolveToNoTagIds() {
+        TourSearchRequest request = TourSearchRequest.builder()
+                .tagCodes(List.of("UNKNOWN_CODE"))
+                .page(0)
+                .size(10)
+                .build();
+
+        when(tagRepository.findByCodeInIgnoreCaseAndIsActiveTrue(List.of("UNKNOWN_CODE"))).thenReturn(List.of());
+
+        var page = tourQueryService.searchTours(request);
+
+        assertThat(page.getContent()).isEmpty();
+        verify(tourRepository, never()).findAll(any(Predicate.class), any(PageRequest.class));
+    }
+
+    @Test
+    void searchTours_resolvesTagCodesAndAppliesTourTagFilter() {
+        TourSearchRequest request = TourSearchRequest.builder()
+                .tagCodes(List.of("BIEN"))
+                .page(0)
+                .size(10)
+                .build();
+        Tag bienTag = Tag.builder()
+                .id(77L)
+                .code("BIEN")
+                .name("Biển")
+                .isActive(true)
+                .createdAt(LocalDateTime.now())
+                .build();
+        Tour tour = Tour.builder()
+                .id(20L)
+                .code("TOUR-020")
+                .name("Beach escape")
+                .slug("beach-escape")
+                .destination(Destination.builder().id(8L).build())
+                .basePrice(new BigDecimal("1000000"))
+                .currency("VND")
+                .status(com.wedservice.backend.module.tours.entity.TourStatus.ACTIVE)
+                .build();
+
+        when(tagRepository.findByCodeInIgnoreCaseAndIsActiveTrue(List.of("BIEN"))).thenReturn(List.of(bienTag));
+        when(tourTagRepository.findByIdTagIdIn(List.of(77L))).thenReturn(List.of(
+                com.wedservice.backend.module.tours.entity.TourTag.builder()
+                        .id(com.wedservice.backend.module.tours.entity.TourTagId.builder().tourId(20L).tagId(77L).build())
+                        .build()
+        ));
+        when(tourRepository.findAll(any(com.querydsl.core.BooleanBuilder.class), any(PageRequest.class)))
+                .thenReturn(new PageImpl<>(List.of(tour), PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "createdAt")), 1));
+
+        var page = tourQueryService.searchTours(request);
+
+        verify(tourTagRepository).findByIdTagIdIn(eq(List.of(77L)));
+        assertThat(page.getContent()).hasSize(1);
+    }
+
+    @Test
+    void searchTours_appliesDomesticOnlyFilter() {
+        TourSearchRequest request = TourSearchRequest.builder()
+                .domesticOnly(true)
+                .page(0)
+                .size(10)
+                .build();
+        Tour tour = Tour.builder()
+                .id(21L)
+                .code("TOUR-021")
+                .name("VN Tour")
+                .slug("vn-tour")
+                .destination(Destination.builder().id(1L).build())
+                .basePrice(BigDecimal.ONE)
+                .currency("VND")
+                .status(com.wedservice.backend.module.tours.entity.TourStatus.ACTIVE)
+                .build();
+
+        when(tourRepository.findAll(any(com.querydsl.core.BooleanBuilder.class), any(PageRequest.class)))
+                .thenReturn(new PageImpl<>(List.of(tour), PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "createdAt")), 1));
+
+        var page = tourQueryService.searchTours(request);
+
+        verify(tourRepository).findAll(any(com.querydsl.core.BooleanBuilder.class), any(PageRequest.class));
+        assertThat(page.getContent()).hasSize(1);
+    }
+
+    @Test
+    void searchTours_throwsWhenDomesticAndInternationalBothTrue() {
+        TourSearchRequest request = TourSearchRequest.builder()
+                .domesticOnly(true)
+                .internationalOnly(true)
+                .build();
+
+        assertThatThrownBy(() -> tourQueryService.searchTours(request))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("api.error.tour.search.domesticInternationalExclusive");
     }
 }

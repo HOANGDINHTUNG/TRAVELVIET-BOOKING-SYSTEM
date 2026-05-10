@@ -29,7 +29,7 @@ public class TourValidator {
         if (request.getDurationDays() != null
                 && request.getDurationNights() != null
                 && request.getDurationNights() > request.getDurationDays()) {
-            throw new BadRequestException("Duration nights cannot be greater than duration days");
+            throw BadRequestException.i18n("api.error.tour.validator.durationNightsGtDays");
         }
         validateMedia(request.getMedia());
         validateTagIds(request.getTagIds());
@@ -44,7 +44,7 @@ public class TourValidator {
         }
         String normalized = currency.trim().toUpperCase(Locale.ROOT);
         if (normalized.length() != 3) {
-            throw new BadRequestException("Currency must be a 3-character code");
+            throw BadRequestException.i18n("api.error.tour.validator.currencyLength");
         }
         return normalized;
     }
@@ -56,30 +56,30 @@ public class TourValidator {
         try {
             return TourStatus.fromValue(status.trim().toLowerCase(Locale.ROOT));
         } catch (IllegalArgumentException ex) {
-            throw new BadRequestException(ex.getMessage());
+            throw BadRequestException.i18n("api.error.tour.invalidStatus", status.trim());
         }
     }
 
     public void validateScheduleRequest(TourScheduleRequest request) {
         if (request.getReturnAt() != null && request.getDepartureAt() != null
                 && !request.getReturnAt().isAfter(request.getDepartureAt())) {
-            throw new BadRequestException("Schedule returnAt must be after departureAt");
+            throw BadRequestException.i18n("api.error.tour.validator.scheduleReturnAfterDeparture");
         }
         if (request.getBookingOpenAt() != null && request.getBookingCloseAt() != null
                 && request.getBookingCloseAt().isBefore(request.getBookingOpenAt())) {
-            throw new BadRequestException("Schedule bookingCloseAt must be after bookingOpenAt");
+            throw BadRequestException.i18n("api.error.tour.validator.scheduleBookingCloseAfterOpen");
         }
         if (request.getBookingCloseAt() != null && request.getDepartureAt() != null
                 && request.getBookingCloseAt().isAfter(request.getDepartureAt())) {
-            throw new BadRequestException("Schedule bookingCloseAt must not be after departureAt");
+            throw BadRequestException.i18n("api.error.tour.validator.scheduleBookingCloseNotAfterDeparture");
         }
         if (request.getMeetingAt() != null && request.getDepartureAt() != null
                 && request.getMeetingAt().isAfter(request.getDepartureAt())) {
-            throw new BadRequestException("Schedule meetingAt must not be after departureAt");
+            throw BadRequestException.i18n("api.error.tour.validator.scheduleMeetingNotAfterDeparture");
         }
         if (request.getMinGuestsToOperate() != null && request.getCapacityTotal() != null
                 && request.getMinGuestsToOperate() > request.getCapacityTotal()) {
-            throw new BadRequestException("Schedule minGuestsToOperate must not exceed capacityTotal");
+            throw BadRequestException.i18n("api.error.tour.validator.minGuestsVsCapacity");
         }
 
         validateNonNegativePrice(request.getAdultPrice(), "adultPrice");
@@ -92,7 +92,7 @@ public class TourValidator {
             for (TourSchedulePickupPointRequest pickupPoint : request.getPickupPoints()) {
                 if (pickupPoint.getPickupAt() != null && request.getDepartureAt() != null
                         && pickupPoint.getPickupAt().isAfter(request.getDepartureAt())) {
-                    throw new BadRequestException("Pickup point time must not be after departureAt");
+                    throw BadRequestException.i18n("api.error.tour.validator.pickupNotAfterDeparture");
                 }
             }
         }
@@ -101,10 +101,10 @@ public class TourValidator {
             Set<Long> guideIds = new HashSet<>();
             for (TourScheduleGuideRequest guideAssignment : request.getGuideAssignments()) {
                 if (guideAssignment.getGuideId() != null && guideAssignment.getGuideId() <= 0) {
-                    throw new BadRequestException("guideId must be greater than 0");
+                    throw BadRequestException.i18n("api.error.tour.validator.guideIdPositive");
                 }
                 if (guideAssignment.getGuideId() != null && !guideIds.add(guideAssignment.getGuideId())) {
-                    throw new BadRequestException("guideAssignments must not contain duplicate guideId");
+                    throw BadRequestException.i18n("api.error.tour.validator.duplicateGuideId");
                 }
             }
         }
@@ -117,7 +117,7 @@ public class TourValidator {
         try {
             return TourScheduleStatus.fromValue(status.trim().toLowerCase(Locale.ROOT));
         } catch (IllegalArgumentException ex) {
-            throw new BadRequestException(ex.getMessage());
+            throw BadRequestException.i18n("api.error.tour.invalidScheduleStatus", status.trim());
         }
     }
 
@@ -125,18 +125,18 @@ public class TourValidator {
         if (targetStatus == TourScheduleStatus.DRAFT
                 && schedule.getBookedSeats() != null
                 && schedule.getBookedSeats() > 0) {
-            throw new BadRequestException("Schedule with booked seats cannot move back to draft");
+            throw BadRequestException.i18n("api.error.tour.validator.bookedSeatsCannotDraft");
         }
         if ((targetStatus == TourScheduleStatus.OPEN || targetStatus == TourScheduleStatus.FULL)
                 && schedule.getDepartureAt() != null
                 && schedule.getDepartureAt().isBefore(LocalDateTime.now())) {
-            throw new BadRequestException("Past schedules cannot be reopened for booking");
+            throw BadRequestException.i18n("api.error.tour.validator.pastScheduleCannotReopen");
         }
     }
 
     private void validateNonNegativePrice(BigDecimal value, String fieldName) {
         if (value != null && value.compareTo(BigDecimal.ZERO) < 0) {
-            throw new BadRequestException(fieldName + " must be greater than or equal to 0");
+            throw BadRequestException.i18n("api.error.common.fieldGteZero", fieldName);
         }
     }
 
@@ -148,7 +148,7 @@ public class TourValidator {
         for (TourMediaRequest item : media) {
             Integer sortOrder = item.getSortOrder() == null ? 0 : item.getSortOrder();
             if (!sortOrders.add(sortOrder)) {
-                throw new BadRequestException("Media sortOrder must be unique within the tour");
+                throw BadRequestException.i18n("api.error.tour.validator.mediaSortOrderUnique");
             }
         }
     }
@@ -160,10 +160,10 @@ public class TourValidator {
         Set<Integer> dayNumbers = new HashSet<>();
         for (TourItineraryDayRequest day : itineraryDays) {
             if (!dayNumbers.add(day.getDayNumber())) {
-                throw new BadRequestException("Itinerary dayNumber must be unique within the tour");
+                throw BadRequestException.i18n("api.error.tour.validator.itineraryDayUnique");
             }
             if (durationDays != null && day.getDayNumber() > durationDays) {
-                throw new BadRequestException("Itinerary dayNumber must not exceed durationDays");
+                throw BadRequestException.i18n("api.error.tour.validator.itineraryDayMaxDuration");
             }
             validateItineraryItems(day.getItems());
         }
@@ -176,10 +176,10 @@ public class TourValidator {
         Set<Integer> sequenceNumbers = new HashSet<>();
         for (ItineraryItemRequest item : items) {
             if (!sequenceNumbers.add(item.getSequenceNo())) {
-                throw new BadRequestException("Itinerary item sequenceNo must be unique within a day");
+                throw BadRequestException.i18n("api.error.tour.validator.itinerarySequenceUnique");
             }
             if (item.getStartTime() != null && item.getEndTime() != null && item.getEndTime().isBefore(item.getStartTime())) {
-                throw new BadRequestException("Itinerary item endTime must not be before startTime");
+                throw BadRequestException.i18n("api.error.tour.validator.itineraryEndAfterStart");
             }
         }
     }
@@ -192,7 +192,7 @@ public class TourValidator {
         for (TourChecklistItemRequest item : checklistItems) {
             String key = item.getItemName().trim().toLowerCase(Locale.ROOT);
             if (!normalizedNames.add(key)) {
-                throw new BadRequestException("Checklist item names must be unique within the tour");
+                throw BadRequestException.i18n("api.error.tour.validator.checklistNamesUnique");
             }
         }
     }
@@ -204,10 +204,10 @@ public class TourValidator {
         Set<Long> uniqueTagIds = new HashSet<>();
         for (Long tagId : tagIds) {
             if (tagId == null || tagId <= 0) {
-                throw new BadRequestException("tagIds must contain positive ids only");
+                throw BadRequestException.i18n("api.error.tour.validator.tagIdsPositive");
             }
             if (!uniqueTagIds.add(tagId)) {
-                throw new BadRequestException("tagIds must be unique");
+                throw BadRequestException.i18n("api.error.tour.validator.tagIdsUnique");
             }
         }
     }
@@ -220,10 +220,10 @@ public class TourValidator {
         for (TourSeasonalityRequest season : seasonalityRequests) {
             String nameKey = season.getSeasonName().trim().toLowerCase(Locale.ROOT);
             if (!uniqueSeasonNames.add(nameKey)) {
-                throw new BadRequestException("Season names must be unique within the tour");
+                throw BadRequestException.i18n("api.error.tour.validator.seasonNamesUnique");
             }
             if (season.getMonthFrom() != null && season.getMonthTo() != null && season.getMonthTo() < season.getMonthFrom()) {
-                throw new BadRequestException("seasonality monthTo must not be smaller than monthFrom");
+                throw BadRequestException.i18n("api.error.tour.validator.seasonalityMonthOrder");
             }
             validateNonNegativePrice(season.getRecommendationScore(), "seasonality recommendationScore");
         }

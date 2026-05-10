@@ -1,0 +1,318 @@
+{
+  "common": {
+    "logout": "Đăng xuất",
+    "search": "Tìm kiếm",
+    "page": "Trang",
+    "of": "trên",
+    "items": "mục",
+    "loading": "Đang tải...",
+    "empty": "Không có dữ liệu hiển thị.",
+    "errorTitle": "Không tải được dữ liệu",
+    "retry": "Thử lại",
+    "viewDetail": "Xem chi tiết",
+    "save": "Lưu",
+    "create": "Tạo mới",
+    "edit": "Sửa",
+    "delete": "Xoá",
+    "cancel": "Huỷ",
+    "confirm": "Xác nhận",
+    "close": "Đóng",
+    "yes": "Đồng ý",
+    "no": "Không"
+  },
+  "tours": {
+    "pageTitle": "Quản lý Tours",
+    "pageSubtitle": "Theo dõi danh sách tour, trạng thái và thông tin cơ bản phục vụ vận hành.",
+    "errorMessage": "Không thể tải danh sách tour. Vui lòng thử lại sau ít phút.",
+    "createButton": "Tạo tour mới",
+    "table": {
+      "id": "Mã",
+      "code": "Code",
+      "name": "Tên tour",
+      "destination": "Điểm đến",
+      "duration": "Lịch trình",
+      "price": "Giá khởi điểm",
+      "status": "Trạng thái",
+      "rating": "Đánh giá",
+      "bookings": "Đã đặt",
+      "actions": "Thao tác"
+    },
+    "status": {
+      "draft": "Bản nháp",
+      "active": "Đang bán",
+      "inactive": "Tạm dừng",
+      "archived": "Lưu trữ"
+    },
+    "form": {
+      "code": "Mã tour",
+      "codePlaceholder": "VD: TVN-HALONG-3N",
+      "name": "Tên tour",
+      "namePlaceholder": "Tên hiển thị cho khách hàng",
+      "slug": "Slug (URL)",
+      "slugPlaceholder": "vi-du-tour-url",
+      "destinationId": "ID điểm đến",
+      "cancellationPolicyId": "Chính sách huỷ (ID)",
+      "basePrice": "Giá khởi điểm",
+      "currency": "Tiền tệ (3 ký tự)",
+      "durationDays": "Số ngày",
+      "durationNights": "Số đêm",
+      "transportType": "Phương tiện di chuyển",
+      "tripMode": "Loại hình (group/private/shared)",
+      "status": "Trạng thái",
+      "isFeatured": "Đặt làm tour nổi bật",
+      "shortDescription": "Mô tả ngắn",
+      "description": "Mô tả chi tiết",
+      "highlights": "Điểm nhấn",
+      "inclusions": "Bao gồm",
+      "exclusions": "Không bao gồm",
+      "notes": "Ghi chú nội bộ",
+      "tags": "Nhãn / chủ đề",
+      "media": "Hình ảnh & video",
+      "itinerary": "Lịch trình theo ngày"
+    },
+    "destinationSelect": {
+      "placeholder": "Chọn điểm đến...",
+      "searchPlaceholder": "Gõ để tìm điểm đến...",
+      "hint": "Nhập ít nhất 1 ký tự để tìm điểm đến.",
+      "manualLabel": "ID thủ công",
+      "beGapWarning": "Backend chưa expose Long id ở DTO điểm đến — tạm thời nhập ID thủ công."
+    },
+    "tags": {
+      "beGapWarning": "Backend chưa có endpoint /admin/tags — tạm thời nhập danh sách Tag ID, ngăn cách bởi dấu phẩy.",
+      "csvPlaceholder": "VD: 1, 2, 3"
+    },
+    "upload": {
+      "pickFiles": "Chọn ảnh / video",
+      "uploading": "Đang tải lên ({{count}})...",
+      "waitForUpload": "Đang tải media, vui lòng đợi...",
+      "addManual": "Thêm URL",
+      "manualUrlPlaceholder": "https://...",
+      "altPlaceholder": "Mô tả thay thế (alt text)",
+      "empty": "Chưa có media nào. Hãy chọn ảnh/video hoặc dán URL.",
+      "failed": "Không tải lên được file. Vui lòng thử lại.",
+      "beGapWarning": "Backend chưa có /admin/files/upload — vui lòng dán URL trực tiếp vào ô bên cạnh."
+    },
+    "itinerary": {
+      "subtitle": "Mỗi ngày là một mốc lịch trình. Bạn có thể thêm/xoá/sắp xếp lại tuỳ ý.",
+      "addDay": "Thêm ngày",
+      "empty": "Chưa có ngày nào trong lịch trình.",
+      "dayLabel": "Ngày",
+      "dayNumber": "Thứ tự ngày",
+      "title": "Tiêu đề ngày",
+      "description": "Mô tả hoạt động",
+      "overnightDestination": "ID điểm nghỉ đêm",
+      "meals": {
+        "breakfast": "Bữa sáng",
+        "lunch": "Bữa trưa",
+        "dinner": "Bữa tối"
+      },
+      "location": "Vị trí"
+    },
+    "dialog": {
+      "createTitle": "Tạo tour mới",
+      "createSubtitle": "Điền thông tin cơ bản, ảnh và lịch trình có thể bổ sung sau.",
+      "editTitle": "Cập nhật tour",
+      "editSubtitle": "Thay đổi sẽ ảnh hưởng đến hiển thị công khai sau khi lưu.",
+      "deleteTitle": "Xoá tour",
+      "deleteMessage": "Hành động này sẽ xoá tour \"{{name}}\". Bạn có chắc chắn?"
+    },
+    "toast": {
+      "createSuccess": "Đã tạo tour mới.",
+      "createFailed": "Không tạo được tour. Vui lòng thử lại.",
+      "updateSuccess": "Đã cập nhật tour.",
+      "updateFailed": "Không cập nhật được tour. Vui lòng thử lại.",
+      "deleteSuccess": "Đã xoá tour.",
+      "deleteFailed": "Không xoá được tour. Vui lòng thử lại.",
+      "statusSuccess": "Đã cập nhật trạng thái."
+    },
+    "validation": {
+      "codeRequired": "Vui lòng nhập mã tour.",
+      "codeTooLong": "Mã tour không được vượt quá 30 ký tự.",
+      "nameRequired": "Vui lòng nhập tên tour.",
+      "nameTooLong": "Tên tour không được vượt quá 255 ký tự.",
+      "slugRequired": "Vui lòng nhập slug.",
+      "slugTooLong": "Slug không được vượt quá 280 ký tự.",
+      "slugFormat": "Slug chỉ chứa chữ cái, số và dấu gạch ngang.",
+      "destinationRequired": "Vui lòng chọn điểm đến hợp lệ.",
+      "basePriceRequired": "Vui lòng nhập giá khởi điểm.",
+      "basePriceMin": "Giá khởi điểm phải lớn hơn hoặc bằng 0.",
+      "currencyFormat": "Mã tiền tệ phải gồm 3 ký tự (vd: VND, USD).",
+      "durationDaysRequired": "Vui lòng nhập số ngày.",
+      "durationDaysMin": "Số ngày phải lớn hơn hoặc bằng 1.",
+      "durationNightsMin": "Số đêm phải lớn hơn hoặc bằng 0.",
+      "transportTypeTooLong": "Phương tiện di chuyển không được vượt quá 120 ký tự.",
+      "tripModeTooLong": "Loại hình tour không được vượt quá 50 ký tự.",
+      "shortDescriptionTooLong": "Mô tả ngắn quá dài.",
+      "descriptionTooLong": "Mô tả chi tiết quá dài.",
+      "highlightsTooLong": "Điểm nhấn quá dài.",
+      "inclusionsTooLong": "Mục bao gồm quá dài.",
+      "exclusionsTooLong": "Mục không bao gồm quá dài.",
+      "notesTooLong": "Ghi chú quá dài.",
+      "mediaTypeRequired": "Vui lòng chọn loại media.",
+      "mediaTypeTooLong": "Loại media không được vượt quá 20 ký tự.",
+      "mediaUrlRequired": "Vui lòng cung cấp URL media.",
+      "dayNumberRequired": "Vui lòng nhập thứ tự ngày.",
+      "dayNumberMin": "Thứ tự ngày phải ≥ 1.",
+      "dayTitleRequired": "Vui lòng nhập tiêu đề cho ngày.",
+      "dayTitleTooLong": "Tiêu đề ngày không được vượt quá 255 ký tự."
+    },
+    "schedules": {
+      "openButton": "Lịch khởi hành",
+      "createButton": "Tạo đợt khởi hành",
+      "empty": "Tour này chưa có đợt khởi hành nào.",
+      "errorMessage": "Không tải được danh sách đợt khởi hành. Vui lòng thử lại.",
+      "table": {
+        "code": "Mã đợt",
+        "departure": "Khởi hành",
+        "return": "Kết thúc",
+        "seats": "Số chỗ (đã đặt/tổng)",
+        "remaining": "Còn lại",
+        "adultPrice": "Giá người lớn",
+        "status": "Trạng thái",
+        "actions": "Thao tác",
+        "cancel": "Huỷ đợt"
+      },
+      "status": {
+        "draft": "Bản nháp",
+        "open": "Mở bán",
+        "closed": "Đã đóng",
+        "full": "Hết chỗ",
+        "departed": "Đã khởi hành",
+        "completed": "Đã hoàn tất",
+        "cancelled": "Đã huỷ",
+        "derivedFull": "Trạng thái 'Hết chỗ' tự động tính từ số chỗ đã đặt."
+      },
+      "section": {
+        "basic": "Thông tin cơ bản",
+        "capacity": "Số chỗ & phụ thu",
+        "passengerPrices": "Giá theo loại khách",
+        "meeting": "Điểm tập trung",
+        "extras": "Thông tin bổ sung"
+      },
+      "form": {
+        "scheduleCode": "Mã đợt (tuỳ chọn)",
+        "scheduleCodePlaceholder": "VD: HALONG-2025-12-25",
+        "status": "Trạng thái",
+        "departureAt": "Thời gian khởi hành",
+        "returnAt": "Thời gian kết thúc",
+        "bookingOpenAt": "Mở booking từ",
+        "bookingCloseAt": "Đóng booking lúc",
+        "capacityTotal": "Tổng số chỗ",
+        "minGuestsToOperate": "Số khách tối thiểu để khởi hành",
+        "singleRoomSurcharge": "Phụ thu phòng đơn",
+        "meetingAt": "Thời gian tập trung",
+        "meetingPointName": "Tên điểm tập trung",
+        "meetingAddress": "Địa chỉ điểm tập trung",
+        "transportDetail": "Phương tiện chi tiết",
+        "note": "Ghi chú nội bộ"
+      },
+      "passenger": {
+        "subtitle": "Thiết lập giá theo từng loại khách. Ít nhất phải có dòng giá người lớn.",
+        "empty": "Chưa có dòng giá nào — vui lòng thêm ít nhất 1 dòng (ưu tiên 'Người lớn').",
+        "types": {
+          "adult": "Người lớn",
+          "child": "Trẻ em",
+          "infant": "Em bé",
+          "senior": "Người cao tuổi"
+        }
+      },
+      "dialog": {
+        "listTitle": "Lịch khởi hành",
+        "listSubtitle": "Tour: {{name}}",
+        "createTitle": "Tạo đợt khởi hành mới",
+        "createSubtitle": "Nhập thời gian, sức chứa và bảng giá theo loại khách.",
+        "editTitle": "Cập nhật đợt khởi hành",
+        "editSubtitle": "Thay đổi sẽ ảnh hưởng tới khách hàng đã đặt chỗ.",
+        "cancelTitle": "Huỷ đợt khởi hành",
+        "cancelMessage": "Đợt khởi hành sẽ chuyển sang trạng thái 'Đã huỷ'. (Backend chưa hỗ trợ xoá thật.) Bạn có chắc chắn?"
+      },
+      "toast": {
+        "createSuccess": "Đã tạo đợt khởi hành.",
+        "createFailed": "Không tạo được đợt khởi hành. Vui lòng thử lại.",
+        "updateSuccess": "Đã cập nhật đợt khởi hành.",
+        "updateFailed": "Không cập nhật được đợt khởi hành. Vui lòng thử lại.",
+        "statusSuccess": "Đã cập nhật trạng thái đợt khởi hành.",
+        "statusFailed": "Không cập nhật được trạng thái. Vui lòng thử lại.",
+        "cancelSuccess": "Đã huỷ đợt khởi hành.",
+        "cancelFailed": "Không huỷ được đợt khởi hành. Vui lòng thử lại."
+      },
+      "validation": {
+        "departureRequired": "Vui lòng chọn thời gian khởi hành.",
+        "returnRequired": "Vui lòng chọn thời gian kết thúc.",
+        "returnAfterDeparture": "Thời gian kết thúc phải sau thời gian khởi hành.",
+        "capacityRequired": "Vui lòng nhập tổng số chỗ.",
+        "capacityMin": "Tổng số chỗ phải ≥ 1.",
+        "passengerPricesRequired": "Vui lòng thêm ít nhất 1 dòng giá.",
+        "adultPriceRequired": "Phải có giá cho 'Người lớn'.",
+        "priceRequired": "Vui lòng nhập giá.",
+        "priceMin": "Giá phải ≥ 0."
+      }
+    }
+  },
+  "bookings": {
+    "page": {
+      "title": "Quản lý đặt chỗ",
+      "subtitle": "Theo dõi đơn hàng, cập nhật trạng thái và xử lý hoàn tiền.",
+      "loading": "Đang tải danh sách đơn...",
+      "errorMessage": "Không tải được danh sách đơn. Vui lòng thử lại.",
+      "empty": "Không có đơn nào khớp bộ lọc hiện tại.",
+      "fallbackWarning": "Backend chưa có endpoint admin search bookings (GET /admin/bookings). Tạm thời hiển thị danh sách đơn của tài khoản đang đăng nhập (GET /bookings/me).",
+      "searchPlaceholder": "Tìm theo mã, tên, SĐT, email",
+      "allStatus": "Tất cả trạng thái đơn",
+      "allPayment": "Tất cả trạng thái thanh toán",
+      "totalCount": "Tổng: {{count}}",
+      "col": {
+        "id": "Mã đơn",
+        "contact": "Khách hàng",
+        "tour": "Tour / Đợt",
+        "bookedAt": "Ngày đặt",
+        "status": "Trạng thái",
+        "amount": "Tổng tiền",
+        "actions": "Hành động"
+      },
+      "actions": {
+        "checkIn": "Check-in",
+        "complete": "Đã đi",
+        "refund": "Hoàn tiền",
+        "cancel": "Hủy đơn"
+      },
+      "confirm": {
+        "btnCancel": "Đóng",
+        "btnConfirm": "Xác nhận",
+        "checkIn": {
+          "title": "Xác nhận check-in",
+          "message": "Đánh dấu đơn này đã check-in (khách đã có mặt)?"
+        },
+        "complete": {
+          "title": "Xác nhận hoàn thành",
+          "message": "Đánh dấu đơn này đã hoàn thành chuyến đi?"
+        },
+        "cancel": {
+          "title": "Xác nhận hủy đơn",
+          "message": "Đơn sẽ chuyển sang trạng thái 'Đã hủy' và không thể khôi phục."
+        }
+      }
+    },
+    "refund": {
+      "title": "Tạo yêu cầu hoàn tiền",
+      "bookingLabel": "Đơn",
+      "noAmount": "Đơn không có tổng tiền (finalAmount). Không thể gửi yêu cầu hoàn tiền cho đến khi có số tiền hợp lệ.",
+      "amount": "Số tiền hoàn",
+      "maxAmount": "Tối đa",
+      "reason": "Lý do",
+      "reasonPlaceholder": "Lý do hoàn tiền (tuỳ chọn)",
+      "cancel": "Hủy",
+      "submit": "Gửi yêu cầu"
+    },
+    "toast": {
+      "cancelSuccess": "Đã hủy đơn đặt chỗ.",
+      "cancelFailed": "Không hủy được đơn. Vui lòng thử lại.",
+      "checkInSuccess": "Đã check-in đơn đặt chỗ.",
+      "checkInFailed": "Không check-in được. Vui lòng thử lại.",
+      "completeSuccess": "Đã đánh dấu đơn hoàn thành.",
+      "completeFailed": "Không cập nhật được. Vui lòng thử lại.",
+      "refundSuccess": "Đã tạo yêu cầu hoàn tiền.",
+      "refundFailed": "Không tạo được yêu cầu hoàn tiền. Vui lòng thử lại."
+    }
+  }
+}

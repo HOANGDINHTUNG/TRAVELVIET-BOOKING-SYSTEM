@@ -11,7 +11,7 @@ import {
   Star,
   Tag,
 } from 'lucide-react'
-import { tourApi } from '../../../api/server/Tour.api'
+import { tourApi, tourListSearchParamsFromUrl } from '../../../api/server/Tour.api'
 import { EmptyState } from '../../../components/common/ui/EmptyState'
 import { ErrorBlock } from '../../../components/common/ui/ErrorBlock'
 import { PageLoader } from '../../../components/common/ux/PageLoader'
@@ -43,6 +43,8 @@ function ToursPage() {
     () => searchParams.get('category') ?? ALL_FILTER,
   )
 
+  const catalogSearchKey = searchParams.toString()
+
   useEffect(() => {
     let isActive = true
 
@@ -51,7 +53,12 @@ function ToursPage() {
       setError(null)
 
       try {
-        const data = await tourApi.getAllTours()
+        const serverFilter = tourListSearchParamsFromUrl(
+          new URLSearchParams(catalogSearchKey),
+        )
+        const data = serverFilter
+          ? await tourApi.searchPublicTours(serverFilter)
+          : await tourApi.getAllTours()
 
         if (isActive) {
           setTours(data)
@@ -76,7 +83,7 @@ function ToursPage() {
     return () => {
       isActive = false
     }
-  }, [])
+  }, [catalogSearchKey])
 
   const translateTourField = useCallback(
     (
@@ -93,6 +100,38 @@ function ToursPage() {
     },
     [i18n, t],
   )
+
+  const catalogHead = useMemo(() => {
+    const p = tourListSearchParamsFromUrl(
+      new URLSearchParams(catalogSearchKey),
+    )
+    if (!p) {
+      return {
+        kicker: t('catalog.all.kicker'),
+        title: t('catalog.all.title'),
+        lead: t('catalog.all.lead'),
+      }
+    }
+    if (p.internationalOnly) {
+      return {
+        kicker: t('catalog.international.kicker'),
+        title: t('catalog.international.title'),
+        lead: t('catalog.international.lead'),
+      }
+    }
+    if (p.domesticOnly && p.tagCodes?.includes('BIEN')) {
+      return {
+        kicker: t('catalog.domesticBeach.kicker'),
+        title: t('catalog.domesticBeach.title'),
+        lead: t('catalog.domesticBeach.lead'),
+      }
+    }
+    return {
+      kicker: t('catalog.filtered.kicker'),
+      title: t('catalog.filtered.title'),
+      lead: t('catalog.filtered.lead'),
+    }
+  }, [catalogSearchKey, t])
 
   const categoryOptions = useMemo(() => {
     const categories = tours
@@ -163,13 +202,9 @@ function ToursPage() {
 
           <header className="catalog-header">
             <div>
-              <p className="catalog-kicker">Tat ca tour</p>
-              <h1>Tim tour phu hop voi ngan sach va cach di cua ban</h1>
-              <p>
-                Xem toan bo goi tour dang mo ban, loc nhanh theo kieu chuyen
-                di va mo trang chi tiet de xem lich trinh, gia, diem don va
-                chinh sach dat cho.
-              </p>
+              <p className="catalog-kicker">{catalogHead.kicker}</p>
+              <h1>{catalogHead.title}</h1>
+              <p>{catalogHead.lead}</p>
             </div>
             <div className="catalog-summary">
               <strong>{tours.length}</strong>

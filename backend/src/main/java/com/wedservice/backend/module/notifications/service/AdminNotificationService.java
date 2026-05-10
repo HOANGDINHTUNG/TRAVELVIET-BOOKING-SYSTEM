@@ -41,12 +41,12 @@ public class AdminNotificationService {
 
         NotificationChannel channel = request.getChannel() == null ? NotificationChannel.IN_APP : request.getChannel();
         if (channel != NotificationChannel.IN_APP) {
-            throw new BadRequestException("Only in_app channel is supported in the current notification foundation");
+            throw BadRequestException.i18n("api.error.notification.inAppOnly");
         }
 
         LocalDateTime now = LocalDateTime.now();
         if (request.getScheduledAt() != null && request.getScheduledAt().isAfter(now)) {
-            throw new BadRequestException("Future scheduling is not supported yet");
+            throw BadRequestException.i18n("api.error.notification.futureUnsupported");
         }
 
         String payload = normalizeNullable(request.getPayload());
@@ -76,7 +76,7 @@ public class AdminNotificationService {
         try {
             return UUID.fromString(rawUserId);
         } catch (Exception ex) {
-            throw new BadRequestException("userId must be a valid UUID");
+            throw BadRequestException.i18n("api.error.common.userIdUuid");
         }
     }
 
@@ -87,14 +87,14 @@ public class AdminNotificationService {
         try {
             jsonMapper.readTree(payload);
         } catch (Exception ex) {
-            throw new BadRequestException("payload must be valid JSON");
+            throw BadRequestException.i18n("api.error.notification.payloadJson");
         }
     }
 
     private String normalizeRequiredText(String value, String fieldName) {
         String normalized = normalizeNullable(value);
         if (!StringUtils.hasText(normalized)) {
-            throw new BadRequestException(fieldName + " is required");
+            throw BadRequestException.i18n("api.error.common.fieldRequired", fieldName);
         }
         return normalized;
     }

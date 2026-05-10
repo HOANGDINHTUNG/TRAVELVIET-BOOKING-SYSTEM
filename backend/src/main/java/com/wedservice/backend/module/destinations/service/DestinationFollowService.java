@@ -39,7 +39,7 @@ public class DestinationFollowService implements DestinationFollowCommandService
                 .orElseThrow(() -> new ResourceNotFoundException("Destination not found: " + destinationUuid));
 
         if (followRepository.existsByUserIdAndDestinationId(userId, destination.getId())) {
-            throw new BadRequestException("Already following this destination");
+            throw BadRequestException.i18n("api.error.destination.alreadyFollowing");
         }
 
         DestinationFollow follow = DestinationFollow.builder()

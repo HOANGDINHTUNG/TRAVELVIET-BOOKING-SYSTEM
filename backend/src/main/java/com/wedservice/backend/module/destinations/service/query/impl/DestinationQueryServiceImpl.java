@@ -2,13 +2,16 @@ package com.wedservice.backend.module.destinations.service.query.impl;
 
 import com.querydsl.core.BooleanBuilder;
 import com.wedservice.backend.common.exception.ResourceNotFoundException;
+import com.wedservice.backend.common.i18n.LocaleTagUtil;
 import com.wedservice.backend.common.util.DataNormalizer;
 import com.wedservice.backend.module.destinations.entity.Destination;
+import com.wedservice.backend.module.destinations.entity.DestinationTranslation;
 import com.wedservice.backend.module.destinations.entity.DestinationMedia;
 import com.wedservice.backend.module.destinations.entity.DestinationStatus;
 import com.wedservice.backend.module.destinations.entity.QDestination;
 import com.wedservice.backend.module.destinations.mapper.DestinationMapper;
 import com.wedservice.backend.module.destinations.repository.DestinationRepository;
+import com.wedservice.backend.module.destinations.repository.DestinationTranslationRepository;
 import com.wedservice.backend.module.destinations.dto.request.DestinationSearchRequest;
 import org.springframework.cache.annotation.Cacheable;
 import com.wedservice.backend.common.response.PageResponse;
@@ -26,7 +29,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -34,11 +40,15 @@ import java.util.UUID;
 public class DestinationQueryServiceImpl implements DestinationQueryService {
 
     private final DestinationRepository destinationRepository;
+    private final DestinationTranslationRepository destinationTranslationRepository;
     private final DestinationMapper destinationMapper;
     private final TourRepository tourRepository;
 
     @Override
-    @Cacheable(value = "destinations", key = "#request")
+    @Cacheable(
+            value = "destinations",
+            key = "#request.hashCode() + '_' + T(org.springframework.context.i18n.LocaleContextHolder).getLocale().toLanguageTag()"
+    )
     @Transactional(readOnly = true)
     public PageResponse<DestinationPublicResponse> searchApprovedDestinations(DestinationSearchRequest request) {
         Sort sort = Sort.by(Sort.Direction.fromString(request.getSortDir()), request.getSortBy());
@@ -74,11 +84,19 @@ public class DestinationQueryServiceImpl implements DestinationQueryService {
         builder.and(qDestination.isActive.isTrue());
 
         Page<Destination> page = destinationRepository.findAll(builder, pageable);
-        return PageResponse.of(page.map(this::toPublicResponse));
+        String lang = LocaleTagUtil.currentLanguageTag();
+        Map<Long, DestinationTranslation> byDestId = loadDestinationTranslations(
+                page.getContent().stream().map(Destination::getId).toList(),
+                lang
+        );
+        return PageResponse.of(page.map(d -> toPublicResponse(d, byDestId.get(d.getId()))));
     }
 
     @Override
-    @Cacheable(value = "destination-details", key = "#uuid")
+    @Cacheable(
+            value = "destination-details",
+            key = "#uuid.toString() + '_' + T(org.springframework.context.i18n.LocaleContextHolder).getLocale().toLanguageTag()"
+    )
     @Transactional(readOnly = true)
     public DestinationPublicDetailResponse getApprovedDestinationByUuid(UUID uuid) {
         Destination destination = destinationRepository.findByUuid(uuid)
@@ -90,19 +108,44 @@ public class DestinationQueryServiceImpl implements DestinationQueryService {
             throw new ResourceNotFoundException("Destination not found or not approved");
         }
 
-        return toPublicDetailResponse(destination);
+        String lang = LocaleTagUtil.currentLanguageTag();
+        DestinationTranslation tr = loadDestinationTranslations(java.util.List.of(destination.getId()), lang)
+                .get(destination.getId());
+        return toPublicDetailResponse(destination, tr);
     }
 
-    private DestinationPublicResponse toPublicResponse(Destination destination) {
+    private Map<Long, DestinationTranslation> loadDestinationTranslations(Collection<Long> destinationIds, String lang) {
+        if (destinationIds == null || destinationIds.isEmpty()) {
+            return Map.of();
+        }
+        var list = destinationTranslationRepository.findByDestination_IdInAndLocale(destinationIds, lang);
+        Map<Long, DestinationTranslation> map = new HashMap<>();
+        for (DestinationTranslation t : list) {
+            Long id = t.getDestination() != null ? t.getDestination().getId() : null;
+            if (id != null) {
+                map.putIfAbsent(id, t);
+            }
+        }
+        return map;
+    }
+
+    private static String pickLocalized(String translated, String base) {
+        return org.springframework.util.StringUtils.hasText(translated) ? translated : base;
+    }
+
+    private DestinationPublicResponse toPublicResponse(Destination destination, DestinationTranslation tr) {
         return DestinationPublicResponse.builder()
                 .uuid(destination.getUuid())
-                .name(destination.getName())
+                .name(pickLocalized(tr != null ? tr.getName() : null, destination.getName()))
                 .slug(destination.getSlug())
                 .countryCode(destination.getCountryCode())
                 .province(destination.getProvince())
                 .district(destination.getDistrict())
                 .region(destination.getRegion())
-                .shortDescription(destination.getShortDescription())
+                .shortDescription(pickLocalized(
+                        tr != null ? tr.getShortDescription() : null,
+                        destination.getShortDescription()
+                ))
                 .bestTimeFromMonth(destination.getBestTimeFromMonth())
                 .bestTimeToMonth(destination.getBestTimeToMonth())
                 .crowdLevelDefault(destination.getCrowdLevelDefault())
@@ -121,10 +164,10 @@ public class DestinationQueryServiceImpl implements DestinationQueryService {
         }
     }
 
-    private DestinationPublicDetailResponse toPublicDetailResponse(Destination destination) {
+    private DestinationPublicDetailResponse toPublicDetailResponse(Destination destination, DestinationTranslation tr) {
         return DestinationPublicDetailResponse.builder()
                 .uuid(destination.getUuid())
-                .name(destination.getName())
+                .name(pickLocalized(tr != null ? tr.getName() : null, destination.getName()))
                 .slug(destination.getSlug())
                 .countryCode(destination.getCountryCode())
                 .province(destination.getProvince())
@@ -133,8 +176,11 @@ public class DestinationQueryServiceImpl implements DestinationQueryService {
                 .address(destination.getAddress())
                 .latitude(destination.getLatitude())
                 .longitude(destination.getLongitude())
-                .shortDescription(destination.getShortDescription())
-                .description(destination.getDescription())
+                .shortDescription(pickLocalized(
+                        tr != null ? tr.getShortDescription() : null,
+                        destination.getShortDescription()
+                ))
+                .description(pickLocalized(tr != null ? tr.getDescription() : null, destination.getDescription()))
                 .bestTimeFromMonth(destination.getBestTimeFromMonth())
                 .bestTimeToMonth(destination.getBestTimeToMonth())
                 .crowdLevelDefault(destination.getCrowdLevelDefault())

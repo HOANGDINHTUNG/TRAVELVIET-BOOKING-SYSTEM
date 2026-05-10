@@ -1,4 +1,15 @@
 app:
+  cache:
+    caffeine:
+      tours:
+        maximum-size: 2000
+        expire-after-write-seconds: 300
+      destinations:
+        maximum-size: 1000
+        expire-after-write-seconds: 300
+      destination-details:
+        maximum-size: 4000
+        expire-after-write-seconds: 600
   security:
     whitelist:
       - "/auth/register"
@@ -7,20 +18,32 @@ app:
       - "/ai/chat"
       - "/actuator/health/**"
       - "/actuator/info"
+      - "/payments/vnpay/ipn"
     jwt:
-      secret: ${JWT_SECRET:wedservice-default-secret-change-me}
+      # Bắt buộc set JWT_SECRET (hoặc dùng profile dev: application-dev.yaml có placeholder cục bộ).
+      secret: ${JWT_SECRET:}
       expiration: ${JWT_EXPIRATION:3600000} # 1 hour
       refresh-expiration: ${JWT_REFRESH_EXPIRATION:2592000000} # 30 days
+  vnpay:
+    enabled: ${VNPAY_ENABLED:false}
+    tmn-code: ${VNPAY_TMN_CODE:}
+    hash-secret: ${VNPAY_HASH_SECRET:}
+    pay-url: ${VNPAY_PAY_URL:https://sandbox.vnpayment.vn/paymentv2/vpcpay.html}
+    return-url: ${VNPAY_RETURN_URL:}
+    ipn-url: ${VNPAY_IPN_URL:}
+    locale: ${VNPAY_LOCALE:vn}
+    order-info-prefix: ${VNPAY_ORDER_INFO_PREFIX:TravelViet booking}
 
 minio:
-  url: ${MINIO_URL:http://192.168.100.142:9000}
-  accessKey: ${MINIO_ACCESS_KEY:admin}
-  secretKey: ${MINIO_SECRET_KEY:09022006}
+  url: ${MINIO_URL:http://127.0.0.1:9000}
+  accessKey: ${MINIO_ACCESS_KEY:minioadmin}
+  secretKey: ${MINIO_SECRET_KEY:minioadmin}
   bucketName: ${MINIO_BUCKET_NAME:tour-images}
 
 weatherapi:
   base-url: ${WEATHERAPI_BASE_URL:https://api.weatherapi.com/v1}
-  api-key: ${WEATHERAPI_KEY:663999078ab543f3be084845261104}
+  # Không đặt API key mặc định trong repo — set WEATHERAPI_KEY (xem .env.example).
+  api-key: ${WEATHERAPI_KEY:}
   forecast-days: ${WEATHERAPI_FORECAST_DAYS:1}
   aqi: ${WEATHERAPI_AQI:no}
   alerts: ${WEATHERAPI_ALERTS:no}
@@ -32,6 +55,10 @@ gemini:
   timeout: ${GEMINI_TIMEOUT:15s}
 
 spring:
+  messages:
+    basename: i18n/messages
+    encoding: UTF-8
+    fallback-to-system-locale: false
   config:
     import:
       - optional:file:.env[.properties]

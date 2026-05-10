@@ -1,10 +1,14 @@
 package com.wedservice.backend.module.bookings.dto.request;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.*;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -47,5 +51,16 @@ public class CreateBookingRequest {
 
     private Long comboId;
 
-    private java.util.List<CreatePassengerRequest> passengers;
+    /** Kênh đặt (mã ASCII, ví dụ app, web, pos). Mặc định app nếu bỏ trống. */
+    @Size(max = 30)
+    @Pattern(regexp = "^[a-zA-Z0-9._-]*$", message = "bookingSource must be ASCII alphanumeric with . _ - only")
+    private String bookingSource;
+
+    @Size(max = 4000)
+    private String specialRequests;
+
+    private List<CreatePassengerRequest> passengers;
+
+    @Valid
+    private List<BookingProductLineRequest> bookingProducts;
 }

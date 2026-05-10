@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 import {
   ArrowLeft,
   Eye,
@@ -14,49 +16,68 @@ import {
   UserPlus,
 } from 'lucide-react'
 import {
-  getStoredAccessToken,
-  getStoredAuthUser,
-  loginWithPassword,
-  persistAuthSession,
-  resolvePostAuthRedirect,
-} from '../api/authApi'
+  hasManagerRole,
+  selectCurrentUser,
+  selectIsAuthenticated,
+  useAuthStore,
+} from '../../../stores/authStore'
+import { useLogin } from '../hooks/useAuthMutation'
 import './AuthPage.css'
 
-type AlertState =
-  | { type: 'success'; message: string }
-  | { type: 'error'; message: string }
-  | null
-
 const REMEMBER_EMAIL_KEY = 'travelviet-remember-email'
+
+function readRedirectFrom(state: unknown): string {
+  if (
+    typeof state === 'object' &&
+    state !== null &&
+    'from' in state &&
+    typeof (state as { from: unknown }).from === 'string'
+  ) {
+    return (state as { from: string }).from
+  }
+  return ''
+}
 
 function LoginPage() {
   const navigate = useNavigate()
   const location = useLocation()
+  const { t } = useTranslation('auth')
+  const isAuthenticated = useAuthStore(selectIsAuthenticated)
+  const currentUser = useAuthStore(selectCurrentUser)
+
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [rememberEmail, setRememberEmail] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [alert, setAlert] = useState<AlertState>(null)
-  const redirectFrom =
-    typeof location.state === 'object' &&
-    location.state !== null &&
-    'from' in location.state &&
-    typeof location.state.from === 'string'
-      ? location.state.from
-      : ''
+
+  const redirectFrom = readRedirectFrom(location.state)
+  const fallbackRedirect = hasManagerRole(currentUser)
+    ? '/management/dashboard'
+    : '/'
+  const targetRedirect = redirectFrom || fallbackRedirect
+
+  const login = useLogin({
+    redirectTo: targetRedirect,
+    onAuthenticated: () => {
+      const trimmedEmail = email.trim()
+      if (rememberEmail && trimmedEmail) {
+        window.localStorage.setItem(
+          REMEMBER_EMAIL_KEY,
+          JSON.stringify(trimmedEmail),
+        )
+      } else {
+        window.localStorage.removeItem(REMEMBER_EMAIL_KEY)
+      }
+    },
+  })
 
   useEffect(() => {
-    const storedToken = getStoredAccessToken()
-    const storedUser = getStoredAuthUser()
-    if (storedToken && storedUser) {
-      navigate(redirectFrom || resolvePostAuthRedirect(storedUser), { replace: true })
+    if (isAuthenticated && currentUser) {
+      navigate(targetRedirect, { replace: true })
       return
     }
-
     try {
       const remembered = window.localStorage.getItem(REMEMBER_EMAIL_KEY)
-
       if (remembered) {
         setEmail(JSON.parse(remembered) as string)
         setRememberEmail(true)
@@ -64,58 +85,31 @@ function LoginPage() {
     } catch {
       window.localStorage.removeItem(REMEMBER_EMAIL_KEY)
     }
-  }, [navigate, redirectFrom])
+  }, [isAuthenticated, currentUser, navigate, targetRedirect])
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const isPending = login.isPending
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    setAlert(null)
+    if (isPending) return
 
     const trimmedEmail = email.trim()
-
     if (!trimmedEmail || !password.trim()) {
-      setAlert({
-        type: 'error',
-        message: 'Vui lòng nhập đầy đủ email và mật khẩu.',
-      })
+      toast.error(
+        String(
+          t('missingFields', {
+            defaultValue:
+              'Vui lòng nhập đầy đủ email/SĐT và mật khẩu.',
+          }),
+        ),
+      )
       return
     }
 
-    setLoading(true)
-
-    try {
-      const auth = await loginWithPassword({
-        login: trimmedEmail,
-        passwordHash: password,
-      })
-
-      persistAuthSession(auth)
-
-      if (rememberEmail) {
-        window.localStorage.setItem(REMEMBER_EMAIL_KEY, JSON.stringify(trimmedEmail))
-      } else {
-        window.localStorage.removeItem(REMEMBER_EMAIL_KEY)
-      }
-
-      setAlert({
-        type: 'success',
-        message: 'Đăng nhập thành công! Đang chuyển hướng...',
-      })
-
-      window.setTimeout(
-        () => navigate(redirectFrom || resolvePostAuthRedirect(auth.user)),
-        800,
-      )
-    } catch (error) {
-      setAlert({
-        type: 'error',
-        message:
-          error instanceof Error
-            ? error.message
-            : 'Có lỗi xảy ra khi đăng nhập. Vui lòng thử lại.',
-      })
-    } finally {
-      setLoading(false)
-    }
+    login.mutate({
+      login: trimmedEmail,
+      passwordHash: password,
+    })
   }
 
   return (
@@ -125,9 +119,13 @@ function LoginPage() {
           <ArrowLeft aria-hidden="true" />
           TravelViet
         </Link>
-        <Link className="auth-switch-link" to="/register" state={{ from: redirectFrom }}>
+        <Link
+          className="auth-switch-link"
+          to="/register"
+          state={{ from: redirectFrom }}
+        >
           <UserPlus aria-hidden="true" />
-          Đăng ký
+          {String(t('form.createAccount', { defaultValue: 'Đăng ký' })).trim()}
         </Link>
       </div>
 
@@ -154,46 +152,44 @@ function LoginPage() {
           </span>
         </aside>
 
-        <form className="auth-panel" onSubmit={handleSubmit}>
+        <form className="auth-panel" onSubmit={handleSubmit} noValidate>
           <span className="auth-icon">
             <LogIn aria-hidden="true" />
           </span>
           <div className="auth-heading">
             <p>Chào mừng trở lại</p>
-            <h1>Đăng nhập</h1>
+            <h1>
+              {String(t('form.submit', { defaultValue: 'Đăng nhập' }))}
+            </h1>
           </div>
 
-          {alert && (
-            <div className={`auth-alert auth-alert-${alert.type}`} role="status">
-              {alert.message}
-            </div>
-          )}
-
           <label className="auth-field">
-            <span>Email</span>
+            <span>{String(t('form.loginLabel'))}</span>
             <span className="auth-input-wrap">
               <Mail aria-hidden="true" />
               <input
-                type="email"
-                name="email"
-                placeholder="you@example.com"
+                type="text"
+                name="login"
+                placeholder={String(t('form.loginPlaceholder'))}
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
-                autoComplete="email"
+                autoComplete="username"
+                disabled={isPending}
               />
             </span>
           </label>
           <label className="auth-field">
-            <span>Mật khẩu</span>
+            <span>{String(t('form.passwordLabel'))}</span>
             <span className="auth-input-wrap">
               <LockKeyhole aria-hidden="true" />
               <input
                 type={showPassword ? 'text' : 'password'}
                 name="password"
-                placeholder="Nhập mật khẩu"
+                placeholder={String(t('form.passwordPlaceholder'))}
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
                 autoComplete="current-password"
+                disabled={isPending}
               />
               <button
                 className="auth-input-action"
@@ -201,6 +197,7 @@ function LoginPage() {
                 aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
                 aria-pressed={showPassword}
                 onClick={() => setShowPassword((current) => !current)}
+                disabled={isPending}
               >
                 {showPassword ? <EyeOff /> : <Eye />}
               </button>
@@ -213,18 +210,23 @@ function LoginPage() {
                 type="checkbox"
                 checked={rememberEmail}
                 onChange={(event) => setRememberEmail(event.target.checked)}
+                disabled={isPending}
               />
-              <span>Ghi nhớ email</span>
+              <span>{String(t('form.rememberLabel'))}</span>
             </label>
-            <span className="auth-muted-action">Quên mật khẩu?</span>
+            <span className="auth-muted-action">
+              {String(t('form.forgotPassword'))}
+            </span>
           </div>
 
-          <button className="auth-submit" type="submit" disabled={loading}>
-            {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
+          <button className="auth-submit" type="submit" disabled={isPending}>
+            {isPending
+              ? String(t('form.submitting'))
+              : String(t('form.submit'))}
           </button>
           <p className="auth-inline-switch">
-            Chưa có tài khoản?
-            <Link to="/register"> Tạo tài khoản</Link>
+            {String(t('form.noAccount'))}
+            <Link to="/register">{String(t('form.createAccount'))}</Link>
           </p>
         </form>
       </div>

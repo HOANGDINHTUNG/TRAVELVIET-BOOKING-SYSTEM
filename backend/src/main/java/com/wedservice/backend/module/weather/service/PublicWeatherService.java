@@ -275,14 +275,14 @@ public class PublicWeatherService {
 
     private String normalizeQuery(String value) {
         if (!StringUtils.hasText(value)) {
-            throw new BadRequestException("q is required");
+            throw BadRequestException.i18n("api.error.weather.qRequired");
         }
         return value.trim();
     }
 
     private int normalizeForecastDays(int days) {
         if (days < 1 || days > 14) {
-            throw new BadRequestException("days must be between 1 and 14");
+            throw BadRequestException.i18n("api.error.weather.daysRange");
         }
         return days;
     }
@@ -290,7 +290,7 @@ public class PublicWeatherService {
     private String normalizeYesNo(String value, String fieldName) {
         String normalized = StringUtils.hasText(value) ? value.trim().toLowerCase() : "no";
         if (!"yes".equals(normalized) && !"no".equals(normalized)) {
-            throw new BadRequestException(fieldName + " must be yes or no");
+            throw BadRequestException.i18n("api.error.common.fieldMustBeYesOrNo", fieldName);
         }
         return normalized;
     }

@@ -93,7 +93,7 @@ class AdminProductServiceTest {
 
         assertThatThrownBy(() -> adminProductService.createProduct(request))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessage("stockQty must be >= 0");
+                .hasMessage("api.error.commerce.product.stockQtyGteZero");
     }
 
     @Test

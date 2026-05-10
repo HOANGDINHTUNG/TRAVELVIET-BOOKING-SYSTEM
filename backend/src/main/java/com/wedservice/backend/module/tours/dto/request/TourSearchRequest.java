@@ -18,10 +18,29 @@ import java.util.List;
 public class TourSearchRequest {
     private Long destinationId;
 
+    /**
+     * ISO 3166-1 alpha-2 country code of the tour's primary destination (e.g. VN, KR).
+     */
+    @Size(min = 2, max = 2, message = "destinationCountryCode must be a 2-letter ISO code")
+    @Pattern(
+            regexp = "[A-Za-z]{2}",
+            message = "destinationCountryCode must be a 2-letter ISO code"
+    )
+    private String destinationCountryCode;
+
+    /** When true, only tours whose destination {@code country_code} is {@code VN}. */
+    private Boolean domesticOnly;
+
+    /** When true, only tours whose destination {@code country_code} is not {@code VN}. */
+    private Boolean internationalOnly;
+
     @Size(max = 100, message = "keyword must not exceed 100 characters")
     private String keyword;
 
     private List<Long> tagIds;
+
+    /** Tag {@code code} values (e.g. BIEN); resolved to tag ids with active tags only. */
+    private List<String> tagCodes;
 
     @DecimalMin(value = "0.0", inclusive = true, message = "minPrice must be greater than or equal to 0")
     private BigDecimal minPrice;

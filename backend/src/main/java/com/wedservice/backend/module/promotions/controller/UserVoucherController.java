@@ -41,4 +41,11 @@ public class UserVoucherController {
                 .data(userVoucherService.claimVoucher(request))
                 .build();
     }
+
+    /** Canonical path (same behaviour as {@code POST /vouchers/claim}). */
+    @PostMapping("/users/me/vouchers/claim")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ApiResponse<ClaimedVoucherResponse> claimVoucherForCurrentUser(@Valid @RequestBody ClaimVoucherRequest request) {
+        return claimVoucher(request);
+    }
 }

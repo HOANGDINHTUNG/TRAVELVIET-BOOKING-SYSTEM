@@ -9,7 +9,7 @@ public class ReviewValidator {
 
     public void validateRating(Integer rating, String fieldName) {
         if (rating == null || rating < 1 || rating > 5) {
-            throw new BadRequestException(fieldName + " must be between 1 and 5");
+            throw BadRequestException.i18n("api.error.common.fieldRatingOneToFive", fieldName);
         }
     }
 
@@ -17,7 +17,7 @@ public class ReviewValidator {
         try {
             return ReviewSentiment.fromValue(sentiment).getValue();
         } catch (IllegalArgumentException ex) {
-            throw new BadRequestException("Invalid sentiment");
+            throw BadRequestException.i18n("api.error.review.invalidSentiment");
         }
     }
 }

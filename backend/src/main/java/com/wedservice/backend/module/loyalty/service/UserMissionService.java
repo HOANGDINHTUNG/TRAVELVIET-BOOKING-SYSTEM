@@ -48,11 +48,11 @@ public class UserMissionService {
                 .orElseThrow(() -> new ResourceNotFoundException("User mission not found"));
 
         if (!userMission.getUser().getId().equals(userId)) {
-            throw new BadRequestException("This mission does not belong to you");
+            throw BadRequestException.i18n("api.error.loyalty.mission.notYours");
         }
 
         if (userMission.getStatus() != UserMissionStatus.COMPLETED) {
-            throw new BadRequestException("Mission is not completed or already claimed");
+            throw BadRequestException.i18n("api.error.loyalty.mission.notCompletedOrClaimed");
         }
 
         MissionDefinition mission = userMission.getMission();
@@ -72,7 +72,7 @@ public class UserMissionService {
             userRepository.save(user);
         } else if (mission.getRewardType() == MissionRewardType.VOUCHER) {
             if (mission.getRewardRefId() == null) {
-                throw new BadRequestException("Voucher reward missing reference id");
+                throw BadRequestException.i18n("api.error.loyalty.mission.voucherRewardMissingRef");
             }
             // Create voucher claim for the user
             VoucherUserClaim claim = VoucherUserClaim.builder()

@@ -249,7 +249,7 @@ export const destinationApi = {
 
   getMyFollows(page = 0, size = 50) {
     return getBackendData<PageResponse<DestinationFollow>>(
-      "destinations/me/follows",
+      "users/me/destination-follows",
       { page, size },
     );
   },

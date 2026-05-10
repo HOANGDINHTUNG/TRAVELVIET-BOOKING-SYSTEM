@@ -110,7 +110,7 @@ public class UserPassportService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
         if (user.getStatus() != Status.ACTIVE) {
-            throw new BadRequestException("User is not active");
+            throw BadRequestException.i18n("api.error.passport.userInactive");
         }
 
         Destination resolvedDestination = resolveDestination(userId, request);
@@ -121,12 +121,12 @@ public class UserPassportService {
             Long bookingDestinationId = bookingTour.getDestination() == null ? null
                     : bookingTour.getDestination().getId();
             if (!resolvedDestination.getId().equals(bookingDestinationId)) {
-                throw new BadRequestException("destinationUuid does not match booking destination");
+                throw BadRequestException.i18n("api.error.passport.destinationMismatch");
             }
         }
 
         if (booking == null && resolvedDestination == null) {
-            throw new BadRequestException("bookingId or destinationUuid is required");
+            throw BadRequestException.i18n("api.error.passport.bookingOrDestinationRequired");
         }
 
         Long destinationId;
@@ -139,7 +139,7 @@ public class UserPassportService {
             }
             destinationId = tour.getDestination().getId();
         } else {
-            throw new BadRequestException("bookingId or destinationUuid is required");
+            throw BadRequestException.i18n("api.error.passport.bookingOrDestinationRequired");
         }
 
         if (booking != null) {
@@ -251,7 +251,7 @@ public class UserPassportService {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new ResourceNotFoundException("Booking not found with id: " + bookingId));
         if (!userId.equals(booking.getUserId())) {
-            throw new BadRequestException("bookingId does not belong to the user");
+            throw BadRequestException.i18n("api.error.passport.bookingNotYours");
         }
         return booking;
     }
@@ -266,7 +266,7 @@ public class UserPassportService {
                     .orElseThrow(
                             () -> new ResourceNotFoundException("Destination not found with uuid: " + destinationUuid));
         } catch (IllegalArgumentException ex) {
-            throw new BadRequestException("destinationUuid must be a valid UUID");
+            throw BadRequestException.i18n("api.error.passport.destinationUuidInvalid");
         }
     }
 

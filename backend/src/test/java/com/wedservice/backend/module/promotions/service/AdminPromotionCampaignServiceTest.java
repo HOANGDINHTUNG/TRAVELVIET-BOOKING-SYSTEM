@@ -121,7 +121,7 @@ class AdminPromotionCampaignServiceTest {
 
         assertThatThrownBy(() -> adminPromotionCampaignService.createPromotionCampaign(request))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessage("endAt must be after startAt");
+                .hasMessage("api.error.promo.campaign.endAfterStart");
     }
 
     @Test

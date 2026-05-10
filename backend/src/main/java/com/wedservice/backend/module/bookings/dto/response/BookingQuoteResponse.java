@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Getter
 @Setter
@@ -22,10 +23,14 @@ public class BookingQuoteResponse {
     private BigDecimal discountAmount;
     private BigDecimal voucherDiscountAmount;
     private BigDecimal loyaltyDiscountAmount;
+    /** Combo final price plus standalone product lines (add-ons excluding voucher discounts). */
     private BigDecimal addonAmount;
+    /** Sum of standalone product line totals (snapshot at quote time). */
+    private BigDecimal productsAmount;
     private BigDecimal taxAmount;
     private BigDecimal finalAmount;
     private String currency;
     private AppliedVoucherQuoteResponse appliedVoucher;
     private AppliedComboQuoteResponse appliedCombo;
+    private List<AppliedProductQuoteResponse> appliedProducts;
 }

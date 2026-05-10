@@ -154,7 +154,7 @@ class AdminComboPackageServiceTest {
 
         assertThatThrownBy(() -> adminComboPackageService.createComboPackage(request))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessage("basePrice must equal the sum of combo item list prices");
+                .hasMessage("api.error.commerce.combo.basePriceSumMismatch");
     }
 
     @Test

@@ -12,6 +12,9 @@ export type Tour = {
   highlights: string[];
   description?: string;
   destinationId?: number;
+  destinationCountryCode?: string;
+  destinationName?: string;
+  destinationProvince?: string;
   currency?: string;
 };
 
@@ -137,6 +140,9 @@ export type BackendTour = {
   name: string;
   slug?: string;
   destinationId?: number;
+  destinationCountryCode?: string;
+  destinationName?: string;
+  destinationProvince?: string;
   basePrice?: number | string;
   currency?: string;
   durationDays?: number;

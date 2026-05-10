@@ -1,6 +1,7 @@
 import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
-import { DEFAULT_LANGUAGE } from '../constants/preferences'
+import HttpBackend from 'i18next-http-backend'
+import { DEFAULT_LANGUAGE, LANGUAGE_MODES } from '../constants/preferences'
 
 export const resources = {
   vi: {
@@ -151,6 +152,30 @@ export const resources = {
             days: '4 ngày 3 đêm',
             highlights: ['Hồ Tuyền Lâm', 'Đồi thông', 'Chợ đêm'],
           },
+          'da-nang-3n2d-bien-ba-na': {
+            title: 'Đà Nẵng 3N2Đ – Biển & Bà Nà',
+            description: 'Tour nhẹ nhàng cho gia đình; biển Mỹ Khê, Bà Nà Hills và phố cổ.',
+            location: 'Khởi hành: Từ Đà Nẵng',
+            category: 'Tour ghép',
+            days: '3 ngày 2 đêm',
+            highlights: ['Cầu Rồng', 'Bà Nà', 'Biển Mỹ Khê'],
+          },
+          'sai-gon-1-day-city-tour': {
+            title: 'Sài Gòn 1 ngày – City tour',
+            description: 'Dinh Độc Lập, Bưu điện, Nhà thờ Đức Bà trong một ngày.',
+            location: 'Khởi hành: Từ TP. Hồ Chí Minh',
+            category: 'Tour ghép',
+            days: '1 ngày',
+            highlights: ['Dinh Độc Lập', 'Bưu điện', 'Nhà thờ Đức Bà'],
+          },
+          'seoul-4n3d-am-thuc-van-hoa': {
+            title: 'Seoul 4N3Đ – Ẩm thực & văn hóa',
+            description: 'Gyeongbokgung, Myeongdong, N Seoul Tower và ẩm thực đường phố.',
+            location: 'Khởi hành: Từ Seoul',
+            category: 'Tour ghép',
+            days: '4 ngày 3 đêm',
+            highlights: ['Cung điện', 'Myeongdong', 'Street food'],
+          },
         },
         destinations: {
           haLong: 'Hạ Long',
@@ -206,6 +231,50 @@ export const resources = {
         rating: 'sao',
         choose: 'Chọn tour',
         perPerson: 'mỗi khách',
+      },
+      tourCard: {
+        durationUnknown: 'Lịch trình đang cập nhật',
+        durationDaysNights: '{{days}} ngày {{nights}} đêm',
+        durationDaysOnly: '{{count}} ngày',
+        departureFromProvince: 'Khởi hành: Từ {{place}}',
+        departurePlace: 'Khởi hành: {{place}}',
+        departureFallback: 'Đang cập nhật',
+      },
+      homeTourRows: {
+        sectionAria: 'Tour theo chủ đề',
+        domesticTitle: 'TOUR BIỂN ĐẢO TRONG NƯỚC',
+        internationalTitle: 'TOUR HOT NƯỚC NGOÀI',
+        viewMore: 'Xem thêm',
+        viewDetail: 'Xem chi tiết →',
+        emptyDomestic:
+          'Chưa có tour biển/đảo nổi bật trong nước. Gắn tag BIEN và điểm đến Việt Nam trên backend.',
+        emptyInternational:
+          'Chưa có tour quốc tế nổi bật. Thêm tour với điểm đến ngoài VN và đánh dấu nổi bật.',
+        prev: 'Xem trước',
+        next: 'Xem tiếp',
+      },
+      catalog: {
+        all: {
+          kicker: 'Tất cả tour',
+          title: 'Tìm tour phù hợp với ngân sách và cách đi của bạn',
+          lead:
+            'Xem toàn bộ gói tour đang mở bán, lọc nhanh theo kiểu chuyến đi và mở trang chi tiết để xem lịch trình, giá, điểm đón và chính sách đặt chỗ.',
+        },
+        international: {
+          kicker: 'Tour quốc tế',
+          title: 'Tour hot nước ngoài',
+          lead: 'Các gói nổi bật với điểm đến ngoài Việt Nam.',
+        },
+        domesticBeach: {
+          kicker: 'Trong nước',
+          title: 'Tour biển đảo trong nước',
+          lead: 'Tour Việt Nam gắn chủ đề biển đảo, đang nổi bật trên hệ thống.',
+        },
+        filtered: {
+          kicker: 'Kết quả lọc',
+          title: 'Danh sách tour đã lọc',
+          lead: 'Kết quả theo bộ lọc từ liên kết hoặc URL.',
+        },
       },
       services: {
         eyebrow: 'Dịch vụ TravelViet',
@@ -416,6 +485,30 @@ export const resources = {
             days: '4 days 3 nights',
             highlights: ['Tuyen Lam Lake', 'Pine hills', 'Night market'],
           },
+          'da-nang-3n2d-bien-ba-na': {
+            title: 'Da Nang 3D2N – Beach & Ba Na',
+            description: 'Easy family pace: My Khe beach, Ba Na Hills, and the old town.',
+            location: 'Departure: From Da Nang',
+            category: 'Group tour',
+            days: '3 days 2 nights',
+            highlights: ['Dragon Bridge', 'Ba Na', 'My Khe Beach'],
+          },
+          'sai-gon-1-day-city-tour': {
+            title: 'Saigon 1 day – City highlights',
+            description: 'Independence Palace, Central Post Office, and Notre-Dame in one day.',
+            location: 'Departure: From Ho Chi Minh City',
+            category: 'Group tour',
+            days: '1 day',
+            highlights: ['Independence Palace', 'Post Office', 'Notre-Dame'],
+          },
+          'seoul-4n3d-am-thuc-van-hoa': {
+            title: 'Seoul 4D3N – Food & culture',
+            description: 'Gyeongbokgung, Myeongdong, N Seoul Tower, and street food.',
+            location: 'Departure: From Seoul',
+            category: 'Group tour',
+            days: '4 days 3 nights',
+            highlights: ['Royal palace', 'Myeongdong', 'Street food'],
+          },
         },
         destinations: {
           haLong: 'Ha Long',
@@ -471,6 +564,50 @@ export const resources = {
         rating: 'stars',
         choose: 'Choose tour',
         perPerson: 'per person',
+      },
+      tourCard: {
+        durationUnknown: 'Itinerary updating',
+        durationDaysNights: '{{days}} days {{nights}} nights',
+        durationDaysOnly: '{{count}} days',
+        departureFromProvince: 'Departure: From {{place}}',
+        departurePlace: 'Departure: {{place}}',
+        departureFallback: 'Details updating',
+      },
+      homeTourRows: {
+        sectionAria: 'Themed tour rows',
+        domesticTitle: 'BEACH & ISLAND TOURS — VIETNAM',
+        internationalTitle: 'HOT INTERNATIONAL TOURS',
+        viewMore: 'See more',
+        viewDetail: 'View details →',
+        emptyDomestic:
+          'No featured beach/island tours in Vietnam yet. Add BIEN tag and VN destinations in the backend.',
+        emptyInternational:
+          'No featured international tours yet. Add tours with non-VN destinations marked featured.',
+        prev: 'Previous',
+        next: 'Next',
+      },
+      catalog: {
+        all: {
+          kicker: 'All tours',
+          title: 'Find tours that fit your budget and travel style',
+          lead:
+            'Browse open packages, filter by trip type, and open a tour page for itinerary, price, pickup, and booking policy.',
+        },
+        international: {
+          kicker: 'International',
+          title: 'Hot international tours',
+          lead: 'Featured packages with destinations outside Vietnam.',
+        },
+        domesticBeach: {
+          kicker: 'Domestic',
+          title: 'Beach & island tours in Vietnam',
+          lead: 'Vietnam tours tagged beach/island, featured on the platform.',
+        },
+        filtered: {
+          kicker: 'Filtered results',
+          title: 'Filtered tour list',
+          lead: 'Results from your link or URL filters.',
+        },
       },
       services: {
         eyebrow: 'TravelViet services',
@@ -535,13 +672,34 @@ export const resources = {
   },
 } as const
 
-i18n.use(initReactI18next).init({
-  resources,
-  lng: DEFAULT_LANGUAGE,
-  fallbackLng: DEFAULT_LANGUAGE,
-  interpolation: {
-    escapeValue: false,
-  },
-})
+/** Namespace tách JSON ngoài (load qua HTTP backend từ /public/locales). */
+export const SPLIT_NAMESPACES = [
+  'auth',
+  'management',
+  'errors',
+  'tours',
+  'bookings',
+] as const
+export type SplitNamespace = (typeof SPLIT_NAMESPACES)[number]
+
+void i18n
+  .use(HttpBackend)
+  .use(initReactI18next)
+  .init({
+    resources,
+    partialBundledLanguages: true,
+    ns: ['translation', ...SPLIT_NAMESPACES],
+    defaultNS: 'translation',
+    fallbackNS: 'translation',
+    supportedLngs: [...LANGUAGE_MODES],
+    lng: DEFAULT_LANGUAGE,
+    fallbackLng: DEFAULT_LANGUAGE,
+    interpolation: {
+      escapeValue: false,
+    },
+    backend: {
+      loadPath: '/locales/{{lng}}/{{ns}}.json',
+    },
+  })
 
 export default i18n

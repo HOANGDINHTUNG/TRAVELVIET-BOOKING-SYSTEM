@@ -16,6 +16,9 @@ public class TourResponse {
     private String name;
     private String slug;
     private Long destinationId;
+    private String destinationCountryCode;
+    private String destinationName;
+    private String destinationProvince;
     private Long cancellationPolicyId;
     private BigDecimal basePrice;
     private String currency;
@@ -41,4 +44,6 @@ public class TourResponse {
     private List<TourChecklistItemResponse> checklistItems;
     private CancellationPolicyResponse cancellationPolicy;
     private String translationKey;
+    /** Localized itinerary narrative from tour_translations (public merge); structured days stay in itineraryDays. */
+    private String itinerarySummary;
 }

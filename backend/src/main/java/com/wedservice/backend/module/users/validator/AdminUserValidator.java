@@ -16,7 +16,7 @@ public class AdminUserValidator {
 
     public void validateRequiredContact(String email, String phone) {
         if (!StringUtils.hasText(email) && !StringUtils.hasText(phone)) {
-            throw new BadRequestException("At least email or phone must be provided");
+            throw BadRequestException.i18n("api.error.common.contactRequired");
         }
     }
 
@@ -26,7 +26,7 @@ public class AdminUserValidator {
                     ? userRepository.existsByEmailIgnoreCase(email)
                     : userRepository.existsByEmailIgnoreCaseAndIdNot(email, currentUserId);
             if (emailExists) {
-                throw new BadRequestException("Email already exists");
+                throw BadRequestException.i18n("api.error.common.emailExists");
             }
         }
 
@@ -35,7 +35,7 @@ public class AdminUserValidator {
                     ? userRepository.existsByPhone(phone)
                     : userRepository.existsByPhoneAndIdNot(phone, currentUserId);
             if (phoneExists) {
-                throw new BadRequestException("Phone already exists");
+                throw BadRequestException.i18n("api.error.common.phoneExists");
             }
         }
     }

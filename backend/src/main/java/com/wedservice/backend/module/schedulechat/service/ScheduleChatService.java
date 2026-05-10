@@ -191,7 +191,7 @@ public class ScheduleChatService {
 
         if (!backoffice) {
             if (!Boolean.TRUE.equals(room.getIsActive())) {
-                throw new BadRequestException("Schedule chat room is inactive");
+                throw BadRequestException.i18n("api.error.chat.roomInactive");
             }
             if (room.getVisibility() == ScheduleChatVisibility.STAFF_ONLY) {
                 throw new AccessDeniedException("You do not have permission to access this chat room");
@@ -247,7 +247,7 @@ public class ScheduleChatService {
 
     private void ensureMemberCanSend(ScheduleChatRoomMember member) {
         if (Boolean.TRUE.equals(member.getIsMuted())) {
-            throw new BadRequestException("Current user is muted in this chat room");
+            throw BadRequestException.i18n("api.error.chat.userMuted");
         }
     }
 
@@ -344,7 +344,7 @@ public class ScheduleChatService {
     private String normalizeRequiredMessage(String value) {
         String normalized = normalizeNullable(value);
         if (!StringUtils.hasText(normalized)) {
-            throw new BadRequestException("messageText is required");
+            throw BadRequestException.i18n("api.error.chat.messageRequired");
         }
         return normalized;
     }

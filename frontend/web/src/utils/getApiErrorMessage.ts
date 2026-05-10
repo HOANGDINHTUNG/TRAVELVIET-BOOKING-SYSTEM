@@ -1,10 +1,5 @@
-import { isAxiosError } from 'axios'
-import type { ApiResponse } from '../types/api'
+import { handleApiError } from '../lib/handleApiError'
 
 export function getApiErrorMessage(error: unknown, fallback: string) {
-  if (isAxiosError<ApiResponse<unknown>>(error)) {
-    return error.response?.data?.message || error.message || fallback
-  }
-
-  return error instanceof Error ? error.message : fallback
+  return handleApiError(error, fallback)
 }

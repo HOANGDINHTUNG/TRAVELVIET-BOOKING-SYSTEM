@@ -28,6 +28,6 @@ export const voucherApi = {
   },
 
   claim(payload: ClaimVoucherPayload) {
-    return postBackendData<ClaimedVoucher>('vouchers/claim', payload)
+    return postBackendData<ClaimedVoucher>('users/me/vouchers/claim', payload)
   },
 }

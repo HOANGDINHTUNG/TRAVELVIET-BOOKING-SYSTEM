@@ -1,11 +1,15 @@
 type ErrorBlockProps = {
   message: string
   title?: string
+  actionLabel?: string
+  onAction?: () => void
 }
 
 export function ErrorBlock({
   message,
   title = 'Khong the tai du lieu',
+  actionLabel,
+  onAction,
 }: ErrorBlockProps) {
   return (
     <section className="min-h-[42vh] bg-slate-950 px-4 py-20 text-slate-100">
@@ -15,6 +19,15 @@ export function ErrorBlock({
         </p>
         <h2 className="mt-3 text-2xl font-semibold">{title}</h2>
         <p className="mt-2 text-sm leading-6 text-slate-200">{message}</p>
+        {actionLabel && onAction && (
+          <button
+            type="button"
+            onClick={onAction}
+            className="mt-5 inline-flex items-center justify-center rounded-xl bg-red-500/20 px-4 py-2 text-sm font-medium text-red-50 ring-1 ring-red-300/30 transition hover:bg-red-500/25"
+          >
+            {actionLabel}
+          </button>
+        )}
       </div>
     </section>
   )

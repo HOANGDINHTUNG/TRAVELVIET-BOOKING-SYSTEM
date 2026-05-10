@@ -103,7 +103,7 @@ class AdminRbacCommandServiceTest {
 
         assertThatThrownBy(() -> adminRbacCommandService.createRole(request))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessage("Only SUPER_ADMIN can create or modify system roles");
+                .hasMessage("api.error.rbac.onlySuperAdminSystemRoles");
     }
 
     @Test
@@ -217,6 +217,6 @@ class AdminRbacCommandServiceTest {
 
         assertThatThrownBy(() -> adminRbacCommandService.updateRolePermissions(9L, request))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessage("Permission code not found: permission.view");
+                .hasMessage("api.error.rbac.permissionCodesNotFound");
     }
 }

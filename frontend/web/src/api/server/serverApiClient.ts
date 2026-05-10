@@ -1,7 +1,7 @@
 import { axiosBackend } from '../../utils/axiosInstance'
-import type { ApiRequestOptions, ApiResponse } from '../../types/api'
-import { unwrapApiResponse } from '../../types/api'
-import { getApiErrorMessage } from '../../utils/getApiErrorMessage'
+import type { ApiRequestOptions } from '../../types/api'
+import { ApiClientError } from '../../types/api'
+import { handleApiError } from '../../lib/handleApiError'
 
 export type BackendRequestParams = Record<string, unknown>
 
@@ -16,10 +16,10 @@ async function requestBackendData<T>(
   body?: unknown,
   config: BackendRequestConfig = {},
 ) {
-  const fallback = `Khong the tai du lieu tu ${path}.`
+  const fallback = `Could not load data from ${path}.`
 
   try {
-    const response = await axiosBackend.request<ApiResponse<T>>({
+    const response = await axiosBackend.request<T>({
       method,
       url: path,
       data: body,
@@ -33,9 +33,10 @@ async function requestBackendData<T>(
       return undefined as T
     }
 
-    return unwrapApiResponse(response.data, fallback, config.options) as T
-  } catch (error) {
-    throw new Error(getApiErrorMessage(error, fallback))
+    return response.data as T
+  } catch (error: unknown) {
+    if (error instanceof ApiClientError) throw error
+    throw new Error(handleApiError(error, fallback))
   }
 }
 

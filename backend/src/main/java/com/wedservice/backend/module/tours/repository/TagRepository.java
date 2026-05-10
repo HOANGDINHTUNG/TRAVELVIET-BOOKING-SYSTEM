@@ -9,4 +9,6 @@ import java.util.List;
 public interface TagRepository extends JpaRepository<Tag, Long> {
 
     List<Tag> findByIdInAndIsActiveTrue(Collection<Long> ids);
+
+    List<Tag> findByCodeInIgnoreCaseAndIsActiveTrue(Collection<String> codes);
 }
