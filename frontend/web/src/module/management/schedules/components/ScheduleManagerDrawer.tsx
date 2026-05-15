@@ -122,14 +122,14 @@ function ScheduleManagerDrawer(props: ScheduleManagerDrawerProps) {
         }
         footer={
           <div className="flex justify-between gap-2">
-            <span className="text-xs text-[var(--color-muted,#64748b)]">
+            <span className="text-xs text-[var(--admin-muted)]">
               {String(t('common.items'))}: {items.length}
             </span>
             <div className="flex gap-2">
               <button
                 type="button"
                 onClick={props.onClose}
-                className="rounded-md border border-[var(--color-border,#e2e8f0)] bg-white px-3 py-1.5 text-xs font-medium hover:bg-slate-50"
+                className="admin-icon-btn rounded-[var(--admin-radius-sm)] border border-[var(--admin-border)] px-3 py-1.5 text-xs font-medium text-[var(--admin-text)]"
               >
                 {String(t('common.close'))}
               </button>
@@ -137,7 +137,7 @@ function ScheduleManagerDrawer(props: ScheduleManagerDrawerProps) {
                 type="button"
                 onClick={() => setInner({ kind: 'create' })}
                 disabled={props.tourId == null}
-                className="inline-flex items-center gap-1 rounded-md bg-[var(--color-primary,#0ea5e9)] px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50"
+                className="inline-flex items-center gap-1 rounded-[var(--admin-radius-sm)] bg-[var(--admin-primary)] px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50"
               >
                 <CalendarPlus className="h-3.5 w-3.5" aria-hidden />
                 {String(t('tours.schedules.createButton'))}
@@ -147,7 +147,7 @@ function ScheduleManagerDrawer(props: ScheduleManagerDrawerProps) {
         }
       >
         {errorMessage ? (
-          <div className="mb-3 flex items-center gap-2 rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700">
+          <div className="mb-3 flex items-center gap-2 rounded-[var(--admin-radius-sm)] border border-[color-mix(in_srgb,var(--admin-danger)_35%,var(--admin-border))] bg-[color-mix(in_srgb,var(--admin-danger)_10%,var(--admin-surface))] px-3 py-2 text-xs text-[var(--admin-danger)]">
             <Sparkles className="h-3.5 w-3.5" aria-hidden />
             {errorMessage}
           </div>

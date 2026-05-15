@@ -1,0 +1,218 @@
+/* ============================================================
+   Vùng ngoài – nền xanh nhạt + sóng nhẹ (giống THD)
+   ============================================================ */
+.hsb-wrap {
+  --hsb-orange: #ff6600;
+  --hsb-orange-hover: #e65c00;
+  --hsb-panel-bg: #e8f4fc;
+  --hsb-panel-border: #b8d9ee;
+
+  background: linear-gradient(180deg, #f4fafd 0%, #e8f2fa 55%, #eef6fc 100%);
+  padding: clamp(14px, 2.5vw, 22px) clamp(12px, 3vw, 32px) clamp(10px, 2vw, 16px);
+  border-bottom: 1px solid #dce8f2;
+  position: relative;
+  overflow: hidden;
+}
+
+.hsb-wrap::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.55;
+  background:
+    radial-gradient(ellipse 140% 70% at 15% -10%, rgba(255, 255, 255, 0.85) 0%, transparent 55%),
+    radial-gradient(ellipse 100% 50% at 85% 110%, rgba(255, 255, 255, 0.5) 0%, transparent 50%),
+    radial-gradient(ellipse 80% 40% at 50% 30%, rgba(180, 220, 245, 0.35) 0%, transparent 60%);
+}
+
+/* ============================================================
+   Panel bo góc chứa thanh tìm kiếm
+   ============================================================ */
+.hsb-panel {
+  position: relative;
+  z-index: 1;
+  max-width: 1160px;
+  margin: 0 auto;
+  background: linear-gradient(165deg, #f0f8ff 0%, #e4f2fb 45%, #dff0fa 100%);
+  border: 1px solid var(--hsb-panel-border);
+  border-radius: 14px;
+  padding: clamp(12px, 2vw, 16px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.75),
+    0 4px 18px rgba(15, 80, 120, 0.08);
+}
+
+.hsb-bar {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* ============================================================
+   Ô chọn / nhập
+   ============================================================ */
+.hsb-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1 1 160px;
+  min-width: 130px;
+  min-height: 46px;
+  border: 1px solid #c5d5e5;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.hsb-field:focus-within {
+  border-color: var(--hsb-orange);
+  box-shadow: 0 0 0 2px rgba(255, 102, 0, 0.2);
+}
+
+.hsb-icon {
+  position: absolute;
+  left: 11px;
+  color: var(--hsb-orange);
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.hsb-arrow {
+  position: absolute;
+  right: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #1a1a1a;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.hsb-field select,
+.hsb-field input[type="date"] {
+  width: 100%;
+  height: 100%;
+  min-height: 46px;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 14px;
+  color: #333;
+  padding: 0 30px 0 36px;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+.hsb-field select option {
+  color: #333;
+}
+
+.hsb-field select {
+  color: #6b7a8c;
+}
+
+.hsb-field-filled select {
+  color: #222;
+}
+
+.hsb-field-date input[type="date"] {
+  position: relative;
+  z-index: 3;
+  color: #222;
+  padding-right: 12px;
+}
+
+.hsb-field-date:not(.hsb-field-date-filled) input[type="date"] {
+  color: transparent;
+}
+
+.hsb-field-date:not(.hsb-field-date-filled) input[type="date"]::-webkit-datetime-edit {
+  color: transparent;
+}
+
+.hsb-date-placeholder {
+  position: absolute;
+  left: 36px;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: #6b7a8c;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.hsb-field-date-filled .hsb-date-placeholder {
+  display: none;
+}
+
+.hsb-field-date input::-webkit-calendar-picker-indicator {
+  opacity: 1;
+  cursor: pointer;
+  margin-left: 4px;
+}
+
+/* ============================================================
+   Nút tìm kiếm – cam đậm
+   ============================================================ */
+.hsb-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  min-height: 46px;
+  padding: 0 clamp(18px, 3vw, 28px);
+  background: var(--hsb-orange);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(255, 102, 0, 0.35);
+  transition: background 0.15s ease, transform 0.12s ease;
+}
+
+.hsb-btn:hover {
+  background: var(--hsb-orange-hover);
+}
+
+.hsb-btn:active {
+  transform: scale(0.98);
+}
+
+@media (max-width: 900px) {
+  .hsb-field {
+    flex: 1 1 calc(50% - 6px);
+  }
+}
+
+@media (max-width: 640px) {
+  .hsb-panel {
+    border-radius: 12px;
+    padding: 12px;
+  }
+
+  .hsb-bar {
+    gap: 8px;
+  }
+
+  .hsb-field {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+
+  .hsb-btn {
+    width: 100%;
+    min-height: 48px;
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "codes": {
+    "SESSION_EXPIRED_NO_REFRESH": "Phiên đăng nhập đã hết hạn hoặc thiếu dữ liệu làm mới an toàn. Vui lòng đăng nhập lại.",
+    "NOT_AUTHENTICATED": "Bạn chưa đăng nhập hoặc phiên không còn hiệu lực. Vui lòng đăng nhập để tiếp tục.",
+    "REFRESH_REJECTED": "Máy chủ không chấp nhận làm mới phiên. Vui lòng đăng nhập lại.",
+    "REFRESH_FAILED": "Không thể làm mới phiên đăng nhập. Vui lòng thử lại hoặc đăng nhập lại.",
+    "NETWORK_ERROR": "Không kết nối được tới máy chủ. Kiểm tra mạng và thử lại.",
+    "HTTP_ERROR": "Yêu cầu không thành công. Vui lòng thử lại sau."
+  }
+}

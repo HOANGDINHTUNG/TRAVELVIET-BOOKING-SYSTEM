@@ -19,6 +19,12 @@ public class TourSearchRequest {
     private Long destinationId;
 
     /**
+     * Khi {@code destinationId} được set: {@code true} (mặc định) — gồm tour của mọi điểm đến con theo {@code destination_path}.
+     */
+    @Builder.Default
+    private Boolean destinationSubtree = Boolean.TRUE;
+
+    /**
      * ISO 3166-1 alpha-2 country code of the tour's primary destination (e.g. VN, KR).
      */
     @Size(min = 2, max = 2, message = "destinationCountryCode must be a 2-letter ISO code")

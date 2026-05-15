@@ -32,11 +32,15 @@ import java.util.List;
 @Mapper(componentModel = "spring", 
         unmappedTargetPolicy = ReportingPolicy.IGNORE,
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
-        imports = {DataNormalizer.class, SlugUtils.class, CrowdLevel.class, DestinationStatus.class})
+        imports = {DataNormalizer.class, SlugUtils.class, CrowdLevel.class, DestinationStatus.class,
+                com.wedservice.backend.module.destinations.util.DestinationProgramSlug.class})
 public interface DestinationMapper extends BaseMapper<DestinationResponse, Destination> {
 
     @Override
-    @Mapping(target = "uuid", source = "uuid")
+    @Mapping(target = "id", source = "id")
+    @Mapping(target = "parentUuid", expression = "java(entity.getParent() == null ? null : entity.getParent().getUuid())")
+    @Mapping(target = "level", source = "level")
+    @Mapping(target = "path", source = "path")
     DestinationResponse toDto(Destination entity);
 
     @Mapping(target = "id", ignore = true)
@@ -54,6 +58,10 @@ public interface DestinationMapper extends BaseMapper<DestinationResponse, Desti
     @Mapping(target = "crowdLevelDefault", expression = "java(request.getCrowdLevelDefault() != null ? request.getCrowdLevelDefault() : CrowdLevel.MEDIUM)")
     @Mapping(target = "isActive", expression = "java(request.getIsActive() != null ? request.getIsActive() : true)")
     @Mapping(target = "status", expression = "java(DestinationStatus.APPROVED)")
+    @Mapping(target = "parent", ignore = true)
+    @Mapping(target = "children", ignore = true)
+    @Mapping(target = "level", ignore = true)
+    @Mapping(target = "path", ignore = true)
     @Mapping(target = "mediaList", ignore = true)
     @Mapping(target = "foods", ignore = true)
     @Mapping(target = "specialties", ignore = true)
@@ -78,6 +86,10 @@ public interface DestinationMapper extends BaseMapper<DestinationResponse, Desti
     @Mapping(target = "isFeatured", expression = "java(defaultBoolean(request.getIsFeatured(), destination.getIsFeatured()))")
     @Mapping(target = "isActive", expression = "java(defaultBoolean(request.getIsActive(), destination.getIsActive()))")
     @Mapping(target = "isOfficial", expression = "java(defaultBoolean(request.getIsOfficial(), destination.getIsOfficial()))")
+    @Mapping(target = "parent", ignore = true)
+    @Mapping(target = "children", ignore = true)
+    @Mapping(target = "level", ignore = true)
+    @Mapping(target = "path", ignore = true)
     @Mapping(target = "mediaList", ignore = true)
     @Mapping(target = "foods", ignore = true)
     @Mapping(target = "specialties", ignore = true)
@@ -92,6 +104,12 @@ public interface DestinationMapper extends BaseMapper<DestinationResponse, Desti
     );
 
     @Mapping(target = "uuid", source = "uuid")
+    @Mapping(target = "id", source = "id")
+    @Mapping(target = "parentUuid", expression = "java(destination.getParent() == null ? null : destination.getParent().getUuid())")
+    @Mapping(target = "parentId", expression = "java(destination.getParent() == null ? null : destination.getParent().getId())")
+    @Mapping(target = "level", source = "level")
+    @Mapping(target = "path", source = "path")
+    @Mapping(target = "programSlug", expression = "java(DestinationProgramSlug.build(destination.getSlug(), destination.getId()))")
     @Mapping(target = "translations", ignore = true)
     DestinationDetailResponse toDetailResponse(Destination destination);
 

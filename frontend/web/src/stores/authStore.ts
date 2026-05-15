@@ -113,6 +113,9 @@ export const useAuthStore = create<AuthState>()(
         permissions: options?.permissions ?? [],
         isAuthenticated: true,
       })
+      if (typeof window !== 'undefined') {
+        window.sessionStorage.setItem('travelviet-login-welcome-pending', '1')
+      }
       window.dispatchEvent(new Event('travelviet:login'))
     },
 

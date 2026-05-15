@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
+import type { TFunction } from "i18next";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import {
   promotionApi,
@@ -17,48 +19,11 @@ type PromotionCard = {
   ctaUrl: string;
 };
 
-/** Shown only when the public API returns no rows (or fails). Not DB-backed. */
-const fallbackPromotions: PromotionCard[] = [
-  {
-    id: -1,
-    title: "Du lich - Teambuilding - Gala",
-    subtitle: "Chuong trinh he tron goi cho doanh nghiep tu 30 khach.",
-    badge: "Uu dai doanh nghiep",
-    imageUrl:
-      "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80",
-    imageAlt: "Doan khach tham gia hoat dong team building ngoai troi",
-    ctaLabel: "Xem uu dai",
-    ctaUrl: "/tours",
-  },
-  {
-    id: -2,
-    title: "Ca cong ty cung di",
-    subtitle: "Goi tour tron goi cho doan 50 den 1000 khach.",
-    badge: "Tour doan lon",
-    imageUrl:
-      "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80",
-    imageAlt: "Nhom nhan vien cong ty cung tham gia chuyen di",
-    ctaLabel: "Nhan tu van",
-    ctaUrl: "/tours",
-  },
-  {
-    id: -3,
-    title: "Hanh trinh gan ket",
-    subtitle: "Giam gia cho nhom gia dinh tu 6 khach tro len.",
-    badge: "Gia dinh",
-    imageUrl:
-      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80",
-    imageAlt: "Gia dinh nghi duong tren bai bien",
-    ctaLabel: "Dat tour ngay",
-    ctaUrl: "/tours",
-  },
-];
-
 /** Generic image when API row exists but `image_url` is still empty (e.g. old rows before V7). */
 const PLACEHOLDER_PROMO_IMAGE =
   "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80";
 
-function toPromotionCard(item: PromotionCampaign): PromotionCard {
+function toPromotionCard(item: PromotionCampaign, t: TFunction): PromotionCard {
   const safeCtaUrl =
     item.ctaUrl?.startsWith("/") && !item.ctaUrl.startsWith("/promotions")
       ? item.ctaUrl
@@ -67,20 +32,24 @@ function toPromotionCard(item: PromotionCampaign): PromotionCard {
   return {
     id: item.id,
     title: item.displayTitle || item.name || item.code || "Promotion",
-    subtitle: item.displaySubtitle || item.description || "Uu dai tour moi nhat",
-    badge: item.badgeText || "Promotion",
+    subtitle:
+      item.displaySubtitle ||
+      item.description ||
+      t("homePage.promotions.defaultSubtitle"),
+    badge: item.badgeText || t("homePage.promotions.defaultBadge"),
     imageUrl: item.imageUrl?.trim() ? item.imageUrl : PLACEHOLDER_PROMO_IMAGE,
     imageAlt:
       item.imageAlt ||
       item.displayTitle ||
       item.name ||
-      "TravelViet promotion",
-    ctaLabel: item.ctaLabel || "Xem uu dai",
+      t("homePage.promotions.defaultBadge"),
+    ctaLabel: item.ctaLabel || t("homePage.promotions.defaultCta"),
     ctaUrl: safeCtaUrl,
   };
 }
 
 export function LatestPromotionsSection() {
+  const { t, i18n } = useTranslation();
   const [promotions, setPromotions] = useState<PromotionCampaign[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -110,25 +79,29 @@ export function LatestPromotionsSection() {
     };
   }, []);
 
+  const fallbackCards = useMemo(
+    () =>
+      t("homePage.promotions.fallback", { returnObjects: true }) as PromotionCard[],
+    [t, i18n.language],
+  );
+
   const cards = useMemo(() => {
     const activeCards = promotions
       .filter((item) => item.name || item.displayTitle || item.code)
       .sort((left, right) => (left.sortOrder ?? 0) - (right.sortOrder ?? 0))
       .slice(0, 3)
-      .map(toPromotionCard);
+      .map((item) => toPromotionCard(item, t));
 
-    // API returned real rows: show them (image may be placeholder until DB has image_url).
     if (activeCards.length > 0) {
       return activeCards;
     }
-    // No rows from server: static demo cards so the section is not empty.
-    return fallbackPromotions;
-  }, [promotions]);
+    return fallbackCards;
+  }, [promotions, t, fallbackCards]);
 
   return (
     <section className="section-shell latest-promotions-section" id="promotions">
       <div className="latest-promotions-heading">
-        <h2>Chương trình khuyến mãi mới nhất</h2>
+        <h2>{t("homePage.promotions.sectionTitle")}</h2>
       </div>
 
       <div className="latest-promotions-grid" aria-busy={isLoading}>
@@ -139,7 +112,17 @@ export function LatestPromotionsSection() {
             to={item.ctaUrl}
             key={item.id}
           >
-            <img src={item.imageUrl} alt={item.imageAlt} loading="lazy" />
+            <div className="latest-promotion-card-inner">
+              <img src={item.imageUrl} alt={item.imageAlt} loading="lazy" />
+              <div className="latest-promotion-card-overlay" aria-hidden="true">
+                <div className="latest-promotion-card-overlay-panel">
+                  <span className="latest-promotion-badge">{item.badge}</span>
+                  <h3 className="latest-promotion-title">{item.title}</h3>
+                  <p className="latest-promotion-sub">{item.subtitle}</p>
+                  <span className="latest-promotion-cta">{item.ctaLabel}</span>
+                </div>
+              </div>
+            </div>
           </Link>
         ))}
       </div>

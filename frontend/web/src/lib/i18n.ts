@@ -3,10 +3,16 @@ import { initReactI18next } from 'react-i18next'
 import HttpBackend from 'i18next-http-backend'
 import { DEFAULT_LANGUAGE, LANGUAGE_MODES } from '../constants/preferences'
 
+import { homeLowerVi } from '../module/home/locales/homeLower.vi'
+import { homeLowerEn } from '../module/home/locales/homeLower.en'
+import { homePageVi } from '../module/home/locales/homePage.vi'
+import { homePageEn } from '../module/home/locales/homePage.en'
+
 export const resources = {
   vi: {
     translation: {
       nav: {
+        ariaMain: 'Điều hướng chính',
         home: 'Trang chủ',
         about: 'Điểm đến',
         pages: 'Gói tour',
@@ -15,6 +21,11 @@ export const resources = {
         plan: 'Lên lịch trình',
       },
       hero: {
+        searchCardAria: 'Tìm tour nhanh',
+        promoStripAria: 'Ưu đãi & cam kết trên banner',
+        promo1: 'Tour trọn gói — linh hoạt ngày khởi hành',
+        promo2: 'Tư vấn minh bạch — không ép shopping',
+        bookingCta: 'Đặt tour ngay',
         cta: 'Khám phá điểm đến',
         slides: [
           {
@@ -66,6 +77,19 @@ export const resources = {
             copy: 'Ngồi thuyền qua hang động, đạp xe đường làng, leo điểm ngắm cảnh và thư giãn giữa thung lũng núi đá vôi.',
           },
         ],
+      },
+      homeQuick: {
+        aria: 'Lối tắt dịch vụ',
+        tours: 'Tour',
+        destinations: 'Điểm đến',
+        support: 'Hỗ trợ',
+        passport: 'Passport',
+      },
+      testimonials: {
+        title: 'Khách hàng nói gì về TravelViet',
+        prevAria: 'Xem đánh giá trước',
+        nextAria: 'Xem đánh giá tiếp theo',
+        starsAria: '{{count}} sao',
       },
       booking: {
         destination: 'Điểm đến',
@@ -245,11 +269,11 @@ export const resources = {
         domesticTitle: 'TOUR BIỂN ĐẢO TRONG NƯỚC',
         internationalTitle: 'TOUR HOT NƯỚC NGOÀI',
         viewMore: 'Xem thêm',
-        viewDetail: 'Xem chi tiết →',
+        viewDetail: 'Xem chi tiết',
         emptyDomestic:
-          'Chưa có tour biển/đảo nổi bật trong nước. Gắn tag BIEN và điểm đến Việt Nam trên backend.',
+          'Chưa có tour trên kệ Biển đảo VN. Gắn tag HOME_BEACH_VN (và nổi bật) trong tour_tags / bảng tags.',
         emptyInternational:
-          'Chưa có tour quốc tế nổi bật. Thêm tour với điểm đến ngoài VN và đánh dấu nổi bật.',
+          'Chưa có tour trên kệ HOT quốc tế. Gắn tag HOME_HOT_INTL (và nổi bật) trong tour_tags / bảng tags.',
         prev: 'Xem trước',
         next: 'Xem tiếp',
       },
@@ -268,7 +292,7 @@ export const resources = {
         domesticBeach: {
           kicker: 'Trong nước',
           title: 'Tour biển đảo trong nước',
-          lead: 'Tour Việt Nam gắn chủ đề biển đảo, đang nổi bật trên hệ thống.',
+          lead: 'Tour được gắn tag kệ HOME_BEACH_VN (nổi bật) — chọn tay cho hàng trang chủ.',
         },
         filtered: {
           kicker: 'Kết quả lọc',
@@ -335,11 +359,43 @@ export const resources = {
         close: 'Đóng tiện ích',
         open: 'Mở tiện ích',
       },
+      header: {
+        brandTagline: 'Tour • Điểm đến • Đặt chỗ',
+        exploreTours: 'Khám phá tour',
+        login: 'Đăng nhập',
+        account: 'Tài khoản',
+        ariaSwitchToLight: 'Chuyển sang giao diện sáng',
+        ariaSwitchToDark: 'Chuyển sang giao diện tối',
+        ariaToggleLanguage: 'Chuyển đổi ngôn ngữ',
+        signedIn: 'Đã đăng nhập',
+        accountPage: 'Trang tài khoản',
+        supportCenter: 'Hỗ trợ',
+        passport: 'Passport du lịch',
+        managementPage: 'Trang quản lý',
+        profileDetails: 'Thông tin cá nhân',
+        fullName: 'Họ tên',
+        displayName: 'Tên hiển thị',
+        email: 'Email',
+        phone: 'Số điện thoại',
+        status: 'Trạng thái',
+        memberLevel: 'Hạng thành viên',
+        notUpdated: 'Chưa cập nhật',
+        logout: 'Đăng xuất',
+        theme: 'Giao diện',
+        light: 'Sáng',
+        dark: 'Tối',
+        language: 'Ngôn ngữ',
+        vietnamese: 'VI',
+        english: 'EN',
+      },
+      homePage: homePageVi,
+      homeLower: homeLowerVi,
     },
   },
   en: {
     translation: {
       nav: {
+        ariaMain: 'Main navigation',
         home: 'Home',
         about: 'Destinations',
         pages: 'Packages',
@@ -348,6 +404,11 @@ export const resources = {
         plan: 'Plan my trip',
       },
       hero: {
+        searchCardAria: 'Quick tour search',
+        promoStripAria: 'Highlights on the hero banner',
+        promo1: 'Full packages — flexible departures',
+        promo2: 'Clear guidance — no forced shopping',
+        bookingCta: 'Book this tour',
         cta: 'Explore destinations',
         slides: [
           {
@@ -399,6 +460,19 @@ export const resources = {
             copy: 'Glide through caves, bike village paths, climb viewpoints, and unwind among limestone valleys and calm water.',
           },
         ],
+      },
+      homeQuick: {
+        aria: 'Service shortcuts',
+        tours: 'Tours',
+        destinations: 'Destinations',
+        support: 'Support',
+        passport: 'Passport',
+      },
+      testimonials: {
+        title: 'What customers say about TravelViet',
+        prevAria: 'Previous testimonials',
+        nextAria: 'Next testimonials',
+        starsAria: '{{count}} stars',
       },
       booking: {
         destination: 'Destination',
@@ -578,11 +652,11 @@ export const resources = {
         domesticTitle: 'BEACH & ISLAND TOURS — VIETNAM',
         internationalTitle: 'HOT INTERNATIONAL TOURS',
         viewMore: 'See more',
-        viewDetail: 'View details →',
+        viewDetail: 'View details',
         emptyDomestic:
-          'No featured beach/island tours in Vietnam yet. Add BIEN tag and VN destinations in the backend.',
+          'No tours on the Vietnam beach shelf yet. Add HOME_BEACH_VN (and featured) in tour_tags / tags.',
         emptyInternational:
-          'No featured international tours yet. Add tours with non-VN destinations marked featured.',
+          'No tours on the international HOT shelf yet. Add HOME_HOT_INTL (and featured) in tour_tags / tags.',
         prev: 'Previous',
         next: 'Next',
       },
@@ -601,7 +675,7 @@ export const resources = {
         domesticBeach: {
           kicker: 'Domestic',
           title: 'Beach & island tours in Vietnam',
-          lead: 'Vietnam tours tagged beach/island, featured on the platform.',
+          lead: 'Tours tagged HOME_BEACH_VN (featured) — curated for the home shelf.',
         },
         filtered: {
           kicker: 'Filtered results',
@@ -668,6 +742,37 @@ export const resources = {
         close: 'Close tools',
         open: 'Open tools',
       },
+      header: {
+        brandTagline: 'Tour • Destination • Booking',
+        exploreTours: 'Explore tours',
+        login: 'Sign in',
+        account: 'Account',
+        ariaSwitchToLight: 'Switch to light theme',
+        ariaSwitchToDark: 'Switch to dark theme',
+        ariaToggleLanguage: 'Switch language',
+        signedIn: 'Signed in',
+        accountPage: 'Account center',
+        supportCenter: 'Support center',
+        passport: 'Travel passport',
+        managementPage: 'Management',
+        profileDetails: 'Personal details',
+        fullName: 'Full name',
+        displayName: 'Display name',
+        email: 'Email',
+        phone: 'Phone',
+        status: 'Status',
+        memberLevel: 'Member level',
+        notUpdated: 'Not updated',
+        logout: 'Sign out',
+        theme: 'Theme',
+        light: 'Light',
+        dark: 'Dark',
+        language: 'Language',
+        vietnamese: 'VI',
+        english: 'EN',
+      },
+      homePage: homePageEn,
+      homeLower: homeLowerEn,
     },
   },
 } as const

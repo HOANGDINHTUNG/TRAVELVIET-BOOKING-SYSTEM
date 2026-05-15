@@ -5,9 +5,12 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
@@ -118,6 +121,22 @@ public class Destination extends AuditableEntity {
     @Column(name = "is_official", nullable = false)
     @Builder.Default
     private Boolean isOfficial = false;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id")
+    private Destination parent;
+
+    @OneToMany(mappedBy = "parent")
+    @Builder.Default
+    private List<Destination> children = new ArrayList<>();
+
+    @Column(name = "destination_level", nullable = false)
+    @Builder.Default
+    private Integer level = 0;
+
+    @Column(name = "destination_path", nullable = false, length = 512)
+    @Builder.Default
+    private String path = "/";
 
     @OneToMany(mappedBy = "destination", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("sortOrder ASC")

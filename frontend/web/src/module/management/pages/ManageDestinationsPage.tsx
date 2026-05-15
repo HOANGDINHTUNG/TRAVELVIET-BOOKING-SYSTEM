@@ -47,6 +47,7 @@ type DestinationFormState = {
   bestTimeFromMonth: string
   bestTimeToMonth: string
   crowdLevelDefault: string
+  parentId: string
   isFeatured: boolean
   isActive: boolean
   isOfficial: boolean
@@ -91,6 +92,7 @@ function destinationToForm(detail: AdminDestinationDetail): DestinationFormState
     bestTimeFromMonth: toText(detail.bestTimeFromMonth),
     bestTimeToMonth: toText(detail.bestTimeToMonth),
     crowdLevelDefault: toText(detail.crowdLevelDefault || 'MEDIUM'),
+    parentId: detail.parentId != null && detail.parentId !== undefined ? String(detail.parentId) : '',
     isFeatured: Boolean(detail.isFeatured),
     isActive: detail.isActive !== false,
     isOfficial: Boolean(detail.isOfficial),
@@ -121,6 +123,7 @@ function buildPayload(
     isFeatured: form.isFeatured,
     isActive: form.isActive,
     isOfficial: form.isOfficial,
+    parentId: form.parentId.trim() === '' ? null : optionalNumber(form.parentId),
   }
 }
 
@@ -155,6 +158,8 @@ function ManageDestinationsPage() {
       const page = await contentManagementApi.getAdminDestinations({
         keyword: searchQuery.trim() || undefined,
         status: selectedStatus || undefined,
+        sortBy: 'path',
+        sortDir: 'asc',
       })
 
       setDestinations(page.content)
@@ -184,6 +189,14 @@ function ManageDestinationsPage() {
       return counts
     }, {})
   }, [destinations])
+
+  const sortedDestinations = useMemo(() => {
+    return [...destinations].sort((a, b) => (a.path || '').localeCompare(b.path || ''))
+  }, [destinations])
+
+  const parentSelectOptions = useMemo(() => {
+    return sortedDestinations.filter((d) => d.id != null)
+  }, [sortedDestinations])
 
   const openEdit = async (destination: AdminDestination) => {
     if (!destination.uuid) {
@@ -430,6 +443,23 @@ function ManageDestinationsPage() {
                 onChange={(event) => updateForm('slug', event.target.value)}
               />
             </div>
+            <div className="mgmt-edit-field wide">
+              <label htmlFor="destination-parent">Diem den cha (ID)</label>
+              <select
+                id="destination-parent"
+                value={form.parentId}
+                onChange={(event) => updateForm('parentId', event.target.value)}
+              >
+                <option value="">— Goc (khong cha) —</option>
+                {parentSelectOptions
+                  .filter((d) => d.uuid !== selectedDetail.uuid)
+                  .map((d) => (
+                    <option key={d.uuid || String(d.id)} value={String(d.id)}>
+                      {'—'.repeat(Math.max(0, d.level ?? 0))} {d.name} ({d.code || d.slug || d.id})
+                    </option>
+                  ))}
+              </select>
+            </div>
             <div className="mgmt-edit-field">
               <label htmlFor="destination-country">Country</label>
               <input
@@ -588,11 +618,12 @@ function ManageDestinationsPage() {
         </div>
       ) : (
         <div className="mgmt-content-grid">
-          {destinations.map((destination) => {
+          {sortedDestinations.map((destination) => {
             const status = normalizeStatus(destination.status)
             const pending = status === 'pending'
             const canEdit = status === 'approved' && !destination.deletedAt
             const busy = busyId === destination.uuid
+            const indent = Math.max(0, destination.level ?? 0)
 
             return (
               <article className="mgmt-content-card" key={destination.uuid || destination.name}>
@@ -609,7 +640,9 @@ function ManageDestinationsPage() {
                   </span>
                 </div>
                 <div className="mgmt-content-card-body">
-                  <h3>{destination.name}</h3>
+                  <h3 style={{ paddingLeft: indent * 10 }}>
+                    {destination.name}
+                  </h3>
                   <p>{getDestinationSummary(destination)}</p>
                   <div className="mgmt-content-meta">
                     <span>

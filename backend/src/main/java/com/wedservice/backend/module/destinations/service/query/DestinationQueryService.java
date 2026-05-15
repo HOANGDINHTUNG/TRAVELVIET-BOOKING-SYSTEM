@@ -9,5 +9,9 @@ import java.util.UUID;
 
 public interface DestinationQueryService {
     PageResponse<DestinationPublicResponse> searchApprovedDestinations(DestinationSearchRequest request);
+
     DestinationPublicDetailResponse getApprovedDestinationByUuid(UUID uuid);
+
+    /** Chi tiết theo slug dạng {@code ...-pid-123} (travel.com.vn). */
+    DestinationPublicDetailResponse getApprovedDestinationByProgramSlug(String programSlug);
 }

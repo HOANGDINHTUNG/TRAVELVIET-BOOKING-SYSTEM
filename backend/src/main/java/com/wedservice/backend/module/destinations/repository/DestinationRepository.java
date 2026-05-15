@@ -29,4 +29,12 @@ public interface DestinationRepository extends JpaRepository<Destination, Long>,
             Collection<DestinationStatus> statuses
     );
 
+    java.util.List<Destination> findByParentIsNullAndDeletedAtIsNullAndIsActiveTrueAndStatusOrderByNameAsc(
+            DestinationStatus status);
+
+    java.util.List<Destination> findByParent_IdAndDeletedAtIsNullAndIsActiveTrueAndStatusOrderByNameAsc(
+            Long parentId,
+            DestinationStatus status);
+
+    java.util.List<Destination> findByParent_IdAndDeletedAtIsNullOrderByNameAsc(Long parentId);
 }

@@ -4,6 +4,7 @@ import com.wedservice.backend.module.bookings.entity.Booking;
 import com.wedservice.backend.module.bookings.entity.BookingStatus;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,7 +14,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface BookingRepository extends JpaRepository<Booking, Long> {
+public interface BookingRepository extends JpaRepository<Booking, Long>, JpaSpecificationExecutor<Booking> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select b from Booking b where b.id = :id")

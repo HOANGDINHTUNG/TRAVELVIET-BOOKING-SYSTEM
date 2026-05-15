@@ -9,15 +9,16 @@
   left: 50%;
   z-index: 2147483647;
   padding: 0 14px;
-  border-radius: 8px;
+  border-radius: 10px;
   transform: translateX(-50%);
   box-sizing: border-box;
   color: #fff;
-  background: rgba(90, 94, 96, 0);
-  transition:
-    background-color 240ms ease,
-    color 240ms ease;
-  will-change: background-color, backdrop-filter, box-shadow, padding;
+  will-change: backdrop-filter, box-shadow;
+}
+
+.site-nav.tv-glass-card--navbar.is-scrolled {
+  padding-top: 12px;
+  padding-bottom: 12px;
 }
 
 .site-nav.has-auth-garden {
@@ -412,13 +413,8 @@
   background: linear-gradient(180deg, #f5fbf4, #c8e5cf);
 }
 
-.site-nav.is-scrolled {
-  background: rgba(82, 87, 89, 0.78);
-}
-
 .theme-light .site-nav.is-scrolled {
   color: #283618;
-  background: rgba(254, 250, 224, 0.94);
 }
 
 .theme-light .site-nav.is-scrolled .brand,
@@ -517,7 +513,6 @@
 
 .theme-dark .site-nav.is-scrolled {
   color: #eadcc5;
-  background: rgba(74, 47, 31, 0.92);
 }
 
 .theme-dark .site-nav.is-scrolled .brand,

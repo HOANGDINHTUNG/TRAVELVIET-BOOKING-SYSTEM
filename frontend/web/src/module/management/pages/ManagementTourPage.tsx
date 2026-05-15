@@ -621,61 +621,71 @@ function ManagementTourPage({ mode }: ManagementTourPageProps) {
         </header>
 
         <div className="mgmt-tour-toolbar">
-          <label className="mgmt-crud-search">
-            <Search aria-hidden="true" />
+          <div className="mgmt-tour-toolbar-row mgmt-tour-toolbar-row--primary">
+            <label className="mgmt-crud-search">
+              <Search aria-hidden="true" />
+              <input
+                value={query.keyword}
+                onChange={(event) => updateQuery({ keyword: event.target.value })}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') {
+                    void loadTours(0)
+                  }
+                }}
+                placeholder="Tìm theo tên hoặc mã tour"
+              />
+            </label>
+            <select value={query.tripMode} onChange={(event) => updateQuery({ tripMode: event.target.value })}>
+              {tripModeOptions.map((option) => (
+                <option value={option.value} key={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+            <select value={query.featuredOnly} onChange={(event) => updateQuery({ featuredOnly: event.target.value })}>
+              {booleanFilterOptions.map((option) => (
+                <option value={option.value} key={option.value}>
+                  Nổi bật: {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="mgmt-tour-toolbar-row mgmt-tour-toolbar-row--secondary">
             <input
-              value={query.keyword}
-              onChange={(event) => updateQuery({ keyword: event.target.value })}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter') {
-                  void loadTours(0)
-                }
-              }}
-              placeholder="Tìm theo tên hoặc mã tour"
+              value={query.destinationId}
+              onChange={(event) => updateQuery({ destinationId: event.target.value })}
+              placeholder="Lọc theo destinationId"
+              aria-label="Lọc theo destinationId"
             />
-          </label>
-          <select value={query.tripMode} onChange={(event) => updateQuery({ tripMode: event.target.value })}>
-            {tripModeOptions.map((option) => (
-              <option value={option.value} key={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-          <select value={query.featuredOnly} onChange={(event) => updateQuery({ featuredOnly: event.target.value })}>
-            {booleanFilterOptions.map((option) => (
-              <option value={option.value} key={option.value}>
-                Nổi bật: {option.label}
-              </option>
-            ))}
-          </select>
-          <input
-            value={query.destinationId}
-            onChange={(event) => updateQuery({ destinationId: event.target.value })}
-            placeholder="Lọc theo destinationId"
-            aria-label="Lọc theo destinationId"
-          />
-          <button type="button" onClick={() => void loadTours(0)} disabled={loading}>
-            <RefreshCcw aria-hidden="true" />
-            Tải lại
-          </button>
-          {canCreateTour && mode === 'tours' && (
-            <button type="button" onClick={() => {
-              setSelectedTour(null)
-              setTourForm(createEmptyTourForm())
-            }}>
-              <Plus aria-hidden="true" />
-              Tạo tour
+            <button type="button" onClick={() => void loadTours(0)} disabled={loading}>
+              <RefreshCcw aria-hidden="true" />
+              Tải lại
             </button>
-          )}
-          {canCreateSchedule && mode === 'schedules' && (
-            <button type="button" onClick={() => setScheduleForm(createEmptyScheduleForm(selectedTour?.id ?? null))}>
-              <Plus aria-hidden="true" />
-              Tạo lịch
-            </button>
-          )}
+            {canCreateTour && mode === 'tours' && (
+              <button type="button" onClick={() => {
+                setSelectedTour(null)
+                setTourForm(createEmptyTourForm())
+              }}>
+                <Plus aria-hidden="true" />
+                Tạo tour
+              </button>
+            )}
+            {canCreateSchedule && mode === 'schedules' && (
+              <button type="button" onClick={() => setScheduleForm(createEmptyScheduleForm(selectedTour?.id ?? null))}>
+                <Plus aria-hidden="true" />
+                Tạo lịch
+              </button>
+            )}
+          </div>
         </div>
 
-        <div className="mgmt-tour-layout">
+        <div
+          className={
+            mode === 'schedules'
+              ? 'mgmt-tour-layout mgmt-tour-layout--schedules'
+              : 'mgmt-tour-layout'
+          }
+        >
           <article className="mgmt-crud-panel">
             <div className="mgmt-section-title">
               <h3>Danh sách tour</h3>
@@ -725,8 +735,8 @@ function ManagementTourPage({ mode }: ManagementTourPageProps) {
             </div>
           </article>
 
-          <aside className="mgmt-crud-panel">
-            {mode === 'tours' ? (
+          {mode === 'tours' ? (
+            <aside className="mgmt-crud-panel">
               <>
                 <div className="mgmt-section-title">
                   <h3>{tourForm.id ? 'Cập nhật tour' : 'Tạo tour'}</h3>
@@ -793,11 +803,13 @@ function ManagementTourPage({ mode }: ManagementTourPageProps) {
                   </div>
                 </div>
               </>
-            ) : (
-              <>
+            </aside>
+          ) : (
+            <>
+              <div className="mgmt-crud-panel mgmt-schedule-column">
                 <div className="mgmt-section-title">
-                  <h3>Lịch khởi hành của tour</h3>
-                  <p>Chọn tour bên trái để xem và cấu hình lịch khởi hành.</p>
+                  <h3>Lịch khởi hành</h3>
+                  <p>Chọn tour bên trái, sau đó chọn một lịch trong danh sách.</p>
                 </div>
 
                 {selectedTour && (
@@ -855,6 +867,13 @@ function ManagementTourPage({ mode }: ManagementTourPageProps) {
                     )}
                   </div>
                 )}
+              </div>
+
+              <div className="mgmt-crud-panel mgmt-schedule-form-column">
+                <div className="mgmt-section-title">
+                  <h3>Chi tiết lịch</h3>
+                  <p>Chỉnh sửa lịch đã chọn hoặc tạo lịch mới bằng nút trên thanh công cụ.</p>
+                </div>
 
                 <div className="mgmt-tour-form">
                   <label><span>Mã lịch</span><input value={scheduleForm.scheduleCode} onChange={(event) => setScheduleForm((current) => ({ ...current, scheduleCode: event.target.value }))} /></label>
@@ -882,9 +901,9 @@ function ManagementTourPage({ mode }: ManagementTourPageProps) {
                     </button>
                   </div>
                 </div>
-              </>
-            )}
-          </aside>
+              </div>
+            </>
+          )}
         </div>
 
         {message && <p className="mgmt-crud-message">{message}</p>}

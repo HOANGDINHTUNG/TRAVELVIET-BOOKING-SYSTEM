@@ -92,6 +92,7 @@ export type AdminDestinationPayload = {
   isFeatured?: boolean
   isActive?: boolean
   isOfficial?: boolean
+  parentId?: number | null
   mediaList?: DestinationMediaPayload[]
   foods?: Array<Pick<DestinationFood, 'foodName' | 'description' | 'isFeatured'>>
   specialties?: Array<Pick<DestinationSpecialty, 'specialtyName' | 'description'>>
@@ -228,6 +229,7 @@ export function destinationDetailToPayload(
     isFeatured: detail.isFeatured,
     isActive: detail.isActive,
     isOfficial: detail.isOfficial,
+    parentId: detail.parentId,
     mediaList: detail.mediaList?.map((item) => ({
       mediaType: item.mediaType,
       mediaUrl: item.mediaUrl,

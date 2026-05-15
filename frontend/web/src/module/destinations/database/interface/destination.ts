@@ -48,7 +48,15 @@ export type DestinationEvent = {
   isActive?: boolean
 }
 
+export type DestinationBreadcrumbItem = {
+  uuid?: string
+  name: string
+  slug?: string
+  programSlug?: string
+}
+
 export type BackendDestinationDetail = {
+  id?: number
   uuid: string
   name: string
   slug?: string
@@ -71,6 +79,12 @@ export type BackendDestinationDetail = {
   activities?: DestinationActivity[]
   tips?: DestinationTip[]
   events?: DestinationEvent[]
+  parentUuid?: string
+  parentId?: number
+  level?: number
+  path?: string
+  programSlug?: string
+  breadcrumbs?: DestinationBreadcrumbItem[]
 }
 
 export type DestinationDetail = Omit<BackendDestinationDetail, 'mediaList'> & {
@@ -81,4 +95,5 @@ export type DestinationDetail = Omit<BackendDestinationDetail, 'mediaList'> & {
   activities: DestinationActivity[]
   tips: DestinationTip[]
   events: DestinationEvent[]
+  breadcrumbs?: DestinationBreadcrumbItem[]
 }

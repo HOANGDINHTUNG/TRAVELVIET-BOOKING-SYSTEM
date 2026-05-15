@@ -1,25 +1,18 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { motion } from 'motion/react'
+import { toast } from 'sonner'
 import {
   AlertTriangle,
-  CheckCheck,
   CheckCircle2,
-  Loader2,
-  PackageX,
   Search,
-  Undo2,
-  UserCheck,
-  XCircle,
 } from 'lucide-react'
 import { handleApiError } from '../../../../lib/handleApiError'
-import BookingStatusBadge from '../../../bookings/components/BookingStatusBadge'
-import PaymentStatusBadge from '../../../bookings/components/PaymentStatusBadge'
+import { publicBookingKeys } from '../../../bookings/hooks/useBookingMutation'
+import { ManagementBookingsApi } from '../api/managementBookings.api'
 import {
-  formatCurrencyVnd,
-  formatDateTime,
-} from '../../schedules/utils/currency'
-import {
+  managementBookingKeys,
   useCancelBooking,
   useCheckInBooking,
   useCompleteBooking,
@@ -30,6 +23,7 @@ import type {
   ManagementBookingSearchParams,
 } from '../types/managementBooking'
 import { DEFAULT_MANAGEMENT_BOOKING_SEARCH } from '../types/managementBooking'
+import BookingsDataTable from '../components/BookingsDataTable'
 import RefundDialog from '../components/RefundDialog'
 
 type ConfirmAction = 'cancel' | 'checkIn' | 'complete'
@@ -44,6 +38,7 @@ const FIELD_CLASS =
 
 function ManagementBookingsPage() {
   const { t } = useTranslation('management')
+  const queryClient = useQueryClient()
   const [params, setParams] = useState<ManagementBookingSearchParams>(
     DEFAULT_MANAGEMENT_BOOKING_SEARCH,
   )
@@ -56,9 +51,77 @@ function ManagementBookingsPage() {
   const [confirm, setConfirm] = useState<ConfirmState>(null)
   const [refundBooking, setRefundBooking] =
     useState<ManagementBookingResponse | null>(null)
+  const [bulkBusy, setBulkBusy] = useState(false)
 
   const total = query.data?.page.totalElements ?? 0
   const usedFallback = query.data?.fallback === true
+
+  const invalidateAfterBulk = useCallback(
+    (touchedIds: number[]) => {
+      void queryClient.invalidateQueries({ queryKey: managementBookingKeys.all })
+      for (const id of touchedIds) {
+        void queryClient.invalidateQueries({
+          queryKey: publicBookingKeys.detail(id),
+        })
+      }
+      void queryClient.invalidateQueries({ queryKey: publicBookingKeys.myList() })
+    },
+    [queryClient],
+  )
+
+  const runBulkCheckIn = useCallback(
+    async (ids: number[]) => {
+      if (ids.length === 0) return
+      setBulkBusy(true)
+      let ok = 0
+      try {
+        for (const id of ids) {
+          try {
+            await ManagementBookingsApi.checkIn(id)
+            ok++
+          } catch (err) {
+            toast.error(
+              handleApiError(err, String(t('bookings.toast.checkInFailed'))),
+            )
+          }
+        }
+        invalidateAfterBulk(ids)
+        toast.success(
+          String(t('bookings.page.bulk.done', { ok, total: ids.length })),
+        )
+      } finally {
+        setBulkBusy(false)
+      }
+    },
+    [invalidateAfterBulk, t],
+  )
+
+  const runBulkComplete = useCallback(
+    async (ids: number[]) => {
+      if (ids.length === 0) return
+      setBulkBusy(true)
+      let ok = 0
+      try {
+        for (const id of ids) {
+          try {
+            await ManagementBookingsApi.complete(id)
+            ok++
+          } catch (err) {
+            toast.error(
+              handleApiError(err, String(t('bookings.toast.completeFailed'))),
+            )
+          }
+        }
+        invalidateAfterBulk(ids)
+        toast.success(
+          String(t('bookings.page.bulk.done', { ok, total: ids.length })),
+        )
+      } finally {
+        setBulkBusy(false)
+      }
+    },
+    [invalidateAfterBulk, t],
+  )
 
   const visibleBookings = useMemo(() => {
     const bookings = query.data?.page.content ?? []
@@ -187,69 +250,31 @@ function ManagementBookingsPage() {
       </div>
 
       {/* Body */}
-      {query.isPending ? (
-        <div className="flex items-center justify-center gap-2 rounded-xl border border-[var(--color-border,#e2e8f0)] bg-slate-50 px-3 py-12 text-sm text-[var(--color-muted,#64748b)]">
-          <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-          {String(t('bookings.page.loading'))}
-        </div>
-      ) : query.error ? (
+      {query.error ? (
         <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-6 text-center text-sm text-rose-800">
           {handleApiError(
             query.error,
             String(t('bookings.page.errorMessage')),
           )}
         </div>
-      ) : visibleBookings.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-[var(--color-border,#e2e8f0)] bg-slate-50 px-4 py-12 text-center text-sm text-[var(--color-muted,#64748b)]">
-          <PackageX
-            className="mx-auto mb-2 h-8 w-8 text-slate-400"
-            aria-hidden
-          />
-          {String(t('bookings.page.empty'))}
-        </div>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-[var(--color-border,#e2e8f0)] bg-white">
-          <table className="min-w-full divide-y divide-slate-100 text-sm">
-            <thead className="bg-slate-50 text-[10px] uppercase tracking-wide text-slate-600">
-              <tr>
-                <Th>{String(t('bookings.page.col.id'))}</Th>
-                <Th>{String(t('bookings.page.col.contact'))}</Th>
-                <Th>{String(t('bookings.page.col.tour'))}</Th>
-                <Th>{String(t('bookings.page.col.bookedAt'))}</Th>
-                <Th>{String(t('bookings.page.col.status'))}</Th>
-                <Th className="text-right">
-                  {String(t('bookings.page.col.amount'))}
-                </Th>
-                <Th className="text-right">
-                  {String(t('bookings.page.col.actions'))}
-                </Th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {visibleBookings.map((booking) => (
-                <BookingRow
-                  key={booking.id}
-                  booking={booking}
-                  busy={
-                    cancelMutation.isPending ||
-                    checkInMutation.isPending ||
-                    completeMutation.isPending
-                  }
-                  onCancel={() =>
-                    setConfirm({ bookingId: booking.id, action: 'cancel' })
-                  }
-                  onCheckIn={() =>
-                    setConfirm({ bookingId: booking.id, action: 'checkIn' })
-                  }
-                  onComplete={() =>
-                    setConfirm({ bookingId: booking.id, action: 'complete' })
-                  }
-                  onRefund={() => setRefundBooking(booking)}
-                />
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <BookingsDataTable
+          rows={visibleBookings}
+          isPending={query.isPending}
+          busy={
+            cancelMutation.isPending ||
+            checkInMutation.isPending ||
+            completeMutation.isPending ||
+            bulkBusy
+          }
+          bulkSelectionEnabled={!usedFallback}
+          onBulkCheckIn={!usedFallback ? runBulkCheckIn : undefined}
+          onBulkComplete={!usedFallback ? runBulkComplete : undefined}
+          onCancel={(b) => setConfirm({ bookingId: b.id, action: 'cancel' })}
+          onCheckIn={(b) => setConfirm({ bookingId: b.id, action: 'checkIn' })}
+          onComplete={(b) => setConfirm({ bookingId: b.id, action: 'complete' })}
+          onRefund={setRefundBooking}
+        />
       )}
 
       <p className="mt-2 text-right text-[10px] text-[var(--color-muted,#94a3b8)]">
@@ -277,142 +302,6 @@ function ManagementBookingsPage() {
         onClose={() => setRefundBooking(null)}
       />
     </motion.section>
-  )
-}
-
-/* -------------------------------------------------------------------------- */
-
-function Th(props: { children: React.ReactNode; className?: string }) {
-  return (
-    <th
-      scope="col"
-      className={`px-3 py-2 text-left font-semibold ${props.className ?? ''}`}
-    >
-      {props.children}
-    </th>
-  )
-}
-
-type BookingRowProps = {
-  booking: ManagementBookingResponse
-  busy: boolean
-  onCancel: () => void
-  onCheckIn: () => void
-  onComplete: () => void
-  onRefund: () => void
-}
-
-function BookingRow({ booking, busy, ...handlers }: BookingRowProps) {
-  const { t } = useTranslation('management')
-  const canCheckIn =
-    booking.status === 'paid' || booking.status === 'confirmed'
-  const canComplete = booking.status === 'checked_in'
-  const canCancel =
-    booking.status === 'pending' || booking.status === 'confirmed'
-  const canRefund =
-    booking.paymentStatus === 'paid' || booking.paymentStatus === 'partially_refunded'
-
-  return (
-    <tr className="hover:bg-slate-50/60">
-      <td className="px-3 py-2 align-top font-mono text-[11px]">
-        {booking.bookingCode ?? `#${booking.id}`}
-      </td>
-      <td className="px-3 py-2 align-top">
-        <div className="font-medium">{booking.contactName ?? '—'}</div>
-        <div className="text-[10px] text-[var(--color-muted,#64748b)]">
-          {booking.contactPhone ?? ''}
-          {booking.contactEmail ? ` · ${booking.contactEmail}` : ''}
-        </div>
-      </td>
-      <td className="px-3 py-2 align-top">
-        #{booking.tourId} · #{booking.scheduleId}
-      </td>
-      <td className="px-3 py-2 align-top text-xs text-[var(--color-muted,#64748b)]">
-        {formatDateTime(booking.createdAt)}
-      </td>
-      <td className="px-3 py-2 align-top">
-        <div className="flex flex-wrap items-center gap-1">
-          <BookingStatusBadge status={booking.status} />
-          <PaymentStatusBadge status={booking.paymentStatus} />
-        </div>
-      </td>
-      <td className="px-3 py-2 text-right align-top tabular-nums">
-        {formatCurrencyVnd(booking.finalAmount)}
-      </td>
-      <td className="px-3 py-2 align-top">
-        <div className="flex flex-wrap items-center justify-end gap-1">
-          {canCheckIn ? (
-            <ActionBtn
-              icon={UserCheck}
-              label={String(t('bookings.page.actions.checkIn'))}
-              onClick={handlers.onCheckIn}
-              disabled={busy}
-              tone="indigo"
-            />
-          ) : null}
-          {canComplete ? (
-            <ActionBtn
-              icon={CheckCheck}
-              label={String(t('bookings.page.actions.complete'))}
-              onClick={handlers.onComplete}
-              disabled={busy}
-              tone="emerald"
-            />
-          ) : null}
-          {canRefund ? (
-            <ActionBtn
-              icon={Undo2}
-              label={String(t('bookings.page.actions.refund'))}
-              onClick={handlers.onRefund}
-              disabled={busy}
-              tone="violet"
-            />
-          ) : null}
-          {canCancel ? (
-            <ActionBtn
-              icon={XCircle}
-              label={String(t('bookings.page.actions.cancel'))}
-              onClick={handlers.onCancel}
-              disabled={busy}
-              tone="rose"
-            />
-          ) : null}
-        </div>
-      </td>
-    </tr>
-  )
-}
-
-const TONE_CLASS = {
-  indigo:
-    'border-indigo-200 text-indigo-800 hover:bg-indigo-50 focus-visible:ring-indigo-200',
-  emerald:
-    'border-emerald-200 text-emerald-800 hover:bg-emerald-50 focus-visible:ring-emerald-200',
-  rose: 'border-rose-200 text-rose-800 hover:bg-rose-50 focus-visible:ring-rose-200',
-  violet:
-    'border-violet-200 text-violet-800 hover:bg-violet-50 focus-visible:ring-violet-200',
-} as const
-
-type ActionBtnProps = {
-  icon: React.ComponentType<{ className?: string; 'aria-hidden'?: boolean }>
-  label: string
-  tone: keyof typeof TONE_CLASS
-  onClick: () => void
-  disabled?: boolean
-}
-
-function ActionBtn(props: ActionBtnProps) {
-  return (
-    <button
-      type="button"
-      onClick={props.onClick}
-      disabled={props.disabled}
-      title={props.label}
-      className={`inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[10px] font-medium transition disabled:opacity-50 ${TONE_CLASS[props.tone]}`}
-    >
-      <props.icon className="h-3 w-3" aria-hidden />
-      {props.label}
-    </button>
   )
 }
 

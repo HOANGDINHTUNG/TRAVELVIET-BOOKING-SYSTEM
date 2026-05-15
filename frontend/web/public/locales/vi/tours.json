@@ -26,6 +26,34 @@
       "loading": "Đang tải lịch khởi hành...",
       "empty": "Hiện chưa có đợt khởi hành đang mở bán.",
       "remaining": "Còn"
-    }
+    },
+    "tabs": {
+      "description": "Mô tả",
+      "highlights": "Điểm nhấn",
+      "inclusions": "Bao gồm",
+      "exclusions": "Không gồm",
+      "notes": "Lưu ý",
+      "policy": "Chính sách huỷ"
+    },
+    "stock": {
+      "inStock": "Còn chỗ",
+      "limited": "Sắp hết"
+    },
+    "cta": {
+      "pickSchedule": "Chọn lịch & đặt tour",
+      "viewPolicy": "Xem chi tiết chính sách"
+    },
+    "itinerarySummaryTitle": "Tổng quan lịch trình",
+    "itineraryItems": "Hoạt động trong ngày",
+    "seasonalityTitle": "Mùa du lịch gợi ý",
+    "seasonMonths": "Tháng {{from}} – {{to}}",
+    "checklistTitle": "Checklist chuẩn bị",
+    "relatedTitle": "Tour gợi ý",
+    "relatedMockLead": "Gợi ý demo — tích hợp API sau.",
+    "relatedCta": "Xem tour",
+    "reviewsShort": "đánh giá",
+    "bookingsShort": "lượt đặt",
+    "bookingBandHint": "Chọn ngày khởi hành phù hợp — giá theo từng đợt hiển thị trên thẻ. Sau đó điền số khách ở khung bên phải (máy tính) hoặc bên dưới (điện thoại).",
+    "galleryCount": "Ảnh {{current}} / {{total}}"
   }
 }

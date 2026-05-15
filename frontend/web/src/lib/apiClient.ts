@@ -15,6 +15,7 @@ import {
   LEGACY_AUTH_TOKEN_KEY,
   LEGACY_TOKEN_KEY,
   clearStoredAuthSession,
+  getStoredAccessToken,
   getStoredRefreshToken,
   persistAuthSessionData,
 } from '../utils/authSessionStorage'
@@ -92,9 +93,12 @@ apiClient.interceptors.request.use((config) => {
 async function refreshAccessToken(): Promise<AuthResponse> {
   const refreshToken = getStoredRefreshToken()
   if (!refreshToken) {
+    const hadAccessToken = Boolean(getStoredAccessToken())
     throw new ApiClientError({
-      message: 'Missing refresh token',
-      errorCode: 'MISSING_REFRESH_TOKEN',
+      message: '',
+      errorCode: hadAccessToken
+        ? 'SESSION_EXPIRED_NO_REFRESH'
+        : 'NOT_AUTHENTICATED',
       httpStatus: 401,
     })
   }
@@ -108,10 +112,19 @@ async function refreshAccessToken(): Promise<AuthResponse> {
     },
   )
 
-  const auth = unwrapApiResponse(
-    response.data,
-    'Could not refresh token',
-  )
+  let auth: AuthResponse
+  try {
+    auth = unwrapApiResponse(response.data, '')
+  } catch (e) {
+    if (e instanceof ApiClientError) {
+      throw e
+    }
+    throw new ApiClientError({
+      message: '',
+      errorCode: 'REFRESH_REJECTED',
+      httpStatus: response.status >= 400 ? response.status : 401,
+    })
+  }
   persistAuthSessionData(auth)
   window.dispatchEvent(new Event('travelviet:token-refresh'))
   return auth
@@ -178,10 +191,7 @@ apiClient.interceptors.response.use(
       }
       return Promise.reject(
         new ApiClientError({
-          message:
-            refreshError instanceof Error
-              ? refreshError.message
-              : 'Session expired.',
+          message: '',
           errorCode: 'REFRESH_FAILED',
           httpStatus: 401,
         }),

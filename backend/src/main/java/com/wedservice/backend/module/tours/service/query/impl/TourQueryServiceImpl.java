@@ -5,6 +5,7 @@ import com.wedservice.backend.common.exception.BadRequestException;
 import com.wedservice.backend.common.exception.ResourceNotFoundException;
 import com.wedservice.backend.common.i18n.LocaleTagUtil;
 import com.wedservice.backend.module.destinations.entity.Destination;
+import com.wedservice.backend.module.destinations.repository.DestinationRepository;
 import com.wedservice.backend.module.tours.dto.request.TourSearchRequest;
 import com.wedservice.backend.module.tours.dto.response.CancellationPolicyResponse;
 import com.wedservice.backend.module.tours.dto.response.CancellationPolicyRuleResponse;
@@ -110,6 +111,7 @@ public class TourQueryServiceImpl implements TourQueryService {
     private final TourScheduleGuideRepository tourScheduleGuideRepository;
     private final TourTranslationRepository tourTranslationRepository;
     private final TourTranslationMergeHelper tourTranslationMergeHelper;
+    private final DestinationRepository destinationRepository;
 
     @Override
     @Cacheable(value = "tours", keyGenerator = "tourSearchCacheKeyGenerator")
@@ -138,7 +140,23 @@ public class TourQueryServiceImpl implements TourQueryService {
         }
 
         if (request.getDestinationId() != null) {
-            builder.and(qTour.destination.id.eq(request.getDestinationId()));
+            Destination anchor = destinationRepository.findById(request.getDestinationId()).orElse(null);
+            if (anchor == null || anchor.getDeletedAt() != null) {
+                builder.and(qTour.destination.id.eq(request.getDestinationId()));
+            } else if (Boolean.FALSE.equals(request.getDestinationSubtree())) {
+                builder.and(qTour.destination.id.eq(request.getDestinationId()));
+            } else {
+                String pathPrefix = org.springframework.util.StringUtils.hasText(anchor.getPath())
+                        ? anchor.getPath()
+                        : "/" + anchor.getId() + "/";
+                if (!pathPrefix.endsWith("/")) {
+                    pathPrefix = pathPrefix + "/";
+                }
+                final String prefix = pathPrefix;
+                builder.and(qTour.destination.id.eq(anchor.getId())
+                        .or(qTour.destination.path.eq(prefix))
+                        .or(qTour.destination.path.startsWith(prefix)));
+            }
         }
         if (Boolean.TRUE.equals(request.getDomesticOnly())) {
             builder.and(qTour.destination.countryCode.equalsIgnoreCase("VN"));

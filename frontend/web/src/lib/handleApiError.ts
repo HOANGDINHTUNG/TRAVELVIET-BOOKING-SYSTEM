@@ -7,7 +7,7 @@ import {
 
 /**
  * Chuẩn hoá thông báo lỗi hiển thị cho người dùng.
- * - `ApiClientError`: ưu tiên key `api.error.*` trong `message`, sau đó `errors.codes.<errorCode>`, cuối cùng `backendMessage`.
+ * - `ApiClientError`: ưu tiên key `api.error.*` trong `message`, sau đó `codes.<errorCode>` trong namespace `errors`, cuối cùng `backendMessage`.
  * - `Error` thông thường: nếu `message` là key `api.error.*` thì dịch qua i18n.
  *
  * @param error — dùng `unknown` thay cho `any` (strict mode).
@@ -36,9 +36,10 @@ function resolveApiClientErrorMessage(
     return String(i18n.t(raw, { defaultValue: raw }))
   }
 
-  const codeKey = `errors.codes.${error.errorCode}`
-  const fromCode = String(i18n.t(codeKey, { defaultValue: '' }))
-  if (fromCode.length > 0) return fromCode
+  const codeKey = `codes.${error.errorCode}`
+  if (i18n.exists(codeKey, { ns: 'errors' })) {
+    return String(i18n.t(codeKey, { ns: 'errors' }))
+  }
 
   if (raw) return raw
   return fallback

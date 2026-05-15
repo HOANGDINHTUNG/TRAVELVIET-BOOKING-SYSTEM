@@ -1,12 +1,13 @@
--- Chạy bằng user MySQL có quyền admin (Workbench / mysql CLI).
--- Thay YOUR_PASSWORD bằng cùng giá trị DB_PASSWORD trong backend/.env
--- Bắt buộc có @'%' nếu server báo Access denied for user ... @'10.0.2.2' (Docker / WSL / một số mạng NAT).
-
+-- 1. Tạo Database
 CREATE DATABASE IF NOT EXISTS wedservice CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
-CREATE USER IF NOT EXISTS 'wed_app_user'@'%' IDENTIFIED BY 'YOUR_PASSWORD';
-ALTER USER 'wed_app_user'@'%' IDENTIFIED BY 'YOUR_PASSWORD';
+-- 2. Tạo User (BẮT BUỘC phải có đuôi @'%' để kết nối từ máy thật vào)
+CREATE USER IF NOT EXISTS 'wed_app_user'@'%' IDENTIFIED BY '123456';
 
+-- 3. Cấp quyền cho User này trên Database vừa tạo
 GRANT ALL PRIVILEGES ON wedservice.* TO 'wed_app_user'@'%';
 
+SET GLOBAL log_bin_trust_function_creators = 1;
+
+-- 4. Lưu thay đổi
 FLUSH PRIVILEGES;

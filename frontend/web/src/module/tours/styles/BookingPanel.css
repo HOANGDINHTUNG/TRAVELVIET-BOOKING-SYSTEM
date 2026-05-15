@@ -1,0 +1,176 @@
+/* Booking sidebar on public tour detail — theme tokens + glass */
+
+.tour-booking-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  border-radius: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--glass-border);
+  background: linear-gradient(
+      155deg,
+      color-mix(in srgb, var(--color-surface) 94%, transparent),
+      color-mix(in srgb, var(--color-surface) 86%, transparent)
+    )
+    border-box;
+  backdrop-filter: blur(14px) saturate(1.08);
+  box-shadow: var(--glass-shadow-outer), var(--glass-shadow-inset);
+}
+
+.theme-dark .tour-booking-card {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.tour-booking-empty {
+  border-radius: 0.75rem;
+  border: 1px dashed color-mix(in srgb, var(--glass-border) 90%, transparent);
+  padding: 1.5rem 1rem;
+  text-align: center;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: var(--color-muted);
+  background: color-mix(in srgb, var(--color-surface) 80%, transparent);
+  backdrop-filter: blur(8px);
+}
+
+.tour-booking-input {
+  width: 100%;
+  border-radius: 0.375rem;
+  border: 1px solid var(--color-border);
+  background: color-mix(in srgb, var(--color-surface) 96%, transparent);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: var(--color-text);
+  outline: none;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background-color 160ms ease;
+}
+
+.tour-booking-input:focus {
+  border-color: color-mix(in srgb, var(--color-ocean) 55%, var(--color-border));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-ocean) 22%, transparent);
+}
+
+.tour-booking-input:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+  background: color-mix(in srgb, var(--color-surface-soft) 70%, var(--color-surface));
+}
+
+.tour-booking-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--color-border);
+  padding: 0.5rem 0.75rem;
+  background: color-mix(in srgb, var(--color-surface) 88%, transparent);
+}
+
+.tour-booking-icon-btn {
+  display: inline-flex;
+  height: 1.75rem;
+  width: 1.75rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.375rem;
+  border: 1px solid var(--color-border);
+  background: color-mix(in srgb, var(--color-surface) 92%, transparent);
+  color: var(--color-text);
+  cursor: pointer;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease;
+}
+
+.tour-booking-icon-btn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-ocean) 10%, var(--color-surface));
+  border-color: color-mix(in srgb, var(--color-ocean) 35%, var(--color-border));
+}
+
+.tour-booking-icon-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.tour-booking-divider {
+  border-top: 1px solid var(--color-border);
+  padding-top: 0.75rem;
+}
+
+.tour-booking-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-muted);
+}
+
+.tour-booking-apply {
+  border-radius: 0.375rem;
+  background: var(--color-primary);
+  color: #fff;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: opacity 160ms ease, filter 160ms ease;
+}
+
+.tour-booking-apply:hover:not(:disabled) {
+  filter: brightness(1.06);
+}
+
+.tour-booking-apply:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.tour-booking-clear {
+  border-radius: 0.375rem;
+  border: 1px solid color-mix(in srgb, var(--color-danger) 35%, var(--color-border));
+  padding: 0.5rem 0.75rem;
+  font-size: 0.75rem;
+  color: var(--color-danger);
+  background: color-mix(in srgb, var(--color-danger) 8%, var(--color-surface));
+  cursor: pointer;
+}
+
+.tour-booking-clear:hover {
+  background: color-mix(in srgb, var(--color-danger) 14%, var(--color-surface));
+}
+
+.tour-booking-hint--ok {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  color: color-mix(in srgb, var(--color-primary) 85%, #0a3d2e);
+}
+
+.theme-dark .tour-booking-hint--ok {
+  color: color-mix(in srgb, #bfe8d8 70%, var(--color-text));
+}
+
+.tour-booking-hint--bad {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--color-danger);
+}
+
+.tour-booking-warn {
+  border-radius: 0.375rem;
+  border: 1px solid color-mix(in srgb, var(--color-danger) 35%, var(--color-border));
+  background: color-mix(in srgb, var(--color-danger) 10%, var(--color-surface));
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+  line-height: 1.25rem;
+  color: var(--color-danger);
+}

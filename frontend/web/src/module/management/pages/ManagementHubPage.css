@@ -3153,6 +3153,9 @@
   gap: 16px;
   padding: 20px;
   background: color-mix(in srgb, var(--color-surface) 92%, transparent);
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: hidden;
 }
 
 .mgmt-crud-head {
@@ -3162,14 +3165,25 @@
   align-items: start;
 }
 
+.mgmt-crud-head > div:first-child {
+  min-width: 0;
+}
+
+.mgmt-crud-head > div:last-child {
+  min-width: 0;
+}
+
 .mgmt-crud-head h2 {
   margin: 0;
-  font-size: clamp(28px, 4vw, 42px);
-  line-height: 1;
+  font-size: clamp(1.15rem, 2.5vw, 1.75rem);
+  line-height: 1.22;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 .mgmt-crud-head p:last-child {
   max-width: 760px;
+  max-width: min(760px, 100%);
   margin: 8px 0 0;
   color: var(--color-muted);
   line-height: 1.55;
@@ -3179,6 +3193,7 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
+  min-width: 0;
 }
 
 .mgmt-crud-summary span {
@@ -3223,6 +3238,17 @@
   align-items: center;
   padding: 0 11px;
   background: color-mix(in srgb, var(--color-surface) 94%, transparent);
+  box-shadow: none;
+}
+
+.admin-shell .mgmt-crud-search {
+  border-color: var(--admin-border);
+  background: color-mix(in srgb, var(--admin-surface) 94%, var(--admin-bg));
+}
+
+.admin-shell .mgmt-crud-search:focus-within {
+  border-color: color-mix(in srgb, var(--admin-primary) 48%, var(--admin-border));
+  box-shadow: 0 0 0 2px var(--admin-primary-dim);
 }
 
 .mgmt-crud-search svg {
@@ -3251,10 +3277,12 @@
 
 .mgmt-crud-search input {
   min-height: auto;
-  border: 0;
+  height: auto;
+  border: 0 !important;
   padding: 0;
   outline: 0;
-  background: transparent;
+  background: transparent !important;
+  box-shadow: none !important;
 }
 
 .mgmt-crud-form textarea {
@@ -3311,6 +3339,7 @@
   gap: 14px;
   padding: 16px;
   background: color-mix(in srgb, var(--color-page) 68%, transparent);
+  min-width: 0;
 }
 
 .mgmt-crud-empty {
@@ -3717,14 +3746,47 @@
 }
 
 .mgmt-destination-toolbar {
-  display: grid;
-  grid-template-columns: minmax(220px, 1fr) repeat(2, minmax(130px, 170px)) repeat(5, minmax(130px, 160px)) auto auto;
-  gap: 10px;
-  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
 }
 
-.mgmt-destination-toolbar input,
-.mgmt-destination-toolbar select,
+.mgmt-destination-toolbar-row {
+  display: grid;
+  gap: 8px;
+  align-items: stretch;
+  min-width: 0;
+}
+
+.mgmt-destination-toolbar-row--primary {
+  grid-template-columns: minmax(0, 1.35fr) repeat(4, minmax(0, 1fr));
+}
+
+.mgmt-destination-toolbar-row--secondary {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 7.75rem), 1fr));
+}
+
+.mgmt-destination-toolbar-row .mgmt-crud-search {
+  min-width: 0;
+  min-height: 38px;
+}
+
+@media (max-width: 1100px) {
+  .mgmt-destination-toolbar-row--primary {
+    grid-template-columns: minmax(0, 1fr) repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .mgmt-destination-toolbar-row--primary,
+  .mgmt-destination-toolbar-row--secondary {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.mgmt-destination-toolbar-row > input,
+.mgmt-destination-toolbar-row > select,
 .mgmt-destination-form input,
 .mgmt-destination-form select,
 .mgmt-destination-form textarea,
@@ -3765,6 +3827,20 @@
   opacity: 0.55;
 }
 
+.mgmt-destination-toolbar-row > input,
+.mgmt-destination-toolbar-row > select {
+  min-height: 38px;
+  padding: 0 9px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.mgmt-destination-toolbar-row--secondary > button {
+  justify-self: start;
+  width: auto;
+  min-width: 7.25rem;
+}
+
 .mgmt-destination-toolbar button svg,
 .mgmt-destination-review button svg {
   width: 17px;
@@ -3773,9 +3849,76 @@
 
 .mgmt-destination-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(360px, 0.8fr);
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.85fr);
   gap: 14px;
   align-items: start;
+}
+
+.mgmt-destination-layout > * {
+  min-width: 0;
+}
+
+.mgmt-destination-form-panel {
+  max-height: min(72dvh, 820px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.mgmt-destination-form-panel.mgmt-crud-panel {
+  gap: 10px;
+  padding: 12px;
+}
+
+.mgmt-destination-form-panel .mgmt-section-title h3 {
+  font-size: 1.02rem;
+  line-height: 1.25;
+}
+
+.mgmt-destination-form-panel .mgmt-section-title p {
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.mgmt-destination-form-panel .mgmt-destination-form {
+  gap: 6px;
+}
+
+.mgmt-destination-form-panel .mgmt-destination-form label {
+  gap: 4px;
+}
+
+.mgmt-destination-form-panel .mgmt-destination-form label > span {
+  font-size: 10px;
+  letter-spacing: 0.04em;
+}
+
+.mgmt-destination-form-panel .mgmt-destination-form input,
+.mgmt-destination-form-panel .mgmt-destination-form select,
+.mgmt-destination-form-panel .mgmt-destination-form textarea,
+.mgmt-destination-form-panel .mgmt-destination-review textarea {
+  min-height: 36px;
+  padding: 0 9px;
+  font-weight: 600;
+}
+
+.mgmt-destination-form-panel .mgmt-destination-form textarea,
+.mgmt-destination-form-panel .mgmt-destination-review textarea {
+  min-height: 52px;
+  max-height: 120px;
+  padding: 7px 9px;
+}
+
+@media (min-width: 1200px) {
+  .mgmt-destination-form-panel .mgmt-destination-form {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.mgmt-destination-form-panel .mgmt-destination-preview strong {
+  font-size: 1.05rem;
+  line-height: 1.25;
+  word-break: break-word;
 }
 
 .mgmt-destination-list {
@@ -3862,7 +4005,13 @@
 .mgmt-destination-form {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+  gap: 8px;
+}
+
+.mgmt-destination-form input,
+.mgmt-destination-form select,
+.mgmt-destination-form textarea {
+  max-width: 100%;
 }
 
 .mgmt-destination-form label {
@@ -3880,8 +4029,9 @@
 
 .mgmt-destination-form textarea,
 .mgmt-destination-review textarea {
-  min-height: 90px;
-  padding: 10px 11px;
+  min-height: 56px;
+  max-height: 140px;
+  padding: 8px 11px;
   resize: vertical;
 }
 
@@ -3946,14 +4096,44 @@
 }
 
 .mgmt-tour-toolbar {
-  display: grid;
-  grid-template-columns: minmax(220px, 1fr) repeat(3, minmax(150px, 180px)) auto auto;
-  gap: 10px;
-  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
 }
 
-.mgmt-tour-toolbar input,
-.mgmt-tour-toolbar select,
+.mgmt-tour-toolbar-row {
+  display: grid;
+  gap: 8px;
+  align-items: stretch;
+  min-width: 0;
+}
+
+.mgmt-tour-toolbar-row--primary {
+  grid-template-columns: minmax(0, 1.4fr) repeat(2, minmax(0, 1fr));
+}
+
+.mgmt-tour-toolbar-row--secondary {
+  grid-template-columns: minmax(0, 1fr) repeat(auto-fit, minmax(min(100%, 7.5rem), 1fr));
+}
+
+.mgmt-tour-toolbar-row .mgmt-crud-search {
+  min-width: 0;
+  min-height: 38px;
+}
+
+@media (max-width: 900px) {
+  .mgmt-tour-toolbar-row--primary {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .mgmt-tour-toolbar-row--secondary {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr));
+  }
+}
+
+.mgmt-tour-toolbar-row > input,
+.mgmt-tour-toolbar-row > select,
 .mgmt-tour-form input,
 .mgmt-tour-form select,
 .mgmt-tour-form textarea {
@@ -3999,11 +4179,29 @@
   height: 17px;
 }
 
+.mgmt-tour-toolbar-row > input,
+.mgmt-tour-toolbar-row > select {
+  min-height: 38px;
+  padding: 0 9px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.mgmt-tour-toolbar-row--secondary > button {
+  justify-self: start;
+  width: auto;
+  min-width: 7.25rem;
+}
+
 .mgmt-tour-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(420px, 0.95fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.95fr);
   gap: 14px;
   align-items: start;
+}
+
+.mgmt-tour-layout > * {
+  min-width: 0;
 }
 
 .mgmt-tour-list,
@@ -4518,11 +4716,9 @@
   .mgmt-audit-layout,
   .mgmt-audit-list button,
   .mgmt-audit-diff,
-  .mgmt-destination-toolbar,
   .mgmt-destination-layout,
   .mgmt-destination-row,
-  .mgmt-tour-toolbar,
-  .mgmt-tour-layout,
+  .mgmt-tour-layout:not(.mgmt-tour-layout--schedules),
   .mgmt-tour-list button,
   .mgmt-support-list button,
   .mgmt-schedule-list > button {
@@ -4601,5 +4797,18 @@
 
   .mgmt-super-actions {
     display: grid;
+  }
+}
+
+/* ============================================================
+   Lịch khởi hành — 3 cột: danh sách tour | danh sách lịch | form
+   ============================================================ */
+.mgmt-tour-layout--schedules {
+  grid-template-columns: minmax(220px, 1fr) minmax(260px, 0.95fr) minmax(300px, 1.05fr);
+}
+
+@media (max-width: 900px) {
+  .mgmt-tour-layout--schedules {
+    grid-template-columns: 1fr;
   }
 }

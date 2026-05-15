@@ -7,16 +7,7 @@ import { weatherApi } from '../../../api/server/Weather.api'
 import { ErrorBlock } from '../../../components/common/ui/ErrorBlock'
 import { PageLoader } from '../../../components/common/ux/PageLoader'
 import { Footer } from '../../../components/Footer/Footer'
-import { DestinationActivitiesSection } from '../components/DestinationActivitiesSection'
-import { DestinationDetailHero } from '../components/DestinationDetailHero'
-import { DestinationEngagementSection } from '../components/DestinationEngagementSection'
-import { DestinationFoodSpecialtySection } from '../components/DestinationFoodSpecialtySection'
-import { DestinationMediaSection } from '../components/DestinationMediaSection'
-import { DestinationOverviewSection } from '../components/DestinationOverviewSection'
-import { DestinationPlannerCta } from '../components/DestinationPlannerCta'
-import { DestinationStatsSection } from '../components/DestinationStatsSection'
-import { DestinationTipsEventsSection } from '../components/DestinationTipsEventsSection'
-import { DestinationWeatherSection } from '../components/DestinationWeatherSection'
+import { DestinationPublicDetailShell } from '../components/public-detail/DestinationPublicDetailShell'
 import type { DestinationDetail } from '../database/interface/destination'
 import {
   destinationDetailCopyByLocale,
@@ -30,14 +21,6 @@ import {
   mapWeatherApiForecasts,
   type DestinationDetailWeatherState,
 } from '../utils/destinationDetailWeather'
-import '../styles/DestinationDetailPage.css'
-import '../styles/DestinationDetailHero.css'
-import '../styles/DestinationDetailOverview.css'
-import '../styles/DestinationDetailStats.css'
-import '../styles/DestinationDetailWeather.css'
-import '../styles/DestinationDetailMedia.css'
-import '../styles/DestinationDetailContent.css'
-import '../styles/DestinationDetailCta.css'
 
 function DestinationDetailPage() {
   const { uuid } = useParams()
@@ -151,9 +134,12 @@ function DestinationDetailPage() {
   if (error || !detail || !viewModel) {
     return (
       <>
-        <div className="destination-detail-error-action">
-          <Link to="/">
-            <ArrowLeft aria-hidden="true" />
+        <div className="bg-slate-950 p-6">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 text-sm font-semibold text-white no-underline"
+          >
+            <ArrowLeft aria-hidden="true" className="h-4 w-4" />
             {copy.backHome}
           </Link>
         </div>
@@ -167,42 +153,13 @@ function DestinationDetailPage() {
 
   return (
     <>
-      <main className="destination-detail-page">
-        <DestinationDetailHero
-          copy={copy}
-          detail={detail}
-          viewModel={viewModel}
-        />
-        <DestinationOverviewSection
-          copy={copy}
-          detail={detail}
-          viewModel={viewModel}
-        />
-        <DestinationStatsSection stats={viewModel.stats} />
-        <DestinationWeatherSection
-          copy={copy}
-          detail={detail}
-          weather={weather}
-        />
-        <DestinationEngagementSection
-          copy={copy}
-          detail={detail}
-          locale={locale}
-        />
-        <DestinationMediaSection
-          copy={copy}
-          detail={detail}
-          viewModel={viewModel}
-        />
-        <DestinationFoodSpecialtySection copy={copy} detail={detail} />
-        <DestinationActivitiesSection copy={copy} detail={detail} />
-        <DestinationTipsEventsSection
-          copy={copy}
-          detail={detail}
-          locale={locale}
-        />
-        <DestinationPlannerCta copy={copy} detail={detail} />
-      </main>
+      <DestinationPublicDetailShell
+        copy={copy}
+        detail={detail}
+        locale={locale}
+        viewModel={viewModel}
+        weather={weather}
+      />
       <Footer />
     </>
   )

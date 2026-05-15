@@ -1,4 +1,5 @@
 import {
+  Activity,
   BadgePercent,
   BarChart3,
   Bell,
@@ -19,6 +20,7 @@ import {
 
 export type ManagementPageId =
   | 'dashboard'
+  | 'api-probe'
   | 'users'
   | 'roles'
   | 'permissions'
@@ -63,6 +65,16 @@ export const managementNavGroups: ManagementNavGroup[] = [
         description: 'Tổng quan quyền, module và kiểm tra nhanh API.',
         path: '/management/dashboard',
         icon: BarChart3,
+        requiredPermissions: [],
+        moduleIds: [],
+        endpointIds: [],
+      },
+      {
+        id: 'api-probe',
+        label: 'Kiểm tra API',
+        description: 'Ping nhanh các endpoint GET để xác nhận backend đang phản hồi.',
+        path: '/management/system-api-probe',
+        icon: Activity,
         requiredPermissions: [],
         moduleIds: [],
         endpointIds: [],

@@ -10,8 +10,9 @@ import {
   clearStoredAuthSession,
   getStoredAccessToken,
   getStoredAuthUser,
-  persistAuthSessionData,
 } from '../../../utils/authSessionStorage'
+import { useAuthStore } from '../../../stores/authStore'
+import { toUserMeResponse, type AuthLoginUser } from '../types/auth'
 
 export type {
   AuthResponse,
@@ -57,13 +58,17 @@ export function refreshAuthSession(refreshToken: string) {
 
 export function persistAuthSession(auth: AuthResponse) {
   clearPersistentAuthSession()
-  persistAuthSessionData(auth)
-  window.dispatchEvent(new Event('travelviet:login'))
+  useAuthStore.getState().setAuth(
+    auth.accessToken,
+    toUserMeResponse(auth.user as AuthLoginUser),
+    { refreshToken: auth.refreshToken },
+  )
 }
 
 export function clearAuthSession() {
   clearStoredAuthSession()
   window.sessionStorage.removeItem('travelviet-login-welcome-seen')
+  window.sessionStorage.removeItem('travelviet-login-welcome-pending')
   window.dispatchEvent(new Event('travelviet:logout'))
 }
 

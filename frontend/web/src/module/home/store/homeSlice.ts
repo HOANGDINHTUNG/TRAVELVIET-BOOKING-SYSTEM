@@ -68,15 +68,14 @@ export const fetchHomePublicData = createAsyncThunk<
     destinationApi.getDestinations(),
     tourApi.getTours(),
     tourApi.searchPublicTours({
-      domesticOnly: true,
-      tagCodes: ['BIEN'],
+      tagCodes: ['HOME_BEACH_VN'],
       featuredOnly: true,
       size: 12,
       sortBy: 'totalBookings',
       sortDir: 'desc',
     }),
     tourApi.searchPublicTours({
-      internationalOnly: true,
+      tagCodes: ['HOME_HOT_INTL'],
       featuredOnly: true,
       size: 12,
       sortBy: 'totalBookings',

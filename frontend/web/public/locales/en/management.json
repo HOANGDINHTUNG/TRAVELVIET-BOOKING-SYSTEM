@@ -20,9 +20,208 @@
     "yes": "Yes",
     "no": "No"
   },
+  "layout": {
+    "accessLoadError": "Could not load management permissions for the current account.",
+    "fallbackDisplayName": "Management user"
+  },
+  "adminShell": {
+    "brandTitle": "TravelViet",
+    "brandSubtitle": "Admin",
+    "superAdminBadge": "Super Admin",
+    "sidebarNavAria": "Admin navigation",
+    "expandSidebar": "Expand sidebar",
+    "collapseSidebar": "Collapse sidebar",
+    "expandShort": "Expand",
+    "collapseShort": "Collapse",
+    "permissionsLoading": "Loading permissions…",
+    "backToSite": "Back to site",
+    "backToSiteTitle": "Return to public site",
+    "searchPlaceholder": "Search tours, booking codes… (Enter → tours)",
+    "searchMobileAria": "Open quick search",
+    "themeDark": "Dark",
+    "themeLight": "Light",
+    "themeSwitchToLight": "Switch to light mode",
+    "themeSwitchToDark": "Switch to dark mode",
+    "notifications": "Notifications",
+    "notificationsEmptyTitle": "Notifications",
+    "notificationsEmptyBody": "No new alerts yet. When the backend adds WebSocket/STOMP, new bookings will appear here.",
+    "profileMenu": "Account menu",
+    "profileAccount": "My profile",
+    "commandPalette": {
+      "title": "Quick go",
+      "subtitle": "Admin pages — Enter to open, Esc to close",
+      "inputPlaceholder": "Type to filter pages or paste a path…",
+      "empty": "No matching items.",
+      "hint": "Shortcut: Ctrl+K or ⌘K",
+      "recentSection": "Recent",
+      "actionsSection": "Actions",
+      "navSection": "Pages"
+    },
+    "health": {
+      "ok": "Backend API: healthy",
+      "fail": "Backend API: unreachable",
+      "checking": "Checking API…"
+    },
+    "paletteAction": {
+      "openApiProbe": "API connectivity check",
+      "createTour": "Create new tour (opens form)",
+      "openBookings": "Open bookings",
+      "openTours": "Open tour list"
+    },
+    "notif": {
+      "samplePaidTitle": "VNPay payment successful (sample)",
+      "samplePaidBody": "Order #BK-DEMO — replace with real-time feed later.",
+      "sampleNewTitle": "New booking needs action (sample)",
+      "sampleNewBody": "Review the booking queue.",
+      "viewBooking": "View booking",
+      "markAllRead": "Mark all read",
+      "demoHint": "Demo: actionable items. Wire to backend for live updates."
+    },
+    "nav": {
+      "dashboard": "Overview",
+      "apiProbe": "API health",
+      "tours": "Tours",
+      "schedules": "Schedules",
+      "bookings": "Bookings",
+      "destinations": "Destinations",
+      "customers": "Customers",
+      "reports": "Reports"
+    }
+  },
+  "apiProbe": {
+    "kicker": "Operations",
+    "title": "API connectivity check",
+    "subtitle": "Light GET probes against the backend (JWT attached when logged in). HTTP 403/404 still means the server answered — only network errors or timeouts mean the backend is unreachable.",
+    "baseUrlLabel": "Base URL:",
+    "runAll": "Run all",
+    "reset": "Clear results",
+    "runOne": "Run",
+    "running": "Calling…",
+    "networkError": "Network error or timeout",
+    "col": {
+      "probe": "API",
+      "request": "Request",
+      "result": "Result",
+      "action": "Action"
+    },
+    "probes": {
+      "health": {
+        "label": "Public health",
+        "hint": "GET /system/health — no authentication."
+      },
+      "toursPublic": {
+        "label": "Public tours",
+        "hint": "GET /tours — public catalog."
+      },
+      "destinationsPublic": {
+        "label": "Public destinations",
+        "hint": "GET /destinations — approved list."
+      },
+      "adminTours": {
+        "label": "Admin tours",
+        "hint": "GET /admin/tours — requires tour.view."
+      },
+      "adminDestinations": {
+        "label": "Admin destinations",
+        "hint": "GET /admin/destinations — requires destination.view."
+      },
+      "adminBookings": {
+        "label": "Admin bookings",
+        "hint": "GET /admin/bookings — may return 404 if the endpoint is not deployed."
+      },
+      "rbacRoles": {
+        "label": "Roles (RBAC)",
+        "hint": "GET /roles — requires user.view."
+      },
+      "bookingsMine": {
+        "label": "My bookings",
+        "hint": "GET /bookings/me — requires authentication."
+      }
+    }
+  },
+  "dashboard": {
+    "skeletonAria": "Loading dashboard",
+    "kicker": "Dashboard",
+    "title": "Operations overview",
+    "subtitle": "Revenue and order mix are derived from the bookings/tours sample; swap the data source in the overview hook when a consolidated statistics API ships.",
+    "metaAggregated": "Estimated from the latest {{count}} bookings (no aggregated payments/admin statistics API yet).",
+    "mockFallbackBanner": "Showing sample data because the bookings API could not be loaded.",
+    "devHubLink": "API checks (legacy)",
+    "devHubPrefix": "Engineering hub:",
+    "apiProbeLink": "API connectivity check",
+    "kpi": {
+      "revenue": {
+        "label": "Total revenue",
+        "hint": "From paid rows in the sample (max {{count}} bookings)"
+      },
+      "orders": {
+        "label": "Total orders",
+        "hint": "Per bookings API pagination"
+      },
+      "tours": {
+        "label": "Active tours",
+        "hint": "Status: on sale (active)"
+      },
+      "customers": {
+        "label": "New customers",
+        "hint": "Last 30 days (user sample)"
+      }
+    },
+    "chart": {
+      "revenueMonthTitle": "Revenue trend this month",
+      "revenueMonthSubtitle": "Daily line chart (VND).",
+      "revenueDay": "Day {{day}}",
+      "yAxisMillions": "{{n}}M",
+      "orderStatusTitle": "Order status mix",
+      "orderStatusSubtitle": "Share of bookings in the current sample",
+      "pieTooltipOrders": "{{count}} orders"
+    },
+    "orderStatus": {
+      "paid": "Paid",
+      "pending": "Needs action",
+      "cancelled": "Cancelled"
+    },
+    "bookingRowStatus": {
+      "pending_payment": "Needs action",
+      "paid": "Paid",
+      "cancelled": "Cancelled"
+    },
+    "activity": {
+      "title": "Recent activity",
+      "subtitle": "Latest 5 bookings",
+      "filterPlaceholder": "Filter by code / guest (coming soon)",
+      "filterTitle": "Filtering will connect when the API supports it",
+      "pager": "Page {{page}} / {{pages}} · {{total}} rows",
+      "colCode": "Code",
+      "colCustomer": "Guest",
+      "colTour": "Tour",
+      "colAmount": "Amount",
+      "colStatus": "Status"
+    },
+    "warnings": {
+      "bookings_api_fallback": "Bookings API is using `/bookings/me` fallback — metrics reflect the signed-in user only, not the whole system.",
+      "bookings_load_error": "Could not load bookings — showing sample data.",
+      "bookings_missing_after_load": "Missing bookings after load — showing sample data.",
+      "tours_load_error": "Could not load the active tour list.",
+      "users_load_error": "Could not load the admin user list.",
+      "tours_kpi_unavailable": "Could not load active tours — tours KPI set to 0.",
+      "users_kpi_unavailable": "Could not load users — new customers KPI set to 0.",
+      "chart_limited_to_page_sample": "Monthly revenue chart is capped at {{rows}} rows from the current page — system totals need a statistics API."
+    }
+  },
   "tours": {
     "pageTitle": "Tours management",
     "pageSubtitle": "Monitor tour catalog, status and key operational fields.",
+    "facet": {
+      "countryLabel": "Destination country",
+      "countryAll": "All countries",
+      "domesticLabel": "Domestic tours only (VN)",
+      "savedViews": "Saved views",
+      "saveView": "Save current view",
+      "saveViewPrompt": "View name (e.g. Tours going live)",
+      "deleteView": "Remove",
+      "noSavedViews": "No saved views yet."
+    },
     "errorMessage": "Could not load the tour list. Please retry in a moment.",
     "createButton": "Create new tour",
     "table": {
@@ -68,7 +267,9 @@
       "notes": "Internal notes",
       "tags": "Tags / themes",
       "media": "Media (images & videos)",
-      "itinerary": "Day-by-day itinerary"
+      "itinerary": "Day-by-day itinerary",
+      "draftHint": "Draft is auto-saved in your browser while you edit.",
+      "draftRestored": "Restored an unsent draft."
     },
     "destinationSelect": {
       "placeholder": "Pick a destination...",
@@ -251,6 +452,17 @@
   },
   "bookings": {
     "page": {
+      "bulk": {
+        "selected": "{{count}} selected",
+        "clear": "Clear selection",
+        "checkIn": "Bulk check-in",
+        "complete": "Bulk complete",
+        "noneEligible": "No eligible bookings in the selection.",
+        "done": "Processed {{ok}} / {{total}} bookings.",
+        "disabledInFallback": "Multi-select is only available with the full admin bookings API (not /bookings/me fallback).",
+        "selectAllPage": "Select all on this page",
+        "selectRow": "Select booking"
+      },
       "title": "Booking management",
       "subtitle": "Track orders, update statuses, and process refunds.",
       "loading": "Loading bookings...",

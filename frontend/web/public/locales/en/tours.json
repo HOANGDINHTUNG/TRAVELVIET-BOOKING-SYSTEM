@@ -26,6 +26,34 @@
       "loading": "Loading schedules...",
       "empty": "No open schedules available right now.",
       "remaining": "Left"
-    }
+    },
+    "tabs": {
+      "description": "Description",
+      "highlights": "Highlights",
+      "inclusions": "Included",
+      "exclusions": "Not included",
+      "notes": "Notes",
+      "policy": "Cancellation"
+    },
+    "stock": {
+      "inStock": "Available",
+      "limited": "Selling fast"
+    },
+    "cta": {
+      "pickSchedule": "Pick dates & book",
+      "viewPolicy": "View full policy"
+    },
+    "itinerarySummaryTitle": "Itinerary overview",
+    "itineraryItems": "Activities",
+    "seasonalityTitle": "Suggested seasons",
+    "seasonMonths": "Months {{from}} – {{to}}",
+    "checklistTitle": "Preparation checklist",
+    "relatedTitle": "You may also like",
+    "relatedMockLead": "Demo suggestions — wire to API later.",
+    "relatedCta": "View tour",
+    "reviewsShort": "reviews",
+    "bookingsShort": "bookings",
+    "bookingBandHint": "Pick a departure — each card shows dates, remaining seats, and price. Then set travelers in the panel on the right (desktop) or below (mobile).",
+    "galleryCount": "Photo {{current}} / {{total}}"
   }
 }

@@ -53,6 +53,12 @@ const lazyManagementToursPage = lazy(
 const lazyManagementHubPage = lazy(
   () => import("../module/management/pages/ManagementHubPage"),
 );
+const lazyDashboardOverview = lazy(
+  () => import("../module/management/pages/DashboardOverview"),
+);
+const lazyManagementApiProbePage = lazy(
+  () => import("../module/management/pages/ManagementApiProbePage"),
+);
 const lazyManagementModulePage = lazy(
   () => import("../module/management/pages/ManagementModulePage"),
 );
@@ -104,8 +110,16 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: withSuspense(createElement(lazyHomePage)) },
       {
+        path: "destinations/branch/:programSlug",
+        element: withSuspense(createElement(lazyDestinationsPage)),
+      },
+      {
         path: "destinations",
         element: withSuspense(createElement(lazyDestinationsPage)),
+      },
+      {
+        path: "destinations/:uuid",
+        element: withSuspense(createElement(lazyDestinationDetailPage)),
       },
       {
         path: "tours",
@@ -120,10 +134,6 @@ const router = createBrowserRouter([
       {
         element: withSuspense(createElement(lazyRequireAuthenticated)),
         children: [
-          {
-            path: "destinations/:uuid",
-            element: withSuspense(createElement(lazyDestinationDetailPage)),
-          },
           {
             path: "tours/:id",
             element: withSuspense(createElement(lazyTourDetailPage)),
@@ -191,6 +201,14 @@ const router = createBrowserRouter([
               },
               {
                 path: "dashboard",
+                element: withSuspense(createElement(lazyDashboardOverview)),
+              },
+              {
+                path: "system-api-probe",
+                element: withSuspense(createElement(lazyManagementApiProbePage)),
+              },
+              {
+                path: "developer-hub",
                 element: withSuspense(createElement(lazyManagementHubPage)),
               },
               {
@@ -215,7 +233,7 @@ const router = createBrowserRouter([
               },
               {
                 path: "tours",
-                element: withSuspense(createElement(lazyManagementTourPage, { mode: "tours" })),
+                element: withSuspense(createElement(lazyManagementToursPage)),
               },
               {
                 path: "schedules",
@@ -223,7 +241,7 @@ const router = createBrowserRouter([
               },
               {
                 path: "bookings",
-                element: withSuspense(createElement(lazyManagementModulePage, { pageId: "bookings" })),
+                element: withSuspense(createElement(lazyManagementBookingsPage)),
               },
               {
                 path: "payments",

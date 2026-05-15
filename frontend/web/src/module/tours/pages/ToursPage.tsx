@@ -1,16 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useDeferredValue, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useSearchParams } from 'react-router-dom'
-import {
-  ArrowLeft,
-  ArrowRight,
-  CalendarDays,
-  Image,
-  MapPin,
-  Search,
-  Star,
-  Tag,
-} from 'lucide-react'
+import { ArrowLeft, Clock, Eye, Image, MapPin, Search, Tag } from 'lucide-react'
 import { tourApi, tourListSearchParamsFromUrl } from '../../../api/server/Tour.api'
 import { EmptyState } from '../../../components/common/ui/EmptyState'
 import { ErrorBlock } from '../../../components/common/ui/ErrorBlock'
@@ -18,15 +9,27 @@ import { PageLoader } from '../../../components/common/ux/PageLoader'
 import { Footer } from '../../../components/Footer/Footer'
 import type { Tour } from '../../home/database/interface/publicTravel'
 import '../../catalog/styles/CatalogListPage.css'
+import '../styles/ToursCatalogCards.css'
+import { buildTourSlug } from '../utils/slug'
 
 const ALL_FILTER = 'Tat ca'
 
-const formatPrice = (price: number) =>
-  new Intl.NumberFormat('vi-VN', {
-    style: 'currency',
-    currency: 'VND',
-    maximumFractionDigits: 0,
-  }).format(price)
+const formatListingPrice = (price: number) =>
+  `${new Intl.NumberFormat('vi-VN', { maximumFractionDigits: 0 }).format(price)}đ`
+
+function tourListingBadge(tour: Tour): { kind: 'deal' | 'standard'; label: string } {
+  const mode = (tour.category || '').toLowerCase()
+  const intl =
+    Boolean(tour.destinationCountryCode && tour.destinationCountryCode !== 'VN') ||
+    mode.includes('quốc tế') ||
+    mode.includes('international')
+
+  if (intl) {
+    return { kind: 'standard', label: 'Tiêu chuẩn' }
+  }
+
+  return { kind: 'deal', label: 'Giá tốt' }
+}
 
 function normalizeText(value: string) {
   return value.trim().toLowerCase()
@@ -42,6 +45,8 @@ function ToursPage() {
   const [selectedCategory, setSelectedCategory] = useState(
     () => searchParams.get('category') ?? ALL_FILTER,
   )
+
+  const deferredSearchQuery = useDeferredValue(searchQuery)
 
   const catalogSearchKey = searchParams.toString()
 
@@ -112,18 +117,28 @@ function ToursPage() {
         lead: t('catalog.all.lead'),
       }
     }
-    if (p.internationalOnly) {
+    if (p.internationalOnly || p.tagCodes?.includes('HOME_HOT_INTL')) {
       return {
         kicker: t('catalog.international.kicker'),
         title: t('catalog.international.title'),
         lead: t('catalog.international.lead'),
       }
     }
-    if (p.domesticOnly && p.tagCodes?.includes('BIEN')) {
+    if (
+      p.tagCodes?.includes('HOME_BEACH_VN') ||
+      (p.domesticOnly && p.tagCodes?.includes('BIEN'))
+    ) {
       return {
         kicker: t('catalog.domesticBeach.kicker'),
         title: t('catalog.domesticBeach.title'),
         lead: t('catalog.domesticBeach.lead'),
+      }
+    }
+    if (p.destinationId != null) {
+      return {
+        kicker: t('catalog.filtered.kicker'),
+        title: t('catalog.filtered.title'),
+        lead: t('catalog.filtered.lead'),
       }
     }
     return {
@@ -142,14 +157,17 @@ function ToursPage() {
   }, [tours])
 
   const filteredTours = useMemo(() => {
-    const normalizedQuery = normalizeText(searchQuery)
+    const normalizedQuery = normalizeText(deferredSearchQuery)
 
     return tours.filter((tour) => {
       const title = translateTourField(tour, 'title', tour.title)
       const description = translateTourField(
         tour,
         'description',
-        tour.description || tour.highlights.join(', ') || tour.category,
+        tour.shortDescription ||
+          tour.description ||
+          tour.highlights.join(', ') ||
+          tour.category,
       )
       const location = translateTourField(tour, 'location', tour.location)
       const days = translateTourField(tour, 'days', tour.days)
@@ -160,6 +178,8 @@ function ToursPage() {
           title,
           tour.title,
           description,
+          tour.shortDescription,
+          tour.description,
           location,
           tour.category,
           days,
@@ -171,7 +191,7 @@ function ToursPage() {
 
       return categoryMatch && (!normalizedQuery || searchableText.includes(normalizedQuery))
     })
-  }, [searchQuery, selectedCategory, tours, translateTourField])
+  }, [deferredSearchQuery, selectedCategory, tours, translateTourField])
 
   const resetFilters = () => {
     setSearchQuery('')
@@ -193,7 +213,7 @@ function ToursPage() {
 
   return (
     <>
-      <main className="catalog-page">
+      <main className="catalog-page tours-catalog-page">
         <div className="catalog-page-inner">
           <Link className="catalog-back-link" to="/">
             <ArrowLeft size={17} strokeWidth={2.1} aria-hidden="true" />
@@ -256,70 +276,66 @@ function ToursPage() {
             <div className="catalog-grid">
               {filteredTours.map((tour) => {
                 const title = translateTourField(tour, 'title', tour.title)
-                const description = translateTourField(
-                  tour,
-                  'description',
-                  tour.description || tour.highlights.join(', ') || tour.category,
-                )
                 const days = translateTourField(tour, 'days', tour.days)
                 const location = translateTourField(tour, 'location', tour.location)
+                const provinceLine =
+                  tour.destinationProvince?.trim() ||
+                  location ||
+                  '—'
+                const badge = tourListingBadge(tour)
+                const detailSlug = buildTourSlug(tour.title, tour.id)
 
                 return (
                   <Link
-                    className="catalog-card-link"
+                    className="tours-catalog-card-link"
                     key={tour.id}
-                    to={`/tours/${tour.id}`}
+                    to={`/tour/${detailSlug}`}
                   >
-                    <article className="catalog-card">
-                      <div className="catalog-card-media">
+                    <article className="tours-catalog-card">
+                      <div className="tours-catalog-card__media">
                         {tour.image ? (
-                          <img src={tour.image} alt={title} />
+                          <img src={tour.image} alt={title} loading="lazy" />
                         ) : (
-                          <div className="catalog-card-empty">
+                          <div className="tours-catalog-card__empty">
                             <Image size={30} strokeWidth={1.8} aria-hidden="true" />
                           </div>
                         )}
-                        <span className="catalog-card-badge">
-                          {tour.rating ? (
-                            <>
-                              <Star
-                                size={13}
-                                fill="currentColor"
-                                strokeWidth={1.5}
-                                aria-hidden="true"
-                              />
-                              {tour.rating.toFixed(1)}
-                            </>
-                          ) : (
-                            tour.category
-                          )}
+
+                        <span
+                          className={`tours-catalog-card__tag tours-catalog-card__tag--${badge.kind}`}
+                        >
+                          {badge.label}
+                        </span>
+
+                        <span className="tours-catalog-card__quick">
+                          <Eye size={16} strokeWidth={2.2} aria-hidden="true" />
+                          Xem nhanh
                         </span>
                       </div>
-                      <div className="catalog-card-body">
-                        <h2>{title}</h2>
-                        <p>{description}</p>
-                        <div className="catalog-card-meta">
+
+                      <div className="tours-catalog-card__panel">
+                        <h2 className="tours-catalog-card__title">{title}</h2>
+
+                        <div className="tours-catalog-card__row">
                           <span>
-                            <CalendarDays
-                              size={15}
-                              strokeWidth={1.8}
-                              aria-hidden="true"
-                            />
+                            <MapPin size={15} strokeWidth={2} aria-hidden="true" />
+                            {provinceLine}
+                          </span>
+                          <span>
+                            <Clock size={15} strokeWidth={2} aria-hidden="true" />
                             {days}
                           </span>
-                          <span>
-                            <MapPin size={15} strokeWidth={1.8} aria-hidden="true" />
-                            {location}
-                          </span>
-                          <span>
-                            <Tag size={15} strokeWidth={1.8} aria-hidden="true" />
-                            {formatPrice(tour.price)}
-                          </span>
                         </div>
-                        <span className="catalog-action-link">
-                          Xem chi tiet
-                          <ArrowRight size={16} strokeWidth={2.1} aria-hidden="true" />
-                        </span>
+
+                        <div className="tours-catalog-card__foot">
+                          <div className="tours-catalog-card__price-block">
+                            <span className="tours-catalog-card__price-label">Giá từ:</span>
+                            <span className="tours-catalog-card__price-value">
+                              {formatListingPrice(tour.price)}
+                            </span>
+                          </div>
+                          <span className="tours-catalog-card__cta">Xem chi tiết</span>
+                        </div>
                       </div>
                     </article>
                   </Link>

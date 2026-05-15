@@ -17,7 +17,7 @@ const splitHeadingSelector = [
   '.travel-film-copy h2',
   '.weather-alert-copy h2',
   '.weather-main-card h3',
-  '.tour-card h3',
+  '.home-tour-card .home-tour-card-title',
   '.contact-section > div h2',
   '.footer-hero h2',
   '.footer-links h3',
@@ -57,7 +57,7 @@ const revealSelector = [
   '.weather-detail-button',
   '.package-section .section-heading .eyebrow',
   '.package-section .section-heading > p',
-  '.tour-card',
+  '.home-tour-card',
   '.tour-body > p',
   '.tour-info-list span',
   '.tour-footer',
@@ -73,7 +73,7 @@ const revealSelector = [
 const hoverSelector = [
   '.booking-bar button',
   '.about-content a',
-  '.tour-card button',
+  '.home-tour-row-arrow',
   '.weather-detail-button',
   '.contact-form button',
   '.footer-subscribe button',
@@ -82,7 +82,6 @@ const hoverSelector = [
 ].join(', ')
 
 const hoverCardSelector = [
-  '.tour-card',
   '.destination-tile',
   '.travel-video-shell',
   '.weather-alert-item',
@@ -122,15 +121,11 @@ export function SiteMotion() {
     const wrapper = document.querySelector<HTMLElement>('#smooth-wrapper')
     const content = document.querySelector<HTMLElement>('#smooth-content')
 
-    if (!wrapper || !content) {
-      return undefined
-    }
-
     const ctx = gsap.context(() => {
       let smoother: ScrollSmoother | undefined
       let hoverCleanups: Array<() => void> = []
 
-      if (!reduceMotion && window.innerWidth > 900) {
+      if (!reduceMotion && window.innerWidth > 900 && wrapper && content) {
         ScrollSmoother.get()?.kill()
         smoother = ScrollSmoother.create({
           wrapper,
@@ -143,7 +138,9 @@ export function SiteMotion() {
         })
       }
 
-      const splitTargets = gsap.utils.toArray<HTMLElement>(splitHeadingSelector)
+      const splitTargets = gsap
+        .utils.toArray<HTMLElement>(splitHeadingSelector)
+        .filter((el) => Boolean(el.textContent?.trim()))
       const splits = reduceMotion
         ? []
         : splitTargets.map((target) =>

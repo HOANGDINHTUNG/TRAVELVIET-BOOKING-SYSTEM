@@ -30,6 +30,10 @@ public class DestinationFacade {
         return queryService.getApprovedDestinationByUuid(uuid);
     }
 
+    public DestinationPublicDetailResponse getApprovedDestinationByProgramSlug(String programSlug) {
+        return queryService.getApprovedDestinationByProgramSlug(programSlug);
+    }
+
     public DestinationProposalResponse proposeDestination(ProposeDestinationRequest request) {
         validator.validatePropose(request);
         return commandService.proposeDestination(request);

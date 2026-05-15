@@ -5,6 +5,7 @@ import { hasStoredAuthSession } from '../../api/authApi'
 import './LoginWelcomeAnimation.css'
 
 const WELCOME_SEEN_KEY = 'travelviet-login-welcome-seen'
+const WELCOME_PENDING_KEY = 'travelviet-login-welcome-pending'
 
 function hasAuthSignal() {
   if (typeof window === 'undefined') {
@@ -55,12 +56,17 @@ export function LoginWelcomeAnimation() {
   }, [clearTimers])
 
   useEffect(() => {
-    const initialAuth = hasAuthSignal()
-    previousAuthRef.current = initialAuth
+    const isAuthedOnMount = hasAuthSignal()
 
-    if (initialAuth) {
-      window.setTimeout(showWelcome, 0)
+    if (
+      isAuthedOnMount &&
+      window.sessionStorage.getItem(WELCOME_PENDING_KEY) === '1'
+    ) {
+      window.sessionStorage.removeItem(WELCOME_PENDING_KEY)
+      showWelcome()
     }
+
+    previousAuthRef.current = isAuthedOnMount
 
     const checkAuthState = () => {
       const isAuthed = hasAuthSignal()

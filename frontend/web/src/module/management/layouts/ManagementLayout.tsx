@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Outlet, useNavigate } from 'react-router-dom'
 import { userApi } from '../../../api/server/User.api'
 import type { UserAccessContext } from '../../auth/api/authApi'
@@ -13,12 +14,12 @@ import {
   resolveManagerRolesForUser,
 } from '../config/managementRoles'
 import { getVisibleManagementGroups } from '../config/managementNavigation'
-import ManagementSidebar from './ManagementSidebar'
-import './managementLayout.css'
+import AdminLayout from './AdminLayout'
 import '../pages/ManagementHubPage.css'
 
 function ManagementLayout() {
   const navigate = useNavigate()
+  const { t } = useTranslation('management')
   const [accessContext, setAccessContext] = useState<UserAccessContext | null>(null)
   const [isAccessLoading, setIsAccessLoading] = useState(true)
   const [accessError, setAccessError] = useState<string | null>(null)
@@ -37,7 +38,7 @@ function ManagementLayout() {
   )
 
   const displayName =
-    user?.displayName || user?.fullName || user?.email || 'Người dùng quản lý'
+    user?.displayName || user?.fullName || user?.email || t('layout.fallbackDisplayName')
   const roleSummary = availableRoles
     .map((roleCode) => managerRoleProfiles[roleCode]?.label ?? roleCode)
     .join(', ')
@@ -64,7 +65,7 @@ function ManagementLayout() {
         persistStoredAuthUser(nextAccessContext.user)
       } catch {
         if (!isCancelled) {
-          setAccessError('Không thể tải quyền quản lý của tài khoản hiện tại.')
+          setAccessError(t('layout.accessLoadError'))
         }
       } finally {
         if (!isCancelled) {
@@ -78,7 +79,7 @@ function ManagementLayout() {
     return () => {
       isCancelled = true
     }
-  }, [navigate])
+  }, [navigate, t])
 
   const handleLogout = () => {
     clearAuthSession()
@@ -86,21 +87,19 @@ function ManagementLayout() {
   }
 
   return (
-    <div className="mgmt-layout">
-      <ManagementSidebar
-        accessContext={accessContext}
-        accessError={accessError}
-        displayName={displayName}
-        isAccessLoading={isAccessLoading}
-        onLogout={handleLogout}
-        roleSummary={roleSummary}
-        visibleGroups={visibleGroups}
-      />
-
-      <main className="mgmt-main">
+    <AdminLayout
+      accessContext={accessContext}
+      accessError={accessError}
+      displayName={displayName}
+      isAccessLoading={isAccessLoading}
+      onLogout={handleLogout}
+      roleSummary={roleSummary}
+      visibleGroups={visibleGroups}
+    >
+      <div className="admin-card p-4 md:p-6">
         <Outlet context={{ accessContext }} />
-      </main>
-    </div>
+      </div>
+    </AdminLayout>
   )
 }
 

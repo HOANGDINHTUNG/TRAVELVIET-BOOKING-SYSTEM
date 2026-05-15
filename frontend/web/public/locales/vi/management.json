@@ -20,9 +20,208 @@
     "yes": "Đồng ý",
     "no": "Không"
   },
+  "layout": {
+    "accessLoadError": "Không thể tải quyền quản lý của tài khoản hiện tại.",
+    "fallbackDisplayName": "Người dùng quản lý"
+  },
+  "adminShell": {
+    "brandTitle": "TravelViet",
+    "brandSubtitle": "Admin",
+    "superAdminBadge": "Super Admin",
+    "sidebarNavAria": "Thanh điều hướng quản trị",
+    "expandSidebar": "Mở rộng sidebar",
+    "collapseSidebar": "Thu gọn sidebar",
+    "expandShort": "Mở rộng",
+    "collapseShort": "Thu gọn",
+    "permissionsLoading": "Đang tải quyền…",
+    "backToSite": "Về website",
+    "backToSiteTitle": "Về trang công khai",
+    "searchPlaceholder": "Tìm tour, mã booking… (Enter → tìm tour)",
+    "searchMobileAria": "Mở tìm kiếm nhanh",
+    "themeDark": "Tối",
+    "themeLight": "Sáng",
+    "themeSwitchToLight": "Chuyển chế độ sáng",
+    "themeSwitchToDark": "Chuyển chế độ tối",
+    "notifications": "Thông báo",
+    "notificationsEmptyTitle": "Thông báo",
+    "notificationsEmptyBody": "Chưa có thông báo mới. Khi backend tích hợp WebSocket/STOMP, đơn mới sẽ hiện tại đây.",
+    "profileMenu": "Menu tài khoản",
+    "profileAccount": "Hồ sơ cá nhân",
+    "commandPalette": {
+      "title": "Đi nhanh",
+      "subtitle": "Trang quản trị — Enter để mở, Esc để đóng",
+      "inputPlaceholder": "Gõ để lọc trang hoặc dán đường dẫn…",
+      "empty": "Không có mục khớp.",
+      "hint": "Phím tắt: Ctrl+K hoặc ⌘K",
+      "recentSection": "Gần đây",
+      "actionsSection": "Thao tác",
+      "navSection": "Trang"
+    },
+    "health": {
+      "ok": "API backend: hoạt động",
+      "fail": "API backend: không phản hồi",
+      "checking": "Đang kiểm tra API…"
+    },
+    "paletteAction": {
+      "openApiProbe": "Kiểm tra kết nối API",
+      "createTour": "Tạo tour mới (mở form)",
+      "openBookings": "Mở trang đơn hàng",
+      "openTours": "Mở danh sách tour"
+    },
+    "notif": {
+      "samplePaidTitle": "Thanh toán VNPay thành công (mẫu)",
+      "samplePaidBody": "Đơn #BK-DEMO — có thể thay bằng WebSocket thật.",
+      "sampleNewTitle": "Đơn mới chờ xử lý (mẫu)",
+      "sampleNewBody": "Kiểm tra danh sách đặt chỗ.",
+      "viewBooking": "Xem đơn",
+      "markAllRead": "Đánh dấu đã đọc",
+      "demoHint": "Bản demo: thông báo có nút. Kết nối BE sau để cập nhật thời gian thực."
+    },
+    "nav": {
+      "dashboard": "Tổng quan",
+      "apiProbe": "Kiểm tra API",
+      "tours": "Quản lý Tour",
+      "schedules": "Lịch khởi hành",
+      "bookings": "Đơn hàng",
+      "destinations": "Điểm đến",
+      "customers": "Khách hàng",
+      "reports": "Báo cáo"
+    }
+  },
+  "apiProbe": {
+    "kicker": "Vận hành",
+    "title": "Kiểm tra API hệ thống",
+    "subtitle": "Gửi các GET nhẹ tới backend (kèm JWT nếu đã đăng nhập). Mã 403/404 vẫn cho biết máy chủ đang phản hồi — chỉ lỗi mạng/timeout là backend không tới được.",
+    "baseUrlLabel": "Base URL:",
+    "runAll": "Chạy tất cả",
+    "reset": "Xóa kết quả",
+    "runOne": "Chạy",
+    "running": "Đang gọi…",
+    "networkError": "Lỗi mạng hoặc timeout",
+    "col": {
+      "probe": "API",
+      "request": "Yêu cầu",
+      "result": "Kết quả",
+      "action": "Thao tác"
+    },
+    "probes": {
+      "health": {
+        "label": "Health công khai",
+        "hint": "GET /system/health — không cần đăng nhập."
+      },
+      "toursPublic": {
+        "label": "Danh sách tour (public)",
+        "hint": "GET /tours — catalog công khai."
+      },
+      "destinationsPublic": {
+        "label": "Điểm đến (public)",
+        "hint": "GET /destinations — danh sách đã duyệt."
+      },
+      "adminTours": {
+        "label": "Tour admin",
+        "hint": "GET /admin/tours — cần quyền tour.view."
+      },
+      "adminDestinations": {
+        "label": "Điểm đến admin",
+        "hint": "GET /admin/destinations — cần quyền destination.view."
+      },
+      "adminBookings": {
+        "label": "Booking admin",
+        "hint": "GET /admin/bookings — có thể 404 nếu BE chưa bật endpoint."
+      },
+      "rbacRoles": {
+        "label": "Vai trò (RBAC)",
+        "hint": "GET /roles — cần user.view."
+      },
+      "bookingsMine": {
+        "label": "Booking của tôi",
+        "hint": "GET /bookings/me — cần đăng nhập."
+      }
+    }
+  },
+  "dashboard": {
+    "skeletonAria": "Đang tải bảng điều khiển",
+    "kicker": "Bảng điều khiển",
+    "title": "Tổng quan vận hành",
+    "subtitle": "Doanh thu và phân bổ đơn được tính từ mẫu đặt chỗ và tour; khi backend có API thống kê tổng hợp, chỉ cần thay nguồn trong hook dữ liệu.",
+    "metaAggregated": "Ước tính từ {{count}} đơn gần nhất (chưa có API thanh toán tổng hợp / admin/statistics).",
+    "mockFallbackBanner": "Đang hiển thị dữ liệu mẫu do lỗi tải API đặt chỗ.",
+    "devHubLink": "kiểm tra API (legacy)",
+    "devHubPrefix": "Trung tâm kỹ thuật:",
+    "apiProbeLink": "kiểm tra kết nối API",
+    "kpi": {
+      "revenue": {
+        "label": "Tổng doanh thu",
+        "hint": "Theo mẫu đơn đã thanh toán (tối đa {{count}} đơn)"
+      },
+      "orders": {
+        "label": "Tổng đơn hàng",
+        "hint": "Theo phân trang API đặt chỗ"
+      },
+      "tours": {
+        "label": "Tour đang hoạt động",
+        "hint": "Trạng thái: đang mở bán (active)"
+      },
+      "customers": {
+        "label": "Khách hàng mới",
+        "hint": "30 ngày gần nhất (mẫu người dùng)"
+      }
+    },
+    "chart": {
+      "revenueMonthTitle": "Xu hướng doanh thu trong tháng",
+      "revenueMonthSubtitle": "Biểu đồ đường theo từng ngày (VND).",
+      "revenueDay": "Ngày {{day}}",
+      "yAxisMillions": "{{n}}M",
+      "orderStatusTitle": "Trạng thái đơn hàng",
+      "orderStatusSubtitle": "Phân bổ theo số lượng đơn trong mẫu",
+      "pieTooltipOrders": "{{count}} đơn"
+    },
+    "orderStatus": {
+      "paid": "Đã thanh toán",
+      "pending": "Chờ xử lý",
+      "cancelled": "Đã hủy"
+    },
+    "bookingRowStatus": {
+      "pending_payment": "Chờ xử lý",
+      "paid": "Đã thanh toán",
+      "cancelled": "Đã hủy"
+    },
+    "activity": {
+      "title": "Hoạt động gần đây",
+      "subtitle": "5 đơn mới nhất",
+      "filterPlaceholder": "Lọc theo mã / khách (sắp có)",
+      "filterTitle": "Tính năng lọc sẽ kết nối khi API hỗ trợ",
+      "pager": "Trang {{page}} / {{pages}} · {{total}} bản ghi",
+      "colCode": "Mã đơn",
+      "colCustomer": "Tên khách",
+      "colTour": "Tên tour",
+      "colAmount": "Số tiền",
+      "colStatus": "Trạng thái"
+    },
+    "warnings": {
+      "bookings_api_fallback": "API đặt chỗ đang dùng fallback `/bookings/me` — số liệu chỉ phản ánh tài khoản hiện tại, không phải toàn hệ thống.",
+      "bookings_load_error": "Không tải được danh sách đặt chỗ — hiển thị dữ liệu mẫu.",
+      "bookings_missing_after_load": "Thiếu dữ liệu đặt chỗ sau khi tải — hiển thị dữ liệu mẫu.",
+      "tours_load_error": "Không tải được danh sách tour (active).",
+      "users_load_error": "Không tải được danh sách người dùng admin.",
+      "tours_kpi_unavailable": "Không tải được số tour đang hoạt động — KPI tour = 0.",
+      "users_kpi_unavailable": "Không tải được người dùng — KPI khách mới = 0.",
+      "chart_limited_to_page_sample": "Doanh thu / biểu đồ tháng chỉ dựa trên tối đa {{rows}} đơn trong trang — tổng hệ thống cần API thống kê."
+    }
+  },
   "tours": {
     "pageTitle": "Quản lý Tours",
     "pageSubtitle": "Theo dõi danh sách tour, trạng thái và thông tin cơ bản phục vụ vận hành.",
+    "facet": {
+      "countryLabel": "Quốc gia điểm đến",
+      "countryAll": "Tất cả quốc gia",
+      "domesticLabel": "Chỉ tour nội địa (VN)",
+      "savedViews": "View đã lưu",
+      "saveView": "Lưu view hiện tại",
+      "saveViewPrompt": "Tên view (vd: Tour sắp bán)",
+      "deleteView": "Xóa",
+      "noSavedViews": "Chưa có view đã lưu."
+    },
     "errorMessage": "Không thể tải danh sách tour. Vui lòng thử lại sau ít phút.",
     "createButton": "Tạo tour mới",
     "table": {
@@ -68,7 +267,9 @@
       "notes": "Ghi chú nội bộ",
       "tags": "Nhãn / chủ đề",
       "media": "Hình ảnh & video",
-      "itinerary": "Lịch trình theo ngày"
+      "itinerary": "Lịch trình theo ngày",
+      "draftHint": "Bản nháp được lưu tự động trên trình duyệt khi bạn chỉnh sửa.",
+      "draftRestored": "Đã khôi phục bản nháp chưa gửi."
     },
     "destinationSelect": {
       "placeholder": "Chọn điểm đến...",
@@ -251,6 +452,17 @@
   },
   "bookings": {
     "page": {
+      "bulk": {
+        "selected": "Đã chọn {{count}}",
+        "clear": "Bỏ chọn",
+        "checkIn": "Check-in hàng loạt",
+        "complete": "Hoàn thành hàng loạt",
+        "noneEligible": "Không có đơn đủ điều kiện trong lựa chọn.",
+        "done": "Đã xử lý {{ok}}/{{total}} đơn.",
+        "disabledInFallback": "Chọn nhiều chỉ khả dụng khi API admin đặt chỗ đầy đủ (không fallback /bookings/me).",
+        "selectAllPage": "Chọn tất cả trên trang",
+        "selectRow": "Chọn đơn"
+      },
       "title": "Quản lý đặt chỗ",
       "subtitle": "Theo dõi đơn hàng, cập nhật trạng thái và xử lý hoàn tiền.",
       "loading": "Đang tải danh sách đơn...",

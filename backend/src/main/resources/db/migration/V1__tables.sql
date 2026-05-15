@@ -81,66 +81,69 @@ SET FOREIGN_KEY_CHECKS = 1;
 -- =============================================================================
 
 -- 1. USERS audit_logs/ PREFERENCES / DEVICES -- 
-
+-- Bẳng mô tả người dùng
 CREATE TABLE IF NOT EXISTS users (
-    id CHAR(36) PRIMARY KEY,
-    email VARCHAR(150) UNIQUE,
-    phone VARCHAR(20) UNIQUE,
-    password_hash VARCHAR(255) NOT NULL,
-    user_category ENUM('INTERNAL', 'CUSTOMER') NOT NULL DEFAULT 'CUSTOMER',
-    status ENUM('pending', 'active', 'suspended', 'blocked', 'deleted') NOT NULL DEFAULT 'active',
-    full_name VARCHAR(150) NOT NULL,
-    display_name VARCHAR(120),
-    gender ENUM('male', 'female', 'other', 'unknown') NOT NULL DEFAULT 'unknown',
-    date_of_birth DATE,
-    avatar_url TEXT,
-    member_level ENUM('bronze', 'silver', 'gold', 'platinum', 'diamond') NOT NULL DEFAULT 'bronze',
-    loyalty_points INT NOT NULL DEFAULT 0,
-    total_spent DECIMAL(14 , 2 ) NOT NULL DEFAULT 0,
-    email_verified_at DATETIME NULL,
-    phone_verified_at DATETIME NULL,
-    last_login_at DATETIME NULL,
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    deleted_at DATETIME NULL,
-    CONSTRAINT chk_user_contact_required CHECK (email IS NOT NULL OR phone IS NOT NULL)
+    id CHAR(36) PRIMARY KEY, -- id người dùng
+    email VARCHAR(150) UNIQUE, -- email người dùng
+    phone VARCHAR(20) UNIQUE, -- số điện thoại người dùng
+    password_hash VARCHAR(255) NOT NULL, -- mật khẩu người dùng đã được mã hoá
+    user_category ENUM('INTERNAL', 'CUSTOMER') NOT NULL DEFAULT 'CUSTOMER', -- loại người dùng
+    status ENUM('pending', 'active', 'suspended', 'blocked', 'deleted') NOT NULL DEFAULT 'active', -- trạng thái người dùng
+    full_name VARCHAR(150) NOT NULL, -- tên người dùng
+    display_name VARCHAR(120), -- tên hiển thị người dùng
+    gender ENUM('male', 'female', 'other', 'unknown') NOT NULL DEFAULT 'unknown', -- giới tính người dùng
+    date_of_birth DATE, -- ngày sinh người dùng
+    avatar_url TEXT, -- url ảnh đại diện người dùng
+    member_level ENUM('bronze', 'silver', 'gold', 'platinum', 'diamond') NOT NULL DEFAULT 'bronze', -- cấp độ thành viên người dùng
+    loyalty_points INT NOT NULL DEFAULT 0, -- điểm thưởng người dùng
+    total_spent DECIMAL(14 , 2 ) NOT NULL DEFAULT 0, -- tổng tiền người dùng đã chi tiêu
+    email_verified_at DATETIME NULL, -- ngày email đã được xác thực
+    phone_verified_at DATETIME NULL, -- ngày số điện thoại đã được xác thực
+    last_login_at DATETIME NULL, -- ngày đăng nhập cuối cùng của người dùng
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, -- ngày tạo người dùng
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- ngày cập nhật người dùng
+    deleted_at DATETIME NULL, -- ngày xóa người dùng
+    CONSTRAINT chk_user_contact_required CHECK (email IS NOT NULL OR phone IS NOT NULL) -- kiểm tra email hoặc số điện thoại có tồn tại
 )  ENGINE=INNODB; 
 
+-- Bảng vai trò
 CREATE TABLE IF NOT EXISTS roles (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    code VARCHAR(50) NOT NULL UNIQUE,
-    name VARCHAR(120) NOT NULL,
-    description VARCHAR(255),
-    role_scope ENUM('SYSTEM', 'BACKOFFICE', 'CUSTOMER') NOT NULL DEFAULT 'SYSTEM',
-    hierarchy_level INT NOT NULL DEFAULT 0,
-    is_system_role BOOLEAN NOT NULL DEFAULT TRUE,
-    is_active BOOLEAN NOT NULL DEFAULT TRUE,
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    deleted_at DATETIME NULL
+    id BIGINT PRIMARY KEY AUTO_INCREMENT, -- id vai trò
+    code VARCHAR(50) NOT NULL UNIQUE, -- mã vai trò
+    name VARCHAR(120) NOT NULL, -- tên vai trò
+    description VARCHAR(255), -- mô tả vai trò
+    role_scope ENUM('SYSTEM', 'BACKOFFICE', 'CUSTOMER') NOT NULL DEFAULT 'SYSTEM', -- phạm vi vai trò
+    hierarchy_level INT NOT NULL DEFAULT 0, -- cấp độ vai trò
+    is_system_role BOOLEAN NOT NULL DEFAULT TRUE, -- có phải là vai trò hệ thống không
+    is_active BOOLEAN NOT NULL DEFAULT TRUE, -- có hoạt động không
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, -- ngày tạo vai trò
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- ngày cập nhật vai trò
+    deleted_at DATETIME NULL -- ngày xóa vai trò
 ) ENGINE=InnoDB; 
 
+-- Bảng quyền hạn
 CREATE TABLE IF NOT EXISTS permissions (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    code VARCHAR(100) NOT NULL UNIQUE,
-    name VARCHAR(150) NOT NULL,
-    module_name VARCHAR(80) NOT NULL,
-    action_name VARCHAR(80) NOT NULL,
-    description VARCHAR(255),
-    is_active BOOLEAN NOT NULL DEFAULT TRUE,
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    deleted_at DATETIME NULL
+    id BIGINT PRIMARY KEY AUTO_INCREMENT, -- id quyền hạn
+    code VARCHAR(100) NOT NULL UNIQUE, -- mã quyền hạn
+    name VARCHAR(150) NOT NULL, -- tên hành động quyền hạn
+    module_name VARCHAR(80) NOT NULL, -- tên module quyền hạn
+    action_name VARCHAR(80) NOT NULL, -- tên hành động quyền hạn
+    description VARCHAR(255), -- mô tả quyền hạn
+    is_active BOOLEAN NOT NULL DEFAULT TRUE, -- có hoạt động không
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, -- ngày tạo 
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- ngày cập nhật 
+    deleted_at DATETIME NULL -- ngày xóa 
 ) ENGINE=InnoDB; 
 
+-- Bảng quyền hạn của vai trò
 CREATE TABLE IF NOT EXISTS role_permissions (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    role_id BIGINT NOT NULL,
-    permission_id BIGINT NOT NULL,
-    granted_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    granted_by CHAR(36) NULL,
-    deleted_at DATETIME NULL,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    id BIGINT PRIMARY KEY AUTO_INCREMENT, -- mã
+    role_id BIGINT NOT NULL, -- id vai trò
+    permission_id BIGINT NOT NULL, -- id quyền hạn
+    granted_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, -- ngày cấp quyền
+    granted_by CHAR(36) NULL, -- id người cấp quyền
+    deleted_at DATETIME NULL, -- ngày xóa
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- ngày cập nhật
     UNIQUE KEY uk_role_permission (role_id, permission_id),
     CONSTRAINT fk_role_permissions_role
         FOREIGN KEY (role_id) REFERENCES roles(id)
@@ -237,154 +240,178 @@ CREATE TABLE IF NOT EXISTS user_addresses (
 
 -- 2. DESTINATIONS / CONTENT / FOLLOW -- 
 
-
+-- Bảng điểm đến
 CREATE TABLE IF NOT EXISTS destinations (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT, -- id điểm đến
+    uuid CHAR(36) NOT NULL DEFAULT (UUID()), -- uuid điểm đến
+    code VARCHAR(30) NOT NULL UNIQUE, -- mã điểm đến
+    name VARCHAR(200) NOT NULL, -- tên điểm đến
+    slug VARCHAR(220) NOT NULL UNIQUE, -- slug điểm đến
+    country_code CHAR(2) NOT NULL DEFAULT 'VN', -- mã quốc gia
+    province VARCHAR(120) NOT NULL, -- tỉnh thành phố
+    district VARCHAR(120), -- quận huyện
+    region VARCHAR(120), -- khu vực
+    address TEXT, -- địa chỉ
+    latitude DECIMAL(10 , 7 ), -- vĩ độ
+    longitude DECIMAL(10 , 7 ), -- kinh độ
+    short_description TEXT, -- mô tả ngắn
+    description TEXT, -- mô tả đầy đủ
+    best_time_from_month TINYINT NULL, -- tháng tốt nhất đi đến
+    best_time_to_month TINYINT NULL, -- tháng tốt nhất đi đến
+    crowd_level_default ENUM('low', 'medium', 'high', 'very_high') NOT NULL DEFAULT 'medium', -- mức độ đông đúc
+    is_featured BOOLEAN NOT NULL DEFAULT FALSE, -- có được đặt làm điểm đến nổi bật không
+    is_active BOOLEAN NOT NULL DEFAULT TRUE, -- có hoạt động không
+    status VARCHAR(20) NOT NULL DEFAULT 'APPROVED', -- trạng thái điểm đến
+    proposed_by CHAR(36) NULL, -- id người đề xuất
+    verified_by CHAR(36) NULL, -- id người xác thực
+    rejection_reason TEXT NULL, -- lý do từ chối
+    is_official BOOLEAN NOT NULL DEFAULT FALSE, -- có phải là điểm đến chính thức không
+    parent_id BIGINT NULL,
+    destination_level INT NOT NULL DEFAULT 0,
+    destination_path VARCHAR(512) NOT NULL DEFAULT '/',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, -- ngày tạo
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- ngày cập nhật
+    deleted_at DATETIME NULL, -- ngày xóa
+    UNIQUE KEY uk_destinations_uuid (uuid), -- unique key uuid
+    KEY idx_destinations_parent (parent_id),
+    KEY idx_destinations_path_prefix (destination_path(190)),
+    CONSTRAINT chk_best_time_from CHECK (best_time_from_month BETWEEN 1 AND 12
+        OR best_time_from_month IS NULL), -- kiểm tra tháng tốt nhất đi đến
+    CONSTRAINT chk_best_time_to CHECK (best_time_to_month BETWEEN 1 AND 12
+        OR best_time_to_month IS NULL), -- kiểm tra tháng tốt nhất đi đến
+    CONSTRAINT fk_destinations_parent FOREIGN KEY (parent_id) REFERENCES destinations (id)
+        ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS destination_translations (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    uuid CHAR(36) NOT NULL DEFAULT (UUID()),
-    code VARCHAR(30) NOT NULL UNIQUE,
-    name VARCHAR(200) NOT NULL,
-    slug VARCHAR(220) NOT NULL UNIQUE,
-    country_code CHAR(2) NOT NULL DEFAULT 'VN',
-    province VARCHAR(120) NOT NULL,
-    district VARCHAR(120),
-    region VARCHAR(120),
-    address TEXT,
-    latitude DECIMAL(10 , 7 ),
-    longitude DECIMAL(10 , 7 ),
+    destination_id BIGINT NOT NULL,
+    locale VARCHAR(10) NOT NULL,
+    name VARCHAR(200),
     short_description TEXT,
     description TEXT,
-    best_time_from_month TINYINT NULL,
-    best_time_to_month TINYINT NULL,
-    crowd_level_default ENUM('low', 'medium', 'high', 'very_high') NOT NULL DEFAULT 'medium',
-    is_featured BOOLEAN NOT NULL DEFAULT FALSE,
-    is_active BOOLEAN NOT NULL DEFAULT TRUE,
-    status VARCHAR(20) NOT NULL DEFAULT 'APPROVED',
-    proposed_by CHAR(36) NULL,
-    verified_by CHAR(36) NULL,
-    rejection_reason TEXT NULL,
-    is_official BOOLEAN NOT NULL DEFAULT FALSE,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    deleted_at DATETIME NULL,
-    UNIQUE KEY uk_destinations_uuid (uuid),
-    CONSTRAINT chk_best_time_from CHECK (best_time_from_month BETWEEN 1 AND 12
-        OR best_time_from_month IS NULL),
-    CONSTRAINT chk_best_time_to CHECK (best_time_to_month BETWEEN 1 AND 12
-        OR best_time_to_month IS NULL)
-)  ENGINE=INNODB; 
+    UNIQUE KEY uk_destination_translations_dest_locale (destination_id, locale),
+    CONSTRAINT fk_destination_translations_destination
+        FOREIGN KEY (destination_id) REFERENCES destinations (id)
+        ON DELETE CASCADE
+) ENGINE=InnoDB;
 
-
+-- Bảng media điểm đến
 CREATE TABLE IF NOT EXISTS destination_media ( 
-	id BIGINT PRIMARY KEY AUTO_INCREMENT, 
-    destination_id BIGINT NOT NULL, 
-    media_type ENUM('image', 'video', 'cover', 'banner') NOT NULL DEFAULT 'image', 
-    media_url TEXT NOT NULL, 
-    alt_text VARCHAR(255), 
-    sort_order INT NOT NULL DEFAULT 0, 
-    is_active BOOLEAN NOT NULL DEFAULT TRUE, 
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    deleted_at DATETIME NULL,
+	id BIGINT PRIMARY KEY AUTO_INCREMENT, -- id media điểm đến
+    destination_id BIGINT NOT NULL, -- id điểm đến
+    media_type ENUM('image', 'video', 'cover', 'banner') NOT NULL DEFAULT 'image', -- loại media
+    media_url TEXT NOT NULL, -- url media
+    alt_text VARCHAR(255), -- text thay thế
+    sort_order INT NOT NULL DEFAULT 0, -- thứ tự sắp xếp
+    is_active BOOLEAN NOT NULL DEFAULT TRUE, -- có hoạt động không
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, -- ngày tạo
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- ngày cập nhật
+    deleted_at DATETIME NULL, -- ngày xóa
     CONSTRAINT fk_destination_media_destination 
     FOREIGN KEY (destination_id) 
     REFERENCES destinations(id) 
     ON DELETE CASCADE 
 ) ENGINE=InnoDB; 
 
-
+-- Bảng món ăn điểm đến
 CREATE TABLE IF NOT EXISTS destination_foods ( 
-	id BIGINT PRIMARY KEY AUTO_INCREMENT, 
-    destination_id BIGINT NOT NULL, 
-    food_name VARCHAR(200) NOT NULL, 
-    description TEXT, 
-    is_featured BOOLEAN NOT NULL DEFAULT TRUE, 
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    deleted_at DATETIME NULL,
+	id BIGINT PRIMARY KEY AUTO_INCREMENT, -- id món ăn điểm đến
+    destination_id BIGINT NOT NULL, -- id điểm đến
+    food_name VARCHAR(200) NOT NULL, -- tên món ăn
+    description TEXT, -- mô tả
+    is_featured BOOLEAN NOT NULL DEFAULT TRUE, -- có được đặt làm món ăn nổi bật không
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, -- ngày tạo
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- ngày cập nhật
+    deleted_at DATETIME NULL, -- ngày xóa
     CONSTRAINT fk_destination_foods_destination 
-    FOREIGN KEY (destination_id) 
+    FOREIGN KEY (destination_id)
     REFERENCES destinations(id) 
-    ON DELETE CASCADE 
+    ON DELETE CASCADE
 ) ENGINE=InnoDB; 
 
-
+-- Bảng chuyên ngành điểm đến
 CREATE TABLE IF NOT EXISTS destination_specialties ( 
-	id BIGINT PRIMARY KEY AUTO_INCREMENT, 
-    destination_id BIGINT NOT NULL, 
-    specialty_name VARCHAR(200) NOT NULL, 
-    description TEXT, 
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    deleted_at DATETIME NULL,
+	id BIGINT PRIMARY KEY AUTO_INCREMENT, -- id chuyên ngành điểm đến
+    destination_id BIGINT NOT NULL, -- id điểm đến
+    specialty_name VARCHAR(200) NOT NULL, -- tên chuyên ngành
+    description TEXT, -- mô tả
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, -- ngày tạo
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- ngày cập nhật
+    deleted_at DATETIME NULL, -- ngày xóa
     CONSTRAINT fk_destination_specialties_destination 
-    FOREIGN KEY (destination_id) 
+    FOREIGN KEY (destination_id)
     REFERENCES destinations(id) 
-    ON DELETE CASCADE 
+    ON DELETE CASCADE
 ) ENGINE=InnoDB; 
 
 
 CREATE TABLE IF NOT EXISTS destination_activities ( 
-	id BIGINT PRIMARY KEY AUTO_INCREMENT, 
-    destination_id BIGINT NOT NULL, 
-    activity_name VARCHAR(200) NOT NULL, 
-    description TEXT, 
-    activity_score DECIMAL(5,2) NOT NULL DEFAULT 0, 
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    deleted_at DATETIME NULL,
+	id BIGINT PRIMARY KEY AUTO_INCREMENT, -- id hoạt động điểm đến
+    destination_id BIGINT NOT NULL, -- id điểm đến
+    activity_name VARCHAR(200) NOT NULL, -- tên hoạt động
+    description TEXT, -- mô tả
+    activity_score DECIMAL(5,2) NOT NULL DEFAULT 0, -- điểm hoạt động
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, -- ngày tạo
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- ngày cập nhật
+    deleted_at DATETIME NULL, -- ngày xóa
     CONSTRAINT fk_destination_activities_destination 
-    FOREIGN KEY (destination_id) 
+    FOREIGN KEY (destination_id)
     REFERENCES destinations(id) 
-    ON DELETE CASCADE 
+    ON DELETE CASCADE
 ) ENGINE=InnoDB; 
 
 
+-- Bảng mẹo điểm đến
 CREATE TABLE IF NOT EXISTS destination_tips (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    destination_id BIGINT NOT NULL,
-    tip_title VARCHAR(200) NOT NULL,
-    tip_content TEXT NOT NULL,
-    sort_order INT NOT NULL DEFAULT 0,
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    deleted_at DATETIME NULL,
-    CONSTRAINT fk_destination_tips_destination FOREIGN KEY (destination_id)
-        REFERENCES destinations (id)
-        ON DELETE CASCADE
+    id BIGINT PRIMARY KEY AUTO_INCREMENT, -- id mẹo điểm đến
+    destination_id BIGINT NOT NULL, -- id điểm đến
+    tip_title VARCHAR(200) NOT NULL, -- tên mẹo
+    tip_content TEXT NOT NULL, -- nội dung mẹo
+    sort_order INT NOT NULL DEFAULT 0, -- thứ tự sắp xếp
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, -- ngày tạo
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- ngày cập nhật
+    deleted_at DATETIME NULL, -- ngày xóa
+    CONSTRAINT fk_destination_tips_destination 
+    FOREIGN KEY (destination_id)
+    REFERENCES destinations(id) 
+    ON DELETE CASCADE
 )  ENGINE=INNODB; 
 
-
-CREATE TABLE IF NOT EXISTS destination_events ( 
-	id BIGINT PRIMARY KEY AUTO_INCREMENT, 
-    destination_id BIGINT NOT NULL, 
-    event_name VARCHAR(200) NOT NULL, 
-    event_type VARCHAR(80), 
-    description TEXT, 
-    starts_at DATETIME NULL, 
-    ends_at DATETIME NULL, 
-    notify_all_followers BOOLEAN NOT NULL DEFAULT FALSE, 
-    is_active BOOLEAN NOT NULL DEFAULT TRUE, 
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, 
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    deleted_at DATETIME NULL,
+-- Bảng sự kiện điểm đến
+CREATE TABLE IF NOT EXISTS destination_events (     
+	id BIGINT PRIMARY KEY AUTO_INCREMENT, -- id sự kiện điểm đến
+    destination_id BIGINT NOT NULL, -- id điểm đến
+    event_name VARCHAR(200) NOT NULL, -- tên sự kiện
+    event_type VARCHAR(80), -- loại sự kiện
+    description TEXT, -- mô tả
+    starts_at DATETIME NULL, -- ngày bắt đầu
+    ends_at DATETIME NULL, -- ngày kết thúc
+    notify_all_followers BOOLEAN NOT NULL DEFAULT FALSE, -- có thông báo cho tất cả người theo dõi không
+    is_active BOOLEAN NOT NULL DEFAULT TRUE, -- có hoạt động không
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, -- ngày tạo
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- ngày cập nhật
+    deleted_at DATETIME NULL, -- ngày xóa
     CONSTRAINT fk_destination_events_destination 
     FOREIGN KEY (destination_id) 
     REFERENCES destinations(id) 
     ON DELETE CASCADE 
 ) ENGINE=InnoDB; 
 
-
+-- Bảng theo dõi điểm đến
 CREATE TABLE IF NOT EXISTS destination_follows ( 
-	id BIGINT PRIMARY KEY AUTO_INCREMENT, 
-    user_id CHAR(36) NOT NULL, 
-    destination_id BIGINT NOT NULL, 
-    notify_event BOOLEAN NOT NULL DEFAULT TRUE, 
-    notify_voucher BOOLEAN NOT NULL DEFAULT TRUE, 
-    notify_new_tour BOOLEAN NOT NULL DEFAULT TRUE, 
-    notify_best_season BOOLEAN NOT NULL DEFAULT TRUE, 
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    deleted_at DATETIME NULL,
+	id BIGINT PRIMARY KEY AUTO_INCREMENT, -- id theo dõi điểm đến
+    user_id CHAR(36) NOT NULL, -- id người theo dõi
+    destination_id BIGINT NOT NULL, -- id điểm đến
+    notify_event BOOLEAN NOT NULL DEFAULT TRUE, -- có thông báo cho sự kiện không
+    notify_voucher BOOLEAN NOT NULL DEFAULT TRUE, -- có thông báo cho voucher không
+    notify_new_tour BOOLEAN NOT NULL DEFAULT TRUE, -- có thông báo cho tour mới không
+    notify_best_season BOOLEAN NOT NULL DEFAULT TRUE, -- có thông báo cho mùa tốt nhất không
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, -- ngày tạo
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- ngày cập nhật
+    deleted_at DATETIME NULL, -- ngày xóa
     UNIQUE KEY uk_destination_follow (user_id, destination_id), 
     CONSTRAINT fk_destination_follows_user 
     FOREIGN KEY (user_id) 
@@ -461,49 +488,63 @@ CREATE TABLE IF NOT EXISTS guides (
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, 
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP 
     ON UPDATE CURRENT_TIMESTAMP 
-) ENGINE=InnoDB; 
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS guide_translations (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    guide_id BIGINT NOT NULL,
+    locale VARCHAR(10) NOT NULL,
+    full_name VARCHAR(150),
+    bio TEXT,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_guide_translations_guide_locale (guide_id, locale),
+    CONSTRAINT fk_guide_translations_guide
+        FOREIGN KEY (guide_id) REFERENCES guides (id)
+        ON DELETE CASCADE
+) ENGINE=InnoDB;
 
 -- 4. TOURS / ITINERARY / SCHEDULE -- 
 
-
+-- Bảng tour
 CREATE TABLE IF NOT EXISTS tours (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    code VARCHAR(30) NOT NULL UNIQUE,
-    name VARCHAR(255) NOT NULL,
-    slug VARCHAR(280) NOT NULL UNIQUE,
-    destination_id BIGINT NOT NULL,
-    cancellation_policy_id BIGINT NULL,
-    short_description TEXT,
-    description TEXT,
-    highlights TEXT,
-    inclusions TEXT,
-    exclusions TEXT,
-    notes TEXT,
-    duration_days SMALLINT NOT NULL,
-    duration_nights SMALLINT NOT NULL DEFAULT 0,
-    base_price DECIMAL(14 , 2 ) NOT NULL DEFAULT 0,
-    currency CHAR(3) NOT NULL DEFAULT 'VND',
-    transport_type VARCHAR(120),
-    trip_mode ENUM('group', 'private', 'shared') NOT NULL DEFAULT 'group',
-    difficulty_level TINYINT NOT NULL DEFAULT 1,
-    activity_level TINYINT NOT NULL DEFAULT 1,
-    min_age SMALLINT NULL,
-    max_age SMALLINT NULL,
-    min_group_size SMALLINT NOT NULL DEFAULT 1,
-    max_group_size SMALLINT NOT NULL DEFAULT 50,
-    is_student_friendly BOOLEAN NOT NULL DEFAULT FALSE,
-    is_family_friendly BOOLEAN NOT NULL DEFAULT FALSE,
-    is_senior_friendly BOOLEAN NOT NULL DEFAULT FALSE,
-    is_featured BOOLEAN NOT NULL DEFAULT FALSE,
-    average_rating DECIMAL(3 , 2 ) NOT NULL DEFAULT 0,
-    total_reviews INT NOT NULL DEFAULT 0,
-    total_bookings INT NOT NULL DEFAULT 0,
-    status ENUM('draft', 'active', 'inactive', 'archived') NOT NULL DEFAULT 'draft',
-    created_by CHAR(36) NULL,
-    updated_by CHAR(36) NULL,
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    deleted_at DATETIME NULL,
+    id BIGINT PRIMARY KEY AUTO_INCREMENT, -- id tour
+    code VARCHAR(30) NOT NULL UNIQUE, -- mã tour
+    name VARCHAR(255) NOT NULL, -- tên tour
+    slug VARCHAR(280) NOT NULL UNIQUE, -- slug tour
+    destination_id BIGINT NOT NULL, -- id điểm đến
+    cancellation_policy_id BIGINT NULL, -- id chính sách hủy
+    short_description TEXT, -- mô tả ngắn
+    description TEXT, -- mô tả đầy đủ
+    highlights TEXT, -- điểm nổi bật
+    inclusions TEXT, -- bao gồm
+    exclusions TEXT, -- không bao gồm
+    notes TEXT, -- ghi chú
+    duration_days SMALLINT NOT NULL, -- số ngày
+    duration_nights SMALLINT NOT NULL DEFAULT 0, -- số đêm
+    base_price DECIMAL(14 , 2 ) NOT NULL DEFAULT 0, -- giá cơ bản
+    currency CHAR(3) NOT NULL DEFAULT 'VND', -- loại tiền tệ
+    transport_type VARCHAR(120), -- loại phương tiện
+    trip_mode ENUM('group', 'private', 'shared') NOT NULL DEFAULT 'group', -- loại tour
+    difficulty_level TINYINT NOT NULL DEFAULT 1, -- độ khó
+    activity_level TINYINT NOT NULL DEFAULT 1, -- độ hoạt động
+    min_age SMALLINT NULL, -- tuổi tối thiểu
+    max_age SMALLINT NULL, -- tuổi tối đa
+    min_group_size SMALLINT NOT NULL DEFAULT 1, -- số người tối thiểu
+    max_group_size SMALLINT NOT NULL DEFAULT 50, -- số người tối đa
+    is_student_friendly BOOLEAN NOT NULL DEFAULT FALSE, -- có phù hợp với sinh viên không
+    is_family_friendly BOOLEAN NOT NULL DEFAULT FALSE, -- có phù hợp với gia đình không
+    is_senior_friendly BOOLEAN NOT NULL DEFAULT FALSE, -- có phù hợp với người già không
+    is_featured BOOLEAN NOT NULL DEFAULT FALSE, -- có được đặt làm tour nổi bật không
+    average_rating DECIMAL(3 , 2 ) NOT NULL DEFAULT 0, -- điểm trung bình
+    total_reviews INT NOT NULL DEFAULT 0, -- số đánh giá
+    total_bookings INT NOT NULL DEFAULT 0, -- số đặt tour
+    status ENUM('draft', 'active', 'inactive', 'archived') NOT NULL DEFAULT 'draft', -- trạng thái tour
+    created_by CHAR(36) NULL, -- id người tạo
+    updated_by CHAR(36) NULL, -- id người cập nhật
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, -- ngày tạo
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- ngày cập nhật
+    deleted_at DATETIME NULL, -- ngày xóa
     CONSTRAINT fk_tours_destination FOREIGN KEY (destination_id)
         REFERENCES destinations (id),
     CONSTRAINT fk_tours_policy FOREIGN KEY (cancellation_policy_id)
@@ -518,7 +559,27 @@ CREATE TABLE IF NOT EXISTS tours (
     CONSTRAINT chk_duration_nights CHECK (duration_nights >= 0),
     CONSTRAINT chk_difficulty_level CHECK (difficulty_level BETWEEN 1 AND 5),
     CONSTRAINT chk_activity_level CHECK (activity_level BETWEEN 1 AND 5)
-)  ENGINE=INNODB; 
+)  ENGINE=INNODB;
+
+CREATE TABLE IF NOT EXISTS tour_translations (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    tour_id BIGINT NOT NULL,
+    locale VARCHAR(10) NOT NULL,
+    name VARCHAR(255),
+    short_description TEXT,
+    description TEXT,
+    highlights TEXT,
+    inclusions TEXT,
+    exclusions TEXT,
+    notes TEXT,
+    itinerary_summary TEXT,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_tour_translations_tour_locale (tour_id, locale),
+    CONSTRAINT fk_tour_translations_tour
+        FOREIGN KEY (tour_id) REFERENCES tours (id)
+        ON DELETE CASCADE
+) ENGINE=InnoDB;
 
 
 CREATE TABLE IF NOT EXISTS tour_tags (

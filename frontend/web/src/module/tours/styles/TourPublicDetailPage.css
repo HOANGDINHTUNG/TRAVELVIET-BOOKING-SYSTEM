@@ -1,0 +1,146 @@
+/* Public tour detail (/tour/:slug) — TravelViet tokens + glass, light/dark */
+
+.tour-public-shell {
+  min-height: 100vh;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--color-page) 88%, white) 0%, var(--color-page) 38%),
+    var(--color-page);
+  color: var(--color-text);
+}
+
+.theme-dark .tour-public-shell {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--color-page) 92%, #000) 0%, var(--color-page) 42%),
+    var(--color-page);
+}
+
+.tour-public-skeleton {
+  height: 18rem;
+  width: 100%;
+  border-radius: 1rem;
+  border: 1px solid var(--glass-border);
+  background: color-mix(in srgb, var(--color-surface) 72%, transparent);
+  box-shadow: var(--glass-shadow-outer);
+  animation: tour-public-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes tour-public-pulse {
+  0%,
+  100% {
+    opacity: 0.72;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tour-public-skeleton {
+    animation: none;
+    opacity: 0.85;
+  }
+}
+
+.tour-public-error h1 {
+  color: var(--color-text);
+}
+
+.tour-public-back {
+  color: var(--color-muted);
+  text-decoration: none;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  transition: color 160ms ease;
+}
+
+.tour-public-back:hover {
+  color: var(--color-text);
+}
+
+.tour-public-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border-radius: 9999px;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 600;
+  border: 1px solid var(--glass-border);
+  background: color-mix(in srgb, var(--color-surface) 82%, transparent);
+  color: var(--color-text);
+  backdrop-filter: blur(8px) saturate(1.05);
+}
+
+.tour-public-badge--rating {
+  border-color: color-mix(in srgb, var(--color-accent) 42%, var(--glass-border));
+  background: color-mix(in srgb, var(--color-accent) 16%, var(--color-surface));
+}
+
+.tour-public-badge--featured {
+  border-color: color-mix(in srgb, var(--color-ocean) 45%, var(--glass-border));
+  background: color-mix(in srgb, var(--color-ocean) 12%, var(--color-surface));
+  color: var(--color-text);
+}
+
+.theme-dark .tour-public-badge {
+  background: color-mix(in srgb, var(--color-surface) 88%, transparent);
+}
+
+.tour-public-title {
+  color: var(--color-text);
+}
+
+.tour-public-lead {
+  color: var(--color-muted);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.tour-public-prose {
+  color: color-mix(in srgb, var(--color-text) 88%, var(--color-muted));
+  font-size: 0.875rem;
+  line-height: 1.625;
+}
+
+.tour-public-panel {
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(12px) saturate(1.06);
+  background: linear-gradient(
+      168deg,
+      color-mix(in srgb, var(--color-surface) 92%, transparent),
+      color-mix(in srgb, var(--color-surface-soft) 78%, transparent)
+    )
+    border-box;
+  box-shadow: var(--glass-shadow-outer);
+}
+
+.tour-public-panel--inclusions {
+  border-color: color-mix(in srgb, var(--color-primary) 32%, var(--glass-border));
+}
+
+.tour-public-panel--inclusions h3 {
+  color: var(--color-primary);
+}
+
+.tour-public-panel--inclusions p {
+  color: color-mix(in srgb, var(--color-text) 90%, var(--color-primary));
+}
+
+.tour-public-panel--exclusions {
+  border-color: color-mix(in srgb, var(--color-danger) 35%, var(--glass-border));
+}
+
+.tour-public-panel--exclusions h3 {
+  color: var(--color-danger);
+}
+
+.tour-public-panel--exclusions p {
+  color: color-mix(in srgb, var(--color-text) 88%, var(--color-danger));
+}
+
+.theme-dark .tour-public-panel {
+  border-color: rgba(255, 255, 255, 0.12);
+}

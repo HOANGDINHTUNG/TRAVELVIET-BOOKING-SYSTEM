@@ -1,0 +1,247 @@
+.thd-home {
+  margin: 0 auto;
+  max-width: 1200px;
+  padding: 28px 16px 48px;
+}
+
+.thd-services {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-bottom: 28px;
+}
+
+.thd-service-chip {
+  background: #ffffff;
+  border: 1px solid #d9e2ef;
+  border-radius: 12px;
+  color: #183153;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 700;
+  min-height: 48px;
+}
+
+.thd-section {
+  margin-bottom: 36px;
+}
+
+.thd-section h2 {
+  color: #0b2340;
+  font-size: 26px;
+  font-weight: 800;
+  margin: 0 0 14px;
+}
+
+.thd-promo-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.thd-promo-grid article {
+  background: linear-gradient(135deg, #01244e, #094b8d);
+  border-radius: 14px;
+  color: #ffffff;
+  padding: 18px;
+}
+
+.thd-promo-grid strong {
+  display: block;
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+
+.thd-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.thd-chip {
+  background: #edf2f9;
+  border: 1px solid #d4dfef;
+  border-radius: 999px;
+  color: #173256;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 8px 14px;
+}
+
+.thd-section-head {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.thd-section-head a {
+  color: #0066cc;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.thd-tour-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.thd-card {
+  background: #ffffff;
+  border: 1px solid #e5ecf6;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.thd-card-image {
+  display: block;
+  height: 170px;
+  object-fit: cover;
+  width: 100%;
+}
+
+.thd-card-body {
+  padding: 14px;
+}
+
+.thd-card-body h3 {
+  color: #0f294b;
+  font-size: 16px;
+  line-height: 1.45;
+  margin: 0 0 8px;
+  min-height: 48px;
+}
+
+.thd-card-rating,
+.thd-card-days,
+.thd-card-from {
+  color: #4d5f77;
+  font-size: 13px;
+  margin: 0 0 6px;
+}
+
+.thd-card-price {
+  color: #0b7f3e;
+  font-size: 18px;
+  font-weight: 800;
+  margin: 8px 0 12px;
+}
+
+.thd-card-link {
+  color: #005cc1;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.thd-testimonial-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.thd-testimonial-grid article {
+  background: #ffffff;
+  border: 1px solid #e3ebf7;
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.thd-testimonial-grid p {
+  color: #2f4361;
+  line-height: 1.55;
+  margin: 0 0 10px;
+}
+
+.thd-testimonial-grid strong {
+  color: #0f2d53;
+}
+
+.thd-gallery-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.thd-gallery-grid article {
+  background: #ffffff;
+  border: 1px solid #e5ebf5;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.thd-gallery-grid img {
+  display: block;
+  height: 140px;
+  object-fit: cover;
+  width: 100%;
+}
+
+.thd-gallery-grid h4 {
+  color: #193659;
+  font-size: 14px;
+  margin: 10px 12px 14px;
+}
+
+.thd-brand-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.thd-brand-row span {
+  background: #ffffff;
+  border: 1px solid #dce7f7;
+  border-radius: 999px;
+  color: #22446f;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 8px 12px;
+}
+
+.thd-two-col {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.thd-two-col article {
+  background: #ffffff;
+  border: 1px solid #e4ecf8;
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.thd-two-col article p {
+  color: #325376;
+  margin: 0 0 8px;
+}
+
+.thd-story-list {
+  display: grid;
+  gap: 8px;
+}
+
+.thd-story-item {
+  border-bottom: 1px dashed #dce7f7;
+  padding: 0 0 8px;
+}
+
+.thd-story-item h4 {
+  color: #1b365c;
+  font-size: 15px;
+  margin: 0 0 6px;
+}
+
+.thd-story-item p {
+  color: #667b98;
+  font-size: 13px;
+  margin: 0;
+}
+
+@media (min-width: 768px) {
+  .thd-services {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}

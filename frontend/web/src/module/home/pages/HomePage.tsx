@@ -1,30 +1,27 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { FormEvent } from "react";
+import { useTranslation } from "react-i18next";
 import { Footer } from "../../../components/Footer/Footer";
 import { EmptyState } from "../../../components/common/ui/EmptyState";
 import { ErrorBlock } from "../../../components/common/ui/ErrorBlock";
 import { PageLoader } from "../../../components/common/ux/PageLoader";
+import BannerHome, {
+  type BannerSlide,
+} from "../../../components/hero/BannerHome";
 import { useAppDispatch, useAppSelector } from "../../../hooks/reduxHooks";
-import { LoginWelcomeAnimation } from "../../auth/components/LoginWelcome/LoginWelcomeAnimation";
-import { AboutSection } from "../components/About/AboutSection";
-import { ContactSection } from "../components/Contact/ContactSection";
-import { DestinationsSection } from "../components/Destinations/DestinationsSection";
-import { Hero } from "../components/Hero/Hero";
-import { PackagesSection } from "../components/Packages/PackagesSection";
-import { PartnerMarquee } from "../components/PartnerMarquee/PartnerMarquee";
+import { buildTourSlug } from "../../tours/utils/slug";
+import { HomeSearchBar } from "../components/HomeSearchBar/HomeSearchBar";
+import { HomeServicesRow } from "../components/HomeServicesRow/HomeServicesRow";
 import { LatestPromotionsSection } from "../components/Promotions/LatestPromotionsSection";
-import { HomeTourRows } from "../components/HomeTourRows/HomeTourRows";
 import { TourHotSection } from "../components/TourHotSection/TourHotSection";
-import { PersonalizedRecommendations } from "../components/Recommendations/PersonalizedRecommendations";
-import { StorySection } from "../components/Story/StorySection";
-import { CustomerTestimonialsSection } from "../components/Testimonials/CustomerTestimonialsSection";
-import { TravelFilmSection } from "../components/TravelFilm/TravelFilmSection";
+import { HomeTourRows } from "../components/HomeTourRows/HomeTourRows";
+import { HomeLowerSections } from "../components/HomeLowerSections/HomeLowerSections";
 import {
   fetchHomePublicData,
   selectHome,
 } from "../store/homeSlice";
 
 function HomePage() {
+  const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const {
     destinations,
@@ -34,20 +31,9 @@ function HomePage() {
     loading,
     error,
   } = useAppSelector(selectHome);
-  const [selectedTour, setSelectedTour] = useState("");
-  const [submitted, setSubmitted] = useState(false);
+
   const [stalled, setStalled] = useState(false);
   const stallTimer = useRef<number | null>(null);
-
-  useEffect(() => {
-    console.log(">>> HomePage Data:", { destinations, tours });
-    destinations.forEach((d) => {
-      if (d.image) console.log(`Destination ${d.name} image URL:`, d.image);
-    });
-    tours.forEach((t) => {
-      if (t.image) console.log(`Tour ${t.title} image URL:`, t.image);
-    });
-  }, [destinations, tours]);
 
   useEffect(() => {
     void dispatch(fetchHomePublicData());
@@ -73,13 +59,8 @@ function HomePage() {
       return;
     }
 
-    if (stallTimer.current) {
-      window.clearTimeout(stallTimer.current);
-    }
-
-    stallTimer.current = window.setTimeout(() => {
-      setStalled(true);
-    }, 3500);
+    if (stallTimer.current) window.clearTimeout(stallTimer.current);
+    stallTimer.current = window.setTimeout(() => setStalled(true), 3500);
 
     return () => {
       if (stallTimer.current) {
@@ -101,34 +82,44 @@ function HomePage() {
     void dispatch(fetchHomePublicData());
   };
 
-  const selectedTourValue = useMemo(() => {
-    if (tours.length === 0) {
-      return "";
-    }
-
-    return selectedTour && tours.some((tour) => tour.title === selectedTour)
-      ? selectedTour
-      : tours[0].title;
-  }, [selectedTour, tours]);
-
-  const visibleTours = useMemo(() => {
-    return tours.slice(0, 6);
-  }, [tours]);
-
   const heroTours = useMemo(
     () => tours.filter((item) => Boolean(item.image)),
     [tours],
   );
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setSubmitted(true);
-  };
+  const bannerSlides = useMemo<BannerSlide[]>(() => {
+    return heroTours.slice(0, 6).map((tour) => {
+      const destinationLabel = (tour.location || "").trim();
+      const durationLabel = (tour.days || "").trim();
+      const place = `${destinationLabel || "VIETNAM"}${
+        durationLabel ? ` • ${durationLabel}` : ""
+      }`;
+      const slugSource = (tour.title || "").toLowerCase();
+      const detailPath = `/tour/${buildTourSlug(slugSource, tour.id)}`;
+      const teaserHighlights =
+        Array.isArray(tour.highlights) && tour.highlights.length
+          ? tour.highlights.slice(0, 3).join(" • ")
+          : "";
+      const short = (tour.shortDescription || "").trim();
+      const longBody = (tour.description || "").trim();
+      const description =
+        short ||
+        (longBody.length > 220
+          ? teaserHighlights || `${longBody.slice(0, 200).trim()}…`
+          : longBody) ||
+        teaserHighlights ||
+        t("homePage.defaultBannerTeaser");
 
-  const handleSelectTour = (tourTitle: string) => {
-    setSelectedTour(tourTitle);
-    document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
-  };
+      return {
+        place,
+        title: tour.title,
+        subtitle: tour.category || tour.location || t("homePage.bannerSubtitleFallback"),
+        description,
+        image: tour.image,
+        detailPath,
+      };
+    });
+  }, [heroTours, t]);
 
   if (loading && destinations.length === 0 && tours.length === 0) {
     if (stalled) {
@@ -141,7 +132,6 @@ function HomePage() {
             onAction={handleRetry}
           />
           <Footer />
-          <LoginWelcomeAnimation />
         </>
       );
     }
@@ -150,7 +140,6 @@ function HomePage() {
       <>
         <PageLoader />
         <Footer />
-        <LoginWelcomeAnimation />
       </>
     );
   }
@@ -164,7 +153,6 @@ function HomePage() {
           onAction={handleRetry}
         />
         <Footer />
-        <LoginWelcomeAnimation />
       </>
     );
   }
@@ -172,52 +160,29 @@ function HomePage() {
   return (
     <>
       {heroTours.length > 0 ? (
-        <Hero tours={heroTours} />
+        <BannerHome slides={bannerSlides} ctaLabel={t("homePage.bannerCta")} />
       ) : (
         <EmptyState
-          title="Chua co anh tour tu backend."
-          message="Kiem tra mediaUrl trong response GET /tours."
+          title="Chưa có ảnh tour từ backend."
+          message="Kiểm tra mediaUrl trong response GET /tours."
         />
       )}
-      <PartnerMarquee />
+
+      <HomeSearchBar />
+      <HomeServicesRow />
       <LatestPromotionsSection />
-      <HomeTourRows
-        domesticTours={toursDomesticBeach}
-        internationalTours={toursInternationalHot}
-        loading={loading}
-      />
       <TourHotSection
         destinations={destinations}
         tours={tours}
         loading={loading}
       />
-      <AboutSection />
-      {destinations.length > 0 ? (
-        <DestinationsSection destinations={destinations} />
-      ) : (
-        <EmptyState title="Danh sach diem den dang trong." />
-      )}
-      <TravelFilmSection />
-      {visibleTours.length > 0 ? (
-        <PackagesSection tours={visibleTours} onSelectTour={handleSelectTour} />
-      ) : (
-        <EmptyState
-          title="Chua co tour phu hop."
-          message="Kiem tra endpoint GET /tours hoac bo loc diem den hien tai."
-        />
-      )}
-      <CustomerTestimonialsSection />
-      <PersonalizedRecommendations />
-      <StorySection />
-      <ContactSection
-        tours={tours}
-        selectedTour={selectedTourValue}
-        submitted={submitted}
-        onTourChange={setSelectedTour}
-        onSubmit={handleSubmit}
+      <HomeTourRows
+        domesticTours={toursDomesticBeach}
+        internationalTours={toursInternationalHot}
+        loading={loading}
       />
+      <HomeLowerSections destinations={destinations} />
       <Footer />
-      <LoginWelcomeAnimation />
     </>
   );
 }

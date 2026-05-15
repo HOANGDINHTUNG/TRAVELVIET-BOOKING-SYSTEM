@@ -9,7 +9,12 @@ export type Tour = {
   rating?: number;
   reviewCount?: number;
   image: string;
+  /** Ảnh media tour (cover, gallery…) theo sortOrder — dùng nền blur Tour HOT */
+  mediaGalleryUrls?: string[];
   highlights: string[];
+  /** Mô tả ngắn (API) — ưu tiên cho card/banner */
+  shortDescription?: string;
+  /** Mô tả đầy đủ từ API */
   description?: string;
   destinationId?: number;
   destinationCountryCode?: string;
@@ -29,6 +34,10 @@ export type HeroSlide = {
 export type Destination = {
   translationKey?: string;
   uuid?: string;
+  id?: number;
+  parentUuid?: string;
+  level?: number;
+  programSlug?: string;
   name: string;
   tours: string;
   image: string;
@@ -38,6 +47,7 @@ export type Destination = {
 };
 
 export type BackendDestination = {
+  id?: number;
   uuid: string;
   name: string;
   slug?: string;
@@ -53,6 +63,10 @@ export type BackendDestination = {
   coverImageUrl?: string;
   activeTourCount?: number;
   translationKey?: string;
+  parentUuid?: string;
+  level?: number;
+  path?: string;
+  programSlug?: string;
 };
 
 export type BackendTourMedia = {

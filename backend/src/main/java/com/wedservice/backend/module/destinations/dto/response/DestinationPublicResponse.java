@@ -13,6 +13,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DestinationPublicResponse {
+    private Long id;
     private UUID uuid;
     private String name;
     private String slug;
@@ -28,4 +29,8 @@ public class DestinationPublicResponse {
     private String coverImageUrl;
     private Long activeTourCount;
     private String translationKey;
+    private UUID parentUuid;
+    private Integer level;
+    /** Slug URL kiểu travel.com.vn: {@code slug-pid-id}. */
+    private String programSlug;
 }

@@ -32,14 +32,12 @@ import type {
   CreateBookingPayload,
 } from '../../bookings/types/publicBooking'
 import type { TourScheduleResponse } from '../types/publicTour'
+import '../styles/BookingPanel.css'
 
 type BookingPanelProps = {
   tourId: number
   schedule: TourScheduleResponse | null
 }
-
-const FIELD_INPUT_CLASS =
-  'w-full rounded-md border border-[var(--color-border,#cbd5e1)] bg-white px-3 py-2 text-sm outline-none transition focus:border-[var(--color-primary,#0ea5e9)] focus:ring-2 focus:ring-[var(--color-primary,#0ea5e9)]/20 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400'
 
 const QUOTE_DEBOUNCE_MS = 400
 
@@ -202,9 +200,7 @@ function BookingPanel({ tourId, schedule }: BookingPanelProps) {
 
   if (!schedule) {
     return (
-      <div className="rounded-xl border border-dashed border-[var(--color-border,#e2e8f0)] bg-slate-50 px-4 py-6 text-center text-sm text-[var(--color-muted,#64748b)]">
-        {String(t('panel.selectSchedulePrompt'))}
-      </div>
+      <div className="tour-booking-empty">{String(t('panel.selectSchedulePrompt'))}</div>
     )
   }
 
@@ -223,12 +219,10 @@ function BookingPanel({ tourId, schedule }: BookingPanelProps) {
     (!appliedVoucherInfo || (appliedVoucherInfo.discountAmount ?? 0) === 0)
 
   return (
-    <div className="flex flex-col gap-4 rounded-2xl border border-[var(--color-border,#e2e8f0)] bg-white p-4 shadow-sm">
+    <div className="tour-booking-card">
       <div>
-        <p className="text-xs uppercase tracking-wide text-[var(--color-muted,#64748b)]">
-          {String(t('panel.title'))}
-        </p>
-        <p className="text-sm font-semibold text-slate-900">
+        <p className="tour-booking-label">{String(t('panel.title'))}</p>
+        <p className="text-sm font-semibold text-[var(--color-text)]">
           {schedule.scheduleCode ?? `#${schedule.id}`}
         </p>
       </div>
@@ -253,33 +247,30 @@ function BookingPanel({ tourId, schedule }: BookingPanelProps) {
                   ? schedule.infantPrice
                   : schedule.seniorPrice
           return (
-            <div
-              key={row.key}
-              className="flex items-center justify-between gap-3 rounded-lg border border-[var(--color-border,#e2e8f0)] px-3 py-2"
-            >
+            <div key={row.key} className="tour-booking-row">
               <div className="min-w-0">
-                <p className="text-sm font-medium">{String(t(row.label))}</p>
-                <p className="text-xs text-[var(--color-muted,#64748b)]">
-                  {formatCurrencyVnd(unitPrice)}
+                <p className="text-sm font-medium text-[var(--color-text)]">
+                  {String(t(row.label))}
                 </p>
+                <p className="text-xs text-[var(--color-muted)]">{formatCurrencyVnd(unitPrice)}</p>
               </div>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => bump(row.key, -1)}
                   disabled={count <= row.min}
-                  className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 hover:bg-slate-50 disabled:opacity-40"
+                  className="tour-booking-icon-btn"
                   aria-label="-"
                 >
                   <Minus className="h-3 w-3" aria-hidden />
                 </button>
-                <span className="w-6 text-center text-sm font-semibold tabular-nums">
+                <span className="w-6 text-center text-sm font-semibold tabular-nums text-[var(--color-text)]">
                   {count}
                 </span>
                 <button
                   type="button"
                   onClick={() => bump(row.key, 1)}
-                  className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 hover:bg-slate-50"
+                  className="tour-booking-icon-btn"
                   aria-label="+"
                 >
                   <Plus className="h-3 w-3" aria-hidden />
@@ -292,13 +283,11 @@ function BookingPanel({ tourId, schedule }: BookingPanelProps) {
 
       {/* Voucher */}
       <div className="flex flex-col gap-1">
-        <label className="text-xs font-semibold uppercase tracking-wide text-slate-600">
-          {String(t('panel.voucher.label'))}
-        </label>
+        <label className="tour-booking-label">{String(t('panel.voucher.label'))}</label>
         <div className="flex gap-2">
           <div className="relative flex-1">
             <Tag
-              className="absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400"
+              className="absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--color-muted)]"
               aria-hidden
             />
             <input
@@ -306,16 +295,12 @@ function BookingPanel({ tourId, schedule }: BookingPanelProps) {
               value={voucherInput}
               onChange={(event) => setVoucherInput(event.target.value)}
               placeholder={String(t('panel.voucher.placeholder'))}
-              className={`${FIELD_INPUT_CLASS} pl-7`}
+              className="tour-booking-input pl-7"
               maxLength={50}
             />
           </div>
           {appliedVoucherCode ? (
-            <button
-              type="button"
-              onClick={handleClearVoucher}
-              className="rounded-md border border-rose-200 px-3 py-2 text-xs text-rose-700 hover:bg-rose-50"
-            >
+            <button type="button" onClick={handleClearVoucher} className="tour-booking-clear">
               {String(t('panel.voucher.clear'))}
             </button>
           ) : (
@@ -323,7 +308,7 @@ function BookingPanel({ tourId, schedule }: BookingPanelProps) {
               type="button"
               onClick={handleApplyVoucher}
               disabled={voucherInput.trim().length === 0 || quoteQuery.isFetching}
-              className="rounded-md bg-slate-900 px-3 py-2 text-xs font-semibold text-white disabled:opacity-50"
+              className="tour-booking-apply"
             >
               {String(t('panel.voucher.apply'))}
             </button>
@@ -336,7 +321,7 @@ function BookingPanel({ tourId, schedule }: BookingPanelProps) {
               initial={{ opacity: 0, y: -4 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
-              className="inline-flex items-center gap-1 text-xs text-emerald-700"
+              className="tour-booking-hint--ok"
             >
               <CheckCircle2 className="h-3 w-3" aria-hidden />
               {String(t('panel.voucher.appliedHint'))}{' '}
@@ -351,7 +336,7 @@ function BookingPanel({ tourId, schedule }: BookingPanelProps) {
               initial={{ opacity: 0, y: -4 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
-              className="inline-flex items-center gap-1 text-xs text-rose-700"
+              className="tour-booking-hint--bad"
             >
               <XCircle className="h-3 w-3" aria-hidden />
               {String(t('panel.voucher.invalid'))}
@@ -361,39 +346,39 @@ function BookingPanel({ tourId, schedule }: BookingPanelProps) {
       </div>
 
       {/* Contact info */}
-      <div className="grid grid-cols-1 gap-2 border-t border-slate-100 pt-3">
+      <div className="tour-booking-divider grid grid-cols-1 gap-2">
         <input
           type="text"
           value={contactName}
           onChange={(event) => setContactName(event.target.value)}
           placeholder={String(t('panel.contact.name'))}
-          className={FIELD_INPUT_CLASS}
+          className="tour-booking-input"
         />
         <input
           type="tel"
           value={contactPhone}
           onChange={(event) => setContactPhone(event.target.value)}
           placeholder={String(t('panel.contact.phone'))}
-          className={FIELD_INPUT_CLASS}
+          className="tour-booking-input"
         />
         <input
           type="email"
           value={contactEmail}
           onChange={(event) => setContactEmail(event.target.value)}
           placeholder={String(t('panel.contact.email'))}
-          className={FIELD_INPUT_CLASS}
+          className="tour-booking-input"
         />
         <textarea
           rows={2}
           value={specialRequests}
           onChange={(event) => setSpecialRequests(event.target.value)}
           placeholder={String(t('panel.contact.note'))}
-          className={FIELD_INPUT_CLASS}
+          className="tour-booking-input"
         />
       </div>
 
       {/* Pricing summary */}
-      <dl className="space-y-1 border-t border-slate-100 pt-3 text-sm">
+      <dl className="tour-booking-divider space-y-1 text-sm">
         <div className="flex justify-between">
           <dt className="text-[var(--color-muted,#64748b)]">
             {String(t('panel.summary.subtotal'))}
@@ -403,37 +388,35 @@ function BookingPanel({ tourId, schedule }: BookingPanelProps) {
           </dd>
         </div>
         {voucherDiscount > 0 ? (
-          <div className="flex justify-between text-emerald-700">
+          <div className="flex justify-between text-[var(--color-primary)]">
             <dt>{String(t('panel.summary.voucherDiscount'))}</dt>
             <dd className="tabular-nums">-{formatCurrencyVnd(voucherDiscount)}</dd>
           </div>
         ) : null}
         {totalDiscount > 0 && totalDiscount !== voucherDiscount ? (
-          <div className="flex justify-between text-emerald-700">
+          <div className="flex justify-between text-[var(--color-primary)]">
             <dt>{String(t('panel.summary.discount'))}</dt>
             <dd className="tabular-nums">-{formatCurrencyVnd(totalDiscount)}</dd>
           </div>
         ) : null}
-        <div className="flex items-baseline justify-between border-t border-slate-100 pt-2">
+        <div className="flex items-baseline justify-between border-t border-[var(--color-border)] pt-2">
           <dt className="text-sm font-semibold">
             {String(t('panel.summary.total'))}
             {quoteQuery.isFetching ? (
               <Loader2 className="ml-1 inline h-3 w-3 animate-spin" aria-hidden />
             ) : null}
           </dt>
-          <dd className="text-lg font-bold text-[var(--color-primary,#0ea5e9)] tabular-nums">
+          <dd className="text-lg font-bold text-[var(--color-primary)] tabular-nums">
             {formatCurrencyVnd(finalAmount)}
           </dd>
         </div>
-        <p className="text-[10px] text-[var(--color-muted,#94a3b8)]">
+        <p className="text-[10px] text-[var(--color-muted)]">
           {String(t('panel.summary.totalSeats'))}: {formatNumberVi(totalSeats)}
         </p>
       </dl>
 
       {overCapacity ? (
-        <p className="rounded-md border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs text-rose-700">
-          {String(t('panel.overCapacity'))}
-        </p>
+        <p className="tour-booking-warn">{String(t('panel.overCapacity'))}</p>
       ) : null}
 
       {/* Submit */}
@@ -441,7 +424,7 @@ function BookingPanel({ tourId, schedule }: BookingPanelProps) {
         type="button"
         onClick={handleSubmit}
         disabled={createMutation.isPending || overCapacity}
-        className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-primary,#0ea5e9)] px-4 py-3 text-sm font-bold text-white shadow-md transition hover:brightness-95 disabled:opacity-60"
+        className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-3 text-sm font-bold text-white shadow-md transition hover:brightness-95 disabled:opacity-60"
       >
         {createMutation.isPending ? (
           <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
@@ -455,7 +438,7 @@ function BookingPanel({ tourId, schedule }: BookingPanelProps) {
             : String(t('panel.loginToBook'))}
       </button>
 
-      <p className="text-center text-[10px] text-[var(--color-muted,#94a3b8)]">
+      <p className="text-center text-[10px] text-[var(--color-muted)]">
         {String(t('panel.disclaimer'))}
       </p>
     </div>

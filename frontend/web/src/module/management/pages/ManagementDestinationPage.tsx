@@ -492,9 +492,14 @@ function ManagementDestinationPage() {
     <div className="mgmt-page">
       <section className="mgmt-crud-shell">
         <header className="mgmt-crud-head">
-          <div>
+          <div className="min-w-0">
             <p className="mgmt-kicker">ĐIỂM ĐẾN</p>
-            <h2>Quản lý điểm đến và đề xuất</h2>
+            <h2 className="space-y-0.5">
+              <span className="block">Quản lý điểm đến</span>
+              <span className="block text-[0.92em] font-semibold text-[var(--admin-muted)]">
+                và đề xuất
+              </span>
+            </h2>
             <p>
               Tìm kiếm, xem chi tiết, tạo mới, cập nhật thông tin lõi và duyệt
               hoặc từ chối các đề xuất điểm đến.
@@ -518,76 +523,80 @@ function ManagementDestinationPage() {
         </header>
 
         <div className="mgmt-destination-toolbar">
-          <label className="mgmt-crud-search">
-            <Search aria-hidden="true" />
+          <div className="mgmt-destination-toolbar-row mgmt-destination-toolbar-row--primary">
+            <label className="mgmt-crud-search">
+              <Search aria-hidden="true" />
+              <input
+                value={query.keyword}
+                onChange={(event) => updateQuery({ keyword: event.target.value })}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') {
+                    void loadDestinations(0)
+                  }
+                }}
+                placeholder="Tìm theo tên hoặc mã điểm đến"
+              />
+            </label>
             <input
-              value={query.keyword}
-              onChange={(event) => updateQuery({ keyword: event.target.value })}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter') {
-                  void loadDestinations(0)
-                }
-              }}
-              placeholder="Tìm theo tên hoặc mã điểm đến"
+              value={query.province}
+              onChange={(event) => updateQuery({ province: event.target.value })}
+              placeholder="Tỉnh/thành"
+              aria-label="Lọc tỉnh thành"
             />
-          </label>
-          <input
-            value={query.province}
-            onChange={(event) => updateQuery({ province: event.target.value })}
-            placeholder="Tỉnh/thành"
-            aria-label="Lọc tỉnh thành"
-          />
-          <input
-            value={query.region}
-            onChange={(event) => updateQuery({ region: event.target.value })}
-            placeholder="Vùng miền"
-            aria-label="Lọc vùng miền"
-          />
-          <select value={query.status} onChange={(event) => updateQuery({ status: event.target.value })}>
-            {destinationStatusOptions.map((option) => (
-              <option value={option.value} key={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-          <select value={query.crowdLevel} onChange={(event) => updateQuery({ crowdLevel: event.target.value })}>
-            {crowdLevelOptions.map((option) => (
-              <option value={option.value} key={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-          <select value={query.isFeatured} onChange={(event) => updateQuery({ isFeatured: event.target.value })}>
-            {booleanFilterOptions.map((option) => (
-              <option value={option.value} key={option.value}>
-                Nổi bật: {option.label}
-              </option>
-            ))}
-          </select>
-          <select value={query.isActive} onChange={(event) => updateQuery({ isActive: event.target.value })}>
-            {booleanFilterOptions.map((option) => (
-              <option value={option.value} key={option.value}>
-                Hoạt động: {option.label}
-              </option>
-            ))}
-          </select>
-          <select value={query.isOfficial} onChange={(event) => updateQuery({ isOfficial: event.target.value })}>
-            {booleanFilterOptions.map((option) => (
-              <option value={option.value} key={option.value}>
-                Chính thức: {option.label}
-              </option>
-            ))}
-          </select>
-          <button type="button" onClick={() => void loadDestinations(0)} disabled={loading}>
-            <RefreshCcw aria-hidden="true" />
-            Tải lại
-          </button>
-          {canCreate && (
-            <button type="button" onClick={startCreate}>
-              <Plus aria-hidden="true" />
-              Tạo mới
+            <input
+              value={query.region}
+              onChange={(event) => updateQuery({ region: event.target.value })}
+              placeholder="Vùng miền"
+              aria-label="Lọc vùng miền"
+            />
+            <select value={query.status} onChange={(event) => updateQuery({ status: event.target.value })}>
+              {destinationStatusOptions.map((option) => (
+                <option value={option.value} key={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+            <select value={query.crowdLevel} onChange={(event) => updateQuery({ crowdLevel: event.target.value })}>
+              {crowdLevelOptions.map((option) => (
+                <option value={option.value} key={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="mgmt-destination-toolbar-row mgmt-destination-toolbar-row--secondary">
+            <select value={query.isFeatured} onChange={(event) => updateQuery({ isFeatured: event.target.value })}>
+              {booleanFilterOptions.map((option) => (
+                <option value={option.value} key={option.value}>
+                  Nổi bật: {option.label}
+                </option>
+              ))}
+            </select>
+            <select value={query.isActive} onChange={(event) => updateQuery({ isActive: event.target.value })}>
+              {booleanFilterOptions.map((option) => (
+                <option value={option.value} key={option.value}>
+                  Hoạt động: {option.label}
+                </option>
+              ))}
+            </select>
+            <select value={query.isOfficial} onChange={(event) => updateQuery({ isOfficial: event.target.value })}>
+              {booleanFilterOptions.map((option) => (
+                <option value={option.value} key={option.value}>
+                  Chính thức: {option.label}
+                </option>
+              ))}
+            </select>
+            <button type="button" onClick={() => void loadDestinations(0)} disabled={loading}>
+              <RefreshCcw aria-hidden="true" />
+              Tải lại
             </button>
-          )}
+            {canCreate && (
+              <button type="button" onClick={startCreate}>
+                <Plus aria-hidden="true" />
+                Tạo mới
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="mgmt-destination-layout">
@@ -668,7 +677,7 @@ function ManagementDestinationPage() {
             </div>
           </article>
 
-          <aside className="mgmt-crud-panel">
+          <aside className="mgmt-crud-panel mgmt-destination-form-panel">
             <div className="mgmt-section-title">
               <h3>{editing ? 'Chi tiết & cập nhật' : 'Tạo điểm đến'}</h3>
               <p>

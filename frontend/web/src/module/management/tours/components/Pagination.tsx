@@ -29,7 +29,7 @@ function Pagination(props: PaginationProps) {
   }
 
   return (
-    <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--color-border,#e2e8f0)] px-4 py-3 text-xs text-[var(--color-muted,#64748b)]">
+    <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--admin-border)] bg-[color-mix(in_srgb,var(--admin-muted)_6%,var(--admin-surface))] px-4 py-3 text-xs text-[var(--admin-muted)]">
       <span>
         {String(t('common.page'))} {props.page + 1} / {totalPages} ·{' '}
         {props.totalElements} {String(t('common.items'))}
@@ -42,7 +42,7 @@ function Pagination(props: PaginationProps) {
             onChange={(event) =>
               props.onChangeSize?.(Number(event.target.value))
             }
-            className="rounded-md border border-[var(--color-border,#e2e8f0)] bg-white px-2 py-1 text-xs"
+            className="admin-input rounded-[var(--admin-radius-sm)] px-2 py-1 text-xs text-[var(--admin-text)]"
           >
             {sizeOptions.map((option) => (
               <option key={option} value={option}>
@@ -57,7 +57,7 @@ function Pagination(props: PaginationProps) {
           onClick={goPrev}
           disabled={props.page === 0 || props.isFetching}
           aria-label="Previous page"
-          className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[var(--color-border,#e2e8f0)] disabled:opacity-50"
+          className="admin-icon-btn inline-flex h-7 w-7 items-center justify-center !p-0 disabled:opacity-50"
         >
           <ChevronLeft className="h-4 w-4" aria-hidden />
         </button>
@@ -66,7 +66,7 @@ function Pagination(props: PaginationProps) {
           onClick={goNext}
           disabled={props.page + 1 >= totalPages || props.isFetching}
           aria-label="Next page"
-          className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[var(--color-border,#e2e8f0)] disabled:opacity-50"
+          className="admin-icon-btn inline-flex h-7 w-7 items-center justify-center !p-0 disabled:opacity-50"
         >
           <ChevronRight className="h-4 w-4" aria-hidden />
         </button>

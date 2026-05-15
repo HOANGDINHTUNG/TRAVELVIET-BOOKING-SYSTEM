@@ -1,0 +1,10 @@
+{
+  "codes": {
+    "SESSION_EXPIRED_NO_REFRESH": "Your session has expired or secure refresh data is missing. Please sign in again.",
+    "NOT_AUTHENTICATED": "You are not signed in, or the session is no longer valid. Please sign in to continue.",
+    "REFRESH_REJECTED": "The server could not refresh your session. Please sign in again.",
+    "REFRESH_FAILED": "We could not refresh your session. Please try again or sign in again.",
+    "NETWORK_ERROR": "Could not reach the server. Check your connection and try again.",
+    "HTTP_ERROR": "The request could not be completed. Please try again later."
+  }
+}

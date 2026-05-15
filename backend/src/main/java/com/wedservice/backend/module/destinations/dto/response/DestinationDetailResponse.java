@@ -17,6 +17,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DestinationDetailResponse {
+    private Long id;
     private UUID uuid;
     private String code;
     private String name;
@@ -53,4 +54,11 @@ public class DestinationDetailResponse {
 
     /** All persisted locale rows (admin). Public API merges by {@code Accept-Language} without exposing this list. */
     private List<DestinationTranslationResponse> translations;
+
+    private UUID parentUuid;
+    private Long parentId;
+    private Integer level;
+    private String path;
+    /** Slug URL kiểu travel.com.vn: {@code slug-pid-id}. */
+    private String programSlug;
 }

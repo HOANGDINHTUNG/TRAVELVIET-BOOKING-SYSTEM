@@ -26,6 +26,7 @@ import {
   persistStoredAuthUser,
 } from '../../module/auth/api/authApi'
 import { setLanguage, setTheme } from '../../stores/slices/preferencesSlice'
+import { GlassCard } from '../ui/GlassCard'
 import './Navbar.css'
 
 gsap.registerPlugin(ScrollToPlugin, ScrollTrigger)
@@ -122,17 +123,6 @@ export function Navbar() {
     authUser?.displayName || authUser?.fullName || authUser?.email || accountLabels.account
 
   useEffect(() => {
-    const nav = navRef.current
-    if (!nav) {
-      return undefined
-    }
-
-    gsap.set(nav, {
-      clearProps: 'backgroundColor,color',
-      backdropFilter: 'blur(0px)',
-      boxShadow: '0 0 0 rgba(0, 0, 0, 0)',
-    })
-
     const handleScroll = () => {
       const shouldPin = window.scrollY > 48
 
@@ -142,16 +132,6 @@ export function Navbar() {
 
       scrolledRef.current = shouldPin
       setIsScrolled(shouldPin)
-      gsap.to(nav, {
-        backdropFilter: shouldPin ? 'blur(18px)' : 'blur(0px)',
-        boxShadow: shouldPin
-          ? '0 18px 48px rgba(0, 0, 0, 0.26)'
-          : '0 0 0 rgba(0, 0, 0, 0)',
-        paddingTop: shouldPin ? 12 : 0,
-        paddingBottom: shouldPin ? 12 : 0,
-        duration: 0.38,
-        ease: 'power2.out',
-      })
     }
 
     window.addEventListener('scroll', handleScroll, { passive: true })
@@ -275,10 +255,12 @@ export function Navbar() {
   ]
 
   return (
-    <nav
+    <GlassCard
+      as="nav"
+      variant="navbar"
       className={`site-nav ${isScrolled ? 'is-scrolled' : ''}`}
       ref={navRef}
-      aria-label="Main navigation"
+      aria-label={t('nav.ariaMain')}
     >
       <a
         className="brand"
@@ -514,6 +496,6 @@ export function Navbar() {
           </>
         )}
       </div>
-    </nav>
+    </GlassCard>
   )
 }

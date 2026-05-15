@@ -17,8 +17,10 @@ import com.wedservice.backend.module.destinations.dto.response.DestinationTransl
 import com.wedservice.backend.module.destinations.entity.DestinationTranslation;
 import com.wedservice.backend.module.destinations.repository.DestinationRepository;
 import com.wedservice.backend.module.destinations.repository.DestinationTranslationRepository;
+import com.wedservice.backend.module.destinations.service.DestinationHierarchyService;
 import com.wedservice.backend.module.destinations.service.command.AdminDestinationCommandService;
 import com.wedservice.backend.module.destinations.service.query.AdminDestinationQueryService;
+import com.wedservice.backend.module.destinations.validator.DestinationValidator;
 import com.wedservice.backend.common.security.AuthenticatedUserProvider;
 import com.wedservice.backend.common.util.DataNormalizer;
 import com.wedservice.backend.common.util.SlugUtils;
@@ -47,6 +49,8 @@ public class AdminDestinationService extends BaseService<Destination, Long>
     private final DestinationRepository destinationRepository;
     private final DestinationTranslationRepository destinationTranslationRepository;
     private final DestinationMapper destinationMapper;
+    private final DestinationHierarchyService destinationHierarchyService;
+    private final DestinationValidator destinationValidator;
 
     @Override
     protected JpaRepository<Destination, Long> getRepository() {
@@ -125,7 +129,12 @@ public class AdminDestinationService extends BaseService<Destination, Long>
         }
 
         Destination destination = destinationMapper.toEntity(request);
-        return toDetailWithTranslations(destinationRepository.save(destination));
+        destinationValidator.validateParentAssignment(null, request.getParentId());
+        applyParent(destination, request.getParentId());
+        Destination saved = destinationRepository.save(destination);
+        destinationRepository.flush();
+        destinationHierarchyService.assignPathAndLevelForNewDestination(saved);
+        return toDetailWithTranslations(destinationRepository.findById(saved.getId()).orElseThrow());
     }
 
     @Transactional
@@ -143,13 +152,28 @@ public class AdminDestinationService extends BaseService<Destination, Long>
 
         validateUniqueDestination(normalizedCode, normalizedSlug, destination.getId());
 
+        destinationValidator.validateParentAssignment(destination.getId(), request.getParentId());
         destinationMapper.applyAdminUpdate(destination, request, normalizedCode, normalizedSlug);
-        return toDetailWithTranslations(destinationRepository.save(destination));
+        applyParent(destination, request.getParentId());
+        Destination saved = destinationRepository.save(destination);
+        destinationRepository.flush();
+        destinationHierarchyService.refreshPathsFromNode(saved.getId());
+        return toDetailWithTranslations(saved);
     }
 
     private Destination findDestinationByUuid(UUID uuid) {
         return destinationRepository.findByUuid(uuid)
                 .orElseThrow(() -> new ResourceNotFoundException("Destination not found with uuid: " + uuid));
+    }
+
+    private void applyParent(Destination destination, Long parentId) {
+        if (parentId == null) {
+            destination.setParent(null);
+            return;
+        }
+        Destination parent = destinationRepository.findById(parentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Parent destination not found: " + parentId));
+        destination.setParent(parent);
     }
 
     private void validateUniqueDestination(String code, String slug, Long currentId) {

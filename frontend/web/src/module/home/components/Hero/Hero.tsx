@@ -8,6 +8,8 @@ import {
   type HeroSlide,
   type Tour,
 } from '../../database/travelData'
+import { GlassCard } from '../../../../components/ui/GlassCard'
+import { MotionSection } from '../../../../components/ui/MotionSection'
 import './Hero.css'
 
 type Direction = 'leftToRight' | 'rightToLeft' | 'topDown' | 'bottomUp'
@@ -93,7 +95,8 @@ function toTourHeroSlide(tour: Tour): HeroTourSlide {
     titleMain: tour.title,
     kicker: tour.category || 'TravelViet tour',
     copy:
-      tour.description ||
+      tour.shortDescription?.trim() ||
+      tour.description?.trim() ||
       tour.highlights[0] ||
       `Book ${tour.title} with a TravelViet itinerary built around local experiences.`,
     image: tour.image,
@@ -136,6 +139,7 @@ export function Hero({ tours = [] }: HeroProps) {
   const titleRef = useRef<HTMLHeadingElement | null>(null)
   const copyRef = useRef<HTMLParagraphElement | null>(null)
   const metaRef = useRef<HTMLDivElement | null>(null)
+  const promoRef = useRef<HTMLDivElement | null>(null)
   const ctaRef = useRef<HTMLAnchorElement | null>(null)
   const activeBgRef = useRef<HTMLImageElement | null>(null)
   const oldBgRef = useRef<HTMLImageElement | null>(null)
@@ -237,7 +241,7 @@ export function Hero({ tours = [] }: HeroProps) {
         0,
       )
       .to(
-        [copyRef.current, metaRef.current, ctaRef.current],
+        [copyRef.current, metaRef.current, promoRef.current, ctaRef.current],
         {
           autoAlpha: 0,
           duration: 0.62,
@@ -293,7 +297,12 @@ export function Hero({ tours = [] }: HeroProps) {
           0,
         )
         .fromTo(
-          [copyRef.current, metaRef.current, ctaRef.current],
+          [
+            copyRef.current,
+            metaRef.current,
+            promoRef.current,
+            ctaRef.current,
+          ],
           { autoAlpha: 0 },
           {
             autoAlpha: 1,
@@ -320,11 +329,12 @@ export function Hero({ tours = [] }: HeroProps) {
     const title = titleRef.current
     const copy = copyRef.current
     const meta = metaRef.current
+    const promo = promoRef.current
     const cta = ctaRef.current
     const ripple = rippleRef.current
     const thumbnailTrack = thumbnailTrackRef.current
 
-    if (!activeBg || !title || !copy || !meta || !cta) {
+    if (!activeBg || !title || !copy || !meta || !promo || !cta) {
       return undefined
     }
 
@@ -451,7 +461,7 @@ export function Hero({ tours = [] }: HeroProps) {
         0.22,
       )
       .fromTo(
-        [copy, meta, cta],
+        [copy, meta, promo, cta],
         { autoAlpha: 0, y: 0 },
         {
           autoAlpha: 1,
@@ -518,7 +528,7 @@ export function Hero({ tours = [] }: HeroProps) {
         <div className="hero-ripple-layer" ref={rippleRef}></div>
       </div>
 
-      <div className="hero-content">
+      <MotionSection as="div" className="hero-content" delay={0.06}>
         <p className="eyebrow">{activeHero.kicker}</p>
         <h1 ref={titleRef}>{activeHero.titleMain}</h1>
         <p className="hero-copy" ref={copyRef}>
@@ -531,12 +541,30 @@ export function Hero({ tours = [] }: HeroProps) {
             <strong className="hero-tour-price">{activeHero.priceLabel}</strong>
           )}
         </div>
+        <div
+          className="hero-promo-row"
+          ref={promoRef}
+          role="list"
+          aria-label={t('hero.promoStripAria')}
+        >
+          <span className="hero-promo-chip hero-promo-chip--accent" role="listitem">
+            {t('hero.promo1')}
+          </span>
+          <span className="hero-promo-chip" role="listitem">
+            {t('hero.promo2')}
+          </span>
+        </div>
         <Link className="primary-button" ref={ctaRef} to={activeTourHref}>
-          Booking now
+          {t('hero.bookingCta')}
         </Link>
-      </div>
+      </MotionSection>
 
-      <div className="hero-search-card" aria-label="Tim tour nhanh">
+      <GlassCard
+        as="div"
+        variant="heroSearch"
+        className="hero-search-card"
+        aria-label={t('hero.searchCardAria')}
+      >
         <label className="hero-search-field">
           <MapPin size={20} strokeWidth={2.4} aria-hidden="true" />
           <select
@@ -599,7 +627,7 @@ export function Hero({ tours = [] }: HeroProps) {
           <Search size={18} strokeWidth={2.6} aria-hidden="true" />
           Search
         </Link>
-      </div>
+      </GlassCard>
 
       <div
         className="hero-thumbnails"

@@ -2,6 +2,7 @@ export type DestinationDetailLocale = 'vi' | 'en'
 
 export type DestinationDetailCopy = {
   backHome: string
+  backToDestinationsList: string
   loading: string
   missingUuid: string
   loadError: string
@@ -62,6 +63,16 @@ export type DestinationDetailCopy = {
   plannerTitle: (name: string) => string
   plannerCopy: string
   plannerAction: string
+  toursGlassKicker: string
+  toursGlassTitle: string
+  toursGlassCopy: string
+  toursGlassCta: string
+  detailTocTitle: string
+  detailTocOverview: string
+  detailTocGallery: string
+  detailTocWeather: string
+  detailTocExperience: string
+  detailTocCommunity: string
   facts: Record<string, string>
   crowdLabels: Record<string, string>
   monthNames: string[]
@@ -73,6 +84,7 @@ export const destinationDetailCopyByLocale: Record<
 > = {
   vi: {
     backHome: 'Về trang chủ',
+    backToDestinationsList: 'Danh sách điểm đến',
     loading: 'Đang tải chi tiết điểm đến...',
     missingUuid: 'Thiếu mã điểm đến.',
     loadError: 'Không thể tải thông tin điểm đến.',
@@ -138,6 +150,17 @@ export const destinationDetailCopyByLocale: Record<
     plannerCopy:
       'Dùng hồ sơ điểm đến, thời tiết, media và các gợi ý trải nghiệm để thiết kế tour phù hợp với từng nhóm khách.',
     plannerAction: 'Tư vấn lịch trình',
+    toursGlassKicker: 'Bước tiếp theo',
+    toursGlassTitle: 'Xem tour gợi ý cho điểm đến này',
+    toursGlassCopy:
+      'Mở danh sách tour công khai với từ khóa trùng tên điểm đến — phù hợp khám phá trước khi đặt.',
+    toursGlassCta: 'Đi tới danh sách tour',
+    detailTocTitle: 'Trên trang này',
+    detailTocOverview: 'Tổng quan',
+    detailTocGallery: 'Thư viện ảnh',
+    detailTocWeather: 'Thời tiết',
+    detailTocExperience: 'Ẩm thực & trải nghiệm',
+    detailTocCommunity: 'Cộng đồng & đề xuất',
     facts: {
       uuid: 'UUID',
       slug: 'Slug',
@@ -178,6 +201,7 @@ export const destinationDetailCopyByLocale: Record<
   },
   en: {
     backHome: 'Back to home',
+    backToDestinationsList: 'All destinations',
     loading: 'Loading destination details...',
     missingUuid: 'Missing destination id.',
     loadError: 'Could not load destination information.',
@@ -242,6 +266,17 @@ export const destinationDetailCopyByLocale: Record<
     plannerCopy:
       'Use destination profile, weather, media, and experience suggestions to design tours for each guest group.',
     plannerAction: 'Plan itinerary',
+    toursGlassKicker: 'Next step',
+    toursGlassTitle: 'Browse tours for this destination',
+    toursGlassCopy:
+      'Opens the public tour list with a keyword matching this destination name — useful before booking.',
+    toursGlassCta: 'Go to tour list',
+    detailTocTitle: 'On this page',
+    detailTocOverview: 'Overview',
+    detailTocGallery: 'Media gallery',
+    detailTocWeather: 'Weather',
+    detailTocExperience: 'Food & experiences',
+    detailTocCommunity: 'Community & ideas',
     facts: {
       uuid: 'UUID',
       slug: 'Slug',

@@ -172,6 +172,61 @@
   text-shadow: 0 14px 42px rgba(0, 0, 0, 0.42);
 }
 
+.hero-promo-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px 12px;
+  margin-top: 22px;
+  max-width: min(720px, 100%);
+}
+
+.hero-promo-chip {
+  padding: 10px 18px;
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.96);
+  font-size: clamp(13px, 1.35vw, 15px);
+  font-weight: 800;
+  line-height: 1.35;
+  letter-spacing: 0.01em;
+  text-align: center;
+  text-wrap: balance;
+  background: color-mix(in srgb, var(--color-ocean) 78%, #041018 22%);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.12) inset,
+    0 18px 40px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(10px);
+}
+
+.hero-promo-chip--accent {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--color-ocean) 88%, #0a1c24),
+    color-mix(in srgb, var(--color-primary) 42%, var(--color-ocean) 58%)
+  );
+  border-color: color-mix(in srgb, var(--color-primary) 55%, rgba(255, 255, 255, 0.2));
+}
+
+.theme-dark .hero-promo-chip {
+  background: rgba(12, 32, 38, 0.72);
+  border-color: rgba(120, 220, 200, 0.28);
+}
+
+.theme-dark .hero-promo-chip--accent {
+  background: linear-gradient(
+    135deg,
+    rgba(18, 48, 52, 0.88),
+    color-mix(in srgb, var(--color-primary) 36%, rgba(8, 28, 32, 0.92))
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-promo-chip {
+    transition: none;
+  }
+}
+
 .primary-button {
   min-height: 54px;
   border: 1px solid rgba(255, 255, 255, 0.86);
@@ -202,8 +257,6 @@
 .hero-search-card {
   width: min(1380px, calc(100% - 48px));
   min-height: 126px;
-  border: 1px solid color-mix(in srgb, var(--color-border) 76%, transparent);
-  border-radius: 8px;
   display: grid;
   grid-template-columns: minmax(180px, 1fr) minmax(180px, 1fr) minmax(170px, 0.85fr) minmax(170px, 0.85fr) 146px;
   gap: 10px;
@@ -215,14 +268,6 @@
   left: 24px;
   z-index: 5;
   margin: 0 auto;
-  background:
-    radial-gradient(circle at 8% 16%, color-mix(in srgb, var(--color-primary) 16%, transparent), transparent 20%),
-    radial-gradient(circle at 72% 105%, color-mix(in srgb, var(--color-accent) 18%, transparent), transparent 24%),
-    color-mix(in srgb, var(--color-surface) 94%, transparent);
-  box-shadow:
-    0 24px 70px rgba(40, 54, 24, 0.24),
-    0 1px 0 rgba(255, 255, 255, 0.45) inset;
-  backdrop-filter: blur(16px);
 }
 
 .hero-search-field {
@@ -279,17 +324,6 @@
   background: linear-gradient(135deg, color-mix(in srgb, var(--color-primary) 88%, #fff), var(--color-primary));
   box-shadow: 0 20px 42px color-mix(in srgb, var(--color-primary) 34%, transparent);
   transform: translateY(-1px);
-}
-
-.theme-dark .hero-search-card {
-  border-color: rgba(255, 255, 255, 0.12);
-  background:
-    radial-gradient(circle at 8% 16%, rgba(85, 210, 182, 0.13), transparent 20%),
-    radial-gradient(circle at 72% 105%, rgba(240, 199, 86, 0.12), transparent 24%),
-    color-mix(in srgb, var(--color-surface) 88%, transparent);
-  box-shadow:
-    0 24px 70px rgba(0, 0, 0, 0.42),
-    0 1px 0 rgba(255, 255, 255, 0.07) inset;
 }
 
 .theme-dark .hero-search-field {

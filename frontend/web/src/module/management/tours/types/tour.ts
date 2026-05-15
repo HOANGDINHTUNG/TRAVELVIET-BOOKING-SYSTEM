@@ -82,6 +82,7 @@ export type TourSearchParams = {
   keyword?: string
   destinationId?: number
   destinationCountryCode?: string
+  domesticOnly?: boolean
   status?: TourStatus
   featuredOnly?: boolean
   minPrice?: number

@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -20,6 +22,13 @@ public class DestinationSearchRequest {
     private Boolean isActive;
     private Boolean isOfficial;
     private com.wedservice.backend.module.destinations.entity.DestinationStatus status;
+
+    /** Khi {@code true}: bỏ lọc cây (danh sách phẳng — tương thích client cũ). */
+    @Builder.Default
+    private Boolean hierarchyFlat = Boolean.FALSE;
+
+    /** Lọc theo điểm đến cha (cấp con). Bỏ qua nếu {@link #hierarchyFlat} = true. */
+    private UUID parentUuid;
 
     @Builder.Default
     private Integer page = 0;

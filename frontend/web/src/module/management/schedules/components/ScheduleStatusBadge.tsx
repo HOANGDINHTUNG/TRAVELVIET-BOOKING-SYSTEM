@@ -2,13 +2,20 @@ import { useTranslation } from 'react-i18next'
 import type { ScheduleStatus } from '../types/schedule'
 
 const STATUS_CLASS: Record<ScheduleStatus, string> = {
-  draft: 'bg-slate-100 text-slate-700 ring-slate-200',
-  open: 'bg-emerald-100 text-emerald-800 ring-emerald-200',
-  closed: 'bg-amber-100 text-amber-800 ring-amber-200',
-  full: 'bg-rose-100 text-rose-800 ring-rose-200',
-  departed: 'bg-sky-100 text-sky-800 ring-sky-200',
-  completed: 'bg-indigo-100 text-indigo-800 ring-indigo-200',
-  cancelled: 'bg-zinc-100 text-zinc-600 ring-zinc-200',
+  draft:
+    'bg-[color-mix(in_srgb,var(--admin-muted)_14%,var(--admin-surface))] text-[var(--admin-text)] ring-[var(--admin-border)]',
+  open:
+    'bg-emerald-100 text-emerald-900 ring-emerald-200 dark:bg-emerald-950/55 dark:text-emerald-200 dark:ring-emerald-800',
+  closed:
+    'bg-amber-100 text-amber-900 ring-amber-200 dark:bg-amber-950/50 dark:text-amber-200 dark:ring-amber-800',
+  full:
+    'bg-rose-100 text-rose-900 ring-rose-200 dark:bg-rose-950/50 dark:text-rose-200 dark:ring-rose-800',
+  departed:
+    'bg-sky-100 text-sky-900 ring-sky-200 dark:bg-sky-950/45 dark:text-sky-200 dark:ring-sky-800',
+  completed:
+    'bg-indigo-100 text-indigo-900 ring-indigo-200 dark:bg-indigo-950/45 dark:text-indigo-200 dark:ring-indigo-800',
+  cancelled:
+    'bg-zinc-200 text-zinc-800 ring-zinc-300 dark:bg-zinc-800/50 dark:text-zinc-200 dark:ring-zinc-600',
 }
 
 type ScheduleStatusBadgeProps = {

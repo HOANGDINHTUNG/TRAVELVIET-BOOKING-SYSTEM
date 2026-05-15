@@ -37,4 +37,10 @@ public class DestinationPublicDetailResponse {
     private List<DestinationActivityResponse> activities;
     private List<DestinationTipResponse> tips;
     private List<DestinationEventResponse> events;
+
+    private Long id;
+    private UUID parentUuid;
+    private Integer level;
+    private String programSlug;
+    private List<DestinationBreadcrumbItem> breadcrumbs;
 }

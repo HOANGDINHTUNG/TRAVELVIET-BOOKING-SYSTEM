@@ -1,18 +1,29 @@
 .home-tour-rows {
-  padding: clamp(48px, 6vw, 72px) clamp(16px, 4vw, 48px);
-  background: color-mix(in srgb, var(--color-surface, #0f1419) 88%, transparent);
+  padding: clamp(32px, 4vw, 52px) clamp(16px, 4vw, 48px);
+  background: var(--color-page);
+}
+
+/* Cùng max-width với khối khuyến mãi (1160px) — không kéo full màn hình */
+.home-tour-rows-inner {
+  max-width: 1160px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
 }
 
 .home-tour-row + .home-tour-row {
-  margin-top: clamp(40px, 5vw, 56px);
+  margin-top: clamp(36px, 4vw, 52px);
 }
 
+/* ============================================================
+   Tiêu đề hàng
+   ============================================================ */
 .home-tour-row-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
   flex-wrap: wrap;
 }
 
@@ -23,29 +34,41 @@
   flex-shrink: 0;
 }
 
+.home-tour-row-title {
+  margin: 0;
+  font-size: clamp(17px, 2.2vw, 22px);
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-heading);
+}
+
 .home-tour-row-more {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--color-primary, #e11d48);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-accent-foreground);
   text-decoration: none;
   white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.home-tour-row-more::after {
+  content: " ›";
 }
 
 .home-tour-row-more:hover {
   text-decoration: underline;
+  color: var(--color-accent-hover);
 }
 
-.home-tour-row-title {
-  margin: 0;
-  font-size: clamp(1.15rem, 2.4vw, 1.45rem);
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  color: var(--color-heading, #f4f6f8);
-}
-
+/* ============================================================
+   Điều hướng carousel
+   ============================================================ */
 .home-tour-row-nav {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   flex-shrink: 0;
 }
 
@@ -53,65 +76,129 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--color-primary, #e11d48) 45%, transparent);
-  background: color-mix(in srgb, var(--color-primary, #e11d48) 12%, transparent);
-  color: var(--color-heading, #f4f6f8);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-muted);
   cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease;
+  transition:
+    border-color var(--duration-hover) ease,
+    background var(--duration-hover) ease,
+    color var(--duration-hover) ease,
+    transform var(--duration-hover) var(--ease-hover);
 }
 
 .home-tour-row-arrow:hover {
-  background: color-mix(in srgb, var(--color-primary, #e11d48) 22%, transparent);
-  border-color: color-mix(in srgb, var(--color-primary, #e11d48) 65%, transparent);
+  border-color: var(--color-accent-foreground);
+  color: var(--color-accent-foreground);
+  background: color-mix(in srgb, var(--color-accent) 10%, var(--color-surface));
 }
 
 .home-tour-row-empty {
   margin: 0;
-  color: var(--color-muted, #9aa4b2);
-  font-size: 0.95rem;
-  line-height: 1.55;
+  color: var(--color-muted);
+  font-size: 14px;
 }
 
-.home-tour-row-scroller {
-  display: flex;
-  gap: 18px;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  padding-bottom: 8px;
-  scrollbar-width: thin;
+/* ============================================================
+   Carousel: tối đa 8 tour, luôn 4 ô; mỗi bấm qua/prev xoay vòng 1 tour
+   ============================================================ */
+.home-tour-row-viewport {
+  width: 100%;
+  /* Không clip theo chiều dọc — hover translateY không bị cắt; không có cuộn ngang thực tế */
+  overflow: visible;
+  padding-block: clamp(12px, 2vw, 20px);
+  margin-block: clamp(-8px, -1vw, -12px);
 }
 
-.home-tour-row-scroller::-webkit-scrollbar {
-  height: 6px;
+.home-tour-row-page {
+  width: 100%;
+  box-sizing: border-box;
+  display: grid;
+  gap: 16px;
+  padding: 0 1px;
+  min-width: 0;
 }
 
-.home-tour-row-scroller::-webkit-scrollbar-thumb {
-  background: color-mix(in srgb, var(--color-muted, #9aa4b2) 45%, transparent);
-  border-radius: 999px;
+.home-tour-row-page--skeleton {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
-.home-tour-card {
-  flex: 0 0 min(280px, 78vw);
-  scroll-snap-align: start;
-  border-radius: 14px;
+.home-tour-row-page--rotate-next {
+  animation: home-tour-row-shift-next 0.3s cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+.home-tour-row-page--rotate-prev {
+  animation: home-tour-row-shift-prev 0.3s cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-tour-row-page--rotate-next,
+  .home-tour-row-page--rotate-prev {
+    animation: none;
+  }
+}
+
+@keyframes home-tour-row-shift-next {
+  0% {
+    opacity: 0.82;
+    transform: translateX(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes home-tour-row-shift-prev {
+  0% {
+    opacity: 0.82;
+    transform: translateX(-12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ============================================================
+   Card tour (GlassCard variant glass + token hover)
+   ============================================================ */
+.home-tour-row-page .home-tour-card.tv-glass-card--glass {
+  --shadow-lift-y: -9px;
+
+  min-width: 0;
+  width: 100%;
+  padding: 0;
+  border-radius: var(--radius-card);
   overflow: hidden;
-  background: var(--color-card, #1a222c);
-  border: 1px solid color-mix(in srgb, var(--color-muted, #9aa4b2) 18%, transparent);
   display: flex;
   flex-direction: column;
-  min-height: 100%;
+  transition:
+    box-shadow var(--duration-hover) var(--ease-hover),
+    transform var(--duration-hover) var(--ease-hover),
+    border-color var(--duration-hover) ease;
 }
 
-.home-tour-card-skeleton {
-  min-height: 360px;
+.home-tour-row-page .home-tour-card.tv-glass-card--glass:hover {
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(var(--shadow-lift-y));
+}
+
+.home-tour-row-page .home-tour-card-skeleton.tv-glass-card--flat {
+  min-width: 0;
+  width: 100%;
+  padding: 0;
+  min-height: 340px;
+  border-radius: var(--radius-card);
+  overflow: hidden;
   background: linear-gradient(
     105deg,
-    color-mix(in srgb, var(--color-card, #1a222c) 100%, #fff) 0%,
-    color-mix(in srgb, var(--color-card, #1a222c) 100%, #fff 6%) 40%,
-    color-mix(in srgb, var(--color-card, #1a222c) 100%, #fff) 80%
+    color-mix(in srgb, var(--color-surface-soft) 88%, var(--color-border)) 0%,
+    var(--color-surface) 45%,
+    color-mix(in srgb, var(--color-surface-soft) 88%, var(--color-border)) 90%
   );
   background-size: 200% 100%;
   animation: home-tour-shimmer 1.2s ease-in-out infinite;
@@ -126,11 +213,14 @@
   }
 }
 
+/* ============================================================
+   Ảnh card
+   ============================================================ */
 .home-tour-card-media {
   display: block;
   aspect-ratio: 16 / 10;
-  background: color-mix(in srgb, var(--color-muted, #9aa4b2) 12%, transparent);
   overflow: hidden;
+  background: var(--color-surface-soft);
 }
 
 .home-tour-card-media img {
@@ -138,58 +228,105 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  transition: transform 0.35s ease;
+}
+
+.home-tour-card:hover .home-tour-card-media img {
+  transform: scale(1.04);
 }
 
 .home-tour-card-ph {
   width: 100%;
   height: 100%;
-  min-height: 160px;
+  min-height: 145px;
+  background: color-mix(in srgb, var(--color-surface-soft) 70%, var(--color-border));
 }
 
+/* ============================================================
+   Body — như trước (flex + glass solid); icon + giá giữ như hiện tại
+   ============================================================ */
 .home-tour-card-body {
-  padding: 14px 16px 16px;
+  padding: 12px 14px 14px;
   display: flex;
   flex-direction: column;
   gap: 6px;
   flex: 1;
+  background: var(--glass-bg-solid);
 }
 
 .home-tour-card-title {
   margin: 0;
-  font-size: 1rem;
-  font-weight: 600;
-  line-height: 1.35;
-  color: var(--color-heading, #f4f6f8);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--color-heading);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  min-height: 40px;
 }
 
-.home-tour-card-meta,
-.home-tour-card-depart {
+.home-tour-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-height: 0;
+}
+
+.home-tour-card-line {
   margin: 0;
-  font-size: 0.85rem;
-  color: var(--color-muted, #9aa4b2);
-  line-height: 1.4;
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  font-size: 12.5px;
+  line-height: 1.35;
+  color: var(--color-muted);
+}
+
+.home-tour-card-line-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.home-tour-card-icon {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: var(--color-ocean);
+}
+
+.app-shell.theme-dark .home-tour-card-icon {
+  color: var(--color-neon-blue);
+}
+
+.home-tour-card-info-bottom {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.home-tour-card-line--location {
+  align-items: flex-start;
+  flex: 1;
+  min-width: 0;
 }
 
 .home-tour-card-price {
-  margin: 6px 0 0;
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: var(--color-primary, #e11d48);
+  margin: 0;
+  flex-shrink: 0;
+  font-size: clamp(17px, 2.1vw, 20px);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: #dc2626;
+}
+
+.app-shell.theme-dark .home-tour-card-price {
+  color: #ff6369;
 }
 
 .home-tour-card-more {
-  margin-top: auto;
-  padding-top: 10px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--color-primary, #e11d48);
-  text-decoration: none;
-}
-
-.home-tour-card-more:hover {
-  text-decoration: underline;
+  display: none;
 }

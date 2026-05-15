@@ -32,12 +32,18 @@ public class DestinationController {
 
     @GetMapping
     public ApiResponse<PageResponse<DestinationPublicResponse>> searchDestinations(DestinationSearchRequest request) {
-    return ApiResponse.success(destinationFacade.searchApprovedDestinations(request));
+        return ApiResponse.success(destinationFacade.searchApprovedDestinations(request));
+    }
+
+    @GetMapping("/program/{programSlug}")
+    public ApiResponse<DestinationPublicDetailResponse> getDestinationByProgramSlug(
+            @PathVariable String programSlug) {
+        return ApiResponse.success(destinationFacade.getApprovedDestinationByProgramSlug(programSlug));
     }
 
     @GetMapping("/{uuid}")
     public ApiResponse<DestinationPublicDetailResponse> getDestination(@PathVariable UUID uuid) {
-    return ApiResponse.success(destinationFacade.getApprovedDestinationByUuid(uuid));
+        return ApiResponse.success(destinationFacade.getApprovedDestinationByUuid(uuid));
     }
 
     @PostMapping("/propose")

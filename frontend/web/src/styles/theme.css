@@ -1,28 +1,119 @@
-.app-shell {
-  --color-page: #fefae0;
+/**
+ * TravelViet — Luxe Travel 2026 design tokens.
+ * Light: white + pastel blue, aqua / deep teal, sunset CTA.
+ * Dark: charcoal navy, electric blue + neon purple accents.
+ * Glass surfaces use --glass-*; prefer opaque body layers on cards for WCAG AA text.
+ */
+
+:root {
+  /* ============================================================
+     Light — page & surfaces
+     ============================================================ */
+  --color-page: #f3f8fc;
+  --color-page-tint: #e6f1fa;
   --color-surface: #ffffff;
-  --color-surface-soft: #fefae0;
-  --color-text: #283618;
-  --color-muted: #606c38;
-  --color-primary: #606c38;
-  --color-ocean: #00b4d8;
-  --color-accent: #dda15e;
-  --color-danger: #bc6c25;
-  --color-border: rgba(96, 108, 56, 0.26);
-  --shadow-card: 0 20px 60px rgba(40, 54, 24, 0.14);
+  --color-surface-soft: #eef6fc;
+  --color-surface-elevated: #ffffff;
+
+  /* Typography & brand */
+  --color-text: #0a2540;
+  --color-muted: #3d5a73;
+  --color-heading: #063848;
+
+  /* Primary = deep teal; aqua = secondary highlight */
+  --color-primary: #0a5c62;
+  --color-primary-hover: #084a4f;
+  --color-aqua: #2ec4b6;
+  --color-ocean: #1aa6bc;
+  --color-accent: #e85d2c;
+  --color-accent-hover: #cf4f22;
+  /** Chữ / giá trên nền sáng (≥4.5:1 với trắng) — CTA nút có thể dùng --color-accent */
+  --color-accent-foreground: #9a3412;
+  --color-danger: #b91c1c;
+
+  --color-border: color-mix(in srgb, var(--color-primary) 22%, #94a3b8 78%);
+  --color-border-subtle: color-mix(in srgb, var(--color-border) 55%, transparent);
+
+  --shadow-card: 0 10px 36px color-mix(in srgb, var(--color-text) 12%, transparent);
+  --shadow-card-hover: 0 18px 48px color-mix(in srgb, var(--color-text) 16%, transparent);
+  --shadow-lift-y: -6px;
+  --duration-hover: 0.22s;
+  --ease-hover: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --radius-card: 12px;
+  --radius-glass: 16px;
+
+  /* Glass — higher surface opacity on cards for ≥4.5:1 body text */
+  --glass-blur: 18px;
+  --glass-bg: color-mix(in srgb, var(--color-surface) 88%, transparent);
+  --glass-bg-solid: color-mix(in srgb, var(--color-surface) 96%, var(--color-page-tint) 4%);
+  --glass-border: color-mix(in srgb, var(--color-primary) 18%, transparent);
+  --glass-shadow-outer: 0 20px 50px color-mix(in srgb, var(--color-text) 10%, transparent);
+  --glass-shadow-inset: inset 0 1px 0 color-mix(in srgb, #ffffff 55%, transparent);
+
+  --focus-ring-color: color-mix(in srgb, var(--color-aqua) 85%, var(--color-primary) 15%);
+
+  --nav-glass-bg-rest: color-mix(in srgb, rgba(6, 40, 48, 0.78) 88%, transparent);
+  --nav-glass-bg-scrolled-light: color-mix(
+    in srgb,
+    var(--color-surface) 92%,
+    var(--color-page-tint) 8%
+  );
+  --nav-glass-bg-scrolled-dark: color-mix(in srgb, #0f172a 88%, rgba(0, 0, 0, 0.35));
+
+  /* Neon pair (light: subtle sheen on borders / focus) */
+  --color-neon-blue: #0ea5e9;
+  --color-neon-purple: #7c3aed;
+}
+
+.app-shell {
   background: var(--color-page);
   color: var(--color-text);
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
 }
 
 .app-shell.theme-dark {
-  --color-page: #080b0b;
-  --color-surface: #15110f;
-  --color-surface-soft: #231a16;
-  --color-text: #eef6f2;
-  --color-muted: rgba(238, 246, 242, 0.68);
-  --color-primary: #0e3d34;
-  --color-ocean: #0a4d69;
-  --color-accent: #8b6c3d;
-  --color-border: rgba(255, 255, 255, 0.1);
-  --shadow-card: 0 20px 60px rgba(0, 0, 0, 0.26);
+  /* ============================================================
+     Dark — charcoal navy + neon accents
+     ============================================================ */
+  --color-page: #0b1220;
+  --color-page-tint: #111b2e;
+  --color-surface: #121a2c;
+  --color-surface-soft: #1a2540;
+  --color-surface-elevated: #1e293b;
+
+  --color-text: #e8f0f7;
+  --color-muted: rgba(232, 240, 247, 0.72);
+  --color-heading: #f0f9ff;
+
+  --color-primary: #5eead4;
+  --color-primary-hover: #2dd4bf;
+  --color-aqua: #22d3ee;
+  --color-ocean: #38bdf8;
+  --color-accent: #fb923c;
+  --color-accent-hover: #fdba74;
+  --color-accent-foreground: #ffedd5;
+  --color-danger: #fca5a5;
+
+  --color-border: color-mix(in srgb, var(--color-neon-blue) 35%, transparent);
+  --color-border-subtle: color-mix(in srgb, #ffffff 12%, transparent);
+
+  --shadow-card: 0 16px 48px rgba(0, 0, 0, 0.45);
+  --shadow-card-hover: 0 22px 60px rgba(0, 0, 0, 0.55);
+
+  --glass-bg: color-mix(in srgb, var(--color-surface) 82%, transparent);
+  --glass-bg-solid: color-mix(in srgb, var(--color-surface) 94%, #0f172a 6%);
+  --glass-border: color-mix(in srgb, var(--color-neon-blue) 42%, var(--color-neon-purple) 22%);
+  --glass-shadow-outer: 0 24px 70px rgba(0, 0, 0, 0.55);
+  --glass-shadow-inset: inset 0 1px 0 color-mix(in srgb, #ffffff 12%, transparent);
+
+  --focus-ring-color: color-mix(in srgb, var(--color-neon-blue) 70%, var(--color-neon-purple) 30%);
+
+  --nav-glass-bg-rest: color-mix(in srgb, rgba(8, 14, 28, 0.88) 90%, transparent);
+  --nav-glass-bg-scrolled-dark: color-mix(in srgb, #0f172a 92%, rgba(0, 0, 0, 0.4));
+
+  --color-neon-blue: #22d3ee;
+  --color-neon-purple: #c084fc;
 }

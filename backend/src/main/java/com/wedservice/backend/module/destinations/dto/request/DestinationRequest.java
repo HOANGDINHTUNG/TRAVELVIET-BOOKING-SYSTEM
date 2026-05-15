@@ -60,6 +60,9 @@ public class DestinationRequest {
     private Boolean isActive;
     private Boolean isOfficial;
 
+    /** ID điểm đến cha; null = nút gốc (châu lục / cấp cao nhất). */
+    private Long parentId;
+
     private List<@Valid DestinationMediaRequest> mediaList;
     private List<@Valid DestinationFoodRequest> foods;
     private List<@Valid DestinationSpecialtyRequest> specialties;

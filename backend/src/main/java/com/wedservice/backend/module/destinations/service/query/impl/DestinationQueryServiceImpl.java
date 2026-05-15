@@ -4,23 +4,25 @@ import com.querydsl.core.BooleanBuilder;
 import com.wedservice.backend.common.exception.ResourceNotFoundException;
 import com.wedservice.backend.common.i18n.LocaleTagUtil;
 import com.wedservice.backend.common.util.DataNormalizer;
+import com.wedservice.backend.module.destinations.dto.request.DestinationSearchRequest;
+import com.wedservice.backend.module.destinations.dto.response.DestinationBreadcrumbItem;
+import com.wedservice.backend.module.destinations.dto.response.DestinationPublicDetailResponse;
+import com.wedservice.backend.module.destinations.dto.response.DestinationPublicResponse;
 import com.wedservice.backend.module.destinations.entity.Destination;
-import com.wedservice.backend.module.destinations.entity.DestinationTranslation;
 import com.wedservice.backend.module.destinations.entity.DestinationMedia;
 import com.wedservice.backend.module.destinations.entity.DestinationStatus;
+import com.wedservice.backend.module.destinations.entity.DestinationTranslation;
 import com.wedservice.backend.module.destinations.entity.QDestination;
 import com.wedservice.backend.module.destinations.mapper.DestinationMapper;
 import com.wedservice.backend.module.destinations.repository.DestinationRepository;
 import com.wedservice.backend.module.destinations.repository.DestinationTranslationRepository;
-import com.wedservice.backend.module.destinations.dto.request.DestinationSearchRequest;
-import org.springframework.cache.annotation.Cacheable;
-import com.wedservice.backend.common.response.PageResponse;
-import com.wedservice.backend.module.destinations.dto.response.DestinationPublicDetailResponse;
-import com.wedservice.backend.module.destinations.dto.response.DestinationPublicResponse;
 import com.wedservice.backend.module.destinations.service.query.DestinationQueryService;
+import com.wedservice.backend.module.destinations.util.DestinationProgramSlug;
 import com.wedservice.backend.module.tours.entity.TourStatus;
 import com.wedservice.backend.module.tours.repository.TourRepository;
+import com.wedservice.backend.common.response.PageResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -29,11 +31,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -83,6 +89,14 @@ public class DestinationQueryServiceImpl implements DestinationQueryService {
         builder.and(qDestination.deletedAt.isNull());
         builder.and(qDestination.isActive.isTrue());
 
+        if (!Boolean.TRUE.equals(request.getHierarchyFlat())) {
+            if (request.getParentUuid() != null) {
+                builder.and(qDestination.parent.uuid.eq(request.getParentUuid()));
+            } else {
+                builder.and(qDestination.parent.isNull());
+            }
+        }
+
         Page<Destination> page = destinationRepository.findAll(builder, pageable);
         String lang = LocaleTagUtil.currentLanguageTag();
         Map<Long, DestinationTranslation> byDestId = loadDestinationTranslations(
@@ -101,17 +115,39 @@ public class DestinationQueryServiceImpl implements DestinationQueryService {
     public DestinationPublicDetailResponse getApprovedDestinationByUuid(UUID uuid) {
         Destination destination = destinationRepository.findByUuid(uuid)
                 .orElseThrow(() -> new ResourceNotFoundException("Destination not found with uuid: " + uuid));
+        assertApprovedActive(destination);
+        String lang = LocaleTagUtil.currentLanguageTag();
+        DestinationTranslation tr = loadDestinationTranslations(List.of(destination.getId()), lang)
+                .get(destination.getId());
+        return toPublicDetailResponse(destination, tr, lang);
+    }
 
+    @Override
+    @Cacheable(
+            value = "destination-details",
+            key = "'prog_' + #programSlug + '_' + T(org.springframework.context.i18n.LocaleContextHolder).getLocale().toLanguageTag()"
+    )
+    @Transactional(readOnly = true)
+    public DestinationPublicDetailResponse getApprovedDestinationByProgramSlug(String programSlug) {
+        Long id = DestinationProgramSlug.parseTrailingPid(programSlug);
+        if (id == null) {
+            throw new ResourceNotFoundException("Invalid destination program slug");
+        }
+        Destination destination = destinationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Destination not found for id: " + id));
+        assertApprovedActive(destination);
+        String lang = LocaleTagUtil.currentLanguageTag();
+        DestinationTranslation tr = loadDestinationTranslations(List.of(destination.getId()), lang)
+                .get(destination.getId());
+        return toPublicDetailResponse(destination, tr, lang);
+    }
+
+    private static void assertApprovedActive(Destination destination) {
         if (destination.getStatus() != DestinationStatus.APPROVED
                 || !Boolean.TRUE.equals(destination.getIsActive())
                 || destination.getDeletedAt() != null) {
             throw new ResourceNotFoundException("Destination not found or not approved");
         }
-
-        String lang = LocaleTagUtil.currentLanguageTag();
-        DestinationTranslation tr = loadDestinationTranslations(java.util.List.of(destination.getId()), lang)
-                .get(destination.getId());
-        return toPublicDetailResponse(destination, tr);
     }
 
     private Map<Long, DestinationTranslation> loadDestinationTranslations(Collection<Long> destinationIds, String lang) {
@@ -135,6 +171,7 @@ public class DestinationQueryServiceImpl implements DestinationQueryService {
 
     private DestinationPublicResponse toPublicResponse(Destination destination, DestinationTranslation tr) {
         return DestinationPublicResponse.builder()
+                .id(destination.getId())
                 .uuid(destination.getUuid())
                 .name(pickLocalized(tr != null ? tr.getName() : null, destination.getName()))
                 .slug(destination.getSlug())
@@ -151,21 +188,44 @@ public class DestinationQueryServiceImpl implements DestinationQueryService {
                 .crowdLevelDefault(destination.getCrowdLevelDefault())
                 .isFeatured(destination.getIsFeatured())
                 .coverImageUrl(resolveCoverImage(destination))
-                .activeTourCount(countActiveTours(destination.getId()))
+                .activeTourCount(countActiveTours(destination))
                 .translationKey(destination.getSlug())
+                .parentUuid(destination.getParent() != null ? destination.getParent().getUuid() : null)
+                .level(destination.getLevel())
+                .programSlug(DestinationProgramSlug.build(destination.getSlug(), destination.getId()))
                 .build();
     }
 
-    private Long countActiveTours(Long destinationId) {
+    private Long countActiveTours(Destination destination) {
         try {
-            return tourRepository.countByDestinationIdAndStatusAndDeletedAtIsNull(destinationId, TourStatus.ACTIVE);
+            String pathPrefix = StringUtils.hasText(destination.getPath())
+                    ? destination.getPath()
+                    : "/" + destination.getId() + "/";
+            if (!pathPrefix.endsWith("/")) {
+                pathPrefix = pathPrefix + "/";
+            }
+            return tourRepository.countActiveToursInDestinationSubtree(
+                    destination.getId(),
+                    pathPrefix,
+                    TourStatus.ACTIVE
+            );
         } catch (Exception e) {
             return 0L;
         }
     }
 
-    private DestinationPublicDetailResponse toPublicDetailResponse(Destination destination, DestinationTranslation tr) {
+    private DestinationPublicDetailResponse toPublicDetailResponse(
+            Destination destination,
+            DestinationTranslation tr,
+            String lang
+    ) {
+        List<Long> chainIds = parsePathIds(destination.getPath());
+        Map<Long, DestinationTranslation> crumbTr = chainIds.isEmpty()
+                ? Map.of()
+                : loadDestinationTranslations(chainIds, lang);
+
         return DestinationPublicDetailResponse.builder()
+                .id(destination.getId())
                 .uuid(destination.getUuid())
                 .name(pickLocalized(tr != null ? tr.getName() : null, destination.getName()))
                 .slug(destination.getSlug())
@@ -191,7 +251,52 @@ public class DestinationQueryServiceImpl implements DestinationQueryService {
                 .activities(destinationMapper.mapActivityList(destination.getActivities()))
                 .tips(destinationMapper.mapTipList(destination.getTips()))
                 .events(destinationMapper.mapEventList(destination.getEvents()))
+                .parentUuid(destination.getParent() != null ? destination.getParent().getUuid() : null)
+                .level(destination.getLevel())
+                .programSlug(DestinationProgramSlug.build(destination.getSlug(), destination.getId()))
+                .breadcrumbs(buildBreadcrumbs(chainIds, crumbTr))
                 .build();
+    }
+
+    private List<Long> parsePathIds(String path) {
+        if (!StringUtils.hasText(path) || "/".equals(path.trim())) {
+            return List.of();
+        }
+        List<Long> ids = new ArrayList<>();
+        for (String part : path.split("/")) {
+            if (!StringUtils.hasText(part)) {
+                continue;
+            }
+            try {
+                ids.add(Long.parseLong(part.trim()));
+            } catch (NumberFormatException ignored) {
+                return List.of();
+            }
+        }
+        return ids;
+    }
+
+    private List<DestinationBreadcrumbItem> buildBreadcrumbs(List<Long> chainIds, Map<Long, DestinationTranslation> trByDestId) {
+        if (chainIds.isEmpty()) {
+            return List.of();
+        }
+        List<Destination> nodes = destinationRepository.findAllById(chainIds);
+        Map<Long, Destination> byId = nodes.stream().collect(Collectors.toMap(Destination::getId, d -> d, (a, b) -> a));
+        List<DestinationBreadcrumbItem> out = new ArrayList<>();
+        for (Long id : chainIds) {
+            Destination d = byId.get(id);
+            if (d == null) {
+                continue;
+            }
+            DestinationTranslation tr = trByDestId.get(id);
+            out.add(DestinationBreadcrumbItem.builder()
+                    .uuid(d.getUuid())
+                    .name(pickLocalized(tr != null ? tr.getName() : null, d.getName()))
+                    .slug(d.getSlug())
+                    .programSlug(DestinationProgramSlug.build(d.getSlug(), d.getId()))
+                    .build());
+        }
+        return out;
     }
 
     private String resolveCoverImage(Destination destination) {
@@ -199,6 +304,7 @@ public class DestinationQueryServiceImpl implements DestinationQueryService {
                 .filter(media -> Boolean.TRUE.equals(media.getIsActive()))
                 .sorted(Comparator.comparing(DestinationMedia::getSortOrder, Comparator.nullsLast(Integer::compareTo)))
                 .map(DestinationMedia::getMediaUrl)
+                .filter(Objects::nonNull)
                 .findFirst()
                 .orElse(null);
     }

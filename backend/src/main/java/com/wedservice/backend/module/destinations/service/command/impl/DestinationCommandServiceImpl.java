@@ -9,6 +9,7 @@ import com.wedservice.backend.module.destinations.entity.CrowdLevel;
 import com.wedservice.backend.module.destinations.entity.Destination;
 import com.wedservice.backend.module.destinations.entity.DestinationStatus;
 import com.wedservice.backend.module.destinations.repository.DestinationRepository;
+import com.wedservice.backend.module.destinations.service.DestinationHierarchyService;
 import com.wedservice.backend.module.destinations.service.command.DestinationCommandService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ public class DestinationCommandServiceImpl implements DestinationCommandService 
 
     private final DestinationRepository destinationRepository;
     private final AuthenticatedUserProvider authenticatedUserProvider;
+    private final DestinationHierarchyService destinationHierarchyService;
 
     @Override
     @Transactional
@@ -59,6 +61,8 @@ public class DestinationCommandServiceImpl implements DestinationCommandService 
                     .build();
 
             Destination saved = destinationRepository.save(destination);
+            destinationRepository.flush();
+            destinationHierarchyService.assignPathAndLevelForNewDestination(saved);
             log.info("Destination saved successfully: uuid={}", saved.getUuid());
             return DestinationProposalResponse.builder()
                     .uuid(saved.getUuid())

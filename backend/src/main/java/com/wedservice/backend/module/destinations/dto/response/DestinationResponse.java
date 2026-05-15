@@ -16,6 +16,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DestinationResponse {
+    private Long id;
     private UUID uuid;
     private String code;
     private String name;
@@ -39,6 +40,9 @@ public class DestinationResponse {
     private UUID verifiedBy;
     private String rejectionReason;
     private Boolean isOfficial;
+    private UUID parentUuid;
+    private Integer level;
+    private String path;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDateTime deletedAt;

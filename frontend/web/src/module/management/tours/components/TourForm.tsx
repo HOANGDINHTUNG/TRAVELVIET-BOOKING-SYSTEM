@@ -1,8 +1,9 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Controller, useForm, type SubmitHandler } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslation } from 'react-i18next'
 import { Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 import DestinationSelect from './DestinationSelect'
 import TagsMultiSelect from './TagsMultiSelect'
 import MediaUploader from './MediaUploader'
@@ -18,6 +19,8 @@ type TourFormProps = {
   defaultValues?: Partial<TourRequestForm>
   /** Tên điểm đến hiển thị ban đầu khi edit (lấy từ TourResponse.destinationName). */
   initialDestinationName?: string | null
+  /** Khi set — tự lưu/khôi phục bản nháp form trên localStorage (vd tạo tour). */
+  draftStorageKey?: string
   isSubmitting?: boolean
   submitLabel?: string
   onCancel?: () => void
@@ -44,6 +47,7 @@ function TourForm(props: TourFormProps) {
     handleSubmit,
     reset,
     control,
+    watch,
     formState: { errors },
   } = useForm<TourRequestForm>({
     resolver: zodResolver(tourRequestSchema),
@@ -53,10 +57,51 @@ function TourForm(props: TourFormProps) {
 
   /** Trạng thái upload media — chặn Submit khi đang upload để tránh save thiếu URL. */
   const [isUploadingMedia, setUploadingMedia] = useState(false)
+  const draftToastShown = useRef(false)
+  const defaultsSnap = JSON.stringify(props.defaultValues ?? {})
 
   useEffect(() => {
-    reset({ ...EMPTY_TOUR_FORM, ...props.defaultValues })
-  }, [props.defaultValues, reset])
+    const base = { ...EMPTY_TOUR_FORM, ...props.defaultValues }
+    if (!props.draftStorageKey) {
+      reset(base)
+      draftToastShown.current = false
+      return
+    }
+    try {
+      const raw = window.localStorage.getItem(props.draftStorageKey)
+      if (raw) {
+        const parsed = JSON.parse(raw) as Partial<TourRequestForm>
+        reset({ ...base, ...parsed })
+        if (!draftToastShown.current) {
+          draftToastShown.current = true
+          toast.info(String(t('tours.form.draftRestored')))
+        }
+      } else {
+        reset(base)
+      }
+    } catch {
+      reset(base)
+    }
+  }, [props.draftStorageKey, defaultsSnap, reset, t, props.defaultValues])
+
+  useEffect(() => {
+    if (!props.draftStorageKey) return undefined
+    let timeoutId = 0
+    const sub = watch((vals) => {
+      window.clearTimeout(timeoutId)
+      timeoutId = window.setTimeout(() => {
+        try {
+          window.localStorage.setItem(props.draftStorageKey!, JSON.stringify(vals))
+        } catch {
+          /* quota */
+        }
+      }, 750)
+    })
+    return () => {
+      sub.unsubscribe()
+      window.clearTimeout(timeoutId)
+    }
+  }, [props.draftStorageKey, watch])
 
   const onValid: SubmitHandler<TourRequestForm> = (values) => {
     if (isUploadingMedia) return
@@ -72,6 +117,10 @@ function TourForm(props: TourFormProps) {
       className="flex flex-col gap-5"
       noValidate
     >
+      {props.draftStorageKey ? (
+        <p className="text-xs text-[var(--color-muted,#64748b)]">{String(t('tours.form.draftHint'))}</p>
+      ) : null}
+
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <Field
           label={String(t('tours.form.code'))}

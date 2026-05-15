@@ -26,6 +26,9 @@ export type PublicTourSearchParams = {
   domesticOnly?: boolean;
   internationalOnly?: boolean;
   destinationCountryCode?: string;
+  destinationId?: number;
+  /** Khi có destinationId: false = chỉ tour gắn đúng destination đó (mặc định backend là true = cả cây con). */
+  destinationSubtree?: boolean;
   featuredOnly?: boolean;
   tagCodes?: string[];
   sortBy?: string;
@@ -43,6 +46,7 @@ function appendTourSearchToUrlSearchParams(
     "sortBy",
     "sortDir",
     "destinationCountryCode",
+    "destinationId",
   ];
   for (const key of scalarKeys) {
     const v = params[key];
@@ -52,6 +56,7 @@ function appendTourSearchToUrlSearchParams(
   if (params.domesticOnly === true) usp.set("domesticOnly", "true");
   if (params.internationalOnly === true) usp.set("internationalOnly", "true");
   if (params.featuredOnly === true) usp.set("featuredOnly", "true");
+  if (params.destinationSubtree === false) usp.set("destinationSubtree", "false");
   if (params.tagCodes?.length) {
     for (const code of params.tagCodes) {
       const c = code?.trim();
@@ -126,12 +131,24 @@ export function tourListSearchParamsFromUrl(
     .map((c) => c.trim())
     .filter(Boolean);
 
+  const rawDestId = searchParams.get("destinationId")?.trim();
+  let destinationId: number | undefined;
+  if (rawDestId && /^\d+$/.test(rawDestId)) {
+    const n = Number(rawDestId);
+    if (Number.isFinite(n)) {
+      destinationId = n;
+    }
+  }
+
+  const destinationSubtree = searchParams.get("destinationSubtree") !== "false";
+
   if (
     !domesticOnly &&
     !internationalOnly &&
     !featuredOnly &&
     !destinationCountryCode &&
-    tagCodes.length === 0
+    tagCodes.length === 0 &&
+    destinationId === undefined
   ) {
     return null;
   }
@@ -143,6 +160,10 @@ export function tourListSearchParamsFromUrl(
     ...(internationalOnly ? { internationalOnly: true } : {}),
     ...(featuredOnly ? { featuredOnly: true } : {}),
     ...(destinationCountryCode ? { destinationCountryCode } : {}),
+    ...(destinationId !== undefined ? { destinationId } : {}),
+    ...(destinationId !== undefined && !destinationSubtree
+      ? { destinationSubtree: false }
+      : {}),
     ...(tagCodes.length ? { tagCodes } : {}),
     sortBy: "createdAt",
     sortDir: "desc",
@@ -152,8 +173,9 @@ export function tourListSearchParamsFromUrl(
 /** Link từ trang chủ → danh sách tour đã lọc (phần A). */
 export const catalogTourLinks = {
   domesticBeachFeatured:
-    "/tours?domesticOnly=true&tagCodes=BIEN&featuredOnly=true",
-  internationalFeatured: "/tours?internationalOnly=true&featuredOnly=true",
+    "/tours?tagCodes=HOME_BEACH_VN&featuredOnly=true",
+  internationalFeatured:
+    "/tours?tagCodes=HOME_HOT_INTL&featuredOnly=true",
 } as const;
 
 function parseHighlights(highlights?: string) {
@@ -177,8 +199,30 @@ function chooseTourImage(tour: BackendTour) {
   return buildAssetUrl(image?.mediaUrl);
 }
 
+/** Tất cả ảnh tour (không video), đã sort — dùng gallery + nền blur */
+function collectTourImageUrls(tour: BackendTour): string[] {
+  if (!tour.media?.length) {
+    return [];
+  }
+
+  return tour.media
+    .filter(
+      (item) =>
+        item.isActive !== false &&
+        item.mediaUrl &&
+        String(item.mediaType ?? "").toLowerCase() !== "video",
+    )
+    .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
+    .map((item) => buildAssetUrl(item.mediaUrl))
+    .filter((u): u is string => Boolean(u));
+}
+
 function mapTour(item: BackendTour): Tour {
   const departure = formatDepartureLine(item);
+  const gallery = collectTourImageUrls(item);
+  const primary = gallery[0] ?? chooseTourImage(item);
+  const allUrls = gallery.length > 0 ? gallery : primary ? [primary] : [];
+
   return {
     id: item.id,
     translationKey: item.translationKey,
@@ -189,9 +233,11 @@ function mapTour(item: BackendTour): Tour {
     price: toNumber(item.basePrice),
     rating: toNumber(item.averageRating) || undefined,
     reviewCount: item.totalReviews,
-    image: chooseTourImage(item),
+    image: primary,
+    mediaGalleryUrls: allUrls.length ? allUrls : undefined,
     highlights: parseHighlights(item.highlights),
-    description: item.shortDescription || item.description,
+    shortDescription: item.shortDescription,
+    description: item.description,
     destinationId: item.destinationId,
     destinationCountryCode: item.destinationCountryCode,
     destinationName: item.destinationName,

@@ -68,6 +68,7 @@ export type DestinationProposal = {
 export type AdminDestinationStatus = "pending" | "approved" | "rejected" | string;
 
 export type AdminDestination = {
+  id?: number;
   uuid: string;
   code?: string;
   name?: string;
@@ -94,6 +95,11 @@ export type AdminDestination = {
   createdAt?: string;
   updatedAt?: string;
   deletedAt?: string;
+  parentUuid?: string;
+  level?: number;
+  path?: string;
+  programSlug?: string;
+  coverImageUrl?: string;
 };
 
 export type AdminDestinationDetail = AdminDestination & {
@@ -104,6 +110,20 @@ export type AdminDestinationDetail = AdminDestination & {
   tips?: BackendDestinationDetail["tips"];
   events?: BackendDestinationDetail["events"];
 };
+
+export type DestinationSearchParams = Partial<{
+  keyword: string;
+  province: string;
+  region: string;
+  crowdLevel: string;
+  isFeatured: boolean;
+  page: number;
+  size: number;
+  sortBy: string;
+  sortDir: "asc" | "desc";
+  hierarchyFlat: boolean;
+  parentUuid: string;
+}>;
 
 export type AdminDestinationQuery = {
   keyword?: string;
@@ -139,6 +159,7 @@ export type AdminDestinationPayload = {
   isFeatured?: boolean;
   isActive?: boolean;
   isOfficial?: boolean;
+  parentId?: number | null;
 };
 
 function mapDestination(item: BackendDestination): Destination {
@@ -147,6 +168,10 @@ function mapDestination(item: BackendDestination): Destination {
   return {
     translationKey: item.translationKey,
     uuid: item.uuid,
+    id: item.id,
+    parentUuid: item.parentUuid,
+    level: item.level,
+    programSlug: item.programSlug,
     name: item.name,
     province: item.province,
     region: item.region,
@@ -197,11 +222,12 @@ function mapDestinationDetail(
       (a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0),
     ),
     events: item.events ?? [],
+    breadcrumbs: item.breadcrumbs,
   };
 }
 
 export const destinationApi = {
-  async getAllDestinations() {
+  async searchApprovedDestinations(params: DestinationSearchParams = {}) {
     const page = await getBackendData<PageResponse<BackendDestination>>(
       "destinations",
       {
@@ -209,10 +235,36 @@ export const destinationApi = {
         size: destinationFetchSize,
         sortBy: "name",
         sortDir: "asc",
+        ...params,
       },
     );
 
     return page.content.map(mapDestination);
+  },
+
+  async getRootDestinations() {
+    return this.searchApprovedDestinations({
+      hierarchyFlat: false,
+      sortBy: "name",
+      sortDir: "asc",
+    });
+  },
+
+  async getDestinationsByParentUuid(parentUuid: string) {
+    return this.searchApprovedDestinations({
+      hierarchyFlat: false,
+      parentUuid,
+      sortBy: "name",
+      sortDir: "asc",
+    });
+  },
+
+  async getAllDestinations() {
+    return this.searchApprovedDestinations({
+      hierarchyFlat: true,
+      sortBy: "name",
+      sortDir: "asc",
+    });
   },
 
   async getDestinations() {
@@ -227,6 +279,15 @@ export const destinationApi = {
   async getDestinationByUuid(uuid: string) {
     const detail = await getBackendData<BackendDestinationDetail>(
       `destinations/${uuid}`,
+    );
+
+    return mapDestinationDetail(detail);
+  },
+
+  async getDestinationByProgramSlug(programSlug: string) {
+    const encoded = encodeURIComponent(programSlug);
+    const detail = await getBackendData<BackendDestinationDetail>(
+      `destinations/program/${encoded}`,
     );
 
     return mapDestinationDetail(detail);
@@ -301,3 +362,5 @@ export const destinationApi = {
 export const fetchPublicDestinations = () => destinationApi.getDestinations();
 export const fetchPublicDestinationByUuid = (uuid: string) =>
   destinationApi.getDestinationByUuid(uuid);
+export const fetchPublicDestinationByProgramSlug = (programSlug: string) =>
+  destinationApi.getDestinationByProgramSlug(programSlug);

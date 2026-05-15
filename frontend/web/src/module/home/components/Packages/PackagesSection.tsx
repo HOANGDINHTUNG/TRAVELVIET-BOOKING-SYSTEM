@@ -64,6 +64,7 @@ export function PackagesSection({ tours, onSelectTour }: PackagesSectionProps) {
           tour.location,
           tour.category,
           tour.days,
+          tour.shortDescription,
           tour.description,
           ...tour.highlights,
         ]
@@ -93,7 +94,10 @@ export function PackagesSection({ tours, onSelectTour }: PackagesSectionProps) {
     const description = translateTourField(
       tour,
       "description",
-      tour.description || tour.highlights.join(", ") || tour.category,
+      tour.shortDescription ||
+        tour.description ||
+        tour.highlights.join(", ") ||
+        tour.category,
     );
     const days = translateTourField(tour, "days", tour.days);
     const location = translateTourField(tour, "location", tour.location);
