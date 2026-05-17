@@ -222,6 +222,59 @@ function TourForm(props: TourFormProps) {
         </Field>
 
         <Field
+          label={String(t('tours.form.listPrice'))}
+          error={fieldErrorMessage(t, errors.listPrice?.message)}
+        >
+          <input
+            type="number"
+            min={0}
+            step="1"
+            disabled={isFormDisabled}
+            {...register('listPrice', {
+              setValueAs: (value) =>
+                value === '' || value == null ? undefined : Number(value),
+            })}
+            className={FIELD_INPUT_CLASS}
+          />
+        </Field>
+
+        <Field
+          label={String(t('tours.form.esgScore'))}
+          error={fieldErrorMessage(t, errors.esgScore?.message)}
+        >
+          <input
+            type="number"
+            min={0}
+            max={100}
+            step={1}
+            disabled={isFormDisabled}
+            {...register('esgScore', {
+              setValueAs: (value) =>
+                value === '' || value == null ? undefined : Number(value),
+            })}
+            className={FIELD_INPUT_CLASS}
+          />
+        </Field>
+
+        <Field
+          label={String(t('tours.form.leiScore'))}
+          error={fieldErrorMessage(t, errors.leiScore?.message)}
+        >
+          <input
+            type="number"
+            min={0}
+            max={100}
+            step={1}
+            disabled={isFormDisabled}
+            {...register('leiScore', {
+              setValueAs: (value) =>
+                value === '' || value == null ? undefined : Number(value),
+            })}
+            className={FIELD_INPUT_CLASS}
+          />
+        </Field>
+
+        <Field
           label={String(t('tours.form.currency'))}
           error={fieldErrorMessage(t, errors.currency?.message)}
         >

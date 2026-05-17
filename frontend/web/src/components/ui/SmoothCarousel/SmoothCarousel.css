@@ -1,0 +1,23 @@
+.smooth-carousel-viewport {
+  overflow: hidden;
+  width: 100%;
+}
+
+.smooth-carousel-track {
+  display: flex;
+  align-items: stretch;
+  width: max-content;
+  will-change: transform;
+  backface-visibility: hidden;
+  transform: translate3d(0, 0, 0);
+}
+
+.smooth-carousel-track > [data-carousel-slide] {
+  flex-shrink: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .smooth-carousel-track {
+    will-change: auto;
+  }
+}

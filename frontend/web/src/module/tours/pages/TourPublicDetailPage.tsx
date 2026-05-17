@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { motion, useReducedMotion } from 'motion/react'
@@ -9,6 +9,10 @@ import {
   useTourDetailQuery,
 } from '../hooks/usePublicTours'
 import { extractTourIdFromSlug } from '../utils/slug'
+import {
+  isScheduleStillBookable,
+  pickDefaultBookableSchedule,
+} from '../utils/tourScheduleSelection'
 import { Footer } from '../../../components/Footer/Footer'
 import TourScheduleSelector from '../components/TourScheduleSelector'
 import BookingPanel from '../components/BookingPanel'
@@ -32,6 +36,25 @@ function TourPublicDetailPage() {
   const [selectedScheduleId, setSelectedScheduleId] = useState<number | null>(
     null,
   )
+
+  useEffect(() => {
+    setSelectedScheduleId(null)
+  }, [tourId])
+
+  useEffect(() => {
+    if (schedulesQuery.isPending) return
+    const schedules = schedulesQuery.data ?? []
+    if (schedules.length === 0) {
+      setSelectedScheduleId(null)
+      return
+    }
+    setSelectedScheduleId((prev) => {
+      if (prev != null && isScheduleStillBookable(prev, schedules)) {
+        return prev
+      }
+      return pickDefaultBookableSchedule(schedules)?.id ?? null
+    })
+  }, [schedulesQuery.data, schedulesQuery.isPending])
 
   const selectedSchedule = useMemo<TourScheduleResponse | null>(() => {
     if (selectedScheduleId == null) return null
@@ -94,14 +117,19 @@ function TourPublicDetailPage() {
     <>
       <div className="tour-public-shell">
         <motion.section
-          initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={prefersReducedMotion ? false : { opacity: 0 }}
+          animate={{ opacity: 1 }}
           transition={{ duration: prefersReducedMotion ? 0 : 0.32 }}
         >
           <TourPublicDetailShell
             tour={tour}
+            hasSelectedSchedule={selectedScheduleId != null}
             bookingPanel={
-              <BookingPanel tourId={tour.id} schedule={selectedSchedule} />
+              <BookingPanel
+                tourId={tour.id}
+                schedule={selectedSchedule}
+                comboPackages={tour.comboPackages ?? undefined}
+              />
             }
             scheduleSelector={scheduleSelector}
           />

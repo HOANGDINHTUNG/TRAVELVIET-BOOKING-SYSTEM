@@ -21,6 +21,9 @@ public class TourResponse {
     private String destinationProvince;
     private Long cancellationPolicyId;
     private BigDecimal basePrice;
+    private Integer esgScore;
+    private Integer leiScore;
+    private BigDecimal listPrice;
     private String currency;
     private Integer durationDays;
     private Integer durationNights;
@@ -46,4 +49,18 @@ public class TourResponse {
     private String translationKey;
     /** Localized itinerary narrative from tour_translations (public merge); structured days stay in itineraryDays. */
     private String itinerarySummary;
+
+    /** Nearest open schedule with seats — for list cards / flash sale. */
+    private TourNextScheduleSummaryResponse nextOpenSchedule;
+
+    /** Primary departure city (vi) from tour_departure_hubs. */
+    private String primaryDepartureCity;
+
+    private TourInclusionFlagsResponse inclusionFlags;
+
+    /** Departure cities for this tour (detail API). */
+    private List<TourDepartureHubResponse> departureHubs;
+
+    /** Linked combo add-ons (detail API). */
+    private List<TourComboPackageOfferResponse> comboPackages;
 }

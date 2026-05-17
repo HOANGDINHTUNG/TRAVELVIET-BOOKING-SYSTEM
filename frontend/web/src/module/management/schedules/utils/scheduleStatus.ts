@@ -1,3 +1,4 @@
+import { getScheduleRemainingSeats } from '../../../tours/utils/scheduleSeatAvailability'
 import type { ScheduleStatus, TourScheduleResponse } from '../types/schedule'
 import { SCHEDULE_STATUS_VALUES } from '../types/schedule'
 
@@ -30,6 +31,11 @@ export function deriveEffectiveStatus(
     status === 'full'
   ) {
     return status
+  }
+
+  const remaining = getScheduleRemainingSeats(schedule)
+  if (remaining != null && remaining <= 0) {
+    return 'full'
   }
 
   const capacity = schedule.capacityTotal ?? 0

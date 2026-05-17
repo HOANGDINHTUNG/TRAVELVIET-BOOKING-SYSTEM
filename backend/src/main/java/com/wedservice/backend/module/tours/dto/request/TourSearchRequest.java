@@ -60,6 +60,13 @@ public class TourSearchRequest {
 
     private Boolean featuredOnly;
 
+    /** When true, only tours with {@code esg_score >= 80}. */
+    private Boolean esgOnly;
+
+    @Min(value = 0, message = "esgMin must be between 0 and 100")
+    @Max(value = 100, message = "esgMin must be between 0 and 100")
+    private Integer esgMin;
+
     private Boolean studentFriendlyOnly;
 
     private Boolean familyFriendlyOnly;

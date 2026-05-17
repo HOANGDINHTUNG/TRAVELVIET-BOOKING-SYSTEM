@@ -4,11 +4,20 @@
 }
 
 .hsrow-inner {
-  max-width: 1160px;
+  max-width: var(--home-content-max);
   margin: 0 auto;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   padding: clamp(8px, 1.5vw, 14px) 0 clamp(14px, 2vw, 22px);
+}
+
+/**
+ * Phase 2: items được wrap trong <MotionStaggerItem> nên dùng sibling
+ * selector `* + *` để vẽ separator giữa các cột, không phụ thuộc
+ * `:last-child` của Link.
+ */
+.hsrow-inner > * + * .hsrow-item {
+  border-left: 1px solid #eaeff7;
 }
 
 /* ============================================================
@@ -22,12 +31,7 @@
   gap: 10px;
   padding: 14px 12px 12px;
   text-decoration: none;
-  border-right: 1px solid #eaeff7;
   transition: background 0.15s ease;
-}
-
-.hsrow-item:last-child {
-  border-right: none;
 }
 
 .hsrow-item:hover {

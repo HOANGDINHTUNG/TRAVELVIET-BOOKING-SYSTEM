@@ -1,21 +1,45 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { ChevronLeft, ChevronRight, Clock, MapPin } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { catalogTourLinks } from "../../../../api/server/Tour.api";
 import { GlassCard } from "../../../../components/ui/GlassCard";
+import { TourCard } from "../../../../components/ui/TourCard/TourCard";
 import type { Tour } from "../../database/interface/publicTravel";
+import type { TourCardSavingTier } from "../../../../components/ui/TourCard/TourCard";
+import {
+  TourQuickViewDialog,
+  type TourQuickViewPayload,
+} from "../../../../components/ui/TourCard/TourQuickViewDialog";
+import { SmoothCarouselTrack } from "../../../../components/ui/SmoothCarousel/SmoothCarouselTrack";
+import { useSmoothInfiniteCarousel } from "../../../../components/ui/SmoothCarousel/useSmoothInfiniteCarousel";
+import { tourDetailPath } from "../../../tours/utils/slug";
 import "./HomeTourRows.css";
 
 const MAX_TOURS = 8;
 const VISIBLE_SLOTS = 4;
 
-function formatVnd(price: number) {
-  return new Intl.NumberFormat("vi-VN", {
-    style: "currency",
-    currency: "VND",
-    maximumFractionDigits: 0,
-  }).format(price);
+/** Logo trên thẻ tour (thay vòng tròn nâu mặc định) */
+const HOME_TOUR_CARD_BRAND_LOGO =
+  "https://res.cloudinary.com/dmzvum1lp/image/upload/v1778951138/logo_vqb3ks.png";
+
+function cornerLabelsForTour(tour: Tour): string[] {
+  const labels: string[] = [];
+  if (tour.category?.trim()) labels.push(tour.category.trim());
+  const h = tour.highlights?.[0]?.trim();
+  if (h) labels.push(h.length > 26 ? `${h.slice(0, 26)}…` : h);
+  return labels.slice(0, 3);
+}
+
+/** Gán badge tier theo vị trí slot để có đủ kiểu (demo UI; sau thay bằng API). */
+function savingTierForSlot(index: number): TourCardSavingTier | undefined {
+  const tiers: (TourCardSavingTier | undefined)[] = [
+    "tiet_kiem",
+    "tieu_chuan",
+    "cao_cap",
+    undefined,
+  ];
+  return tiers[index % tiers.length];
 }
 
 function TourRowCarousel({
@@ -25,10 +49,10 @@ function TourRowCarousel({
   emptyHint,
   viewMoreTo,
   viewMoreLabel,
-  viewDetailLabel,
   ariaPrev,
   ariaNext,
   translateTourField,
+  onQuickViewTour,
 }: {
   title: string;
   tours: Tour[];
@@ -36,7 +60,6 @@ function TourRowCarousel({
   emptyHint: string;
   viewMoreTo: string;
   viewMoreLabel: string;
-  viewDetailLabel: string;
   ariaPrev: string;
   ariaNext: string;
   translateTourField: (
@@ -44,40 +67,23 @@ function TourRowCarousel({
     field: "title" | "days" | "location",
     fallback: string,
   ) => string;
+  onQuickViewTour: (tour: Tour, savingTier?: TourCardSavingTier) => void;
 }) {
   const list = useMemo(() => tours.slice(0, MAX_TOURS), [tours]);
   const n = list.length;
 
-  const [startIndex, setStartIndex] = useState(0);
-  const [slideDir, setSlideDir] = useState<"next" | "prev">("next");
+  const carousel = useSmoothInfiniteCarousel({
+    itemCount: n,
+    visibleCount: VISIBLE_SLOTS,
+    loop: true,
+  });
 
-  const visibleTours = useMemo(() => {
-    if (n === 0) {
-      return [];
-    }
-    if (n === 1) {
-      return list;
-    }
-    const k = Math.min(VISIBLE_SLOTS, n);
-    return Array.from({ length: k }, (_, i) => list[(startIndex + i) % n]!);
-  }, [list, n, startIndex]);
-
-  const listSig = useMemo(() => list.map((t) => t.id).join("|"), [list]);
-
-  useEffect(() => {
-    setStartIndex(0);
-    setSlideDir("next");
-  }, [listSig]);
-
-  const go = (dir: "prev" | "next") => {
-    if (n <= 1) {
-      return;
-    }
-    setSlideDir(dir === "next" ? "next" : "prev");
-    setStartIndex((s) =>
-      dir === "next" ? (s + 1) % n : (s - 1 + n) % n,
-    );
-  };
+  const trackTours = useMemo(() => {
+    if (n === 0) return [];
+    const clones =
+      carousel.cloneCount > 0 ? list.slice(0, carousel.cloneCount) : [];
+    return [...list, ...clones];
+  }, [carousel.cloneCount, list, n]);
 
   if (!loading && tours.length === 0) {
     return (
@@ -101,111 +107,83 @@ function TourRowCarousel({
           <Link className="home-tour-row-more" to={viewMoreTo}>
             {viewMoreLabel}
           </Link>
-          <div className="home-tour-row-nav">
-            <button
-              type="button"
-              aria-label={ariaPrev}
-              onClick={() => go("prev")}
-              className="home-tour-row-arrow"
-            >
-              <ChevronLeft size={22} aria-hidden />
-            </button>
-            <button
-              type="button"
-              aria-label={ariaNext}
-              onClick={() => go("next")}
-              className="home-tour-row-arrow"
-            >
-              <ChevronRight size={22} aria-hidden />
-            </button>
-          </div>
+          {carousel.canNavigate && (
+            <div className="home-tour-row-nav">
+              <button
+                type="button"
+                aria-label={ariaPrev}
+                onClick={carousel.goPrev}
+                className="home-tour-row-arrow"
+              >
+                <ChevronLeft size={22} aria-hidden />
+              </button>
+              <button
+                type="button"
+                aria-label={ariaNext}
+                onClick={carousel.goNext}
+                className="home-tour-row-arrow"
+              >
+                <ChevronRight size={22} aria-hidden />
+              </button>
+            </div>
+          )}
         </div>
       </div>
       <div
-        className="home-tour-row-viewport"
         role="region"
         aria-roledescription="carousel"
         aria-label={title}
+        className="home-tour-row-viewport-wrap"
       >
         {loading && list.length === 0 ? (
           <div
-            className="home-tour-row-page home-tour-row-page--skeleton"
+            className="home-tour-row-track home-tour-row-track--skeleton"
             aria-hidden
           >
             {Array.from({ length: VISIBLE_SLOTS }).map((_, i) => (
-              <GlassCard
-                as="div"
-                variant="flat"
-                key={`home-tour-skel-${title}-${i}`}
-                className="home-tour-card home-tour-card-skeleton"
-              />
+              <div key={`home-tour-skel-${title}-${i}`} data-carousel-slide>
+                <GlassCard
+                  as="div"
+                  variant="flat"
+                  className="home-tour-card home-tour-card-skeleton"
+                />
+              </div>
             ))}
           </div>
         ) : (
-          <div
-            className={`home-tour-row-page home-tour-row-page--rotate-${slideDir}`}
-            key={startIndex}
-            style={{
-              gridTemplateColumns: `repeat(${visibleTours.length}, minmax(0, 1fr))`,
-            }}
+          <SmoothCarouselTrack
+            viewportRef={carousel.viewportRef}
+            offsetX={carousel.offsetX}
+            durationSec={carousel.durationSec}
+            onTransitionComplete={carousel.onTransitionComplete}
+            className="home-tour-row-viewport"
+            trackClassName="home-tour-row-track"
           >
-            {visibleTours.map((tour) => (
-              <GlassCard
-                as="article"
-                variant="glass"
-                key={tour.id}
-                className="home-tour-card"
-              >
-                <Link to={`/tours/${tour.id}`} className="home-tour-card-media">
-                  {tour.image ? (
-                    <img
-                      src={tour.image}
-                      alt={translateTourField(tour, "title", tour.title)}
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div className="home-tour-card-ph" aria-hidden />
-                  )}
-                </Link>
-                <div className="home-tour-card-body">
-                  <h3 className="home-tour-card-title">
-                    {translateTourField(tour, "title", tour.title)}
-                  </h3>
-
-                  <div className="home-tour-card-info">
-                    <p className="home-tour-card-line">
-                      <Clock
-                        className="home-tour-card-icon"
-                        size={17}
-                        strokeWidth={2.25}
-                        aria-hidden
-                      />
-                      <span className="home-tour-card-line-text">
-                        {translateTourField(tour, "days", tour.days)}
-                      </span>
-                    </p>
-                    <div className="home-tour-card-info-bottom">
-                      <p className="home-tour-card-line home-tour-card-line--location">
-                        <MapPin
-                          className="home-tour-card-icon"
-                          size={17}
-                          strokeWidth={2.25}
-                          aria-hidden
-                        />
-                        <span className="home-tour-card-line-text">
-                          {translateTourField(tour, "location", tour.location)}
-                        </span>
-                      </p>
-                      <p className="home-tour-card-price">{formatVnd(tour.price)}</p>
-                    </div>
-                  </div>
-                  <Link to={`/tours/${tour.id}`} className="home-tour-card-more">
-                    {viewDetailLabel}
-                  </Link>
+            {trackTours.map((tour, index) => {
+              const tier = savingTierForSlot(index);
+              return (
+                <div
+                  key={`${tour.id}-${index}`}
+                  data-carousel-slide
+                  className="home-tour-row-slide"
+                >
+                  <TourCard
+                    title={translateTourField(tour, "title", tour.title)}
+                    detailPath={tourDetailPath(tour.id, tour.title)}
+                    imageUrl={tour.image}
+                    location={translateTourField(tour, "location", tour.location)}
+                    duration={translateTourField(tour, "days", tour.days)}
+                    price={tour.price}
+                    savingTier={tier}
+                    cornerLabels={cornerLabelsForTour(tour)}
+                    brandLogoUrl={HOME_TOUR_CARD_BRAND_LOGO}
+                    className="home-tour-card"
+                    onQuickView={() => onQuickViewTour(tour, tier)}
+                  />
                 </div>
-              </GlassCard>
-            ))}
-          </div>
+              );
+            })}
+          </SmoothCarouselTrack>
         )}
       </div>
     </div>
@@ -225,6 +203,9 @@ export function HomeTourRows({
 }: HomeTourRowsProps) {
   const { t, i18n } = useTranslation();
 
+  const [quickViewPayload, setQuickViewPayload] =
+    useState<TourQuickViewPayload | null>(null);
+
   const translateTourField = useCallback(
     (tour: Tour, field: "title" | "days" | "location", fallback: string) => {
       if (!tour.translationKey) {
@@ -234,6 +215,33 @@ export function HomeTourRows({
       return i18n.exists(key) ? t(key) : fallback;
     },
     [i18n, t],
+  );
+
+  const buildQuickViewPayload = useCallback(
+    (tour: Tour, savingTier?: TourCardSavingTier): TourQuickViewPayload => ({
+      title: translateTourField(tour, "title", tour.title),
+      imageUrl: tour.image,
+      location: translateTourField(tour, "location", tour.location),
+      duration: translateTourField(tour, "days", tour.days),
+      price: tour.price,
+      programCode: `TV-${String(tour.id).padStart(5, "0")}`,
+      attractions:
+        tour.highlights?.[0]?.trim() ||
+        translateTourField(tour, "location", tour.location),
+      cuisine:
+        tour.highlights?.[1]?.trim() ||
+        t("tourCard.quickViewModal.defaultCuisine"),
+      detailPath: tourDetailPath(tour.id, tour.title),
+      savingTier,
+    }),
+    [t, translateTourField],
+  );
+
+  const openQuickView = useCallback(
+    (tour: Tour, savingTier?: TourCardSavingTier) => {
+      setQuickViewPayload(buildQuickViewPayload(tour, savingTier));
+    },
+    [buildQuickViewPayload],
   );
 
   return (
@@ -249,10 +257,10 @@ export function HomeTourRows({
           emptyHint={t("homeTourRows.emptyDomestic")}
           viewMoreTo={catalogTourLinks.domesticBeachFeatured}
           viewMoreLabel={t("homeTourRows.viewMore")}
-          viewDetailLabel={t("homeTourRows.viewDetail")}
           ariaPrev={t("homeTourRows.prev")}
           ariaNext={t("homeTourRows.next")}
           translateTourField={translateTourField}
+          onQuickViewTour={openQuickView}
         />
         <TourRowCarousel
           title={t("homeTourRows.internationalTitle")}
@@ -261,12 +269,20 @@ export function HomeTourRows({
           emptyHint={t("homeTourRows.emptyInternational")}
           viewMoreTo={catalogTourLinks.internationalFeatured}
           viewMoreLabel={t("homeTourRows.viewMore")}
-          viewDetailLabel={t("homeTourRows.viewDetail")}
           ariaPrev={t("homeTourRows.prev")}
           ariaNext={t("homeTourRows.next")}
           translateTourField={translateTourField}
+          onQuickViewTour={openQuickView}
         />
       </div>
+
+      <TourQuickViewDialog
+        open={quickViewPayload != null}
+        onOpenChange={(open) => {
+          if (!open) setQuickViewPayload(null);
+        }}
+        tour={quickViewPayload}
+      />
     </section>
   );
 }

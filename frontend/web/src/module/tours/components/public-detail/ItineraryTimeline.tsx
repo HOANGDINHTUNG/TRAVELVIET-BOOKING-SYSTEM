@@ -82,8 +82,21 @@ export function ItineraryTimeline({ tour }: ItineraryTimelineProps) {
                           Boolean(it.description?.trim()) ||
                           Boolean(it.locationName?.trim()) ||
                           Boolean(it.itemType?.trim())
+                        const stopAnchor = it.locationName
+                          ? `stop-${it.locationName
+                              .trim()
+                              .toLowerCase()
+                              .normalize('NFD')
+                              .replace(/[\u0300-\u036f]/g, '')
+                              .replace(/[^a-z0-9]+/g, '-')}`
+                          : undefined
+
                         return (
-                          <li key={it.id} className="rounded-lg bg-slate-50/90">
+                          <li
+                            key={it.id}
+                            id={stopAnchor}
+                            className="scroll-mt-28 rounded-lg bg-slate-50/90"
+                          >
                             {hasBody ? (
                               <button
                                 type="button"

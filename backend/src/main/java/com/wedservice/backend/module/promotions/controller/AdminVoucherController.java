@@ -10,6 +10,7 @@ import com.wedservice.backend.module.promotions.facade.AdminVoucherFacade;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -68,7 +69,7 @@ public class AdminVoucherController {
     }
 
     @PatchMapping("/{id}/status")
-    @PreAuthorize("hasAuthority('voucher.delete')")
+    @PreAuthorize("hasAuthority('voucher.publish')")
     public ApiResponse<VoucherResponse> updateVoucherStatus(
             @PathVariable Long id,
             @Valid @RequestBody UpdateVoucherStatusRequest request
@@ -77,6 +78,16 @@ public class AdminVoucherController {
                 .success(true)
                 .message("Voucher status updated successfully")
                 .data(adminVoucherFacade.updateVoucherStatus(id, request.getIsActive()))
+                .build();
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('voucher.delete')")
+    public ApiResponse<Void> deleteVoucher(@PathVariable Long id) {
+        adminVoucherFacade.deleteVoucher(id);
+        return ApiResponse.<Void>builder()
+                .success(true)
+                .message("Voucher deleted successfully")
                 .build();
     }
 }

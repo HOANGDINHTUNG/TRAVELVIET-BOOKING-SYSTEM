@@ -1,11 +1,64 @@
+export type TourNextScheduleSummary = {
+  scheduleId: number;
+  scheduleCode?: string;
+  departureAt: string;
+  returnAt?: string;
+  remainingSeats: number;
+  capacityTotal?: number;
+  meetingPointName?: string;
+  adultPrice?: number;
+};
+
+export type TourInclusionFlags = {
+  hasFlight?: boolean;
+  hasHotel?: boolean;
+  hasMeals?: boolean;
+  hasTickets?: boolean;
+  hasGuide?: boolean;
+  hasInsurance?: boolean;
+  hasTransport?: boolean;
+  hotelStars?: number | null;
+  flightType?: string | null;
+  notes?: string | null;
+};
+
+export type TourDepartureHub = {
+  cityCode?: string;
+  cityNameVi?: string;
+  cityNameEn?: string;
+  isPrimary?: boolean;
+  sortOrder?: number;
+};
+
+export type TourComboPackageOffer = {
+  comboId: number;
+  code?: string;
+  name?: string;
+  description?: string;
+  basePrice?: number | string;
+  discountAmount?: number | string;
+  finalPrice?: number | string;
+  packageRole?: 'included' | 'optional' | 'recommended' | string;
+  isDefault?: boolean;
+  sortOrder?: number;
+};
+
 export type Tour = {
   id: number;
+  code?: string;
   translationKey?: string;
   title: string;
   location: string;
   category: string;
   days: string;
   price: number;
+  listPrice?: number;
+  nextOpenSchedule?: TourNextScheduleSummary;
+  primaryDepartureCity?: string;
+  inclusionFlags?: TourInclusionFlags;
+  esgScore?: number;
+  leiScore?: number;
+  tagCodes?: string[];
   rating?: number;
   reviewCount?: number;
   image: string;
@@ -158,6 +211,9 @@ export type BackendTour = {
   destinationName?: string;
   destinationProvince?: string;
   basePrice?: number | string;
+  esgScore?: number | null;
+  leiScore?: number | null;
+  listPrice?: number | string | null;
   currency?: string;
   durationDays?: number;
   durationNights?: number;
@@ -181,6 +237,11 @@ export type BackendTour = {
   seasonality?: BackendTourSeasonality[];
   checklistItems?: BackendChecklistItem[];
   cancellationPolicy?: BackendCancellationPolicy;
+  nextOpenSchedule?: TourNextScheduleSummary;
+  primaryDepartureCity?: string;
+  inclusionFlags?: TourInclusionFlags;
+  departureHubs?: TourDepartureHub[];
+  comboPackages?: TourComboPackageOffer[];
 };
 
 export type BackendItineraryDay = {

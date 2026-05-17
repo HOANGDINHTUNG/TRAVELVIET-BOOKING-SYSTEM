@@ -41,6 +41,7 @@ export function useBookingQuote(
     queryFn: () => PublicBookingsApi.quote(payload as BookingQuotePayload),
     enabled: payload != null && payload.scheduleId > 0 && payload.tourId > 0,
     staleTime: 15_000,
+    retry: false,
     ...options,
   })
 }

@@ -37,8 +37,20 @@
   --shadow-card: 0 10px 36px color-mix(in srgb, var(--color-text) 12%, transparent);
   --shadow-card-hover: 0 18px 48px color-mix(in srgb, var(--color-text) 16%, transparent);
   --shadow-lift-y: -6px;
-  --duration-hover: 0.22s;
+
+  /* Motion tokens — premium UX (Phase 0) */
+  --ease-premium: cubic-bezier(0.16, 1, 0.3, 1); /* expo.out — dùng cho reveal/stagger */
   --ease-hover: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-smooth: cubic-bezier(0.32, 0.72, 0, 1); /* dùng cho dropdown/sheet */
+  --duration-fast: 0.18s;
+  --duration-hover: 0.22s;
+  --duration-base: 0.32s;
+  --duration-page: 0.6s;
+
+  /* Glass blur scale */
+  --blur-glass-sm: 10px;
+  --blur-glass-md: 18px;
+  --blur-glass-lg: 28px;
 
   --radius-card: 12px;
   --radius-glass: 16px;
@@ -64,6 +76,13 @@
   /* Neon pair (light: subtle sheen on borders / focus) */
   --color-neon-blue: #0ea5e9;
   --color-neon-purple: #7c3aed;
+
+  /* Home — 4 tour card 300px + gap 18px (carousel / section căn đều) */
+  --home-tour-card-width: 300px;
+  --home-tour-card-gap: 18px;
+  --home-content-max: calc(
+    var(--home-tour-card-width) * 4 + var(--home-tour-card-gap) * 3
+  );
 }
 
 .app-shell {

@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
 import type { PointerEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { SlidersHorizontal, SunMedium } from 'lucide-react'
+import { Search, SlidersHorizontal, SunMedium } from 'lucide-react'
 import { MdTranslate } from 'react-icons/md'
 import { useAppDispatch, useAppSelector } from '../../hooks/reduxHooks'
 import {
   toggleLanguage,
   toggleTheme,
 } from '../../stores/slices/preferencesSlice'
+import { useCommandPalette } from '../command/CommandPaletteContext'
 import './FloatingUtilities.css'
 
 type FloatingPosition = {
@@ -51,6 +52,7 @@ export function FloatingUtilities() {
   const { t } = useTranslation()
   const dispatch = useAppDispatch()
   const { language } = useAppSelector((state) => state.preferences)
+  const { setOpen: openCommandPalette } = useCommandPalette()
   const [isOpen, setIsOpen] = useState(false)
   const [position, setPosition] = useState<FloatingPosition>(() => {
     if (typeof window === 'undefined') {
@@ -135,6 +137,17 @@ export function FloatingUtilities() {
       style={{ left: position.x, top: position.y }}
     >
       <div className="floating-utilities-panel" aria-hidden={!isOpen}>
+        <button
+          className="floating-utility-action"
+          type="button"
+          aria-label={t('commandPalette.triggerLabel')}
+          onClick={() => {
+            setIsOpen(false)
+            openCommandPalette(true)
+          }}
+        >
+          <Search className="utility-action-icon" aria-hidden="true" />
+        </button>
         <button
           className="floating-utility-action"
           type="button"

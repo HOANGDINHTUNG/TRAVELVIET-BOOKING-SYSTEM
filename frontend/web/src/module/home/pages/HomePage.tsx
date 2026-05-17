@@ -3,14 +3,15 @@ import { useTranslation } from "react-i18next";
 import { Footer } from "../../../components/Footer/Footer";
 import { EmptyState } from "../../../components/common/ui/EmptyState";
 import { ErrorBlock } from "../../../components/common/ui/ErrorBlock";
-import { PageLoader } from "../../../components/common/ux/PageLoader";
 import BannerHome, {
   type BannerSlide,
 } from "../../../components/hero/BannerHome";
+import { HomePageSkeleton } from "../../../components/ui/skeletons/HomeSkeletons";
 import { useAppDispatch, useAppSelector } from "../../../hooks/reduxHooks";
 import { buildTourSlug } from "../../tours/utils/slug";
 import { HomeSearchBar } from "../components/HomeSearchBar/HomeSearchBar";
 import { HomeServicesRow } from "../components/HomeServicesRow/HomeServicesRow";
+import { LastMinuteDealsSection } from "../components/LastMinuteDeals/LastMinuteDealsSection";
 import { LatestPromotionsSection } from "../components/Promotions/LatestPromotionsSection";
 import { TourHotSection } from "../components/TourHotSection/TourHotSection";
 import { HomeTourRows } from "../components/HomeTourRows/HomeTourRows";
@@ -28,6 +29,7 @@ function HomePage() {
     tours,
     toursDomesticBeach,
     toursInternationalHot,
+    toursLastMinuteDeals,
     loading,
     error,
   } = useAppSelector(selectHome);
@@ -54,6 +56,7 @@ function HomePage() {
       tours.length > 0 ||
       toursDomesticBeach.length > 0 ||
       toursInternationalHot.length > 0 ||
+      toursLastMinuteDeals.length > 0 ||
       error
     ) {
       return;
@@ -75,6 +78,7 @@ function HomePage() {
     tours.length,
     toursDomesticBeach.length,
     toursInternationalHot.length,
+    toursLastMinuteDeals.length,
   ]);
 
   const handleRetry = () => {
@@ -126,9 +130,9 @@ function HomePage() {
       return (
         <>
           <EmptyState
-            title="Backend chưa mở hoặc API không phản hồi"
-            message="Bạn hãy bật backend rồi bấm Thử lại. (Mặc định web gọi http://localhost:8088/api/v1)"
-            actionLabel="Thử lại"
+            title={t("homePage.status.backendOfflineTitle")}
+            message={t("homePage.status.backendOfflineMessage")}
+            actionLabel={t("homePage.status.retry")}
             onAction={handleRetry}
           />
           <Footer />
@@ -138,7 +142,7 @@ function HomePage() {
 
     return (
       <>
-        <PageLoader />
+        <HomePageSkeleton />
         <Footer />
       </>
     );
@@ -149,7 +153,7 @@ function HomePage() {
       <>
         <ErrorBlock
           message={error}
-          actionLabel="Thử lại"
+          actionLabel={t("homePage.status.retry")}
           onAction={handleRetry}
         />
         <Footer />
@@ -163,13 +167,14 @@ function HomePage() {
         <BannerHome slides={bannerSlides} ctaLabel={t("homePage.bannerCta")} />
       ) : (
         <EmptyState
-          title="Chưa có ảnh tour từ backend."
-          message="Kiểm tra mediaUrl trong response GET /tours."
+          title={t("homePage.status.emptyImagesTitle")}
+          message={t("homePage.status.emptyImagesMessage")}
         />
       )}
 
       <HomeSearchBar />
       <HomeServicesRow />
+      <LastMinuteDealsSection tours={toursLastMinuteDeals} loading={loading} />
       <LatestPromotionsSection />
       <TourHotSection
         destinations={destinations}

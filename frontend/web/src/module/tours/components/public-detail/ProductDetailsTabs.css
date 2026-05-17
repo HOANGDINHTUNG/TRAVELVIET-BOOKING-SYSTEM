@@ -1,0 +1,121 @@
+.tour-public-product-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  width: 100%;
+  min-width: 0;
+}
+
+@media (min-width: 1024px) {
+  .tour-public-detail-main {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+  }
+
+  .tour-public-product-tabs {
+    flex: 1 1 auto;
+    min-height: 12rem;
+  }
+
+  .tour-public-product-tabs__panel {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .tour-public-product-tabs__body {
+    flex: 1 1 auto;
+  }
+}
+
+.tour-public-product-tabs__tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border-width: 1px;
+  border-style: solid;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.tour-public-product-tabs__tab:hover {
+  transform: translateY(-1px);
+}
+
+.tour-public-product-tabs__tab-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.35rem;
+  height: 1.35rem;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.tour-public-product-tabs__tab:not([aria-selected='true']) .tour-public-product-tabs__tab-icon {
+  opacity: 0.92;
+}
+
+.tour-public-product-tabs__panel-head-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.85rem;
+  box-shadow: 0 10px 24px rgba(15, 31, 61, 0.12);
+}
+
+.tour-public-product-tabs__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.tour-public-product-tabs__list-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: rgb(30 41 59);
+}
+
+.tour-public-product-tabs__list-marker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.35rem;
+  height: 1.35rem;
+  margin-top: 0.15rem;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.tour-public-product-tabs__prose {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.65;
+  color: rgb(30 41 59);
+  white-space: pre-line;
+}
+
+.tour-public-product-tabs__callout {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  padding: 0.85rem 1rem;
+  border-radius: 1rem;
+  border: 1px solid color-mix(in srgb, currentColor 12%, transparent);
+  background: color-mix(in srgb, currentColor 6%, white);
+}

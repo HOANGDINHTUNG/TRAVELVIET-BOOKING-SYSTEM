@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { CalendarRange, Sparkles } from 'lucide-react'
 import { formatCurrencyVnd } from '../../../management/schedules/utils/currency'
 import type { TourResponse } from '../../types/publicTour'
+import { resolveListPrice } from '../../utils/tourSustainability'
 import { TOUR_SCHEDULES_ANCHOR_ID } from './tourPublicDetailConstants'
 
 type TourStickyPurchaseCardProps = {
@@ -14,7 +15,7 @@ function scrollToSchedules(anchorId: string) {
 }
 
 /**
- * Card glass: giá (mock list price gạch ngang), badge chỗ, CTA cuộn tới lịch khởi hành.
+ * Card glass: giá niêm yết (listPrice từ BE) + giá bán, badge chỗ, CTA cuộn tới lịch khởi hành.
  */
 export function TourStickyPurchaseCard({
   tour,
@@ -22,7 +23,11 @@ export function TourStickyPurchaseCard({
 }: TourStickyPurchaseCardProps) {
   const { t } = useTranslation('tours')
   const base = tour.basePrice ?? 0
-  const mockList = base > 0 ? Math.round(base * 1.12) : null
+  const listPrice = resolveListPrice({
+    price: base,
+    listPrice: tour.listPrice,
+    basePrice: tour.basePrice,
+  })
   const stockLimited = (tour.totalBookings ?? 0) < 25
 
   return (
@@ -51,9 +56,9 @@ export function TourStickyPurchaseCard({
             {String(t('detail.fromPrice'))}
           </p>
           <div className="flex flex-wrap items-baseline gap-2">
-            {mockList != null && mockList > base ? (
+            {listPrice != null && listPrice > base ? (
               <span className="text-sm text-slate-400 line-through">
-                {formatCurrencyVnd(mockList)}
+                {formatCurrencyVnd(listPrice)}
               </span>
             ) : null}
             <span className="font-serif text-3xl font-bold tracking-tight text-teal-700 md:text-4xl">

@@ -2,6 +2,7 @@ import { useRef, useLayoutEffect, type FC } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -35,9 +36,11 @@ interface BannerHomeProps {
 const BannerHome: FC<BannerHomeProps> = ({
   slides: rawSlides,
   maxSlides = 6,
-  ctaLabel = "Xem chi tiết",
+  ctaLabel,
 }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation("translation");
+  const resolvedCtaLabel = ctaLabel ?? t("homePage.bannerCta");
 
   const demoRef = useRef<HTMLDivElement | null>(null);
   const demoCardsRef = useRef<HTMLDivElement | null>(null);
@@ -89,60 +92,9 @@ const BannerHome: FC<BannerHomeProps> = ({
       });
 
     const ctx = gsap.context(() => {
-      // Build cards (background) HTML
-      const escapeAttr = (value: string) =>
-        value
-          .replace(/&/g, "&amp;")
-          .replace(/"/g, "&quot;")
-          .replace(/'/g, "&#39;")
-          .replace(/</g, "&lt;");
-
-      const safeUrl = (url: string) => url.replace(/[<>'"]/g, "");
-
-      const cardsHtml = slides
-        .map((s, i) => {
-          const fp = i === 0 ? 'fetchpriority="high"' : 'fetchpriority="low"';
-          const load = i === 0 ? "eager" : "lazy";
-          const alt = escapeAttr(s.title);
-          return `<div class="card absolute left-0 top-0 shadow-[6px_6px_10px_2px_rgba(0,0,0,0.6)] rounded-xl overflow-hidden bg-black"
-                id="card${i}">
-              <img src="${safeUrl(s.image)}" alt="${alt}" width="1920" height="1080" decoding="async" class="pointer-events-none absolute inset-0 h-full w-full object-cover select-none" ${fp} loading="${load}" />
-            </div>`;
-        })
-        .join("");
-
-      // Build mini card content (gradient + meta + buttons)
-      const cardContentsHtml = slides
-        .map(
-          (s, i) => `
-        <div class="card-content absolute inset-0 text-white/90" id="card-content-${i}">
-          <div class="flex h-full w-full items-end">
-            <div class="w-full bg-linear-to-t from-black/85 via-black/50 to-transparent p-3 md:p-4">
-              <div class="text-[11px] md:text-[13px] font-medium text-white/70">${s.place}</div>
-              <div class="mt-1 font-['Oswald',sans-serif] font-semibold text-[13px] md:text-[16px] leading-snug line-clamp-3 break-words">${s.title}</div>
-              <div class="font-['Oswald',sans-serif] text-[11px] md:text-[13px] text-white/70 leading-snug line-clamp-3 break-words">${s.subtitle}</div>
-              <div class="text-[11px] md:text-[12px] leading-snug text-white/80 line-clamp-2">${s.description}</div>
-              <div class="cta mt-4 flex items-center gap-4 pointer-events-auto">
-                <button class="bookmark w-8 h-8 md:w-9 md:h-9 rounded-full bg-[#ff6600] text-white grid place-items-center border-none shadow-[0_8px_18px_rgba(255,102,0,0.45)]">
-                  <span class="text-[16px] md:text-[18px] leading-none">★</span>
-                </button>
-                <button class="discover h-8 md:h-9 px-5 md:px-6 rounded-full border border-white/80 text-[10px] md:text-[11px] uppercase bg-black/30 backdrop-blur tracking-[0.18em] hover:bg-white hover:text-black transition-colors">${ctaLabel}</button>
-              </div>
-            </div>
-          </div>
-        </div>`,
-        )
-        .join("");
-
-      const slideNumbersHtml = slides
-        .map(
-          (_, i) =>
-            `<div class="item w-[42px] h-[42px] md:w-[50px] md:h-[50px] absolute top-0 left-0 grid place-items-center text-[22px] md:text-[28px] font-bold text-white" id="slide-item-${i}">${i + 1}</div>`,
-        )
-        .join("");
-
-      demoCardsEl.innerHTML = cardsHtml + cardContentsHtml;
-      slideNumbersEl.innerHTML = slideNumbersHtml;
+      // Phase 1: thay innerHTML injection bằng React JSX (xem return bên dưới).
+      // GSAP vẫn select bằng id `#card{i}` / `#card-content-{i}` / `#slide-item-{i}`
+      // ⇒ logic loop/parallax không đổi, nhưng đã sạch XSS và dễ a11y.
 
       const range = (n: number) => Array(n).fill(0).map((_, j) => j);
       const set = gsap.set;
@@ -165,23 +117,24 @@ const BannerHome: FC<BannerHomeProps> = ({
       let detailsEven = true;
 
       // CTA click -> navigate
-      demoCardsEl
-        .querySelectorAll<HTMLButtonElement>(".card-content .discover")
-        .forEach((btn, i) => {
-          btn.addEventListener(
-            "click",
-            () => slides[i]?.detailPath && navigate(slides[i].detailPath),
-          );
-        });
+      // Card-content CTA buttons có React `onClick` đã gắn (xem JSX render).
+      // Còn 2 khối DetailsBlock (`#details-even`, `#details-odd`) vẫn dùng
+      // querySelectorAll vì nội dung text được tween qua `updateDetails()`
+      // và CTA ở DetailsBlock cần phản ánh slide hiện tại (order[0]).
+      const detailsCtaCleanups: Array<() => void> = [];
       demoEl
         .querySelectorAll<HTMLButtonElement>(
           "#details-even .discover, #details-odd .discover",
         )
         .forEach((btn) => {
-          btn.addEventListener("click", () => {
+          const onClick = () => {
             const idx = order[0];
             if (slides[idx]?.detailPath) navigate(slides[idx].detailPath);
-          });
+          };
+          btn.addEventListener("click", onClick);
+          detailsCtaCleanups.push(() =>
+            btn.removeEventListener("click", onClick),
+          );
         });
 
       let offsetTop = 200;
@@ -201,11 +154,26 @@ const BannerHome: FC<BannerHomeProps> = ({
         const desc = detailsEl.querySelector<HTMLDivElement>(".desc");
         if (!s || !place || !t1 || !t2 || !desc) return;
 
-        place.innerHTML = s.place;
+        // An toàn XSS — dùng textContent / createElement thay innerHTML.
+        place.textContent = s.place;
+
+        // Giữ nguyên dấu accent bar (Movizone DNA): render lại span đầu tiên.
+        const existingAccent = place.querySelector("span");
+        if (!existingAccent) {
+          const accent = document.createElement("span");
+          accent.className =
+            "absolute w-[26px] h-0.5 md:w-[34px] md:h-[3px] rounded-full bg-[#ff6600] left-0 top-0";
+          place.insertBefore(accent, place.firstChild);
+        }
 
         if (s.logoImage) {
-          t1.innerHTML = `<img src="${s.logoImage}" alt="${s.title.replaceAll('"', "")}"
-            class="max-h-[52px] md:max-h-[72px] w-auto object-contain drop-shadow-[0_10px_30px_rgba(0,0,0,0.9)]" />`;
+          while (t1.firstChild) t1.removeChild(t1.firstChild);
+          const img = document.createElement("img");
+          img.src = s.logoImage;
+          img.alt = s.title || "";
+          img.className =
+            "max-h-[52px] md:max-h-[72px] w-auto object-contain drop-shadow-[0_10px_30px_rgba(0,0,0,0.9)]";
+          t1.appendChild(img);
         } else {
           t1.textContent = s.title;
         }
@@ -584,8 +552,7 @@ const BannerHome: FC<BannerHomeProps> = ({
         arrowRight?.removeEventListener("click", handleNext);
         arrowLeft?.removeEventListener("click", handlePrev);
         parallaxTriggers.forEach((t) => t.kill());
-        demoCardsEl.innerHTML = "";
-        slideNumbersEl.innerHTML = "";
+        detailsCtaCleanups.forEach((cleanup) => cleanup());
       };
     }, demoRef);
 
@@ -593,52 +560,141 @@ const BannerHome: FC<BannerHomeProps> = ({
       isCancelled = true;
       ctx.revert();
     };
-  }, [slides, navigate, ctaLabel]);
+  }, [slides, navigate, resolvedCtaLabel]);
 
   return (
-    <div className="relative h-screen min-h-[640px] w-full bg-black text-white overflow-hidden font-sans -mt-13 md:-mt-19">
+    <section
+      role="region"
+      aria-roledescription="carousel"
+      aria-label={t("hero.carouselAria")}
+      className="relative h-screen min-h-[640px] w-full bg-black text-white overflow-hidden font-sans -mt-13 md:-mt-19"
+    >
       {/* Thanh cam indicator (cùng tông nút Tìm kiếm HomeSearchBar) */}
       <div
         ref={indicatorRef}
         className="indicator fixed left-0 right-0 top-0 h-[5px] bg-[#ff6600] z-40"
+        aria-hidden
       />
 
       <div id="demo" ref={demoRef} className="relative w-full h-full">
         {/* Cinematic Overlay Gradient System */}
         <div
+          aria-hidden
           className="absolute inset-0 z-10 pointer-events-none
                         bg-[linear-gradient(90deg,rgba(0,0,0,0.85)_0%,rgba(0,0,0,0.55)_25%,rgba(0,0,0,0.25)_55%,rgba(0,0,0,0)_85%)]"
         />
         <div
+          aria-hidden
           className="absolute inset-0 z-10 pointer-events-none
                         bg-[linear-gradient(180deg,rgba(0,0,0,0.55)_0%,rgba(0,0,0,0)_18%,rgba(0,0,0,0)_60%,rgba(0,0,0,0.75)_100%)]"
         />
 
-        {/* Cards layer (inject HTML từ slides) */}
-        <div id="demo-cards" ref={demoCardsRef} className="absolute inset-0 z-0" />
+        {/* Cards layer — render React JSX (Phase 1) thay innerHTML injection.
+            GSAP vẫn tween bằng selector id, không cần đổi logic loop. */}
+        <div
+          id="demo-cards"
+          ref={demoCardsRef}
+          className="absolute inset-0 z-0"
+        >
+          {slides.map((s, i) => (
+            <div
+              key={`card-${i}`}
+              id={`card${i}`}
+              className="card absolute left-0 top-0 shadow-[6px_6px_10px_2px_rgba(0,0,0,0.6)] rounded-xl overflow-hidden bg-black"
+              role="group"
+              aria-roledescription="slide"
+              aria-label={t("hero.slideLabel", {
+                current: i + 1,
+                total: slides.length,
+                title: s.title,
+              })}
+            >
+              <img
+                src={s.image}
+                alt={s.title}
+                width={1920}
+                height={1080}
+                decoding="async"
+                {...(i === 0
+                  ? { fetchPriority: "high" as const, loading: "eager" as const }
+                  : { fetchPriority: "low" as const, loading: "lazy" as const })}
+                className="pointer-events-none absolute inset-0 h-full w-full object-cover select-none"
+              />
+            </div>
+          ))}
+          {slides.map((s, i) => (
+            <div
+              key={`card-content-${i}`}
+              id={`card-content-${i}`}
+              className="card-content absolute inset-0 text-white/90"
+              aria-hidden
+            >
+              <div className="flex h-full w-full items-end">
+                <div className="w-full bg-gradient-to-t from-black/85 via-black/50 to-transparent p-3 md:p-4">
+                  <div className="text-[11px] md:text-[13px] font-medium text-white/70">
+                    {s.place}
+                  </div>
+                  <div className="mt-1 font-['Oswald',sans-serif] font-semibold text-[13px] md:text-[16px] leading-snug line-clamp-3 break-words">
+                    {s.title}
+                  </div>
+                  <div className="font-['Oswald',sans-serif] text-[11px] md:text-[13px] text-white/70 leading-snug line-clamp-3 break-words">
+                    {s.subtitle}
+                  </div>
+                  <div className="text-[11px] md:text-[12px] leading-snug text-white/80 line-clamp-2">
+                    {s.description}
+                  </div>
+                  <div className="cta mt-4 flex items-center gap-4 pointer-events-auto">
+                    <button
+                      type="button"
+                      aria-label={t("hero.bookmark")}
+                      className="bookmark w-8 h-8 md:w-9 md:h-9 rounded-full bg-[#ff6600] text-white grid place-items-center border-none shadow-[0_8px_18px_rgba(255,102,0,0.45)] transition-transform hover:scale-105 active:scale-95"
+                    >
+                      <span className="text-[16px] md:text-[18px] leading-none">
+                        ★
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        s.detailPath ? navigate(s.detailPath) : undefined
+                      }
+                      className="discover h-8 md:h-9 px-5 md:px-6 rounded-full border border-white/80 text-[10px] md:text-[11px] uppercase bg-black/30 backdrop-blur tracking-[0.18em] hover:bg-white hover:text-black transition-colors"
+                    >
+                      {resolvedCtaLabel}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
 
         {/* DETAILS EVEN */}
         <DetailsBlock
-          ctaLabel={ctaLabel}
+          ctaLabel={resolvedCtaLabel}
           refEl={detailsEvenRef}
           id="details-even"
           z={30}
         />
         {/* DETAILS ODD */}
         <DetailsBlock
-          ctaLabel={ctaLabel}
+          ctaLabel={resolvedCtaLabel}
           refEl={detailsOddRef}
           id="details-odd"
           z={20}
         />
 
         {/* Pagination */}
-        <div className="pagination hidden md:inline-flex absolute left-4 md:left-6 bottom-4 md:bottom-6 items-center gap-4 md:gap-5 z-80 pointer-events-auto">
+        <div
+          className="pagination hidden md:inline-flex absolute left-4 md:left-6 bottom-4 md:bottom-6 items-center gap-4 md:gap-5 z-80 pointer-events-auto"
+          role="group"
+          aria-label={t("hero.controlsAria")}
+        >
           <button
             type="button"
-            aria-label="Previous slide"
+            aria-label={t("hero.prevSlide")}
             ref={arrowLeftRef}
-            className="arrow arrow-left  w-10 h-10 md:w-[46px] md:h-[46px] rounded-full border-2 border-white/30 grid place-items-center bg-black/40 backdrop-blur hover:border-white/70 transition-colors cursor-pointer"
+            className="arrow arrow-left  w-10 h-10 md:w-[46px] md:h-[46px] rounded-full border-2 border-white/30 grid place-items-center bg-black/40 backdrop-blur hover:border-white/70 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -657,9 +713,9 @@ const BannerHome: FC<BannerHomeProps> = ({
           </button>
           <button
             type="button"
-            aria-label="Next slide"
+            aria-label={t("hero.nextSlide")}
             ref={arrowRightRef}
-            className="arrow arrow-right w-10 h-10 md:w-[46px] md:h-[46px] rounded-full border-2 border-white/30 grid place-items-center bg-black/40 backdrop-blur ml-1 md:ml-3 hover:border-white/70 transition-colors cursor-pointer"
+            className="arrow arrow-right w-10 h-10 md:w-[46px] md:h-[46px] rounded-full border-2 border-white/30 grid place-items-center bg-black/40 backdrop-blur ml-1 md:ml-3 hover:border-white/70 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -678,17 +734,31 @@ const BannerHome: FC<BannerHomeProps> = ({
           </button>
           <div className="progress-sub-container ml-2 md:ml-4 flex items-center h-[42px] w-[190px] md:w-60">
             <div className="progress-sub-background w-full h-[3px] bg-white/25 rounded-full overflow-hidden">
-              <div ref={progressRef} className="progress-sub-foreground h-[3px] bg-[#ff6600]" />
+              <div
+                ref={progressRef}
+                className="progress-sub-foreground h-[3px] bg-[#ff6600]"
+              />
             </div>
           </div>
           <div
             id="slide-numbers"
             ref={slideNumbersRef}
             className="slide-numbers relative w-[42px] h-[42px] md:w-[50px] md:h-[50px] overflow-hidden z-30 bg-black/40 rounded-full border border-white/20 backdrop-blur"
-          />
+            aria-hidden
+          >
+            {slides.map((_, i) => (
+              <div
+                key={`slide-item-${i}`}
+                id={`slide-item-${i}`}
+                className="item w-[42px] h-[42px] md:w-[50px] md:h-[50px] absolute top-0 left-0 grid place-items-center text-[22px] md:text-[28px] font-bold text-white"
+              >
+                {i + 1}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 
@@ -718,10 +788,16 @@ const DetailsBlock: FC<{
     </div>
     <div className="desc mt-5 w-[300px] md:w-[560px] max-h-[110px] text-[13px] md:text-[15px] leading-relaxed text-white/85 overflow-hidden line-clamp-4" />
     <div className="cta mt-7 flex items-center max-w-[500px] gap-4">
-      <button className="bookmark w-10 h-10 rounded-full bg-[#ff6600] text-white grid place-items-center border-none shadow-[0_10px_24px_rgba(255,102,0,0.35)] hover:scale-110 transition-transform duration-300">
+      <button
+        type="button"
+        className="bookmark w-10 h-10 rounded-full bg-[#ff6600] text-white grid place-items-center border-none shadow-[0_10px_24px_rgba(255,102,0,0.35)] hover:scale-110 transition-transform duration-300"
+      >
         <span className="text-[18px] leading-none">★</span>
       </button>
-      <button className="discover h-10 px-7 rounded-full border border-white/80 text-[11px] md:text-[12px] uppercase bg-black/30 backdrop-blur tracking-[0.22em] font-semibold hover:bg-white hover:text-black hover:border-white transition-colors duration-300">
+      <button
+        type="button"
+        className="discover h-10 px-7 rounded-full border border-white/80 text-[11px] md:text-[12px] uppercase bg-black/30 backdrop-blur tracking-[0.22em] font-semibold hover:bg-white hover:text-black hover:border-white transition-colors duration-300 focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+      >
         {ctaLabel}
       </button>
     </div>

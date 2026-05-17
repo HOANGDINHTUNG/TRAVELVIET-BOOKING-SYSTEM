@@ -9,6 +9,9 @@ export type {
   TourTagSummary,
   TourSortBy,
   TourSortDir,
+  TourComboPackageOfferSummary,
+  TourDepartureHubSummary,
+  TourInclusionFlags,
 } from '../../management/tours/types/tour'
 
 export type {

@@ -49,7 +49,7 @@
 }
 
 .tour-hot-inner {
-  max-width: 1160px;
+  max-width: var(--home-content-max);
   margin: 0 auto;
   position: relative;
   z-index: 2;

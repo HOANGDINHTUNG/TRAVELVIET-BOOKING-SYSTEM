@@ -23,6 +23,30 @@ export type TourMediaSummary = {
   isActive: boolean | null
 }
 
+export type TourNextScheduleSummary = {
+  scheduleId: number
+  scheduleCode?: string | null
+  departureAt: string
+  returnAt?: string | null
+  remainingSeats: number
+  capacityTotal?: number | null
+  meetingPointName?: string | null
+  adultPrice?: number | null
+}
+
+export type TourInclusionFlags = {
+  hasFlight?: boolean | null
+  hasHotel?: boolean | null
+  hasMeals?: boolean | null
+  hasTickets?: boolean | null
+  hasGuide?: boolean | null
+  hasInsurance?: boolean | null
+  hasTransport?: boolean | null
+  hotelStars?: number | null
+  flightType?: string | null
+  notes?: string | null
+}
+
 export type TourResponse = {
   id: number
   code: string | null
@@ -34,6 +58,9 @@ export type TourResponse = {
   destinationProvince: string | null
   cancellationPolicyId: number | null
   basePrice: number | null
+  esgScore: number | null
+  leiScore: number | null
+  listPrice: number | null
   currency: string | null
   durationDays: number | null
   durationNights: number | null
@@ -59,6 +86,32 @@ export type TourResponse = {
   cancellationPolicy: unknown | null
   translationKey: string | null
   itinerarySummary: string | null
+  nextOpenSchedule?: TourNextScheduleSummary | null
+  primaryDepartureCity?: string | null
+  inclusionFlags?: TourInclusionFlags | null
+  departureHubs?: TourDepartureHubSummary[] | null
+  comboPackages?: TourComboPackageOfferSummary[] | null
+}
+
+export type TourDepartureHubSummary = {
+  cityCode?: string | null
+  cityNameVi?: string | null
+  cityNameEn?: string | null
+  isPrimary?: boolean | null
+  sortOrder?: number | null
+}
+
+export type TourComboPackageOfferSummary = {
+  comboId: number
+  code?: string | null
+  name?: string | null
+  description?: string | null
+  basePrice?: number | null
+  discountAmount?: number | null
+  finalPrice?: number | null
+  packageRole?: string | null
+  isDefault?: boolean | null
+  sortOrder?: number | null
 }
 
 /**
@@ -83,6 +136,8 @@ export type TourSearchParams = {
   destinationId?: number
   destinationCountryCode?: string
   domesticOnly?: boolean
+  internationalOnly?: boolean
+  tagCodes?: string[]
   status?: TourStatus
   featuredOnly?: boolean
   minPrice?: number

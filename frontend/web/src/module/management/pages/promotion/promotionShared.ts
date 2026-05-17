@@ -134,6 +134,91 @@ export function canUsePermission(accessContext: UserAccessContext, permission: s
   )
 }
 
+function hasAnyPermission(
+  accessContext: UserAccessContext,
+  permissions: string[],
+) {
+  if (accessContext.isSuperAdmin) {
+    return true
+  }
+
+  const owned = accessContext.permissions ?? []
+  return permissions.some((permission) => owned.includes(permission))
+}
+
+/**
+ * Tổng hợp quyền của user trong khu khuyến mãi.
+ * Tách riêng campaign vs voucher để dễ phân bổ trách nhiệm theo role
+ * (MARKETING_MANAGER / MARKETING_OPERATOR / MARKETING_VIEWER) thay vì
+ * dồn hết về ADMIN.
+ *
+ * Backward-compat: nếu tài khoản cũ chỉ còn `voucher.*` (chưa kịp migrate role),
+ * vẫn được suy ra quyền tương ứng cho khu campaign.
+ */
+export type PromotionPermissions = {
+  canViewCampaign: boolean
+  canCreateCampaign: boolean
+  canUpdateCampaign: boolean
+  canDeleteCampaign: boolean
+  canPublishCampaign: boolean
+
+  canViewVoucher: boolean
+  canCreateVoucher: boolean
+  canUpdateVoucher: boolean
+  canDeleteVoucher: boolean
+  canPublishVoucher: boolean
+}
+
+export function resolvePromotionPermissions(
+  accessContext: UserAccessContext | null,
+): PromotionPermissions {
+  if (!accessContext) {
+    return {
+      canViewCampaign: false,
+      canCreateCampaign: false,
+      canUpdateCampaign: false,
+      canDeleteCampaign: false,
+      canPublishCampaign: false,
+      canViewVoucher: false,
+      canCreateVoucher: false,
+      canUpdateVoucher: false,
+      canDeleteVoucher: false,
+      canPublishVoucher: false,
+    }
+  }
+
+  return {
+    canViewCampaign: hasAnyPermission(accessContext, [
+      'promotion.campaign.view',
+      'voucher.view',
+    ]),
+    canCreateCampaign: hasAnyPermission(accessContext, [
+      'promotion.campaign.create',
+      'voucher.create',
+    ]),
+    canUpdateCampaign: hasAnyPermission(accessContext, [
+      'promotion.campaign.update',
+      'voucher.update',
+    ]),
+    canDeleteCampaign: hasAnyPermission(accessContext, [
+      'promotion.campaign.delete',
+    ]),
+    canPublishCampaign: hasAnyPermission(accessContext, [
+      'promotion.campaign.publish',
+      'voucher.delete',
+    ]),
+
+    canViewVoucher: canUsePermission(accessContext, 'voucher.view'),
+    canCreateVoucher: canUsePermission(accessContext, 'voucher.create'),
+    canUpdateVoucher: canUsePermission(accessContext, 'voucher.update'),
+    canDeleteVoucher: canUsePermission(accessContext, 'voucher.delete'),
+    canPublishVoucher: hasAnyPermission(accessContext, [
+      'voucher.publish',
+      'voucher.delete',
+    ]),
+  }
+}
+
 export function toBooleanFilter(value: string) {
   if (!value) {
     return undefined

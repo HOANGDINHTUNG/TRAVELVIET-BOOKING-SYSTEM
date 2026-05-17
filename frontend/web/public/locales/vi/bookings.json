@@ -1,7 +1,9 @@
 {
   "panel": {
     "title": "Đặt chỗ cho đợt",
-    "selectSchedulePrompt": "Vui lòng chọn 1 đợt khởi hành ở bên trái để bắt đầu đặt chỗ.",
+    "selectSchedulePrompt": "Vui lòng chọn đợt khởi hành để bắt đầu đặt chỗ.",
+    "guestPriceHint": "Giá tạm tính. Đăng nhập để xem giá chính xác và áp dụng voucher.",
+    "quoteError": "Không tính được giá từ hệ thống. Bạn vẫn có thể thử đặt — server sẽ xác nhận lại.",
     "passengers": {
       "adult": "Người lớn",
       "child": "Trẻ em",
@@ -17,6 +19,8 @@
       "invalid": "Voucher không hợp lệ hoặc không áp dụng cho đợt này."
     },
     "contact": {
+      "title": "Thông tin liên hệ",
+      "prefilledHint": "Đã điền từ tài khoản — bạn có thể chỉnh trước khi đặt.",
       "name": "Họ và tên người đặt",
       "phone": "Số điện thoại",
       "email": "Email (tuỳ chọn)",
@@ -27,7 +31,8 @@
       "discount": "Giảm giá",
       "voucherDiscount": "Giảm từ voucher",
       "total": "Tổng cộng",
-      "totalSeats": "Số chỗ chiếm dụng"
+      "totalSeats": "Số chỗ chiếm dụng",
+      "remainingSeats": "Còn {{count}} chỗ"
     },
     "submit": "Đặt ngay",
     "submitting": "Đang xử lý...",
@@ -35,6 +40,7 @@
     "authRequired": "Bạn cần đăng nhập trước khi đặt tour.",
     "contactRequired": "Vui lòng nhập họ tên và số điện thoại liên hệ.",
     "overCapacity": "Số chỗ chọn vượt quá số chỗ còn trống của đợt khởi hành này.",
+    "overCapacityDetail": "Bạn chọn {{selected}} chỗ nhưng đợt này chỉ còn {{remaining}} chỗ trống.",
     "disclaimer": "Bằng việc nhấn 'Đặt ngay', bạn đồng ý với điều khoản dịch vụ của TravelViet."
   },
   "toast": {

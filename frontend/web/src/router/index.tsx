@@ -11,8 +11,8 @@ const lazyDestinationsPage = lazy(
   () => import("../module/destinations/pages/DestinationsPage"),
 );
 const lazyToursPage = lazy(() => import("../module/tours/pages/ToursPage"));
-const lazyTourDetailPage = lazy(
-  () => import("../module/tours/pages/TourDetailPage"),
+const lazyTourLegacyIdRedirect = lazy(
+  () => import("../module/tours/pages/TourLegacyIdRedirect"),
 );
 const lazyBookingDetailPage = lazy(
   () => import("../module/bookings/pages/BookingDetailPage"),
@@ -126,18 +126,19 @@ const router = createBrowserRouter([
         element: withSuspense(createElement(lazyToursPage)),
       },
       {
-        // Public tour detail (Phase 7) — slug-friendly URL
+        // Public tour detail — slug-friendly URL
         // /tour/:slug (slug encode id ở cuối, vd: halong-bay-3-days-42)
         path: "tour/:slug",
         element: withSuspense(createElement(lazyTourPublicDetailPage)),
       },
       {
+        // URL cũ từ homepage — chuyển sang chi tiết public
+        path: "tours/:id",
+        element: withSuspense(createElement(lazyTourLegacyIdRedirect)),
+      },
+      {
         element: withSuspense(createElement(lazyRequireAuthenticated)),
         children: [
-          {
-            path: "tours/:id",
-            element: withSuspense(createElement(lazyTourDetailPage)),
-          },
           {
             path: "bookings/:id",
             element: withSuspense(createElement(lazyBookingDetailPage)),

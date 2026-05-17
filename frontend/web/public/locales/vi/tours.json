@@ -27,6 +27,7 @@
       "empty": "Hiện chưa có đợt khởi hành đang mở bán.",
       "remaining": "Còn"
     },
+    "productDetailsAria": "Chi tiết chương trình",
     "tabs": {
       "description": "Mô tả",
       "highlights": "Điểm nhấn",
@@ -41,6 +42,7 @@
     },
     "cta": {
       "pickSchedule": "Chọn lịch & đặt tour",
+      "bookNow": "Điền thông tin & đặt ngay",
       "viewPolicy": "Xem chi tiết chính sách"
     },
     "itinerarySummaryTitle": "Tổng quan lịch trình",
@@ -49,11 +51,28 @@
     "seasonMonths": "Tháng {{from}} – {{to}}",
     "checklistTitle": "Checklist chuẩn bị",
     "relatedTitle": "Tour gợi ý",
-    "relatedMockLead": "Gợi ý demo — tích hợp API sau.",
+    "relatedLead": "Các tour có nhiều thẻ trải nghiệm giống nhất với chương trình bạn đang xem.",
+    "relatedPrev": "Xem trước",
+    "relatedNext": "Xem tiếp",
     "relatedCta": "Xem tour",
     "reviewsShort": "đánh giá",
     "bookingsShort": "lượt đặt",
+    "sustainabilityTitle": "Chỉ số bền vững",
+    "esgLabel": "ESG",
+    "leiLabel": "LEI",
+    "sustainabilityHint": "Điểm tham chiếu môi trường – xã hội và tác động kinh tế địa phương của chương trình.",
     "bookingBandHint": "Chọn ngày khởi hành phù hợp — giá theo từng đợt hiển thị trên thẻ. Sau đó điền số khách ở khung bên phải (máy tính) hoặc bên dưới (điện thoại).",
+    "departureFrom": "Khởi hành từ",
+    "nextDeparture": "Lịch gần nhất",
+    "inclusionServicesTitle": "Dịch vụ bao gồm",
+    "comboTitle": "Gói combo / add-on",
+    "comboNone": "Không chọn combo",
+    "comboIncluded": "Đã gồm trong tour",
+    "comboRoleIncluded": "Bao gồm",
+    "comboRoleRecommended": "Đề xuất",
+    "comboRoleOptional": "Tùy chọn",
+    "appliedCombo": "Combo đã áp dụng",
+    "pickupTitle": "Điểm tập trung / đón",
     "galleryCount": "Ảnh {{current}} / {{total}}"
   }
 }

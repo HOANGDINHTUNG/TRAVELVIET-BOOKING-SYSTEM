@@ -16,7 +16,7 @@
 }
 
 .weather-alert-shell {
-  width: min(1180px, calc(100% - 36px));
+  width: min(var(--home-content-max), calc(100% - 36px));
   margin: 0 auto;
   padding: clamp(72px, 9vw, 108px) 0;
 }
@@ -474,7 +474,7 @@
 
 @media (max-width: 760px) {
   .weather-alert-shell {
-    width: min(100% - 28px, 1180px);
+    width: min(100% - 28px, var(--home-content-max));
   }
 
   .weather-main-card {

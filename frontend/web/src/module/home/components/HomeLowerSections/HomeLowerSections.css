@@ -7,7 +7,7 @@
 }
 
 .hls-inner {
-  max-width: 1160px;
+  max-width: var(--home-content-max);
   margin: 0 auto;
 }
 

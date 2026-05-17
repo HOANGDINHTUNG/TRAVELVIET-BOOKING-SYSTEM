@@ -2951,3 +2951,345 @@ INSERT IGNORE INTO tour_translations (
     NULL,
     'Day 1: city/beach highlights · Day 2: Ba Na Hills full day · Day 3: Hoi An evening stroll (indicative; follow the live itinerary from operations).'
 );
+
+-- =====================================================================
+-- CUỐI V7: Booking readiness wave 1 (flash / beach / hot tours)
+-- booked_seats = 0; marketing "còn ít chỗ" chỉ ghi trong note
+-- =====================================================================
+
+UPDATE tours
+SET is_featured = TRUE
+WHERE id IN (41, 46, 50, 63, 78, 89)
+  AND deleted_at IS NULL;
+
+-- =====================================================================
+-- A) LICH KHOI HANH — HOME_FLASH_SALE (41, 46, 50, 63, 78, 89)
+-- =====================================================================
+INSERT IGNORE INTO tour_schedules (
+    id, schedule_code, tour_id, departure_at, return_at, status,
+    capacity_total, booked_seats,
+    adult_price, child_price, infant_price, senior_price,
+    booking_open_at, booking_close_at, meeting_point_name, note
+) VALUES
+-- 41 Bangkok-Pattaya 5N
+(1001,'SCH_TOUR_TH_01_202605_A',41,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 9 DAY),DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 13 DAY),'open',30,0,7500000,5625000,500000,6750000,DATE_SUB(CURRENT_TIMESTAMP,INTERVAL 1 DAY),DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 8 DAY),'Sân bay Tân Sơn Nhất','Bay Vietnam Airlines — khởi hành đoàn Bangkok-Pattaya.'),
+(1002,'SCH_TOUR_TH_01_202605_B',41,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 16 DAY),DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 20 DAY),'open',30,0,7500000,5625000,500000,6750000,CURRENT_TIMESTAMP,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 15 DAY),'Sân bay Tân Sơn Nhất','Còn ít chỗ — đặt sớm để giữ suất phòng KS 4*.'),
+(1003,'SCH_TOUR_TH_01_202605_C',41,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 23 DAY),DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 27 DAY),'open',30,0,7500000,5625000,500000,6750000,CURRENT_TIMESTAMP,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 22 DAY),'Sân bay Tân Sơn Nhất','Show Alcazar + đảo Coral theo chương trình.'),
+(1004,'SCH_TOUR_TH_01_202605_D',41,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 30 DAY),DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 34 DAY),'open',30,0,7500000,5625000,500000,6750000,CURRENT_TIMESTAMP,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 29 DAY),'Sân bay Tân Sơn Nhất','Suất mới — đủ chỗ cho nhóm gia đình.'),
+-- 46 Cambodia 4N
+(1005,'SCH_TOUR_KH_01_202605_A',46,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 12 DAY),DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 15 DAY),'open',35,0,5500000,4125000,400000,4950000,DATE_SUB(CURRENT_TIMESTAMP,INTERVAL 1 DAY),DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 11 DAY),'Văn phòng Quận 1','Xe giường nằm — Siem Reap & Phnom Penh.'),
+(1006,'SCH_TOUR_KH_01_202605_B',46,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 19 DAY),DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 22 DAY),'open',35,0,5500000,4125000,400000,4950000,CURRENT_TIMESTAMP,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 18 DAY),'Văn phòng Quận 1','Angkor Wat sunrise — HDV tiếng Việt.'),
+(1007,'SCH_TOUR_KH_01_202605_C',46,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 26 DAY),DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 29 DAY),'open',35,0,5500000,4125000,400000,4950000,CURRENT_TIMESTAMP,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 25 DAY),'Văn phòng Quận 1','Còn 2 chỗ cuối.'),
+(1008,'SCH_TOUR_KH_01_202605_D',46,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 33 DAY),DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 36 DAY),'open',35,0,5500000,4125000,400000,4950000,CURRENT_TIMESTAMP,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 32 DAY),'Văn phòng Quận 1','Suất mới mở bán.'),
+-- 50 Myanmar 5N
+(1009,'SCH_TOUR_MM_01_202605_A',50,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 14 DAY),DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 18 DAY),'open',24,0,16800000,12600000,1000000,15120000,CURRENT_TIMESTAMP,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 13 DAY),'Sân bay Tân Sơn Nhất','Yangon — Bagan bình minh trên khinh khí cầu (tùy thời tiết).'),
+(1010,'SCH_TOUR_MM_01_202605_B',50,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 21 DAY),DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 25 DAY),'open',24,0,16800000,12600000,1000000,15120000,CURRENT_TIMESTAMP,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 20 DAY),'Sân bay Tân Sơn Nhất','Chùa Shwedagon + hàng nghìn đền Bagan.'),
+(1011,'SCH_TOUR_MM_01_202605_C',50,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 28 DAY),DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 32 DAY),'open',24,0,16800000,12600000,1000000,15120000,CURRENT_TIMESTAMP,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 27 DAY),'Sân bay Tân Sơn Nhất','Còn 1 chỗ — ưu đãi giờ chót.'),
+(1012,'SCH_TOUR_MM_01_202605_D',50,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 35 DAY),DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 39 DAY),'open',24,0,16800000,12600000,1000000,15120000,CURRENT_TIMESTAMP,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 34 DAY),'Sân bay Tân Sơn Nhất','Suất Tết hè — đặt trước visa Myanmar.'),
+-- 63 Chengdu 5N
+(1013,'SCH_TOUR_CN_04_202605_A',63,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 11 DAY),DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 15 DAY),'open',25,0,15800000,11850000,800000,14220000,CURRENT_TIMESTAMP,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 10 DAY),'Sân bay Tân Sơn Nhất','Gấu trúc + Nga Mi Sơn + Lạc Sơn Đại Phật.'),
+(1014,'SCH_TOUR_CN_04_202605_B',63,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 18 DAY),DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 22 DAY),'open',25,0,15800000,11850000,800000,14220000,CURRENT_TIMESTAMP,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 17 DAY),'Sân bay Tân Sơn Nhất','KS 4* trung tâm Thành Đô.'),
+(1015,'SCH_TOUR_CN_04_202605_C',63,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 25 DAY),DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 29 DAY),'open',25,0,15800000,11850000,800000,14220000,CURRENT_TIMESTAMP,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 24 DAY),'Sân bay Tân Sơn Nhất','Visa Trung Quốc theo đoàn.'),
+(1016,'SCH_TOUR_CN_04_202605_D',63,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 32 DAY),DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 36 DAY),'open',25,0,15800000,11850000,800000,14220000,CURRENT_TIMESTAMP,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 31 DAY),'Sân bay Tân Sơn Nhất','Suất mới.'),
+-- 78 Oktoberfest 6N
+(1017,'SCH_TOUR_EU_11_202605_A',78,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 20 DAY),DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 25 DAY),'open',25,0,48000000,36000000,2000000,43200000,CURRENT_TIMESTAMP,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 19 DAY),'Sân bay Tân Sơn Nhất','Munich Oktoberfest + lâu đài Neuschwanstein.'),
+(1018,'SCH_TOUR_EU_11_202605_B',78,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 27 DAY),DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 32 DAY),'open',25,0,48000000,36000000,2000000,43200000,CURRENT_TIMESTAMP,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 26 DAY),'Sân bay Tân Sơn Nhất','HDV tiếng Việt — Schengen visa đoàn.'),
+(1019,'SCH_TOUR_EU_11_202605_C',78,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 34 DAY),DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 39 DAY),'open',25,0,48000000,36000000,2000000,43200000,CURRENT_TIMESTAMP,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 33 DAY),'Sân bay Tân Sơn Nhất','Còn 4 chỗ.'),
+(1020,'SCH_TOUR_EU_11_202605_D',78,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 41 DAY),DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 46 DAY),'open',25,0,48000000,36000000,2000000,43200000,CURRENT_TIMESTAMP,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 40 DAY),'Sân bay Tân Sơn Nhất','Suất cao điểm hè.'),
+-- 89 Egypt 8N
+(1021,'SCH_TOUR_EG_01_202605_A',89,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 15 DAY),DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 22 DAY),'open',20,0,52000000,39000000,2500000,46800000,CURRENT_TIMESTAMP,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 14 DAY),'Sân bay Tân Sơn Nhất','Kim tự tháp + du thuyền Nile 5*.'),
+(1022,'SCH_TOUR_EG_01_202605_B',89,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 22 DAY),DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 29 DAY),'open',20,0,52000000,39000000,2500000,46800000,CURRENT_TIMESTAMP,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 21 DAY),'Sân bay Tân Sơn Nhất','Thung lũng các vị vua + Cairo.'),
+(1023,'SCH_TOUR_EG_01_202605_C',89,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 29 DAY),DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 36 DAY),'open',20,0,52000000,39000000,2500000,46800000,CURRENT_TIMESTAMP,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 28 DAY),'Sân bay Tân Sơn Nhất','Còn 2 chỗ VIP.'),
+(1024,'SCH_TOUR_EG_01_202605_D',89,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 36 DAY),DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 43 DAY),'open',20,0,52000000,39000000,2500000,46800000,CURRENT_TIMESTAMP,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 35 DAY),'Sân bay Tân Sơn Nhất','Suất mới — visa Ai Cập hỗ trợ.'),
+
+-- Beach VN bổ sung (16 Vũng Tàu, 19 Mũi Né)
+(1025,'SCH_TOUR_VT_01_202605_A',16,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 6 DAY),DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 6 DAY),'open',40,0,500000,375000,0,450000,CURRENT_TIMESTAMP,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 5 DAY),'Bến xe Miền Đông','Tour biển cuối tuần — tượng Chúa Kitô.'),
+(1026,'SCH_TOUR_VT_01_202605_B',16,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 13 DAY),DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 13 DAY),'open',40,0,500000,375000,0,450000,CURRENT_TIMESTAMP,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 12 DAY),'Bến xe Miền Đông','Đi sáng về tối.'),
+(1027,'SCH_TOUR_MD_01_202605_A',19,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 8 DAY),DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 8 DAY),'open',25,0,700000,525000,0,630000,CURRENT_TIMESTAMP,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 7 DAY),'Phan Thiết','Jeep đồi cát + làng chài.'),
+(1028,'SCH_TOUR_MD_01_202605_B',19,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 15 DAY),DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 15 DAY),'open',25,0,700000,525000,0,630000,CURRENT_TIMESTAMP,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 14 DAY),'Phan Thiết','Suất mới.'),
+
+-- HOT intl mẫu (91 Nam Phi, 94 Perth, 96 Ấn Độ)
+(1029,'SCH_TOUR_ZA_01_202605_A',91,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 25 DAY),DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 32 DAY),'open',15,0,55000000,41250000,2000000,49500000,CURRENT_TIMESTAMP,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 24 DAY),'Sân bay Tân Sơn Nhất','Safari Kruger + Cape Town.'),
+(1030,'SCH_TOUR_AU_02_202605_A',94,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 28 DAY),DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 33 DAY),'open',18,0,42000000,31500000,1500000,37800000,CURRENT_TIMESTAMP,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 27 DAY),'Sân bay Tân Sơn Nhất','Perth + Rottnest Quokka.'),
+(1031,'SCH_TOUR_IN_01_202605_A',96,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 18 DAY),DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 23 DAY),'open',25,0,18500000,13875000,800000,16650000,CURRENT_TIMESTAMP,DATE_ADD(CURRENT_TIMESTAMP,INTERVAL 17 DAY),'Sân bay Tân Sơn Nhất','Tam giác vàng Delhi-Agra-Jaipur.');
+
+-- =====================================================================
+-- B) DIEM DON (moi schedule flash co it nhat 1 diem)
+-- =====================================================================
+INSERT IGNORE INTO tour_schedule_pickup_points (schedule_id, point_name, address, latitude, longitude, pickup_at, sort_order)
+SELECT s.id, 'Văn phòng TravelViet Q.1', '235 Nguyễn Huệ, Quận 1, TP.HCM', 10.7743, 106.7019,
+       DATE_SUB(s.departure_at, INTERVAL 3 HOUR), 0
+FROM tour_schedules s
+WHERE s.id BETWEEN 1001 AND 1024
+UNION ALL
+SELECT s.id, 'Sân bay Tân Sơn Nhất', 'Cột 12, ga quốc tế TSN', 10.8185, 106.6588,
+       DATE_SUB(s.departure_at, INTERVAL 2 HOUR), 1
+FROM tour_schedules s
+WHERE s.id BETWEEN 1001 AND 1024;
+
+INSERT IGNORE INTO tour_schedule_pickup_points (schedule_id, point_name, address, latitude, longitude, pickup_at, sort_order)
+VALUES
+(1025,'Bến xe Miền Đông','292 Đinh Bộ Lĩnh, Bình Thạnh',10.8129,106.7119,DATE_SUB((SELECT departure_at FROM tour_schedules WHERE id=1025),INTERVAL 1 HOUR),0),
+(1026,'Bến xe Miền Đông','292 Đinh Bộ Lĩnh, Bình Thạnh',10.8129,106.7119,DATE_SUB((SELECT departure_at FROM tour_schedules WHERE id=1026),INTERVAL 1 HOUR),0),
+(1027,'Văn phòng Phan Thiết','01 Trần Hưng Đạo, Phan Thiết',10.9378,108.1522,DATE_SUB((SELECT departure_at FROM tour_schedules WHERE id=1027),INTERVAL 1 HOUR),0),
+(1028,'Văn phòng Phan Thiết','01 Trần Hưng Đạo, Phan Thiết',10.9378,108.1522,DATE_SUB((SELECT departure_at FROM tour_schedules WHERE id=1028),INTERVAL 1 HOUR),0),
+(1029,'Sân bay Tân Sơn Nhất','Ga quốc tế',10.8185,106.6588,DATE_SUB((SELECT departure_at FROM tour_schedules WHERE id=1029),INTERVAL 2 HOUR),0),
+(1030,'Sân bay Tân Sơn Nhất','Ga quốc tế',10.8185,106.6588,DATE_SUB((SELECT departure_at FROM tour_schedules WHERE id=1030),INTERVAL 2 HOUR),0),
+(1031,'Sân bay Tân Sơn Nhất','Ga quốc tế',10.8185,106.6588,DATE_SUB((SELECT departure_at FROM tour_schedules WHERE id=1031),INTERVAL 2 HOUR),0);
+
+-- =====================================================================
+-- C) DIEM KHOI HANH (catalog)
+-- =====================================================================
+INSERT IGNORE INTO tour_departure_hubs (tour_id, city_code, city_name_vi, city_name_en, is_primary, sort_order) VALUES
+(41,'SGN','TP. Hồ Chí Minh','Ho Chi Minh City',TRUE,0),
+(41,'HAN','Hà Nội','Hanoi',FALSE,1),
+(46,'SGN','TP. Hồ Chí Minh','Ho Chi Minh City',TRUE,0),
+(50,'SGN','TP. Hồ Chí Minh','Ho Chi Minh City',TRUE,0),
+(63,'SGN','TP. Hồ Chí Minh','Ho Chi Minh City',TRUE,0),
+(78,'SGN','TP. Hồ Chí Minh','Ho Chi Minh City',TRUE,0),
+(89,'SGN','TP. Hồ Chí Minh','Ho Chi Minh City',TRUE,0),
+(16,'SGN','TP. Hồ Chí Minh','Ho Chi Minh City',TRUE,0),
+(19,'SGN','TP. Hồ Chí Minh','Ho Chi Minh City',TRUE,0),
+(91,'SGN','TP. Hồ Chí Minh','Ho Chi Minh City',TRUE,0),
+(94,'SGN','TP. Hồ Chí Minh','Ho Chi Minh City',TRUE,0),
+(96,'SGN','TP. Hồ Chí Minh','Ho Chi Minh City',TRUE,0);
+
+-- =====================================================================
+-- D) BAO GOM / ICON UI
+-- =====================================================================
+INSERT IGNORE INTO tour_inclusion_flags (
+    tour_id, has_flight, has_hotel, has_meals, has_tickets, has_guide, has_insurance, has_transport,
+    hotel_stars, flight_type, notes
+) VALUES
+(41,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,4,'roundtrip','Vé máy bay khứ hồi + KS 4* + ăn theo chương trình'),
+(46,FALSE,TRUE,TRUE,TRUE,TRUE,FALSE,TRUE,3,'none','Xe máy lạnh + KS tiêu chuẩn — không gồm vé máy bay'),
+(50,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,4,'roundtrip','Bay Yangon + KS 3-4* + HDV'),
+(63,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,4,'roundtrip','Bay Thành Đô + vé tham quan + KS 4*'),
+(78,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,4,'roundtrip','Bay châu Âu + KS 4* + vé Oktoberfest'),
+(89,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,5,'roundtrip','Bay + du thuyền Nile 5* + visa hỗ trợ'),
+(16,FALSE,FALSE,TRUE,TRUE,TRUE,FALSE,TRUE,NULL,'none','Tour trong ngày — xe + HDV + ăn trưa'),
+(19,FALSE,FALSE,TRUE,TRUE,TRUE,FALSE,TRUE,NULL,'none','Tour Jeep — không nghỉ đêm'),
+(91,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,4,'roundtrip','Safari + bay Johannesburg/Cape Town'),
+(94,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,4,'roundtrip','Bay Perth + KS 4*'),
+(96,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,5,'roundtrip','Bay Delhi + KS 5* tam giác vàng');
+
+-- =====================================================================
+-- E) COMBO gan tour (combo_packages id 6-36 da co trong V7)
+-- =====================================================================
+INSERT IGNORE INTO tour_combo_packages (tour_id, combo_id, package_role, is_default, sort_order) VALUES
+(41,36,'recommended',FALSE,1),
+(41,16,'optional',FALSE,2),
+(41,8,'optional',FALSE,3),
+(46,6,'included',TRUE,1),
+(46,10,'optional',FALSE,2),
+(50,36,'recommended',FALSE,1),
+(50,15,'optional',FALSE,2),
+(63,36,'recommended',FALSE,1),
+(63,9,'optional',FALSE,2),
+(78,36,'recommended',FALSE,1),
+(78,13,'optional',FALSE,2),
+(89,36,'recommended',FALSE,1),
+(89,20,'optional',FALSE,2),
+(16,6,'optional',FALSE,1),
+(19,7,'optional',FALSE,1),
+(91,36,'recommended',FALSE,1),
+(94,25,'optional',FALSE,1),
+(96,14,'optional',FALSE,1);
+
+
+-- =====================================================================
+-- CUỐI V7 Wave 2: Lịch OPEN + hub + flags + điểm đón cho tour active còn thiếu
+-- booked_seats = 0 (không seed số giả)
+-- =====================================================================
+
+INSERT IGNORE INTO tour_schedules (
+    id, schedule_code, tour_id, departure_at, return_at, status,
+    capacity_total, booked_seats,
+    adult_price, child_price, infant_price, senior_price,
+    booking_open_at, booking_close_at, meeting_point_name, note
+)
+SELECT
+    2000 + t.id * 10 + 1,
+    CONCAT('SCH_', t.code, '_W2A'),
+    t.id,
+    DATE_ADD(CURRENT_TIMESTAMP, INTERVAL (7 + (t.id % 21)) DAY),
+    DATE_ADD(
+        DATE_ADD(CURRENT_TIMESTAMP, INTERVAL (7 + (t.id % 21)) DAY),
+        INTERVAL GREATEST(COALESCE(t.duration_days, 1), 1) DAY),
+    'open',
+    LEAST(45, GREATEST(12, COALESCE(t.max_group_size, 20))),
+    0,
+    t.base_price,
+    ROUND(t.base_price * 0.75, 0),
+    ROUND(t.base_price * 0.08, 0),
+    ROUND(t.base_price * 0.90, 0),
+    DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 DAY),
+    DATE_ADD(CURRENT_TIMESTAMP, INTERVAL (6 + (t.id % 21)) DAY),
+    'Điểm tập trung TravelViet',
+    CONCAT('Suất A — ', t.name)
+FROM tours t
+WHERE t.deleted_at IS NULL
+  AND t.status = 'active'
+  AND NOT EXISTS (
+    SELECT 1 FROM tour_schedules s
+    WHERE s.tour_id = t.id
+      AND s.deleted_at IS NULL
+      AND s.status = 'open'
+      AND s.departure_at > NOW()
+      AND (s.capacity_total - s.booked_seats) > 0
+  );
+
+INSERT IGNORE INTO tour_schedules (
+    id, schedule_code, tour_id, departure_at, return_at, status,
+    capacity_total, booked_seats,
+    adult_price, child_price, infant_price, senior_price,
+    booking_open_at, booking_close_at, meeting_point_name, note
+)
+SELECT
+    2000 + t.id * 10 + 2,
+    CONCAT('SCH_', t.code, '_W2B'),
+    t.id,
+    DATE_ADD(CURRENT_TIMESTAMP, INTERVAL (14 + (t.id % 18)) DAY),
+    DATE_ADD(
+        DATE_ADD(CURRENT_TIMESTAMP, INTERVAL (14 + (t.id % 18)) DAY),
+        INTERVAL GREATEST(COALESCE(t.duration_days, 1), 1) DAY),
+    'open',
+    LEAST(45, GREATEST(12, COALESCE(t.max_group_size, 20))),
+    0,
+    t.base_price,
+    ROUND(t.base_price * 0.75, 0),
+    ROUND(t.base_price * 0.08, 0),
+    ROUND(t.base_price * 0.90, 0),
+    CURRENT_TIMESTAMP,
+    DATE_ADD(CURRENT_TIMESTAMP, INTERVAL (13 + (t.id % 18)) DAY),
+    'Điểm tập trung TravelViet',
+    CONCAT('Suất B — ', t.name)
+FROM tours t
+WHERE t.deleted_at IS NULL
+  AND t.status = 'active'
+  AND NOT EXISTS (
+    SELECT 1 FROM tour_schedules s
+    WHERE s.tour_id = t.id AND s.id = 2000 + t.id * 10 + 2
+  );
+
+INSERT IGNORE INTO tour_schedule_pickup_points (
+    schedule_id, point_name, address, latitude, longitude, pickup_at, sort_order
+)
+SELECT
+    s.id,
+    'Văn phòng TravelViet Q.1',
+    '235 Nguyễn Huệ, Quận 1, TP.HCM',
+    10.7743,
+    106.7019,
+    DATE_SUB(s.departure_at, INTERVAL 3 HOUR),
+    0
+FROM tour_schedules s
+WHERE s.deleted_at IS NULL
+  AND s.status = 'open'
+  AND s.departure_at > NOW()
+  AND NOT EXISTS (
+    SELECT 1 FROM tour_schedule_pickup_points p
+    WHERE p.schedule_id = s.id AND p.deleted_at IS NULL
+  );
+
+INSERT IGNORE INTO tour_departure_hubs (tour_id, city_code, city_name_vi, city_name_en, is_primary, sort_order)
+SELECT t.id, 'SGN', 'TP. Hồ Chí Minh', 'Ho Chi Minh City', TRUE, 0
+FROM tours t
+WHERE t.deleted_at IS NULL
+  AND t.status = 'active'
+  AND NOT EXISTS (
+    SELECT 1 FROM tour_departure_hubs h
+    WHERE h.tour_id = t.id AND h.deleted_at IS NULL
+  );
+
+INSERT IGNORE INTO tour_inclusion_flags (
+    tour_id, has_flight, has_hotel, has_meals, has_tickets, has_guide, has_insurance, has_transport,
+    hotel_stars, flight_type, notes
+)
+SELECT
+    t.id,
+    CASE
+        WHEN LOWER(CONCAT(IFNULL(t.inclusions, ''), ' ', IFNULL(t.description, '')))
+             REGEXP 'máy bay|vé máy bay|bay khứ|bay perth|bay delhi' THEN TRUE
+        ELSE FALSE
+    END,
+    CASE
+        WHEN LOWER(CONCAT(IFNULL(t.inclusions, ''), ' ', IFNULL(t.description, '')))
+             REGEXP 'khách sạn|ks [0-9]|resort|du thuyền|homestay|ngủ đêm' THEN TRUE
+        WHEN COALESCE(t.duration_days, 1) >= 2 THEN TRUE
+        ELSE FALSE
+    END,
+    CASE
+        WHEN LOWER(CONCAT(IFNULL(t.inclusions, ''), ' ', IFNULL(t.description, '')))
+             REGEXP 'ăn |bữa |buffet|ẩm thực' THEN TRUE
+        ELSE FALSE
+    END,
+    CASE
+        WHEN LOWER(CONCAT(IFNULL(t.inclusions, ''), ' ', IFNULL(t.description, '')))
+             REGEXP 'vé |vào cổng|tham quan' THEN TRUE
+        ELSE TRUE
+    END,
+    CASE
+        WHEN LOWER(CONCAT(IFNULL(t.inclusions, ''), ' ', IFNULL(t.description, '')))
+             REGEXP 'hdv|hướng dẫn' THEN TRUE
+        ELSE TRUE
+    END,
+    CASE
+        WHEN LOWER(CONCAT(IFNULL(t.inclusions, ''), ' ', IFNULL(t.description, '')))
+             REGEXP 'bảo hiểm' THEN TRUE
+        WHEN t.base_price >= 10000000 THEN TRUE
+        ELSE FALSE
+    END,
+    CASE
+        WHEN LOWER(CONCAT(IFNULL(t.inclusions, ''), ' ', IFNULL(t.description, '')))
+             REGEXP 'xe |đưa đón|cano|tàu |thuyền' THEN TRUE
+        ELSE TRUE
+    END,
+    CASE
+        WHEN t.base_price >= 45000000 THEN 5
+        WHEN t.base_price >= 20000000 THEN 4
+        WHEN COALESCE(t.duration_days, 1) >= 3 AND t.base_price >= 8000000 THEN 4
+        WHEN COALESCE(t.duration_days, 1) >= 2 THEN 3
+        ELSE NULL
+    END,
+    CASE
+        WHEN LOWER(CONCAT(IFNULL(t.inclusions, ''), ' ', IFNULL(t.description, '')))
+             REGEXP 'máy bay|vé máy bay' THEN 'roundtrip'
+        ELSE 'none'
+    END,
+    LEFT(CONCAT('Gồm: ', IFNULL(t.inclusions, 'Theo chương trình')), 500)
+FROM tours t
+WHERE t.deleted_at IS NULL
+  AND t.status = 'active'
+  AND NOT EXISTS (SELECT 1 FROM tour_inclusion_flags f WHERE f.tour_id = t.id);
+
+-- CUỐI V7: Đồng bộ booked_seats từ booking thực tế (sau mọi seed)
+UPDATE tour_schedules s
+LEFT JOIN (
+    SELECT
+        b.schedule_id,
+        COALESCE(SUM(b.adults + b.children + b.seniors), 0) AS occupied
+    FROM bookings b
+    WHERE b.status IN ('pending_payment', 'confirmed', 'checked_in', 'completed')
+    GROUP BY b.schedule_id
+) occ ON occ.schedule_id = s.id
+SET s.booked_seats = COALESCE(occ.occupied, 0)
+WHERE s.deleted_at IS NULL;
+
+-- Đóng đợt đã full (chỉ đợt OPEN tương lai)
+UPDATE tour_schedules s
+SET s.status = 'full'
+WHERE s.deleted_at IS NULL
+  AND s.status = 'open'
+  AND s.capacity_total > 0
+  AND s.booked_seats >= s.capacity_total
+  AND s.departure_at > NOW();
+
+-- Mở lại đợt bị full nhầm khi còn chỗ
+UPDATE tour_schedules s
+SET s.status = 'open'
+WHERE s.deleted_at IS NULL
+  AND s.status = 'full'
+  AND s.capacity_total > 0
+  AND s.booked_seats < s.capacity_total
+  AND s.departure_at > NOW();

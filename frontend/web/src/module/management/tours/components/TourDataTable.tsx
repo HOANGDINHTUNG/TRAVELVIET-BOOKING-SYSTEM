@@ -93,6 +93,22 @@ export default function TourDataTable({
           </span>
         ),
       }),
+      columnHelper.accessor('esgScore', {
+        header: String(t('tours.table.esg')),
+        cell: (info) => (
+          <span className="tabular-nums text-[var(--admin-muted)]">
+            {info.getValue() ?? '—'}
+          </span>
+        ),
+      }),
+      columnHelper.accessor('leiScore', {
+        header: String(t('tours.table.lei')),
+        cell: (info) => (
+          <span className="tabular-nums text-[var(--admin-muted)]">
+            {info.getValue() ?? '—'}
+          </span>
+        ),
+      }),
     ],
     [t],
   )
@@ -114,6 +130,9 @@ export default function TourDataTable({
       'Điểm đến': r.destinationName,
       'Trạng thái': r.status,
       'Giá cơ bản': r.basePrice,
+      ESG: r.esgScore,
+      LEI: r.leiScore,
+      'Giá niêm yết': r.listPrice,
       'Tiền tệ': r.currency,
     }))
     const ws = XLSX.utils.json_to_sheet(rows)

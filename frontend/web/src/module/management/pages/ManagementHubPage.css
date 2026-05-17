@@ -3502,6 +3502,24 @@
   background: color-mix(in srgb, var(--color-surface) 92%, transparent);
 }
 
+.mgmt-crud-actions button.mgmt-crud-danger,
+.mgmt-row-actions button.mgmt-crud-danger {
+  background: linear-gradient(135deg, #d6453a, #b3372e);
+  color: #fff;
+  border-color: transparent;
+}
+
+.mgmt-crud-actions button.mgmt-crud-danger:hover:not(:disabled),
+.mgmt-row-actions button.mgmt-crud-danger:hover:not(:disabled) {
+  background: linear-gradient(135deg, #c33b32, #9c2f27);
+}
+
+.mgmt-crud-actions button.mgmt-crud-danger:disabled,
+.mgmt-row-actions button.mgmt-crud-danger:disabled {
+  background: linear-gradient(135deg, #d6453a, #b3372e);
+  opacity: 0.45;
+}
+
 .mgmt-crud-message {
   margin: 0;
   color: #176452;

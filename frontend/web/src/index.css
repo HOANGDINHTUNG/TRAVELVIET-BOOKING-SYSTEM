@@ -1,11 +1,104 @@
 @import url("https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Nunito+Sans:wght@300;400;600;700;800&display=swap");
 @import "tailwindcss";
+@import "tw-animate-css";
 @import "./styles/theme.css";
 
 /* Font Oswald (BẮT BUỘC cho BannerHome typography) — URL import phải đứng trước các rule khác */
 
 /* Dark mode class-based (Movizone guide) */
 @custom-variant dark (&:where(.dark, .dark *));
+
+/* ============================================================
+   Shadcn / ShadcnUI semantic tokens — Phase 0 nền tảng
+   ------------------------------------------------------------
+   Các biến `--background`, `--primary`, ... được tham chiếu từ
+   `@theme inline` ngay bên dưới. Nhờ cờ `inline` của Tailwind v4,
+   tokens KHÔNG ghi `--color-*` vào `:root` ⇒ KHÔNG đè token cũ
+   trong `styles/theme.css` (`--color-primary`, `--color-muted`,
+   `--color-accent`, `--color-border`).
+   Dark mode kế thừa tự nhiên: khi `.app-shell.theme-dark` đổi
+   `--color-page`/`--color-text`/... thì các alias bên dưới
+   cũng đổi theo (chỉ là `var(...)`).
+   ============================================================ */
+:root {
+  --background: var(--color-page);
+  --foreground: var(--color-text);
+  --card: var(--color-surface);
+  --card-foreground: var(--color-text);
+  --popover: var(--color-surface);
+  --popover-foreground: var(--color-text);
+  --primary: var(--color-primary);
+  --primary-foreground: #ffffff;
+  --secondary: var(--color-surface-soft);
+  --secondary-foreground: var(--color-text);
+  --muted: var(--color-surface-soft);
+  --muted-foreground: var(--color-muted);
+  --accent: var(--color-aqua);
+  --accent-foreground: #ffffff;
+  --destructive: var(--color-danger);
+  --destructive-foreground: #ffffff;
+  --border: var(--color-border);
+  --input: var(--color-border);
+  --ring: var(--focus-ring-color);
+  --radius: 0.75rem;
+
+  /* Sidebar (cho Sheet/Drawer + management shell) */
+  --sidebar: var(--color-surface);
+  --sidebar-foreground: var(--color-text);
+  --sidebar-primary: var(--color-primary);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: var(--color-surface-soft);
+  --sidebar-accent-foreground: var(--color-text);
+  --sidebar-border: var(--color-border);
+  --sidebar-ring: var(--focus-ring-color);
+}
+
+@theme inline {
+  /* Surfaces */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  /* Semantic */
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  /* Lines / focus */
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Sidebar */
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Radius scale tương thích Shadcn (`rounded-md`, `rounded-lg`, ...) */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /* Easing premium — sinh utility `ease-premium`, `ease-smooth` */
+  --ease-premium: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-smooth: cubic-bezier(0.32, 0.72, 0, 1);
+}
 
 :root {
   font-family:
@@ -21,9 +114,26 @@
   box-sizing: border-box;
 }
 
-/* Guide yêu cầu SmoothScrollLayout tự kiểm soát scrollBehavior */
+/* Lenis (Phase 0) tự kiểm soát scroll — không để CSS smooth-scroll cản đường */
 html {
   scroll-behavior: auto;
+}
+
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: clip;
 }
 
 body {

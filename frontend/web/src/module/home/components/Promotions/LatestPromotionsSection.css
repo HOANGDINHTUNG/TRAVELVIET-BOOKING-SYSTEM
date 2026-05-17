@@ -2,49 +2,218 @@
 .latest-promotions-section.section-shell,
 .latest-promotions-section {
   padding: clamp(32px, 4vw, 52px) clamp(16px, 4vw, 48px) clamp(28px, 4vw, 48px);
-  background: #fff;
+  background: var(--color-page, #fff);
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
   margin: 0;
 }
 
-.latest-promotions-heading {
-  max-width: 1160px;
+/* ============================================================
+   Tiêu đề + Xem thêm + mũi tên (giống hàng tour)
+   ============================================================ */
+.latest-promotions-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  max-width: var(--home-content-max);
   margin: 0 auto clamp(16px, 2.5vw, 24px);
 }
 
-.latest-promotions-heading h2 {
+.latest-promotions-head h2 {
   margin: 0;
-  color: #0b2340;
   font-size: clamp(17px, 2.2vw, 22px);
   font-weight: 900;
-  line-height: 1.08;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+  color: var(--color-heading, #0b2340);
+  line-height: 1.08;
 }
 
-.latest-promotions-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+.latest-promotions-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+}
+
+.latest-promotions-more {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-accent-foreground, #0046be);
+  text-decoration: none;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.latest-promotions-more::after {
+  content: " ›";
+}
+
+.latest-promotions-more:hover {
+  text-decoration: underline;
+  color: var(--color-accent-hover, #003399);
+}
+
+.latest-promotions-nav {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.latest-promotions-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-border, #d8dee8);
+  background: var(--color-surface, #fff);
+  color: var(--color-muted, #5c6478);
+  cursor: pointer;
+  transition:
+    border-color var(--duration-hover, 0.2s) ease,
+    background var(--duration-hover, 0.2s) ease,
+    color var(--duration-hover, 0.2s) ease,
+    transform var(--duration-hover, 0.2s) var(--ease-hover, ease);
+}
+
+.latest-promotions-arrow:hover {
+  border-color: var(--color-accent-foreground, #0046be);
+  color: var(--color-accent-foreground, #0046be);
+  background: color-mix(in srgb, var(--color-accent, #0046be) 10%, var(--color-surface, #fff));
+}
+
+.latest-promotions-arrow:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ============================================================
+   Carousel viewport
+   ============================================================ */
+.latest-promotions-viewport {
+  max-width: var(--home-content-max);
+  margin: 0 auto;
+  overflow: hidden;
+  padding-block: 4px;
+  container-type: inline-size;
+  container-name: latest-promotions;
+  --carousel-gap: clamp(12px, 1.5vw, 20px);
+  --carousel-visible: 3;
+}
+
+.latest-promotions-track {
   gap: clamp(12px, 1.5vw, 20px);
   align-items: stretch;
-  max-width: 1160px;
-  margin: 0 auto;
 }
 
+.latest-promotions-slide {
+  flex: 0 0
+    calc(
+      (100cqi - (var(--carousel-visible) - 1) * var(--carousel-gap)) /
+        var(--carousel-visible)
+    );
+  width: calc(
+    (100cqi - (var(--carousel-visible) - 1) * var(--carousel-gap)) /
+      var(--carousel-visible)
+  );
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.latest-promotions-track--skeleton {
+  display: flex;
+  gap: clamp(12px, 1.5vw, 20px);
+  max-width: var(--home-content-max);
+  margin: 0 auto;
+  overflow: hidden;
+  container-type: inline-size;
+  --carousel-gap: clamp(12px, 1.5vw, 20px);
+  --carousel-visible: 3;
+}
+
+@supports not (width: 1cqi) {
+  .latest-promotions-slide {
+    flex: 0 0 min(320px, calc(100vw - 48px));
+    width: min(320px, calc(100vw - 48px));
+  }
+
+  @media (max-width: 980px) {
+    .latest-promotions-slide {
+      flex: 0 0 min(100%, calc(100vw - 48px));
+      width: min(100%, calc(100vw - 48px));
+    }
+  }
+}
+
+.latest-promotions-track--skeleton .latest-promotions-slide {
+  flex: 0 0
+    calc(
+      (100cqi - (var(--carousel-visible) - 1) * var(--carousel-gap)) /
+        var(--carousel-visible)
+    );
+}
+
+@media (max-width: 980px) {
+  .latest-promotions-viewport,
+  .latest-promotions-track--skeleton {
+    --carousel-visible: 1;
+  }
+}
+
+.latest-promotions-page--skeleton {
+  pointer-events: none;
+}
+
+.latest-promotion-card--skeleton {
+  aspect-ratio: 16 / 8.7;
+  border-radius: 8px;
+  background: linear-gradient(
+    105deg,
+    color-mix(in srgb, var(--color-surface-soft, #f3f4f6) 88%, var(--color-border, #e5e7eb)) 0%,
+    var(--color-surface, #fff) 45%,
+    color-mix(in srgb, var(--color-surface-soft, #f3f4f6) 88%, var(--color-border, #e5e7eb)) 90%
+  );
+  background-size: 200% 100%;
+  animation: latest-promo-shimmer 1.2s ease-in-out infinite;
+}
+
+@keyframes latest-promo-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .latest-promotion-card--skeleton {
+    animation: none;
+  }
+}
+
+/* ============================================================
+   Thẻ khuyến mãi
+   ============================================================ */
 .latest-promotion-card {
   min-width: 0;
   aspect-ratio: 16 / 8.7;
-  border: 1px solid color-mix(in srgb, var(--color-border) 72%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-border, #d8dee8) 72%, transparent);
   border-radius: 8px;
   display: block;
   overflow: hidden;
-  background: var(--color-surface-soft);
+  background: var(--color-surface-soft, #f3f4f6);
   box-shadow: 0 12px 30px rgba(27, 67, 50, 0.08);
   text-decoration: none;
   transition:
-    transform 180ms ease,
     border-color 180ms ease,
     box-shadow 180ms ease;
   color: inherit;
@@ -66,7 +235,6 @@
   pointer-events: none;
 }
 
-/* Mặc định: ẩn hoàn toàn (ảnh “sạch”) — hover/focus mới trượt lên + hiện */
 .latest-promotion-card-overlay-panel {
   position: absolute;
   left: 0;
@@ -100,14 +268,6 @@
 @media (prefers-reduced-motion: reduce) {
   .latest-promotion-card-overlay-panel {
     transition: opacity 0.2s ease;
-    opacity: 0;
-    transform: translate3d(0, 100%, 0);
-  }
-
-  .latest-promotion-card:hover .latest-promotion-card-overlay-panel,
-  .latest-promotion-card:focus-visible .latest-promotion-card-overlay-panel {
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
   }
 }
 
@@ -159,8 +319,7 @@
 }
 
 .latest-promotion-card:hover {
-  transform: translateY(-3px);
-  border-color: color-mix(in srgb, var(--color-ocean) 36%, var(--color-border));
+  border-color: color-mix(in srgb, var(--color-ocean, #0046be) 36%, var(--color-border, #d8dee8));
   box-shadow: 0 18px 42px rgba(27, 67, 50, 0.14);
 }
 
@@ -174,27 +333,13 @@
   z-index: 0;
 }
 
-@media (max-width: 980px) {
-  .latest-promotions-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .latest-promotion-card {
-    aspect-ratio: 16 / 7.8;
-  }
-}
-
 @media (max-width: 640px) {
   .latest-promotions-section {
     padding-top: 38px;
   }
 
-  .latest-promotions-heading h2 {
+  .latest-promotions-head h2 {
     font-size: 22px;
-  }
-
-  .latest-promotions-grid {
-    gap: 14px;
   }
 
   .latest-promotion-card {

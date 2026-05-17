@@ -1,14 +1,15 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { motion } from 'motion/react'
-import { CalendarRange, CheckCircle2, Loader2, Users } from 'lucide-react'
+import { CalendarRange, CheckCircle2, Loader2, MapPin, Users } from 'lucide-react'
 import {
   formatCurrencyVnd,
   formatDateTime,
   formatNumberVi,
 } from '../../management/schedules/utils/currency'
-import { deriveEffectiveStatus } from '../../management/schedules/utils/scheduleStatus'
+import { getScheduleRemainingSeats } from '../utils/scheduleSeatAvailability'
 import type { TourScheduleResponse } from '../types/publicTour'
+import { listBookableSchedules } from '../utils/tourScheduleSelection'
 
 type TourScheduleSelectorProps = {
   schedules: TourScheduleResponse[] | null | undefined
@@ -23,17 +24,10 @@ type TourScheduleSelectorProps = {
 function TourScheduleSelector(props: TourScheduleSelectorProps) {
   const { t } = useTranslation('tours')
 
-  const bookable = useMemo(() => {
-    const list = (props.schedules ?? []).filter((s) => {
-      const eff = deriveEffectiveStatus(s)
-      return eff === 'open' || eff === 'draft'
-    })
-    return list.sort((a, b) => {
-      const ad = a.departureAt ? new Date(a.departureAt).getTime() : 0
-      const bd = b.departureAt ? new Date(b.departureAt).getTime() : 0
-      return ad - bd
-    })
-  }, [props.schedules])
+  const bookable = useMemo(
+    () => listBookableSchedules(props.schedules),
+    [props.schedules],
+  )
 
   if (props.isLoading) {
     return (
@@ -62,7 +56,10 @@ function TourScheduleSelector(props: TourScheduleSelectorProps) {
     <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:gap-4">
       {bookable.map((schedule) => {
         const isSelected = schedule.id === props.selectedId
-        const remaining = schedule.remainingSeats ?? null
+        const remaining = getScheduleRemainingSeats(schedule)
+        const pickupPreview = (schedule.pickupPoints ?? [])
+          .filter((p) => p.pointName?.trim())
+          .slice(0, 2)
         return (
           <li key={schedule.id}>
             <motion.button
@@ -90,6 +87,24 @@ function TourScheduleSelector(props: TourScheduleSelectorProps) {
               <span className="text-xs font-medium text-slate-500">
                 → {formatDateTime(schedule.returnAt)}
               </span>
+              {schedule.meetingPointName ? (
+                <span className="inline-flex items-start gap-1.5 text-xs text-slate-600">
+                  <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-teal-600" aria-hidden />
+                  {schedule.meetingPointName}
+                </span>
+              ) : null}
+              {pickupPreview.length > 0 ? (
+                <ul className="space-y-1 text-[11px] text-slate-600">
+                  {pickupPreview.map((point) => (
+                    <li key={point.id ?? point.pointName} className="leading-snug">
+                      · {point.pointName}
+                      {point.pickupAt
+                        ? ` (${formatDateTime(point.pickupAt)})`
+                        : ''}
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
               <div className="mt-auto flex flex-wrap items-center justify-between gap-2 border-t border-slate-200/70 pt-3">
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-700">
                   <Users className="h-3.5 w-3.5 text-teal-600" aria-hidden />

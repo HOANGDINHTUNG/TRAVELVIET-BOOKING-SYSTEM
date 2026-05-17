@@ -106,6 +106,9 @@ public class TourCommandServiceImpl implements TourCommandService {
                 .destination(destination)
                 .cancellationPolicyId(cancellationPolicy.getId())
                 .basePrice(request.getBasePrice())
+                .esgScore(request.getEsgScore())
+                .leiScore(request.getLeiScore())
+                .listPrice(request.getListPrice())
                 .currency(tourValidator.normalizeCurrency(request.getCurrency()))
                 .durationDays(request.getDurationDays())
                 .durationNights(request.getDurationNights() == null ? 0 : request.getDurationNights())
@@ -141,6 +144,9 @@ public class TourCommandServiceImpl implements TourCommandService {
         t.setDestination(destination);
         t.setCancellationPolicyId(cancellationPolicy.getId());
         t.setBasePrice(request.getBasePrice());
+        t.setEsgScore(request.getEsgScore());
+        t.setLeiScore(request.getLeiScore());
+        t.setListPrice(request.getListPrice());
         t.setCurrency(tourValidator.normalizeCurrency(request.getCurrency()));
         t.setDurationDays(request.getDurationDays());
         t.setDurationNights(request.getDurationNights() == null ? 0 : request.getDurationNights());
@@ -616,6 +622,9 @@ public class TourCommandServiceImpl implements TourCommandService {
                 .destinationProvince(destinationProvince)
                 .cancellationPolicyId(t.getCancellationPolicyId())
                 .basePrice(t.getBasePrice())
+                .esgScore(t.getEsgScore())
+                .leiScore(t.getLeiScore())
+                .listPrice(t.getListPrice())
                 .currency(t.getCurrency())
                 .durationDays(t.getDurationDays())
                 .durationNights(t.getDurationNights())

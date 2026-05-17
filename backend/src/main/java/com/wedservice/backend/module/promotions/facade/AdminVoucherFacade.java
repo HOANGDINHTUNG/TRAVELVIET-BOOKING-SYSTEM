@@ -33,4 +33,8 @@ public class AdminVoucherFacade {
     public VoucherResponse updateVoucherStatus(Long id, boolean isActive) {
         return adminVoucherService.updateVoucherStatus(id, isActive);
     }
+
+    public void deleteVoucher(Long id) {
+        adminVoucherService.deleteVoucher(id);
+    }
 }

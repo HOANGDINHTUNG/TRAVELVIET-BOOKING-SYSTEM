@@ -2,6 +2,8 @@ import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import type { Destination, Tour } from "../../database/interface/publicTravel";
+import { HotCardSkeleton } from "../../../../components/ui/skeletons/HomeSkeletons";
+import { tourDetailPath } from "../../../tours/utils/slug";
 import "./TourHotSection.css";
 
 type HotCard = {
@@ -125,7 +127,7 @@ function buildCards(
         label: tr.tourLabel(t),
         image: t.image,
         backdropUrl: pickBackdropUrl(gallery, t.image) ?? t.image,
-        href: t.id != null ? `/tours/${t.id}` : "/tours",
+        href: t.id != null ? tourDetailPath(t.id, tr.tourLabel(t)) : "/tours",
       };
     });
 
@@ -254,31 +256,42 @@ export function TourHotSection({
           onMouseLeave={() => setHoveredKey(null)}
         >
           <div className="tour-hot-grid">
-            {cards.map((card) => {
-              const showImg = Boolean(card.image);
-              const skeleton = loading && !showImg;
+            {loading && destinations.length === 0 && tours.length === 0
+              ? Array.from({ length: 5 }).map((_, i) => (
+                  <HotCardSkeleton
+                    key={`hot-skeleton-${i}`}
+                    className="tour-hot-card"
+                  />
+                ))
+              : cards.map((card) => {
+                  const showImg = Boolean(card.image);
 
-              return (
-                <Link
-                  key={card.key}
-                  to={card.href}
-                  className={`tour-hot-card${skeleton ? " tour-hot-card-skeleton" : ""}`}
-                  onMouseEnter={() => setHoveredKey(card.key)}
-                  aria-label={`${card.label}. ${ctaLabel}`}
-                >
-                  {showImg ? (
-                    <img src={card.image!} alt="" loading="lazy" />
-                  ) : (
-                    <span className="tour-hot-card-placeholder" aria-hidden />
-                  )}
-                  <span className="tour-hot-card-menu" aria-hidden>
-                    ···
-                  </span>
-                  <span className="tour-hot-card-cta">{ctaLabel}</span>
-                  <span className="tour-hot-card-label">{card.label}</span>
-                </Link>
-              );
-            })}
+                  return (
+                    <Link
+                      key={card.key}
+                      to={card.href}
+                      className="tour-hot-card"
+                      onMouseEnter={() => setHoveredKey(card.key)}
+                      aria-label={`${card.label}. ${ctaLabel}`}
+                    >
+                      {showImg ? (
+                        <img src={card.image!} alt="" loading="lazy" />
+                      ) : (
+                        <span
+                          className="tour-hot-card-placeholder"
+                          aria-hidden
+                        />
+                      )}
+                      <span className="tour-hot-card-menu" aria-hidden>
+                        ···
+                      </span>
+                      <span className="tour-hot-card-cta">{ctaLabel}</span>
+                      <span className="tour-hot-card-label">
+                        {card.label}
+                      </span>
+                    </Link>
+                  );
+                })}
           </div>
         </div>
       </div>

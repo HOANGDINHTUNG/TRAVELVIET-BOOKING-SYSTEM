@@ -1,5 +1,5 @@
 .contact-section {
-  width: min(1180px, calc(100% - 36px));
+  width: min(var(--home-content-max), calc(100% - 36px));
   margin: 0 auto;
   padding: clamp(72px, 10vw, 118px) 0;
   display: grid;

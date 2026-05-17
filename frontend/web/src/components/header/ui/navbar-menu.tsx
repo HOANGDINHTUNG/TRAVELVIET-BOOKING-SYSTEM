@@ -13,11 +13,34 @@ const springTransition: Transition = {
   restSpeed: 0.001,
 };
 
+export type HeaderNavAppearance = "overlay" | "solid-light" | "solid-dark";
+
+function isNavLinkActive(pathname: string, search: string, to: string) {
+  const qIndex = to.indexOf("?");
+  const toPath = qIndex >= 0 ? to.slice(0, qIndex) : to;
+  const toQuery = qIndex >= 0 ? to.slice(qIndex + 1) : "";
+
+  const pathMatch =
+    pathname === toPath ||
+    (toPath !== "/" && pathname.startsWith(toPath));
+
+  if (!pathMatch) return false;
+  if (!toQuery) return true;
+
+  const expected = new URLSearchParams(toQuery);
+  const actual = new URLSearchParams(search);
+  for (const [key, value] of expected.entries()) {
+    if (actual.get(key) !== value) return false;
+  }
+  return true;
+}
+
 type MenuItemProps = {
   setActive: (item: string | null) => void;
   active: string | null;
   item: string;
   to: string;
+  appearance?: HeaderNavAppearance;
   children?: React.ReactNode;
 };
 
@@ -26,15 +49,27 @@ export const MenuItem: React.FC<MenuItemProps> = ({
   active,
   item,
   to,
+  appearance = "solid-light",
   children,
 }) => {
   const location = useLocation();
 
-  const isPageActive =
-    location.pathname === to || (to !== "/" && location.pathname.startsWith(to));
+  const isPageActive = isNavLinkActive(
+    location.pathname,
+    location.search,
+    to,
+  );
 
   const isDropdownOpen = active === item;
   const isHover = isDropdownOpen;
+
+  const isOverlay = appearance === "overlay";
+  const useLightNavText = isOverlay || appearance === "solid-dark";
+
+  /** Overlay (hợp banner): chữ trắng + gạch cam. Nền tối: chữ trắng + gạch trắng. Sáng: đen. */
+  const labelTone = useLightNavText ? "!text-white" : "!text-black";
+
+  const underlineTone = "!bg-[#ff6600]";
 
   return (
     <div onMouseEnter={() => setActive(item)} className="relative">
@@ -45,19 +80,18 @@ export const MenuItem: React.FC<MenuItemProps> = ({
           className="relative flex flex-col items-center py-1"
         >
           <span
-            className={`relative cursor-pointer text-[13px] uppercase tracking-wide transition-colors ${
+            className={`relative cursor-pointer text-[13px] uppercase tracking-wide transition-[color,opacity,font-weight] ${labelTone} ${
               isPageActive
-                ? "font-semibold opacity-100"
-                : "opacity-80 hover:opacity-100"
+                ? "font-bold opacity-100"
+                : "font-medium opacity-70 hover:opacity-100"
             }`}
           >
             {item}
           </span>
 
-          {/* Sliding underline: scale-x 0 -> 1 từ giữa khi hover/active */}
           <span
-            className={`pointer-events-none mt-1 block h-[2px] rounded-full bg-[#ff6600] origin-center transform-gpu transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-              isPageActive ? "w-12 scale-x-100" : "w-12 scale-x-0"
+            className={`pointer-events-none mt-1 block h-[2px] w-12 rounded-full origin-center transform-gpu transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${underlineTone} ${
+              isPageActive ? "scale-x-100" : "scale-x-0"
             } group-hover/menuitem:scale-x-100 ${isHover ? "scale-x-100" : ""}`}
           />
         </motion.div>

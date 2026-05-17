@@ -68,6 +68,15 @@ public class Tour extends AuditableEntity {
     @Builder.Default
     private BigDecimal basePrice = BigDecimal.ZERO;
 
+    @Column(name = "esg_score")
+    private Integer esgScore;
+
+    @Column(name = "lei_score")
+    private Integer leiScore;
+
+    @Column(name = "list_price", precision = 14, scale = 2)
+    private BigDecimal listPrice;
+
     @Column(name = "currency", length = 3, nullable = false)
     @Builder.Default
     private String currency = "VND";

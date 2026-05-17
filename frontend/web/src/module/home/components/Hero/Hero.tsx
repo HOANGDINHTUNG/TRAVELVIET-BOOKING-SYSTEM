@@ -10,6 +10,7 @@ import {
 } from '../../database/travelData'
 import { GlassCard } from '../../../../components/ui/GlassCard'
 import { MotionSection } from '../../../../components/ui/MotionSection'
+import { tourDetailPath } from '../../../tours/utils/slug'
 import './Hero.css'
 
 type Direction = 'leftToRight' | 'rightToLeft' | 'topDown' | 'bottomUp'
@@ -150,7 +151,9 @@ export function Hero({ tours = [] }: HeroProps) {
   const activeSlideIndex = Math.min(activeSlide, slides.length - 1)
   const activeHero = (slides[activeSlideIndex] ?? slides[0]) as HeroTourSlide
   const oldHero = previousSlide === null ? null : slides[previousSlide] ?? null
-  const activeTourHref = activeHero.tourId ? `/tours/${activeHero.tourId}` : '#packages'
+  const activeTourHref = activeHero.tourId
+    ? tourDetailPath(activeHero.tourId, activeHero.titleMain)
+    : '#packages'
   const categoryOptions = useMemo(
     () => Array.from(new Set(tours.map((tour) => tour.category).filter(Boolean))),
     [tours],
@@ -161,7 +164,11 @@ export function Hero({ tours = [] }: HeroProps) {
   )
   const searchHref = useMemo(() => {
     if (selectedTourId) {
-      return `/tours/${selectedTourId}`
+      const tourId = Number(selectedTourId)
+      const picked = tours.find((t) => t.id === tourId)
+      if (Number.isFinite(tourId) && tourId > 0) {
+        return tourDetailPath(tourId, picked?.title)
+      }
     }
 
     const params = new URLSearchParams()

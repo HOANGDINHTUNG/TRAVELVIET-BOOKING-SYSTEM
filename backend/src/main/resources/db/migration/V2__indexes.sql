@@ -57,3 +57,6 @@ CREATE INDEX idx_commissions_source ON commissions(source_type, source_ref_id);
 CREATE INDEX idx_tour_schedule_status_history_schedule ON tour_schedule_status_history(schedule_id);
 CREATE INDEX idx_notification_deliveries_user_status ON notification_deliveries(user_id, status);
 CREATE INDEX idx_file_attachments_entity ON file_attachments(entity_name, entity_id);
+CREATE INDEX idx_tour_departure_hubs_tour ON tour_departure_hubs (tour_id, is_primary);
+CREATE INDEX idx_tour_combo_packages_tour ON tour_combo_packages (tour_id, package_role);
+CREATE INDEX idx_tour_schedules_open_lookup ON tour_schedules (tour_id, status, departure_at);
