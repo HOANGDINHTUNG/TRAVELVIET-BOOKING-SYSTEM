@@ -1,4 +1,4 @@
-import { Save, TicketPercent } from 'lucide-react'
+import { Save, TicketPercent, Trash2 } from 'lucide-react'
 import type { Voucher, VoucherApplicableScope, VoucherDiscountType } from '../../../../api/server/Promotion.api'
 import {
   discountTypeOptions,
@@ -12,6 +12,8 @@ import {
 type VoucherManagementPaneProps = {
   canCreate: boolean
   canUpdate: boolean
+  canDelete: boolean
+  canPublish: boolean
   detailLoading: boolean
   loading: boolean
   saving: boolean
@@ -22,6 +24,7 @@ type VoucherManagementPaneProps = {
   vouchers: Voucher[]
   onChangeForm: (patch: Partial<VoucherFormState>) => void
   onCreate: () => void
+  onDelete: (item: Voucher) => void
   onPaginate: (page: number) => void
   onSave: () => void
   onSelect: (item: Voucher) => void
@@ -31,6 +34,8 @@ type VoucherManagementPaneProps = {
 function VoucherManagementPane({
   canCreate,
   canUpdate,
+  canDelete,
+  canPublish,
   detailLoading,
   loading,
   saving,
@@ -41,11 +46,13 @@ function VoucherManagementPane({
   vouchers,
   onChangeForm,
   onCreate,
+  onDelete,
   onPaginate,
   onSave,
   onSelect,
   onToggleStatus,
 }: VoucherManagementPaneProps) {
+  const voucherUsed = (selectedVoucher?.usedCount ?? 0) > 0
   return (
     <div className="mgmt-promo-admin-layout">
       <article className="mgmt-crud-panel">
@@ -150,7 +157,12 @@ function VoucherManagementPane({
                   {saving ? 'Đang lưu...' : 'Lưu voucher'}
                 </button>
                 {selectedVoucher && (
-                  <button type="button" onClick={() => void onToggleStatus(selectedVoucher)} disabled={saving || !canUpdate}>
+                  <button
+                    type="button"
+                    onClick={() => void onToggleStatus(selectedVoucher)}
+                    disabled={saving || !canPublish}
+                    title={!canPublish ? 'Bạn không có quyền bật/tắt voucher' : undefined}
+                  >
                     <TicketPercent aria-hidden="true" />
                     {selectedVoucher.isActive === false ? 'Bật voucher' : 'Tắt voucher'}
                   </button>
@@ -158,6 +170,22 @@ function VoucherManagementPane({
                 {canCreate && (
                   <button type="button" onClick={onCreate}>
                     Tạo voucher mới
+                  </button>
+                )}
+                {selectedVoucher && canDelete && (
+                  <button
+                    type="button"
+                    className="mgmt-crud-danger"
+                    onClick={() => onDelete(selectedVoucher)}
+                    disabled={saving || voucherUsed}
+                    title={
+                      voucherUsed
+                        ? 'Voucher đã có lượt sử dụng — chỉ có thể tắt, không xoá để giữ lịch sử booking.'
+                        : undefined
+                    }
+                  >
+                    <Trash2 aria-hidden="true" />
+                    Xoá voucher
                   </button>
                 )}
               </div>

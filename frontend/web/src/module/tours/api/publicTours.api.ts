@@ -12,12 +12,28 @@ import type {
  *
  * @see backend/src/main/java/com/wedservice/backend/module/tours/controller/TourController.java
  */
-function toQueryParams(params: TourSearchParams): Record<string, string> {
-  const output: Record<string, string> = {}
+function toQueryParams(
+  params: TourSearchParams,
+): Record<string, string | string[]> {
+  const output: Record<string, string | string[]> = {}
+
   for (const [key, value] of Object.entries(params)) {
     if (value === undefined || value === null || value === '') continue
+
+    if (key === 'tagCodes' && Array.isArray(value)) {
+      const codes = value.map((code) => String(code).trim()).filter(Boolean)
+      if (codes.length) output.tagCodes = codes
+      continue
+    }
+
+    if (typeof value === 'boolean') {
+      if (value) output[key] = 'true'
+      continue
+    }
+
     output[key] = String(value)
   }
+
   return output
 }
 

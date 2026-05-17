@@ -4,6 +4,7 @@ import { ArrowRight, CalendarDays, MapPin, Search, Star, Tag } from "lucide-reac
 import { FiArrowUpRight } from "react-icons/fi";
 import { Link, useNavigate } from "react-router-dom";
 import type { Tour } from "../../database/travelData";
+import { tourDetailPath } from "../../../tours/utils/slug";
 import "./PackagesSection.css";
 
 type PackagesSectionProps = {
@@ -172,7 +173,7 @@ export function PackagesSection({ tours, onSelectTour }: PackagesSectionProps) {
             <button
               className="tour-primary-button"
               type="button"
-              onClick={() => navigate(`/tours/${tour.id}`)}
+              onClick={() => navigate(tourDetailPath(tour.id, tour.title))}
             >
               {t("packages.choose")}
               <FiArrowUpRight aria-hidden="true" />

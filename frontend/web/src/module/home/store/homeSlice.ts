@@ -16,6 +16,7 @@ type HomePublicData = {
   tours: Tour[]
   toursDomesticBeach: Tour[]
   toursInternationalHot: Tour[]
+  toursLastMinuteDeals: Tour[]
 }
 
 type HomeWeatherData = {
@@ -37,6 +38,7 @@ const initialState: HomeState = {
   tours: [],
   toursDomesticBeach: [],
   toursInternationalHot: [],
+  toursLastMinuteDeals: [],
   forecasts: [],
   alerts: [],
   crowdPredictions: [],
@@ -64,6 +66,7 @@ export const fetchHomePublicData = createAsyncThunk<
     tourResult,
     domesticBeachResult,
     internationalHotResult,
+    lastMinuteDealsResult,
   ] = await Promise.allSettled([
     destinationApi.getDestinations(),
     tourApi.getTours(),
@@ -81,28 +84,66 @@ export const fetchHomePublicData = createAsyncThunk<
       sortBy: 'totalBookings',
       sortDir: 'desc',
     }),
+    tourApi.searchPublicTours({
+      tagCodes: ['HOME_FLASH_SALE'],
+      featuredOnly: true,
+      size: 12,
+      sortBy: 'totalBookings',
+      sortDir: 'desc',
+    }),
   ])
 
-  if (destinationResult.status === 'fulfilled') {
-    return {
-      destinations: destinationResult.value,
-      tours: tourResult.status === 'fulfilled' ? tourResult.value : [],
-      toursDomesticBeach:
-        domesticBeachResult.status === 'fulfilled'
-          ? domesticBeachResult.value
-          : [],
-      toursInternationalHot:
-        internationalHotResult.status === 'fulfilled'
-          ? internationalHotResult.value
-          : [],
+  const toursLastMinuteDeals =
+    lastMinuteDealsResult.status === 'fulfilled'
+      ? lastMinuteDealsResult.value
+      : []
+
+  if (import.meta.env.DEV) {
+    if (lastMinuteDealsResult.status === 'rejected') {
+      console.warn(
+        '[home] HOME_FLASH_SALE fetch FAILED — kiem tra VITE_API_URL (http://localhost:8088/api/v1) va backend.',
+        lastMinuteDealsResult.reason,
+      )
+    } else {
+      console.info(
+        '[home] HOME_FLASH_SALE fetch OK:',
+        toursLastMinuteDeals.length,
+        'tours',
+        toursLastMinuteDeals.map((t) => t.id),
+      )
     }
+  }
+
+  const payload: HomePublicData = {
+    destinations:
+      destinationResult.status === 'fulfilled' ? destinationResult.value : [],
+    tours: tourResult.status === 'fulfilled' ? tourResult.value : [],
+    toursDomesticBeach:
+      domesticBeachResult.status === 'fulfilled' ? domesticBeachResult.value : [],
+    toursInternationalHot:
+      internationalHotResult.status === 'fulfilled'
+        ? internationalHotResult.value
+        : [],
+    toursLastMinuteDeals,
+  }
+
+  const hasAnyHomeData =
+    payload.destinations.length > 0 ||
+    payload.tours.length > 0 ||
+    payload.toursDomesticBeach.length > 0 ||
+    payload.toursInternationalHot.length > 0 ||
+    payload.toursLastMinuteDeals.length > 0
+
+  if (hasAnyHomeData) {
+    return payload
   }
 
   const error =
     getSettledError(destinationResult) ??
     getSettledError(tourResult) ??
     getSettledError(domesticBeachResult) ??
-    getSettledError(internationalHotResult)
+    getSettledError(internationalHotResult) ??
+    getSettledError(lastMinuteDealsResult)
 
   if (error) {
     return rejectWithValue(
@@ -157,6 +198,7 @@ const homeSlice = createSlice({
         state.tours = action.payload.tours
         state.toursDomesticBeach = action.payload.toursDomesticBeach
         state.toursInternationalHot = action.payload.toursInternationalHot
+        state.toursLastMinuteDeals = action.payload.toursLastMinuteDeals
       })
       .addCase(fetchHomePublicData.rejected, (state, action) => {
         state.loading = false

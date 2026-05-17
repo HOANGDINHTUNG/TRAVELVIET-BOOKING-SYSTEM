@@ -9,6 +9,7 @@ import {
   type RecommendedTour,
 } from '../../../../api/server/Recommendation.api'
 import { getStoredAccessToken } from '../../../../utils/authSessionStorage'
+import { tourDetailPath } from '../../../tours/utils/slug'
 import './PersonalizedRecommendations.css'
 
 type RecommendationForm = {
@@ -325,7 +326,9 @@ export function PersonalizedRecommendations() {
                         {copy.reasons}: {(tour.scoringReasons ?? []).join(', ')}
                       </small>
                     )}
-                    <Link to={`/tours/${tour.tourId}`}>{copy.viewTour}</Link>
+                    <Link to={tourDetailPath(tour.tourId, tour.tourName)}>
+                      {copy.viewTour}
+                    </Link>
                   </div>
                 </article>
               ))}

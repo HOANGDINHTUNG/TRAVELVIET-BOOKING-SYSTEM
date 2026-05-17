@@ -3,7 +3,19 @@ export const homePageVi = {
   defaultBannerTeaser: "Khám phá hành trình đáng nhớ cùng TravelViet.",
   bannerSubtitleFallback: "Tour nổi bật",
 
+  status: {
+    backendOfflineTitle: "Backend chưa mở hoặc API không phản hồi",
+    backendOfflineMessage:
+      "Vui lòng bật backend rồi bấm Thử lại. Mặc định web gọi http://localhost:8088/api/v1.",
+    retry: "Thử lại",
+    emptyImagesTitle: "Chưa có ảnh tour từ backend",
+    emptyImagesMessage: "Kiểm tra trường mediaUrl trong response GET /tours.",
+    errorTitle: "Đã có lỗi xảy ra",
+    loadingAria: "Đang tải nội dung trang chủ",
+  },
+
   search: {
+    sectionAria: "Bộ lọc tìm kiếm tour nhanh",
     departurePlaceholder: "Nơi khởi hành...",
     tourTypePlaceholder: "Loại tour...",
     destinationPlaceholder: "Điểm đến...",
@@ -46,8 +58,28 @@ export const homePageVi = {
     visa: "Dịch vụ visa",
   },
 
+  lastMinuteDeals: {
+    sectionTitle: "Ưu đãi giờ chót",
+    sectionLead:
+      "Khám phá thế giới, nghỉ dưỡng cao cấp, trải nghiệm trọn vẹn với mức giá tối ưu nhất trong ngày.",
+    viewMore: "Xem thêm",
+    viewMoreTo: "/tours?tagCodes=HOME_FLASH_SALE",
+    prev: "Xem trước",
+    next: "Xem tiếp",
+    quickView: "Xem nhanh",
+    priceFrom: "Giá từ:",
+    bookNow: "Đặt ngay",
+    seatsLeft: "Còn {{count}} chỗ",
+    dayCountdown: "{{days}} Ngày {{time}}",
+    empty: "Chưa có tour ưu đãi giờ chót. Vui lòng xem lại sau.",
+  },
+
   promotions: {
     sectionTitle: "Chương trình khuyến mãi mới nhất",
+    viewMore: "Xem thêm",
+    viewMoreTo: "/tours",
+    prev: "Xem trước",
+    next: "Xem tiếp",
     defaultSubtitle: "Ưu đãi tour mới nhất",
     defaultBadge: "Khuyến mãi",
     defaultCta: "Xem ưu đãi",

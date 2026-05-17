@@ -237,7 +237,7 @@ export const managementNavGroups: ManagementNavGroup[] = [
         description: 'Quản lý voucher, campaign và gói sản phẩm.',
         path: '/management/promotions',
         icon: BadgePercent,
-        requiredPermissions: ['voucher.view'],
+        requiredPermissions: ['promotion.campaign.view', 'voucher.view'],
         moduleIds: ['promotion'],
         endpointIds: ['vouchers-list', 'vouchers-create', 'campaign-list', 'campaign-create'],
       },

@@ -14,6 +14,56 @@
     var(--color-page);
 }
 
+/* Desktop: sticky cột đặt tour chỉ trong vùng body — dừng trước tour gợi ý */
+.tour-public-layout {
+  --tour-booking-col-width: 420px;
+}
+
+@media (min-width: 1024px) {
+  .tour-public-layout__body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--tour-booking-col-width);
+    column-gap: 3rem;
+    align-items: start;
+  }
+
+  .tour-public-layout__main {
+    grid-column: 1;
+    min-width: 0;
+  }
+
+  /* Sticky trong .tour-public-layout__body — hết body thì nhả (không đè tour gợi ý) */
+  .tour-public-layout__booking {
+    grid-column: 2;
+    position: sticky;
+    top: calc(3.5rem + 0.75rem);
+    align-self: start;
+    width: var(--tour-booking-col-width);
+    max-width: 100%;
+    max-height: calc(100vh - 3.5rem - 1.25rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+    padding-bottom: 0.25rem;
+    z-index: 2;
+  }
+
+  .tour-public-layout__booking::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .tour-public-layout__booking::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--color-border, #d8dee8) 80%, transparent);
+  }
+
+  .tour-public-layout__below {
+    position: relative;
+    z-index: 3;
+    margin-top: 2.5rem;
+  }
+}
+
 .tour-public-skeleton {
   height: 18rem;
   width: 100%;
@@ -143,4 +193,120 @@
 
 .theme-dark .tour-public-panel {
   border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* Breadcrumb chi tiết tour — nút … mở dropdown hành trình (Vietravel) */
+.tour-detail-bc {
+  margin-bottom: 8px;
+}
+
+.tour-detail-bc__list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: color-mix(in srgb, var(--color-muted) 92%, var(--color-text));
+}
+
+.tour-detail-bc__item {
+  display: inline-flex;
+  align-items: center;
+}
+
+.tour-detail-bc__item:not(:last-child)::after {
+  content: '/';
+  margin: 0 6px;
+  color: color-mix(in srgb, var(--color-muted) 65%, transparent);
+  font-weight: 500;
+}
+
+.tour-detail-bc__item a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.tour-detail-bc__item a:hover {
+  text-decoration: underline;
+}
+
+.tour-detail-bc__item--current span {
+  color: var(--color-text);
+  font-weight: 800;
+}
+
+.tour-detail-bc__item--ellipsis {
+  position: relative;
+}
+
+.tour-detail-bc__ellipsis {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  min-height: 22px;
+  padding: 0 6px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-primary);
+  font-size: 16px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.tour-detail-bc__ellipsis:hover,
+.tour-detail-bc__item--ellipsis.is-open .tour-detail-bc__ellipsis {
+  background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+}
+
+.tour-detail-bc__popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  z-index: 50;
+  transform: translateX(-50%);
+  min-width: 148px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--color-border) 75%, transparent);
+  background: #ffffff;
+  box-shadow: 0 12px 36px rgba(15, 23, 42, 0.14);
+}
+
+.theme-dark .tour-detail-bc__popover {
+  background: var(--color-surface-elevated);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.tour-detail-bc__popover-row {
+  text-align: center;
+}
+
+.tour-detail-bc__popover-row a {
+  display: block;
+  padding: 8px 4px;
+  color: var(--color-text);
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.tour-detail-bc__popover-row a:hover {
+  color: var(--color-primary);
+}
+
+.tour-detail-bc__popover-dash {
+  display: block;
+  height: 0;
+  margin: 2px 0;
+  border-top: 1px dashed color-mix(in srgb, var(--color-border) 80%, #cbd5e1);
 }

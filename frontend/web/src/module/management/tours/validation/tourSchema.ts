@@ -63,6 +63,25 @@ export const tourRequestSchema = z.object({
     .number({ message: 'tours.validation.basePriceRequired' })
     .min(0, 'tours.validation.basePriceMin'),
 
+  listPrice: z
+    .number()
+    .min(0, 'tours.validation.listPriceMin')
+    .optional(),
+
+  esgScore: z
+    .number()
+    .int('tours.validation.esgScoreRange')
+    .min(0, 'tours.validation.esgScoreRange')
+    .max(100, 'tours.validation.esgScoreRange')
+    .optional(),
+
+  leiScore: z
+    .number()
+    .int('tours.validation.leiScoreRange')
+    .min(0, 'tours.validation.leiScoreRange')
+    .max(100, 'tours.validation.leiScoreRange')
+    .optional(),
+
   /**
    * Cho phép chuỗi rỗng (user xoá hết); nếu có nội dung thì phải đúng 3 ký tự.
    * Không transform để giữ input/output đều là `string`.
@@ -153,6 +172,9 @@ export const EMPTY_TOUR_FORM: TourRequestForm = {
   slug: '',
   destinationId: 0,
   basePrice: 0,
+  listPrice: undefined,
+  esgScore: undefined,
+  leiScore: undefined,
   durationDays: 1,
   durationNights: 0,
   status: 'draft',
@@ -184,6 +206,9 @@ export function tourResponseToFormDefaults(tour: TourResponse): TourRequestForm 
     destinationId: tour.destinationId ?? 0,
     cancellationPolicyId: tour.cancellationPolicyId ?? undefined,
     basePrice: tour.basePrice ?? 0,
+    listPrice: tour.listPrice ?? undefined,
+    esgScore: tour.esgScore ?? undefined,
+    leiScore: tour.leiScore ?? undefined,
     currency: tour.currency ?? 'VND',
     durationDays: tour.durationDays ?? 1,
     durationNights: tour.durationNights ?? 0,

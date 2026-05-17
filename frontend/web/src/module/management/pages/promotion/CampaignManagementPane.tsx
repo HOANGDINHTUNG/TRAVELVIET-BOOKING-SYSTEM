@@ -1,4 +1,4 @@
-import { BadgePercent, Save } from 'lucide-react'
+import { BadgePercent, Save, Trash2 } from 'lucide-react'
 import type { PromotionCampaign } from '../../../../api/server/Promotion.api'
 import type { CampaignFormState } from './promotionShared'
 import { statusLabel } from './promotionShared'
@@ -10,12 +10,15 @@ type CampaignManagementPaneProps = {
   campaigns: PromotionCampaign[]
   canCreate: boolean
   canUpdate: boolean
+  canDelete: boolean
+  canPublish: boolean
   detailLoading: boolean
   loading: boolean
   saving: boolean
   selectedCampaign: PromotionCampaign | null
   onChangeForm: (patch: Partial<CampaignFormState>) => void
   onCreate: () => void
+  onDelete: (item: PromotionCampaign) => void
   onPaginate: (page: number) => void
   onSave: () => void
   onSelect: (item: PromotionCampaign) => void
@@ -29,12 +32,15 @@ function CampaignManagementPane({
   campaigns,
   canCreate,
   canUpdate,
+  canDelete,
+  canPublish,
   detailLoading,
   loading,
   saving,
   selectedCampaign,
   onChangeForm,
   onCreate,
+  onDelete,
   onPaginate,
   onSave,
   onSelect,
@@ -134,7 +140,12 @@ function CampaignManagementPane({
                   {saving ? 'Đang lưu...' : 'Lưu campaign'}
                 </button>
                 {selectedCampaign && (
-                  <button type="button" onClick={() => void onToggleStatus(selectedCampaign)} disabled={saving || !canUpdate}>
+                  <button
+                    type="button"
+                    onClick={() => void onToggleStatus(selectedCampaign)}
+                    disabled={saving || !canPublish}
+                    title={!canPublish ? 'Bạn không có quyền bật/tắt campaign' : undefined}
+                  >
                     <BadgePercent aria-hidden="true" />
                     {selectedCampaign.isActive === false ? 'Bật campaign' : 'Tắt campaign'}
                   </button>
@@ -142,6 +153,17 @@ function CampaignManagementPane({
                 {canCreate && (
                   <button type="button" onClick={onCreate}>
                     Tạo campaign mới
+                  </button>
+                )}
+                {selectedCampaign && canDelete && (
+                  <button
+                    type="button"
+                    className="mgmt-crud-danger"
+                    onClick={() => onDelete(selectedCampaign)}
+                    disabled={saving}
+                  >
+                    <Trash2 aria-hidden="true" />
+                    Xoá campaign
                   </button>
                 )}
               </div>

@@ -1,6 +1,10 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
+import {
+  MotionStagger,
+  MotionStaggerItem,
+} from "../../../../components/ui/MotionStagger";
 import "./HomeServicesRow.css";
 
 const SERVICE_ICONS = [
@@ -26,24 +30,30 @@ export function HomeServicesRow() {
 
   return (
     <div className="hsrow-wrap">
-      <div className="hsrow-inner">
+      <MotionStagger
+        className="hsrow-inner"
+        staggerChildren={0.07}
+        amount={0.3}
+      >
         {services.map((svc) => (
-          <Link key={svc.labelKey} to={svc.to} className="hsrow-item">
-            <span className="hsrow-icon">
-              <img
-                src={SERVICE_ICONS[svc.iconIndex]}
-                alt=""
-                width={56}
-                height={56}
-                loading="lazy"
-                decoding="async"
-                referrerPolicy="no-referrer-when-downgrade"
-              />
-            </span>
-            <span className="hsrow-label">{t(svc.labelKey)}</span>
-          </Link>
+          <MotionStaggerItem key={svc.labelKey}>
+            <Link to={svc.to} className="hsrow-item">
+              <span className="hsrow-icon">
+                <img
+                  src={SERVICE_ICONS[svc.iconIndex]}
+                  alt=""
+                  width={56}
+                  height={56}
+                  loading="lazy"
+                  decoding="async"
+                  referrerPolicy="no-referrer-when-downgrade"
+                />
+              </span>
+              <span className="hsrow-label">{t(svc.labelKey)}</span>
+            </Link>
+          </MotionStaggerItem>
         ))}
-      </div>
+      </MotionStagger>
     </div>
   );
 }

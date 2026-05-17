@@ -17,6 +17,14 @@ export function buildTourSlug(
   return cleanSlug ? `${cleanSlug}-${id}` : String(id)
 }
 
+/** Đường dẫn chi tiết tour public — `/tour/:slug` (dùng chung homepage + catalog). */
+export function tourDetailPath(
+  id: number,
+  titleOrSlug?: string | null,
+): string {
+  return `/tour/${buildTourSlug(titleOrSlug, id)}`
+}
+
 /**
  * Trích Long id từ URL slug. Hỗ trợ:
  * - Pure number: "42" → 42

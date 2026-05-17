@@ -3,9 +3,9 @@
   background: var(--color-page);
 }
 
-/* Cùng max-width với khối khuyến mãi (1160px) — không kéo full màn hình */
+/* Cùng --home-content-max: vừa 4 card 300px + 3 gap 18px */
 .home-tour-rows-inner {
-  max-width: 1160px;
+  max-width: var(--home-content-max);
   margin-left: auto;
   margin-right: auto;
   width: 100%;
@@ -96,6 +96,12 @@
   background: color-mix(in srgb, var(--color-accent) 10%, var(--color-surface));
 }
 
+.home-tour-row-arrow:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 .home-tour-row-empty {
   margin: 0;
   color: var(--color-muted);
@@ -103,70 +109,44 @@
 }
 
 /* ============================================================
-   Carousel: tối đa 8 tour, luôn 4 ô; mỗi bấm qua/prev xoay vòng 1 tour
+   Carousel: tối đa 8 tour, mỗi card cố định 300×400px.
+   Màn rộng: 4 card trọn trong --home-content-max, không scroll.
+   Màn hẹp: scroll ngang + snap, không co bóp card.
    ============================================================ */
-.home-tour-row-viewport {
+.home-tour-row-viewport-wrap {
   width: 100%;
-  /* Không clip theo chiều dọc — hover translateY không bị cắt; không có cuộn ngang thực tế */
-  overflow: visible;
   padding-block: clamp(12px, 2vw, 20px);
   margin-block: clamp(-8px, -1vw, -12px);
 }
 
-.home-tour-row-page {
+.home-tour-row-viewport {
   width: 100%;
-  box-sizing: border-box;
-  display: grid;
-  gap: 16px;
-  padding: 0 1px;
-  min-width: 0;
+  max-width: var(--home-content-max);
+  margin-inline: auto;
+  overflow: hidden;
 }
 
-.home-tour-row-page--skeleton {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+.home-tour-row-track {
+  gap: var(--home-tour-card-gap);
+  padding: 4px 2px;
 }
 
-.home-tour-row-page--rotate-next {
-  animation: home-tour-row-shift-next 0.3s cubic-bezier(0.33, 1, 0.68, 1);
+.home-tour-row-slide {
+  flex: 0 0 var(--home-tour-card-width);
+  width: var(--home-tour-card-width);
 }
 
-.home-tour-row-page--rotate-prev {
-  animation: home-tour-row-shift-prev 0.3s cubic-bezier(0.33, 1, 0.68, 1);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .home-tour-row-page--rotate-next,
-  .home-tour-row-page--rotate-prev {
-    animation: none;
-  }
-}
-
-@keyframes home-tour-row-shift-next {
-  0% {
-    opacity: 0.82;
-    transform: translateX(12px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes home-tour-row-shift-prev {
-  0% {
-    opacity: 0.82;
-    transform: translateX(-12px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateX(0);
-  }
+.home-tour-row-track--skeleton {
+  display: flex;
+  gap: var(--home-tour-card-gap);
+  padding: 4px 2px;
+  overflow: hidden;
 }
 
 /* ============================================================
    Card tour (GlassCard variant glass + token hover)
    ============================================================ */
-.home-tour-row-page .home-tour-card.tv-glass-card--glass {
+.home-tour-row-track .home-tour-card.tv-glass-card--glass {
   --shadow-lift-y: -9px;
 
   min-width: 0;
@@ -182,17 +162,17 @@
     border-color var(--duration-hover) ease;
 }
 
-.home-tour-row-page .home-tour-card.tv-glass-card--glass:hover {
+.home-tour-row-track .home-tour-card.tv-glass-card--glass:hover {
   box-shadow: var(--shadow-card-hover);
   transform: translateY(var(--shadow-lift-y));
 }
 
-.home-tour-row-page .home-tour-card-skeleton.tv-glass-card--flat {
-  min-width: 0;
-  width: 100%;
+.home-tour-row-track .home-tour-card-skeleton.tv-glass-card--flat {
+  width: var(--home-tour-card-width);
+  height: 400px;
+  flex-shrink: 0;
   padding: 0;
-  min-height: 340px;
-  border-radius: var(--radius-card);
+  border-radius: 18px;
   overflow: hidden;
   background: linear-gradient(
     105deg,
@@ -223,15 +203,9 @@
   background: var(--color-surface-soft);
 }
 
-.home-tour-card-media img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  transition: transform 0.35s ease;
-}
-
-.home-tour-card:hover .home-tour-card-media img {
+/* TourCard (tv-tour-card) — zoom ảnh khi hover, giống tour hot */
+.home-tour-row-track .tv-tour-card:hover .tv-tour-card__image-wrap,
+.home-tour-row-track .tv-tour-card:focus-within .tv-tour-card__image-wrap {
   transform: scale(1.04);
 }
 

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'motion/react'
@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   Loader2,
   LogIn,
+  MapPin,
   Minus,
   Plus,
   Tag,
@@ -20,8 +21,10 @@ import {
 import { useDebouncedValue } from '../../../hooks/useDebouncedValue'
 import {
   formatCurrencyVnd,
+  formatDateTime,
   formatNumberVi,
 } from '../../management/schedules/utils/currency'
+import { handleApiError } from '../../../lib/handleApiError'
 import {
   useBookingQuote,
   useCreateBooking,
@@ -31,12 +34,43 @@ import type {
   BookingQuotePayload,
   CreateBookingPayload,
 } from '../../bookings/types/publicBooking'
-import type { TourScheduleResponse } from '../types/publicTour'
+import type { UserMeResponse } from '../../../types/user'
+import type {
+  TourComboPackageOfferSummary,
+  TourScheduleResponse,
+} from '../types/publicTour'
+import {
+  getScheduleRemainingSeats,
+  isBookingOverSeatCapacity,
+} from '../utils/scheduleSeatAvailability'
 import '../styles/BookingPanel.css'
+
+function bookingContactFromUser(user: UserMeResponse) {
+  return {
+    contactName: user.fullName || user.displayName || '',
+    contactPhone: user.phone ?? '',
+    contactEmail: user.email ?? '',
+  }
+}
 
 type BookingPanelProps = {
   tourId: number
   schedule: TourScheduleResponse | null
+  comboPackages?: TourComboPackageOfferSummary[]
+}
+
+function parseComboPrice(value: number | string | undefined | null) {
+  const amount = Number(value)
+  return Number.isFinite(amount) ? amount : 0
+}
+
+function comboRoleLabel(
+  role: string | null | undefined,
+  t: (key: string) => string,
+) {
+  if (role === 'included') return String(t('detail.comboRoleIncluded'))
+  if (role === 'recommended') return String(t('detail.comboRoleRecommended'))
+  return String(t('detail.comboRoleOptional'))
 }
 
 const QUOTE_DEBOUNCE_MS = 400
@@ -49,8 +83,13 @@ const QUOTE_DEBOUNCE_MS = 400
  * - Voucher: nhập mã → "Apply" gọi quote với voucherCode, đọc `appliedVoucher`
  * - Submit: check auth, nếu chưa đăng nhập → toast + redirect /login
  */
-function BookingPanel({ tourId, schedule }: BookingPanelProps) {
+function BookingPanel({
+  tourId,
+  schedule,
+  comboPackages = [],
+}: BookingPanelProps) {
   const { t } = useTranslation('bookings')
+  const { t: tTour } = useTranslation('tours')
   const navigate = useNavigate()
   const isAuthenticated = useAuthStore(selectIsAuthenticated)
   const currentUser = useAuthStore(selectCurrentUser)
@@ -74,24 +113,39 @@ function BookingPanel({ tourId, schedule }: BookingPanelProps) {
   const [contactEmail, setContactEmail] = useState('')
   const [specialRequests, setSpecialRequests] = useState('')
 
-  // Hydrate contact info khi `currentUser` đổi — pattern "adjusting state
-  // during render" (https://react.dev/reference/react/useState#storing-information-from-previous-renders)
-  // tránh `react-hooks/set-state-in-effect`.
-  const [prevUserId, setPrevUserId] = useState<string | null>(
-    currentUser?.id ?? null,
-  )
-  if ((currentUser?.id ?? null) !== prevUserId) {
-    setPrevUserId(currentUser?.id ?? null)
-    if (currentUser) {
-      const seedName =
-        currentUser.fullName || currentUser.displayName || ''
-      const seedPhone = currentUser.phone ?? ''
-      const seedEmail = currentUser.email ?? ''
-      if (!contactName && seedName) setContactName(seedName)
-      if (!contactPhone && seedPhone) setContactPhone(seedPhone)
-      if (!contactEmail && seedEmail) setContactEmail(seedEmail)
+  const defaultComboId = useMemo(() => {
+    const included = comboPackages.find((c) => c.packageRole === 'included')
+    if (included) return included.comboId
+    const recommended = comboPackages.find((c) => c.isDefault)
+    if (recommended) return recommended.comboId
+    return 0
+  }, [comboPackages])
+
+  const [comboId, setComboId] = useState(defaultComboId)
+
+  useEffect(() => {
+    setComboId(defaultComboId)
+  }, [defaultComboId, tourId])
+
+  // Đã đăng nhập: tự điền họ tên / SĐT / email từ tài khoản; yêu cầu đặc biệt để trống.
+  useEffect(() => {
+    if (!currentUser) {
+      setContactName('')
+      setContactPhone('')
+      setContactEmail('')
+      return
     }
-  }
+    const contact = bookingContactFromUser(currentUser)
+    setContactName(contact.contactName)
+    setContactPhone(contact.contactPhone)
+    setContactEmail(contact.contactEmail)
+  }, [
+    currentUser?.id,
+    currentUser?.fullName,
+    currentUser?.displayName,
+    currentUser?.phone,
+    currentUser?.email,
+  ])
 
   /* ----------------------------- Pricing ----------------------------- */
 
@@ -119,8 +173,9 @@ function BookingPanel({ tourId, schedule }: BookingPanelProps) {
       infants: counts.infants,
       seniors: counts.seniors,
       voucherCode: appliedVoucherCode ?? undefined,
+      comboId: comboId > 0 ? comboId : undefined,
     }
-  }, [tourId, schedule, counts, appliedVoucherCode, isAuthenticated])
+  }, [tourId, schedule, counts, appliedVoucherCode, comboId, isAuthenticated])
 
   const debouncedQuotePayload = useDebouncedValue(
     livePayload,
@@ -130,8 +185,8 @@ function BookingPanel({ tourId, schedule }: BookingPanelProps) {
   const quoteQuery = useBookingQuote(debouncedQuotePayload)
 
   const totalSeats = counts.adults + counts.children + counts.seniors // infants không chiếm chỗ
-  const seatLimit = schedule?.remainingSeats ?? schedule?.capacityTotal ?? 0
-  const overCapacity = seatLimit > 0 && totalSeats > seatLimit
+  const remainingSeats = getScheduleRemainingSeats(schedule)
+  const overCapacity = isBookingOverSeatCapacity(schedule, totalSeats)
 
   /* ----------------------------- Mutation ----------------------------- */
   const createMutation = useCreateBooking()
@@ -175,7 +230,16 @@ function BookingPanel({ tourId, schedule }: BookingPanelProps) {
       return
     }
     if (overCapacity) {
-      toast.error(String(t('panel.overCapacity')))
+      toast.error(
+        String(
+          t('panel.overCapacityDetail', {
+            selected: totalSeats,
+            remaining: remainingSeats ?? 0,
+            defaultValue:
+              'Bạn chọn {{selected}} chỗ nhưng đợt này chỉ còn {{remaining}} chỗ trống.',
+          }),
+        ),
+      )
       return
     }
 
@@ -187,6 +251,7 @@ function BookingPanel({ tourId, schedule }: BookingPanelProps) {
       infants: counts.infants,
       seniors: counts.seniors,
       voucherCode: appliedVoucherCode ?? undefined,
+      comboId: comboId > 0 ? comboId : undefined,
       contactName,
       contactPhone,
       contactEmail,
@@ -218,6 +283,14 @@ function BookingPanel({ tourId, schedule }: BookingPanelProps) {
     quoteQuery.isSuccess &&
     (!appliedVoucherInfo || (appliedVoucherInfo.discountAmount ?? 0) === 0)
 
+  const quoteErrorMessage =
+    isAuthenticated && quoteQuery.isError
+      ? handleApiError(
+          quoteQuery.error,
+          String(t('panel.quoteError')),
+        )
+      : null
+
   return (
     <div className="tour-booking-card">
       <div>
@@ -226,6 +299,28 @@ function BookingPanel({ tourId, schedule }: BookingPanelProps) {
           {schedule.scheduleCode ?? `#${schedule.id}`}
         </p>
       </div>
+
+      {(schedule.meetingPointName ||
+        (schedule.pickupPoints && schedule.pickupPoints.length > 0)) ? (
+        <div className="tour-booking-pickup-hint">
+          <p className="tour-booking-label">{String(tTour('detail.pickupTitle'))}</p>
+          {schedule.meetingPointName ? (
+            <p className="tour-booking-pickup-line">
+              <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden />
+              {schedule.meetingPointName}
+            </p>
+          ) : null}
+          <ul className="tour-booking-pickup-list">
+            {(schedule.pickupPoints ?? []).map((point) => (
+              <li key={point.id ?? point.pointName}>
+                {point.pointName}
+                {point.pickupAt ? ` · ${formatDateTime(point.pickupAt)}` : ''}
+                {point.address ? ` — ${point.address}` : ''}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
 
       {/* Passenger counts */}
       <div className="flex flex-col gap-2">
@@ -280,6 +375,57 @@ function BookingPanel({ tourId, schedule }: BookingPanelProps) {
           )
         })}
       </div>
+
+      {comboPackages.length > 0 ? (
+        <fieldset className="tour-booking-combo-field">
+          <legend className="tour-booking-label">
+            {String(tTour('detail.comboTitle'))}
+          </legend>
+          <div className="tour-booking-combo-list">
+            <label className="tour-booking-combo-option">
+              <input
+                type="radio"
+                name={`tour-combo-${tourId}`}
+                checked={comboId === 0}
+                onChange={() => setComboId(0)}
+              />
+              <span>{String(tTour('detail.comboNone'))}</span>
+            </label>
+            {comboPackages.map((combo) => {
+              const isIncluded = combo.packageRole === 'included'
+              const price = parseComboPrice(combo.finalPrice ?? combo.basePrice)
+              return (
+                <label
+                  key={combo.comboId}
+                  className={`tour-booking-combo-option${isIncluded ? ' is-included' : ''}`}
+                >
+                  <input
+                    type="radio"
+                    name={`tour-combo-${tourId}`}
+                    checked={comboId === combo.comboId}
+                    disabled={isIncluded}
+                    onChange={() => setComboId(combo.comboId)}
+                  />
+                  <span className="tour-booking-combo-copy">
+                    <strong>{combo.name ?? combo.code ?? `#${combo.comboId}`}</strong>
+                    <small>
+                      {comboRoleLabel(combo.packageRole, tTour)}
+                      {isIncluded
+                        ? ` · ${String(tTour('detail.comboIncluded'))}`
+                        : ` · ${formatCurrencyVnd(price)}`}
+                    </small>
+                    {combo.description ? (
+                      <small className="tour-booking-combo-desc">
+                        {combo.description}
+                      </small>
+                    ) : null}
+                  </span>
+                </label>
+              )
+            })}
+          </div>
+        </fieldset>
+      ) : null}
 
       {/* Voucher */}
       <div className="flex flex-col gap-1">
@@ -347,6 +493,14 @@ function BookingPanel({ tourId, schedule }: BookingPanelProps) {
 
       {/* Contact info */}
       <div className="tour-booking-divider grid grid-cols-1 gap-2">
+        <p className="tour-booking-label mb-0">
+          {String(t('panel.contact.title'))}
+        </p>
+        {isAuthenticated ? (
+          <p className="tour-booking-hint mb-0 text-[11px]">
+            {String(t('panel.contact.prefilledHint'))}
+          </p>
+        ) : null}
         <input
           type="text"
           value={contactName}
@@ -399,6 +553,17 @@ function BookingPanel({ tourId, schedule }: BookingPanelProps) {
             <dd className="tabular-nums">-{formatCurrencyVnd(totalDiscount)}</dd>
           </div>
         ) : null}
+        {quoteData?.appliedCombo?.name ? (
+          <div className="flex justify-between text-[var(--color-muted)]">
+            <dt>{String(tTour('detail.appliedCombo'))}</dt>
+            <dd className="text-right text-xs font-medium">
+              {quoteData.appliedCombo.name}
+              {(quoteData.appliedCombo.finalPrice ?? 0) > 0
+                ? ` · ${formatCurrencyVnd(quoteData.appliedCombo.finalPrice)}`
+                : ''}
+            </dd>
+          </div>
+        ) : null}
         <div className="flex items-baseline justify-between border-t border-[var(--color-border)] pt-2">
           <dt className="text-sm font-semibold">
             {String(t('panel.summary.total'))}
@@ -412,11 +577,32 @@ function BookingPanel({ tourId, schedule }: BookingPanelProps) {
         </div>
         <p className="text-[10px] text-[var(--color-muted)]">
           {String(t('panel.summary.totalSeats'))}: {formatNumberVi(totalSeats)}
+          {remainingSeats != null
+            ? ` · ${String(t('panel.summary.remainingSeats', { count: remainingSeats, defaultValue: 'Còn {{count}} chỗ' }))}`
+            : null}
         </p>
+        {!isAuthenticated ? (
+          <p className="text-[10px] text-[var(--color-muted)]">
+            {String(t('panel.guestPriceHint'))}
+          </p>
+        ) : null}
       </dl>
 
+      {quoteErrorMessage ? (
+        <p className="tour-booking-warn">{quoteErrorMessage}</p>
+      ) : null}
+
       {overCapacity ? (
-        <p className="tour-booking-warn">{String(t('panel.overCapacity'))}</p>
+        <p className="tour-booking-warn">
+          {String(
+            t('panel.overCapacityDetail', {
+              selected: totalSeats,
+              remaining: remainingSeats ?? 0,
+              defaultValue:
+                'Bạn chọn {{selected}} chỗ nhưng đợt này chỉ còn {{remaining}} chỗ trống.',
+            }),
+          )}
+        </p>
       ) : null}
 
       {/* Submit */}

@@ -1,7 +1,9 @@
 {
   "panel": {
     "title": "Booking schedule",
-    "selectSchedulePrompt": "Please pick a departure date from the left to start booking.",
+    "selectSchedulePrompt": "Please pick a departure date to start booking.",
+    "guestPriceHint": "Estimated price. Sign in for exact pricing and vouchers.",
+    "quoteError": "Could not fetch price from server. You can still try booking — the server will validate.",
     "passengers": {
       "adult": "Adult",
       "child": "Child",
@@ -17,6 +19,8 @@
       "invalid": "Voucher is invalid or not applicable to this departure."
     },
     "contact": {
+      "title": "Contact details",
+      "prefilledHint": "Filled from your account — you can edit before booking.",
       "name": "Booker's full name",
       "phone": "Phone number",
       "email": "Email (optional)",
@@ -27,7 +31,8 @@
       "discount": "Discount",
       "voucherDiscount": "Voucher discount",
       "total": "Total",
-      "totalSeats": "Seats used"
+      "totalSeats": "Seats used",
+      "remainingSeats": "{{count}} seats left"
     },
     "submit": "Book now",
     "submitting": "Processing...",
@@ -35,6 +40,7 @@
     "authRequired": "Please sign in before booking a tour.",
     "contactRequired": "Please provide booker name and phone number.",
     "overCapacity": "Selected guests exceed the remaining seats for this schedule.",
+    "overCapacityDetail": "You selected {{selected}} seats but only {{remaining}} remain on this departure.",
     "disclaimer": "By clicking 'Book now' you agree to TravelViet's terms of service."
   },
   "toast": {

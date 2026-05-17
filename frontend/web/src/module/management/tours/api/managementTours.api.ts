@@ -48,6 +48,10 @@ function toTourRequestPayload(form: TourRequestForm) {
 
   if (form.durationNights != null) payload.durationNights = form.durationNights
 
+  if (form.listPrice != null) payload.listPrice = form.listPrice
+  if (form.esgScore != null) payload.esgScore = form.esgScore
+  if (form.leiScore != null) payload.leiScore = form.leiScore
+
   const optionalText = {
     transportType: emptyToUndefined(form.transportType),
     tripMode: emptyToUndefined(form.tripMode),

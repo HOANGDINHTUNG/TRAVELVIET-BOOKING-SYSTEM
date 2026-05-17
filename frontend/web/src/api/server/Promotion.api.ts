@@ -1,5 +1,6 @@
 import type { PageResponse } from '../../types/api'
 import {
+  deleteBackendData,
   getBackendData,
   patchBackendData,
   postBackendData,
@@ -157,6 +158,10 @@ export const promotionApi = {
     return patchBackendData<Voucher>(`vouchers/${id}/status`, payload)
   },
 
+  deleteVoucher(id: number) {
+    return deleteBackendData<void>(`vouchers/${id}`)
+  },
+
   getCampaigns(params: PromotionCampaignQuery = {}) {
     return getBackendData<PageResponse<PromotionCampaign>>(
       'promotion-campaigns',
@@ -187,5 +192,9 @@ export const promotionApi = {
       `promotion-campaigns/${id}/status`,
       payload,
     )
+  },
+
+  deleteCampaign(id: number) {
+    return deleteBackendData<void>(`promotion-campaigns/${id}`)
   },
 }

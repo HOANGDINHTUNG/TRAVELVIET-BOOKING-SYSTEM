@@ -109,7 +109,7 @@ class BookingCommandServiceImplTest {
                 productRepository,
                 passengerRepository,
                 authenticatedUserProvider,
-                new BookingValidator(),
+                new BookingValidator(bookingRepository),
                 bookingPricingService,
                 bookingStatusHistoryRecorder,
                 tourRuntimeStatsSyncService,

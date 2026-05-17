@@ -10,6 +10,7 @@ import com.wedservice.backend.module.promotions.facade.AdminPromotionCampaignFac
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -32,9 +33,8 @@ public class AdminPromotionCampaignController {
     public ApiResponse<PageResponse<PromotionCampaignResponse>> getPublicPromotionCampaigns() {
         PromotionCampaignSearchRequest request = new PromotionCampaignSearchRequest();
         request.setPage(0);
-        request.setSize(6);
+        request.setSize(12);
         request.setIsActive(true);
-        request.setIsFeatured(true);
         request.setSortBy("sortOrder");
         request.setSortDir("asc");
 
@@ -46,7 +46,7 @@ public class AdminPromotionCampaignController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAuthority('voucher.view')")
+    @PreAuthorize("hasAnyAuthority('promotion.campaign.view','voucher.view')")
     public ApiResponse<PageResponse<PromotionCampaignResponse>> getPromotionCampaigns(
             @Valid @ModelAttribute PromotionCampaignSearchRequest request
     ) {
@@ -58,7 +58,7 @@ public class AdminPromotionCampaignController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('voucher.view')")
+    @PreAuthorize("hasAnyAuthority('promotion.campaign.view','voucher.view')")
     public ApiResponse<PromotionCampaignResponse> getPromotionCampaign(@PathVariable Long id) {
         return ApiResponse.<PromotionCampaignResponse>builder()
                 .success(true)
@@ -68,7 +68,7 @@ public class AdminPromotionCampaignController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('voucher.create')")
+    @PreAuthorize("hasAuthority('promotion.campaign.create')")
     public ApiResponse<PromotionCampaignResponse> createPromotionCampaign(@Valid @RequestBody PromotionCampaignRequest request) {
         return ApiResponse.<PromotionCampaignResponse>builder()
                 .success(true)
@@ -78,7 +78,7 @@ public class AdminPromotionCampaignController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('voucher.update')")
+    @PreAuthorize("hasAuthority('promotion.campaign.update')")
     public ApiResponse<PromotionCampaignResponse> updatePromotionCampaign(
             @PathVariable Long id,
             @Valid @RequestBody PromotionCampaignRequest request
@@ -91,7 +91,7 @@ public class AdminPromotionCampaignController {
     }
 
     @PatchMapping("/{id}/status")
-    @PreAuthorize("hasAuthority('voucher.delete')")
+    @PreAuthorize("hasAuthority('promotion.campaign.publish')")
     public ApiResponse<PromotionCampaignResponse> updatePromotionCampaignStatus(
             @PathVariable Long id,
             @Valid @RequestBody UpdatePromotionCampaignStatusRequest request
@@ -100,6 +100,16 @@ public class AdminPromotionCampaignController {
                 .success(true)
                 .message("Promotion campaign status updated successfully")
                 .data(adminPromotionCampaignFacade.updatePromotionCampaignStatus(id, request.getIsActive()))
+                .build();
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('promotion.campaign.delete')")
+    public ApiResponse<Void> deletePromotionCampaign(@PathVariable Long id) {
+        adminPromotionCampaignFacade.deletePromotionCampaign(id);
+        return ApiResponse.<Void>builder()
+                .success(true)
+                .message("Promotion campaign deleted successfully")
                 .build();
     }
 }

@@ -109,6 +109,21 @@ public class AdminPromotionCampaignService {
         return response;
     }
 
+    /**
+     * Hard delete chiến dịch khuyến mãi.
+     * FK {@code vouchers.campaign_id} đã được set {@code ON DELETE SET NULL} ở V1__tables.sql,
+     * nên voucher liên kết sẽ tự rời chiến dịch chứ không bị xoá theo. Đây là hành vi mong muốn:
+     * giữ lịch sử voucher đã phát hành, chỉ ngắt liên kết với campaign vừa xoá.
+     */
+    @Transactional
+    public void deletePromotionCampaign(Long id) {
+        PromotionCampaign campaign = findCampaign(id);
+        PromotionCampaignResponse oldState = toResponse(campaign);
+
+        promotionCampaignRepository.delete(campaign);
+        auditTrailRecorder.record(AuditActionType.PROMOTION_CAMPAIGN_DELETE, id, oldState, null);
+    }
+
     private void applyRequest(PromotionCampaign campaign, PromotionCampaignRequest request, String normalizedCode) {
         campaign.setCode(normalizedCode);
         campaign.setName(normalizeRequiredText(request.getName(), "name"));

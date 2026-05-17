@@ -22,6 +22,7 @@ import {
   type AdminTour,
   type AdminTourPayload,
 } from '../api/contentManagementApi'
+import { tourDetailPath } from '../../tours/utils/slug'
 import './ManagementContentPage.css'
 
 const ALL_STATUS = ''
@@ -592,7 +593,10 @@ function ManageToursPage() {
                     {statusCounts[status] ? <span>{statusCounts[status]} cung trang thai</span> : null}
                   </div>
                   <div className="mgmt-content-actions">
-                    <Link className="mgmt-action-link" to={`/tours/${tour.id}`}>
+                    <Link
+                      className="mgmt-action-link"
+                      to={tourDetailPath(tour.id, tour.name)}
+                    >
                       <Eye size={15} strokeWidth={2.1} aria-hidden="true" />
                       Xem nhu khach
                     </Link>

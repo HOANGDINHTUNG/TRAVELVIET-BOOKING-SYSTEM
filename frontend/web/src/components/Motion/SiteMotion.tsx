@@ -2,12 +2,17 @@ import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLocation } from 'react-router-dom'
 import gsap from 'gsap'
-import { ScrollSmoother } from 'gsap/ScrollSmoother'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { SplitText } from 'gsap/SplitText'
 import './SiteMotion.css'
 
-gsap.registerPlugin(ScrollTrigger, ScrollSmoother, SplitText)
+/**
+ * Smooth scroll giờ đây do `LenisProvider` (Phase 0) đảm nhiệm; GSAP
+ * `ScrollSmoother` đã bị gỡ để tránh hai vòng RAF cạnh tranh và double
+ * normalize chiều cao body. ScrollTrigger tự cập nhật mỗi event scroll
+ * của Lenis (gắn ở `LenisProvider.tsx`).
+ */
+gsap.registerPlugin(ScrollTrigger, SplitText)
 
 const splitHeadingSelector = [
   '.stats-strip strong',
@@ -57,7 +62,7 @@ const revealSelector = [
   '.weather-detail-button',
   '.package-section .section-heading .eyebrow',
   '.package-section .section-heading > p',
-  '.home-tour-card',
+  /* TourCard: không reveal GSAP ở đây — tranform inline đè CSS hover (ảnh zoom, CTA, nâng thẻ) */
   '.tour-body > p',
   '.tour-info-list span',
   '.tour-footer',
@@ -105,38 +110,14 @@ export function SiteMotion() {
   const { i18n } = useTranslation()
 
   useEffect(() => {
-    const smoother = ScrollSmoother.get()
-
-    if (location.pathname !== '/') {
-      smoother?.kill()
-    }
-  }, [location.pathname])
-
-  useEffect(() => {
     if (location.pathname !== '/' || typeof window === 'undefined') {
       return undefined
     }
 
     const reduceMotion = isReducedMotion()
-    const wrapper = document.querySelector<HTMLElement>('#smooth-wrapper')
-    const content = document.querySelector<HTMLElement>('#smooth-content')
 
     const ctx = gsap.context(() => {
-      let smoother: ScrollSmoother | undefined
       let hoverCleanups: Array<() => void> = []
-
-      if (!reduceMotion && window.innerWidth > 900 && wrapper && content) {
-        ScrollSmoother.get()?.kill()
-        smoother = ScrollSmoother.create({
-          wrapper,
-          content,
-          smooth: 1.05,
-          smoothTouch: 0.12,
-          effects: true,
-          normalizeScroll: true,
-          ignoreMobileResize: true,
-        })
-      }
 
       const splitTargets = gsap
         .utils.toArray<HTMLElement>(splitHeadingSelector)
@@ -361,13 +342,11 @@ export function SiteMotion() {
 
       window.setTimeout(() => {
         ScrollTrigger.refresh()
-        smoother?.refresh()
       }, 260)
 
       return () => {
         hoverCleanups.forEach((cleanup) => cleanup())
         splits.forEach((split) => split.revert())
-        smoother?.kill()
       }
     }, document.body)
 

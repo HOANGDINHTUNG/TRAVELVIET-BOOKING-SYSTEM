@@ -19,13 +19,14 @@ import {
 } from '../config/managementNavigation'
 import CampaignManagementPane from './promotion/CampaignManagementPane'
 import VoucherManagementPane from './promotion/VoucherManagementPane'
+import { showError, showSuccess } from '../../../lib/toast'
 import {
   activeFilterOptions,
   buildCampaignPayload,
   buildVoucherPayload,
-  canUsePermission,
   createEmptyCampaignForm,
   createEmptyVoucherForm,
+  resolvePromotionPermissions,
   toBooleanFilter,
   toCampaignForm,
   toOptionalNumber,
@@ -76,8 +77,10 @@ function ManagementPromotionPage() {
         Boolean(accessContext.isSuperAdmin),
       ),
   )
-  const canCreate = accessContext ? canUsePermission(accessContext, 'voucher.create') : false
-  const canUpdate = accessContext ? canUsePermission(accessContext, 'voucher.update') : false
+  const permissions = useMemo(
+    () => resolvePromotionPermissions(accessContext),
+    [accessContext],
+  )
 
   const summary = useMemo(
     () => ({
@@ -186,7 +189,7 @@ function ManagementPromotionPage() {
   }
 
   const saveCampaign = async () => {
-    if (!(campaignForm.id ? canUpdate : canCreate)) {
+    if (!(campaignForm.id ? permissions.canUpdateCampaign : permissions.canCreateCampaign)) {
       return
     }
 
@@ -200,17 +203,21 @@ function ManagementPromotionPage() {
       setCampaigns((current) => updateCollection(current, saved))
       setSelectedCampaign(saved)
       setCampaignForm(toCampaignForm(saved))
-      setMessage(campaignForm.id ? 'Đã cập nhật campaign.' : 'Đã tạo campaign mới.')
+      const msg = campaignForm.id ? 'Đã cập nhật campaign.' : 'Đã tạo campaign mới.'
+      setMessage(msg)
+      showSuccess(msg)
       await loadCampaigns(campaignPage)
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Không thể lưu campaign.')
+      const msg = error instanceof Error ? error.message : 'Không thể lưu campaign.'
+      setMessage(msg)
+      showError(msg)
     } finally {
       setSaving(false)
     }
   }
 
   const saveVoucher = async () => {
-    if (!(voucherForm.id ? canUpdate : canCreate)) {
+    if (!(voucherForm.id ? permissions.canUpdateVoucher : permissions.canCreateVoucher)) {
       return
     }
 
@@ -224,17 +231,21 @@ function ManagementPromotionPage() {
       setVouchers((current) => updateCollection(current, saved))
       setSelectedVoucher(saved)
       setVoucherForm(toVoucherForm(saved))
-      setMessage(voucherForm.id ? 'Đã cập nhật voucher.' : 'Đã tạo voucher mới.')
+      const msg = voucherForm.id ? 'Đã cập nhật voucher.' : 'Đã tạo voucher mới.'
+      setMessage(msg)
+      showSuccess(msg)
       await loadVouchers(voucherPage)
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Không thể lưu voucher.')
+      const msg = error instanceof Error ? error.message : 'Không thể lưu voucher.'
+      setMessage(msg)
+      showError(msg)
     } finally {
       setSaving(false)
     }
   }
 
   const toggleCampaignStatus = async (item: PromotionCampaign) => {
-    if (!canUpdate) {
+    if (!permissions.canPublishCampaign) {
       return
     }
 
@@ -250,15 +261,18 @@ function ManagementPromotionPage() {
         setCampaignForm(toCampaignForm(updated))
       }
       setMessage('Đã cập nhật trạng thái campaign.')
+      showSuccess('Đã cập nhật trạng thái campaign.')
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Không thể cập nhật trạng thái campaign.')
+      const msg = error instanceof Error ? error.message : 'Không thể cập nhật trạng thái campaign.'
+      setMessage(msg)
+      showError(msg)
     } finally {
       setSaving(false)
     }
   }
 
   const toggleVoucherStatus = async (item: Voucher) => {
-    if (!canUpdate) {
+    if (!permissions.canPublishVoucher) {
       return
     }
 
@@ -274,8 +288,86 @@ function ManagementPromotionPage() {
         setVoucherForm(toVoucherForm(updated))
       }
       setMessage('Đã cập nhật trạng thái voucher.')
+      showSuccess('Đã cập nhật trạng thái voucher.')
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Không thể cập nhật trạng thái voucher.')
+      const msg = error instanceof Error ? error.message : 'Không thể cập nhật trạng thái voucher.'
+      setMessage(msg)
+      showError(msg)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const deleteCampaign = async (item: PromotionCampaign) => {
+    if (!permissions.canDeleteCampaign) {
+      return
+    }
+
+    const label = item.name || item.code || `#${item.id}`
+    const confirmed = window.confirm(
+      `Xoá vĩnh viễn campaign "${label}"?\n\n` +
+        'Các voucher đang liên kết sẽ tự rời chiến dịch (campaign_id = null) ' +
+        'và không bị xoá theo, giữ nguyên lịch sử phát hành.',
+    )
+    if (!confirmed) {
+      return
+    }
+
+    setSaving(true)
+    setMessage('')
+    try {
+      await promotionApi.deleteCampaign(item.id)
+      setCampaigns((current) => current.filter((c) => c.id !== item.id))
+      if (selectedCampaign?.id === item.id) {
+        setSelectedCampaign(null)
+        setCampaignForm(createEmptyCampaignForm())
+      }
+      setMessage('Đã xoá campaign.')
+      showSuccess('Đã xoá campaign.')
+      await loadCampaigns(campaignPage)
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : 'Không thể xoá campaign.'
+      setMessage(msg)
+      showError(msg)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const deleteVoucher = async (item: Voucher) => {
+    if (!permissions.canDeleteVoucher) {
+      return
+    }
+
+    if ((item.usedCount ?? 0) > 0) {
+      const msg = 'Voucher đã có lượt sử dụng — chỉ có thể tắt để giữ lịch sử booking.'
+      setMessage(msg)
+      showError(msg)
+      return
+    }
+
+    const label = item.name || item.code || `#${item.id}`
+    const confirmed = window.confirm(`Xoá vĩnh viễn voucher "${label}"?`)
+    if (!confirmed) {
+      return
+    }
+
+    setSaving(true)
+    setMessage('')
+    try {
+      await promotionApi.deleteVoucher(item.id)
+      setVouchers((current) => current.filter((v) => v.id !== item.id))
+      if (selectedVoucher?.id === item.id) {
+        setSelectedVoucher(null)
+        setVoucherForm(createEmptyVoucherForm())
+      }
+      setMessage('Đã xoá voucher.')
+      showSuccess('Đã xoá voucher.')
+      await loadVouchers(voucherPage)
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : 'Không thể xoá voucher.'
+      setMessage(msg)
+      showError(msg)
     } finally {
       setSaving(false)
     }
@@ -309,7 +401,10 @@ function ManagementPromotionPage() {
         <section className="mgmt-module-shell">
           <p className="mgmt-kicker">KHÔNG CÓ QUYỀN</p>
           <h2>Bạn không có quyền truy cập khu khuyến mãi</h2>
-          <p>Chỉ tài khoản có quyền voucher.view mới được dùng trang này.</p>
+          <p>
+            Cần có quyền <code>promotion.campaign.view</code> hoặc <code>voucher.view</code>.
+            Liên hệ quản trị để được gán role <strong>MARKETING_VIEWER</strong> trở lên.
+          </p>
         </section>
       </div>
     )
@@ -399,7 +494,7 @@ function ManagementPromotionPage() {
             Tải lại
           </button>
 
-          {canCreate && activeTab === 'campaigns' && (
+          {permissions.canCreateCampaign && activeTab === 'campaigns' && (
             <button type="button" onClick={() => {
               setSelectedCampaign(null)
               setCampaignForm(createEmptyCampaignForm())
@@ -409,7 +504,7 @@ function ManagementPromotionPage() {
             </button>
           )}
 
-          {canCreate && activeTab === 'vouchers' && (
+          {permissions.canCreateVoucher && activeTab === 'vouchers' && (
             <button type="button" onClick={() => {
               setSelectedVoucher(null)
               setVoucherForm(createEmptyVoucherForm())
@@ -426,8 +521,10 @@ function ManagementPromotionPage() {
             campaignPage={campaignPage}
             campaignTotalPages={campaignTotalPages}
             campaigns={campaigns}
-            canCreate={canCreate}
-            canUpdate={canUpdate}
+            canCreate={permissions.canCreateCampaign}
+            canUpdate={permissions.canUpdateCampaign}
+            canDelete={permissions.canDeleteCampaign}
+            canPublish={permissions.canPublishCampaign}
             detailLoading={detailLoading}
             loading={loading}
             saving={saving}
@@ -437,6 +534,7 @@ function ManagementPromotionPage() {
               setSelectedCampaign(null)
               setCampaignForm(createEmptyCampaignForm())
             }}
+            onDelete={(item) => void deleteCampaign(item)}
             onPaginate={(page) => void loadCampaigns(page)}
             onSave={() => void saveCampaign()}
             onSelect={selectCampaign}
@@ -444,8 +542,10 @@ function ManagementPromotionPage() {
           />
         ) : (
           <VoucherManagementPane
-            canCreate={canCreate}
-            canUpdate={canUpdate}
+            canCreate={permissions.canCreateVoucher}
+            canUpdate={permissions.canUpdateVoucher}
+            canDelete={permissions.canDeleteVoucher}
+            canPublish={permissions.canPublishVoucher}
             detailLoading={detailLoading}
             loading={loading}
             saving={saving}
@@ -459,6 +559,7 @@ function ManagementPromotionPage() {
               setSelectedVoucher(null)
               setVoucherForm(createEmptyVoucherForm())
             }}
+            onDelete={(item) => void deleteVoucher(item)}
             onPaginate={(page) => void loadVouchers(page)}
             onSave={() => void saveVoucher()}
             onSelect={selectVoucher}

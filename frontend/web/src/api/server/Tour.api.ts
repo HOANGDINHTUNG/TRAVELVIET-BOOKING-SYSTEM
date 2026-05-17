@@ -14,6 +14,10 @@ import {
   putBackendData,
 } from "./serverApiClient";
 import i18n from "../../lib/i18n";
+import {
+  catalogFiltersToServerParams,
+  parseTourCatalogFilters,
+} from "../../module/tours/utils/tourCatalogSearch";
 
 const featuredTourFetchSize = 6;
 const tourFetchSize = 100;
@@ -31,8 +35,12 @@ export type PublicTourSearchParams = {
   destinationSubtree?: boolean;
   featuredOnly?: boolean;
   tagCodes?: string[];
+  minPrice?: number;
+  maxPrice?: number;
+  transportType?: string;
   sortBy?: string;
   sortDir?: string;
+  esgOnly?: boolean;
 };
 
 function appendTourSearchToUrlSearchParams(
@@ -47,15 +55,19 @@ function appendTourSearchToUrlSearchParams(
     "sortDir",
     "destinationCountryCode",
     "destinationId",
+    "transportType",
   ];
   for (const key of scalarKeys) {
     const v = params[key];
     if (v === undefined || v === null || v === "") continue;
     usp.set(key, String(v));
   }
+  if (params.minPrice != null) usp.set("minPrice", String(params.minPrice));
+  if (params.maxPrice != null) usp.set("maxPrice", String(params.maxPrice));
   if (params.domesticOnly === true) usp.set("domesticOnly", "true");
   if (params.internationalOnly === true) usp.set("internationalOnly", "true");
   if (params.featuredOnly === true) usp.set("featuredOnly", "true");
+  if (params.esgOnly === true) usp.set("esgOnly", "true");
   if (params.destinationSubtree === false) usp.set("destinationSubtree", "false");
   if (params.tagCodes?.length) {
     for (const code of params.tagCodes) {
@@ -98,6 +110,11 @@ function formatDuration(days?: number, nights?: number) {
 }
 
 function formatDepartureLine(item: BackendTour): string {
+  if (item.primaryDepartureCity?.trim()) {
+    return i18n.t("tourCard.departureFromProvince", {
+      place: item.primaryDepartureCity.trim(),
+    });
+  }
   if (item.destinationProvince != null && item.destinationProvince !== "") {
     return i18n.t("tourCard.departureFromProvince", {
       place: item.destinationProvince,
@@ -120,54 +137,11 @@ function formatDepartureLine(item: BackendTour): string {
 export function tourListSearchParamsFromUrl(
   searchParams: URLSearchParams,
 ): PublicTourSearchParams | null {
-  const domesticOnly = searchParams.get("domesticOnly") === "true";
-  const internationalOnly = searchParams.get("internationalOnly") === "true";
-  const featuredOnly = searchParams.get("featuredOnly") === "true";
-  const rawCc = searchParams.get("destinationCountryCode")?.trim();
-  const destinationCountryCode =
-    rawCc && /^[a-zA-Z]{2}$/.test(rawCc) ? rawCc.toUpperCase() : undefined;
-  const tagCodes = searchParams
-    .getAll("tagCodes")
-    .map((c) => c.trim())
-    .filter(Boolean);
-
-  const rawDestId = searchParams.get("destinationId")?.trim();
-  let destinationId: number | undefined;
-  if (rawDestId && /^\d+$/.test(rawDestId)) {
-    const n = Number(rawDestId);
-    if (Number.isFinite(n)) {
-      destinationId = n;
-    }
-  }
-
-  const destinationSubtree = searchParams.get("destinationSubtree") !== "false";
-
-  if (
-    !domesticOnly &&
-    !internationalOnly &&
-    !featuredOnly &&
-    !destinationCountryCode &&
-    tagCodes.length === 0 &&
-    destinationId === undefined
-  ) {
+  if (!searchParams.toString()) {
     return null;
   }
 
-  return {
-    page: 0,
-    size: 100,
-    ...(domesticOnly ? { domesticOnly: true } : {}),
-    ...(internationalOnly ? { internationalOnly: true } : {}),
-    ...(featuredOnly ? { featuredOnly: true } : {}),
-    ...(destinationCountryCode ? { destinationCountryCode } : {}),
-    ...(destinationId !== undefined ? { destinationId } : {}),
-    ...(destinationId !== undefined && !destinationSubtree
-      ? { destinationSubtree: false }
-      : {}),
-    ...(tagCodes.length ? { tagCodes } : {}),
-    sortBy: "createdAt",
-    sortDir: "desc",
-  };
+  return catalogFiltersToServerParams(parseTourCatalogFilters(searchParams));
 }
 
 /** Link từ trang chủ → danh sách tour đã lọc (phần A). */
@@ -176,6 +150,7 @@ export const catalogTourLinks = {
     "/tours?tagCodes=HOME_BEACH_VN&featuredOnly=true",
   internationalFeatured:
     "/tours?tagCodes=HOME_HOT_INTL&featuredOnly=true",
+  lastMinuteDeals: "/tours?tagCodes=HOME_FLASH_SALE&featuredOnly=true",
 } as const;
 
 function parseHighlights(highlights?: string) {
@@ -225,12 +200,26 @@ function mapTour(item: BackendTour): Tour {
 
   return {
     id: item.id,
+    code: item.code?.trim() || undefined,
     translationKey: item.translationKey,
     title: item.name,
     location: departure,
     category: item.tripMode || "Tour",
     days: formatDuration(item.durationDays, item.durationNights),
     price: toNumber(item.basePrice),
+    listPrice:
+      item.listPrice != null && item.listPrice !== ""
+        ? toNumber(item.listPrice, 0) || undefined
+        : undefined,
+    esgScore:
+      item.esgScore != null && Number.isFinite(Number(item.esgScore))
+        ? Number(item.esgScore)
+        : undefined,
+    leiScore:
+      item.leiScore != null && Number.isFinite(Number(item.leiScore))
+        ? Number(item.leiScore)
+        : undefined,
+    tagCodes: item.tags?.map((tag) => tag.code).filter(Boolean) as string[] | undefined,
     rating: toNumber(item.averageRating) || undefined,
     reviewCount: item.totalReviews,
     image: primary,
@@ -243,6 +232,9 @@ function mapTour(item: BackendTour): Tour {
     destinationName: item.destinationName,
     destinationProvince: item.destinationProvince,
     currency: item.currency,
+    nextOpenSchedule: item.nextOpenSchedule,
+    primaryDepartureCity: item.primaryDepartureCity,
+    inclusionFlags: item.inclusionFlags,
   };
 }
 

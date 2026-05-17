@@ -2,6 +2,7 @@ package com.wedservice.backend.module.tours.dto.request;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -37,6 +38,17 @@ public class TourRequest {
     @NotNull(message = "Base price is required")
     @DecimalMin(value = "0.0", inclusive = true, message = "Base price must be greater than or equal to 0")
     private BigDecimal basePrice;
+
+    @Min(value = 0, message = "esgScore must be between 0 and 100")
+    @Max(value = 100, message = "esgScore must be between 0 and 100")
+    private Integer esgScore;
+
+    @Min(value = 0, message = "leiScore must be between 0 and 100")
+    @Max(value = 100, message = "leiScore must be between 0 and 100")
+    private Integer leiScore;
+
+    @DecimalMin(value = "0.0", inclusive = true, message = "listPrice must be greater than or equal to 0")
+    private BigDecimal listPrice;
 
     @Size(min = 3, max = 3, message = "Currency must be a 3-character code")
     private String currency;

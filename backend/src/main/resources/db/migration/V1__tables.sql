@@ -523,6 +523,9 @@ CREATE TABLE IF NOT EXISTS tours (
     duration_days SMALLINT NOT NULL, -- số ngày
     duration_nights SMALLINT NOT NULL DEFAULT 0, -- số đêm
     base_price DECIMAL(14 , 2 ) NOT NULL DEFAULT 0, -- giá cơ bản
+    esg_score TINYINT NULL COMMENT 'điểm ESG 0-100',
+    lei_score TINYINT NULL COMMENT 'điểm LEI 0-100',
+    list_price DECIMAL(14 , 2 ) NULL COMMENT 'giá niêm yết (gạch ngang)',
     currency CHAR(3) NOT NULL DEFAULT 'VND', -- loại tiền tệ
     transport_type VARCHAR(120), -- loại phương tiện
     trip_mode ENUM('group', 'private', 'shared') NOT NULL DEFAULT 'group', -- loại tour
@@ -558,7 +561,9 @@ CREATE TABLE IF NOT EXISTS tours (
     CONSTRAINT chk_duration_days CHECK (duration_days > 0),
     CONSTRAINT chk_duration_nights CHECK (duration_nights >= 0),
     CONSTRAINT chk_difficulty_level CHECK (difficulty_level BETWEEN 1 AND 5),
-    CONSTRAINT chk_activity_level CHECK (activity_level BETWEEN 1 AND 5)
+    CONSTRAINT chk_activity_level CHECK (activity_level BETWEEN 1 AND 5),
+    CONSTRAINT chk_tours_esg_score CHECK (esg_score IS NULL OR (esg_score BETWEEN 0 AND 100)),
+    CONSTRAINT chk_tours_lei_score CHECK (lei_score IS NULL OR (lei_score BETWEEN 0 AND 100))
 )  ENGINE=INNODB;
 
 CREATE TABLE IF NOT EXISTS tour_translations (
@@ -710,6 +715,7 @@ CREATE TABLE IF NOT EXISTS tour_schedules (
 	meeting_latitude DECIMAL(10,7), 
 	meeting_longitude DECIMAL(10,7), 
 	capacity_total INT NOT NULL, 
+	-- Chỉ phản ánh booking thực (pending_payment..completed); seed không gán số giả marketing
 	booked_seats INT NOT NULL DEFAULT 0, 
 	min_guests_to_operate INT NOT NULL DEFAULT 1, 
 	adult_price DECIMAL(14,2) NOT NULL DEFAULT 0, 
@@ -727,7 +733,7 @@ CREATE TABLE IF NOT EXISTS tour_schedules (
 	FOREIGN KEY (tour_id) 
 	REFERENCES tours(id) 
 	ON DELETE CASCADE, 
-	CONSTRAINT chk_schedule_time CHECK (return_at > departure_at), 
+	CONSTRAINT chk_schedule_time CHECK (return_at >= departure_at), 
 	CONSTRAINT chk_capacity_total CHECK (capacity_total > 0), 
 	CONSTRAINT chk_booked_seats CHECK (booked_seats >= 0) 
 ) ENGINE=InnoDB;
@@ -2270,4 +2276,59 @@ CREATE TABLE IF NOT EXISTS customer_testimonials (
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE KEY uk_customer_testimonial_name (customer_name),
     CONSTRAINT chk_customer_testimonials_rating CHECK (rating BETWEEN 1 AND 5)
+) ENGINE=InnoDB;
+
+-- =====================================================================
+-- Booking experience (merged from V9): departure hubs, tour combos, inclusion flags
+-- =====================================================================
+
+CREATE TABLE IF NOT EXISTS tour_departure_hubs (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    tour_id BIGINT NOT NULL,
+    city_code VARCHAR(10) NOT NULL,
+    city_name_vi VARCHAR(120) NOT NULL,
+    city_name_en VARCHAR(120) NULL,
+    is_primary BOOLEAN NOT NULL DEFAULT FALSE,
+    sort_order INT NOT NULL DEFAULT 0,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at DATETIME NULL,
+    UNIQUE KEY uk_tour_departure_hub (tour_id, city_code),
+    CONSTRAINT fk_tour_departure_hubs_tour FOREIGN KEY (tour_id)
+        REFERENCES tours (id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS tour_combo_packages (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    tour_id BIGINT NOT NULL,
+    combo_id BIGINT NOT NULL,
+    package_role ENUM('included', 'optional', 'recommended') NOT NULL DEFAULT 'optional',
+    is_default BOOLEAN NOT NULL DEFAULT FALSE,
+    sort_order INT NOT NULL DEFAULT 0,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_tour_combo_packages (tour_id, combo_id),
+    CONSTRAINT fk_tour_combo_packages_tour FOREIGN KEY (tour_id)
+        REFERENCES tours (id) ON DELETE CASCADE,
+    CONSTRAINT fk_tour_combo_packages_combo FOREIGN KEY (combo_id)
+        REFERENCES combo_packages (id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS tour_inclusion_flags (
+    tour_id BIGINT PRIMARY KEY,
+    has_flight BOOLEAN NOT NULL DEFAULT FALSE,
+    has_hotel BOOLEAN NOT NULL DEFAULT FALSE,
+    has_meals BOOLEAN NOT NULL DEFAULT FALSE,
+    has_tickets BOOLEAN NOT NULL DEFAULT FALSE,
+    has_guide BOOLEAN NOT NULL DEFAULT FALSE,
+    has_insurance BOOLEAN NOT NULL DEFAULT FALSE,
+    has_transport BOOLEAN NOT NULL DEFAULT FALSE,
+    hotel_stars TINYINT NULL,
+    flight_type ENUM('none', 'one_way', 'roundtrip') NOT NULL DEFAULT 'none',
+    notes VARCHAR(500) NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_tour_inclusion_flags_tour FOREIGN KEY (tour_id)
+        REFERENCES tours (id) ON DELETE CASCADE,
+    CONSTRAINT chk_tour_inclusion_hotel_stars CHECK (hotel_stars IS NULL OR hotel_stars BETWEEN 1 AND 5)
 ) ENGINE=InnoDB;

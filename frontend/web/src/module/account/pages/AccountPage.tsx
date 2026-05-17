@@ -49,6 +49,7 @@ import { ErrorBlock } from "../../../components/common/ui/ErrorBlock";
 import { PageLoader } from "../../../components/common/ux/PageLoader";
 import { Footer } from "../../../components/Footer/Footer";
 import { persistStoredAuthUser } from "../../auth/api/authApi";
+import { tourDetailPath } from "../../tours/utils/slug";
 import "./AccountPage.css";
 
 type AccountLocale = "vi" | "en";
@@ -1064,7 +1065,7 @@ export default function AccountPage() {
                   <article key={item.wishlistId}>
                     <strong>{item.tourName || item.tourCode || `Tour #${item.tourId}`}</strong>
                     <span>{formatMoney(item.basePrice, item.currency)}</span>
-                    <Link to={`/tours/${item.tourId}`}>
+                    <Link to={tourDetailPath(item.tourId, item.tourName)}>
                       {copy.viewTour}
                       <ChevronRight aria-hidden="true" />
                     </Link>

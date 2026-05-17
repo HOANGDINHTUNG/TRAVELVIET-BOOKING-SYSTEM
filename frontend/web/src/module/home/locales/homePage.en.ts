@@ -1,9 +1,20 @@
 export const homePageEn = {
+  status: {
+    backendOfflineTitle: "Backend is offline or not responding",
+    backendOfflineMessage:
+      "Please start the backend then press Retry. The web app calls http://localhost:8088/api/v1 by default.",
+    retry: "Retry",
+    emptyImagesTitle: "No tour images from backend",
+    emptyImagesMessage: "Check the mediaUrl field in the GET /tours response.",
+    errorTitle: "Something went wrong",
+    loadingAria: "Loading home page content",
+  },
   bannerCta: "View tour details",
   defaultBannerTeaser: "Discover a memorable journey with TravelViet.",
   bannerSubtitleFallback: "Featured tour",
 
   search: {
+    sectionAria: "Quick tour search filters",
     departurePlaceholder: "Departure point...",
     tourTypePlaceholder: "Tour type...",
     destinationPlaceholder: "Destination...",
@@ -46,8 +57,28 @@ export const homePageEn = {
     visa: "Visa services",
   },
 
+  lastMinuteDeals: {
+    sectionTitle: "Last-minute deals",
+    sectionLead:
+      "Discover the world, premium stays, and full experiences at today's best prices.",
+    viewMore: "View more",
+    viewMoreTo: "/tours?tagCodes=HOME_FLASH_SALE",
+    prev: "Previous",
+    next: "Next",
+    quickView: "Quick view",
+    priceFrom: "From:",
+    bookNow: "Book now",
+    seatsLeft: "{{count}} seats left",
+    dayCountdown: "{{days}} Day {{time}}",
+    empty: "No last-minute deals right now. Please check back soon.",
+  },
+
   promotions: {
     sectionTitle: "Latest promotional programs",
+    viewMore: "View more",
+    viewMoreTo: "/tours",
+    prev: "Previous",
+    next: "Next",
     defaultSubtitle: "Latest tour offers",
     defaultBadge: "Promotion",
     defaultCta: "View offer",

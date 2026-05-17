@@ -4,8 +4,17 @@ import { ArrowRight, MessageCircle, Send, Sparkles, X } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { sendAiMessage } from '../../api/server/AiChat.api'
 import type { AiRelatedItem } from '../../api/server/AiChat.api'
+import { cn } from '@/lib/utils'
 import { buildAssetUrl } from '../../utils/buildAssetUrl'
 import './AiChatBox.css'
+
+export type AiChatBoxProps = {
+  /** Ẩn nút trigger mặc định — dùng nút FAB ngoài (vd. trang /tours). */
+  hideTrigger?: boolean
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
+  className?: string
+}
 
 type ChatMessage = {
   id: string
@@ -72,8 +81,23 @@ function renderRelatedItem(item: AiRelatedItem) {
   )
 }
 
-export function AiChatBox() {
-  const [isOpen, setIsOpen] = useState(false)
+export function AiChatBox({
+  hideTrigger = false,
+  open: controlledOpen,
+  onOpenChange,
+  className,
+}: AiChatBoxProps = {}) {
+  const [internalOpen, setInternalOpen] = useState(false)
+  const isOpen = controlledOpen ?? internalOpen
+
+  const setIsOpen = (value: boolean | ((prev: boolean) => boolean)) => {
+    const next =
+      typeof value === 'function' ? value(controlledOpen ?? internalOpen) : value
+    onOpenChange?.(next)
+    if (controlledOpen === undefined) {
+      setInternalOpen(next)
+    }
+  }
   const [messages, setMessages] = useState<ChatMessage[]>([initialMessage])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
@@ -161,7 +185,7 @@ export function AiChatBox() {
       ?.suggestions ?? []
 
   return (
-    <div className={`ai-chatbox ${isOpen ? 'is-open' : ''}`}>
+    <div className={cn('ai-chatbox', isOpen && 'is-open', className)}>
       {isOpen && (
         <section className="ai-chatbox-panel" aria-label="AI Assistant">
           <header className="ai-chatbox-header">
@@ -242,15 +266,17 @@ export function AiChatBox() {
         </section>
       )}
 
-      <button
-        className="ai-chatbox-trigger"
-        type="button"
-        aria-label={isOpen ? 'Đóng AI Assistant' : 'Mở AI Assistant'}
-        aria-expanded={isOpen}
-        onClick={() => setIsOpen((currentValue) => !currentValue)}
-      >
-        {isOpen ? <X size={24} /> : <MessageCircle size={26} />}
-      </button>
+      {!hideTrigger ? (
+        <button
+          className="ai-chatbox-trigger"
+          type="button"
+          aria-label={isOpen ? 'Đóng AI Assistant' : 'Mở AI Assistant'}
+          aria-expanded={isOpen}
+          onClick={() => setIsOpen((currentValue) => !currentValue)}
+        >
+          {isOpen ? <X size={24} /> : <MessageCircle size={26} />}
+        </button>
+      ) : null}
     </div>
   )
 }

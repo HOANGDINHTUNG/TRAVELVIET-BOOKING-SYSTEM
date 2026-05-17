@@ -2,6 +2,7 @@ package com.wedservice.backend.module.tours.service;
 
 import com.wedservice.backend.module.bookings.entity.BookingStatus;
 import com.wedservice.backend.module.bookings.repository.BookingRepository;
+import com.wedservice.backend.module.bookings.validator.BookingValidator;
 import com.wedservice.backend.module.reviews.repository.ReviewRepository;
 import com.wedservice.backend.module.tours.entity.TourSchedule;
 import com.wedservice.backend.module.tours.entity.TourScheduleStatus;
@@ -18,13 +19,6 @@ import java.util.Set;
 @Component
 @RequiredArgsConstructor
 public class TourRuntimeStatsSyncService {
-
-    private static final Set<BookingStatus> SCHEDULE_OCCUPYING_STATUSES = Set.of(
-            BookingStatus.PENDING_PAYMENT,
-            BookingStatus.CONFIRMED,
-            BookingStatus.CHECKED_IN,
-            BookingStatus.COMPLETED
-    );
 
     private static final Set<BookingStatus> TOUR_BOOKING_COUNTED_STATUSES = Set.of(
             BookingStatus.CONFIRMED,
@@ -43,7 +37,9 @@ public class TourRuntimeStatsSyncService {
         }
         tourScheduleRepository.findById(scheduleId).ifPresent(schedule -> {
             int bookedSeats = Math.toIntExact(
-                    bookingRepository.sumSeatOccupancyByScheduleIdAndStatusIn(scheduleId, SCHEDULE_OCCUPYING_STATUSES)
+                    bookingRepository.sumSeatOccupancyByScheduleIdAndStatusIn(
+                            scheduleId,
+                            BookingValidator.SCHEDULE_OCCUPYING_STATUSES)
             );
             schedule.setBookedSeats(bookedSeats);
             applyCapacityDrivenStatus(schedule, bookedSeats);

@@ -1,6 +1,6 @@
 .thd-home {
   margin: 0 auto;
-  max-width: 1200px;
+  max-width: var(--home-content-max);
   padding: 28px 16px 48px;
 }
 

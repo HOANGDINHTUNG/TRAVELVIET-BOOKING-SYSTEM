@@ -5,8 +5,11 @@ import com.wedservice.backend.module.bookings.dto.request.BookingProductLineRequ
 import com.wedservice.backend.module.bookings.dto.request.BookingQuoteRequest;
 import com.wedservice.backend.module.bookings.dto.request.CreateBookingRequest;
 import com.wedservice.backend.module.bookings.dto.request.CreatePassengerRequest;
+import com.wedservice.backend.module.bookings.entity.BookingStatus;
+import com.wedservice.backend.module.bookings.repository.BookingRepository;
 import com.wedservice.backend.module.tours.entity.TourSchedule;
 import com.wedservice.backend.module.tours.entity.TourScheduleStatus;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -20,10 +23,21 @@ import java.util.Set;
 import java.util.function.ToIntFunction;
 
 @Component
+@RequiredArgsConstructor
 public class BookingValidator {
+
+    /** Cùng tập trạng thái với {@link com.wedservice.backend.module.tours.service.TourRuntimeStatsSyncService}. */
+    public static final Set<BookingStatus> SCHEDULE_OCCUPYING_STATUSES = Set.of(
+            BookingStatus.PENDING_PAYMENT,
+            BookingStatus.CONFIRMED,
+            BookingStatus.CHECKED_IN,
+            BookingStatus.COMPLETED
+    );
 
     private static final Set<String> ALLOWED_PASSENGER_TYPES = Set.of("adult", "child", "infant", "senior");
     private static final Set<String> ALLOWED_PASSENGER_GENDERS = Set.of("male", "female", "other", "unknown");
+
+    private final BookingRepository bookingRepository;
 
     public void validateCreateRequest(CreateBookingRequest request) {
         validateTravellerCounts(request.getAdults(), request.getChildren(), request.getInfants(), request.getSeniors());
@@ -70,7 +84,7 @@ public class BookingValidator {
         }
 
         int requestedSeats = request.getAdults() + request.getChildren() + request.getSeniors();
-        int bookedSeats = schedule.getBookedSeats() == null ? 0 : schedule.getBookedSeats();
+        int bookedSeats = resolveOccupiedSeats(schedule.getId());
         int capacityTotal = schedule.getCapacityTotal() == null ? 0 : schedule.getCapacityTotal();
 
         if (requestedSeats <= 0) {
@@ -102,6 +116,19 @@ public class BookingValidator {
 
     public int calculateTravellerCount(int adults, int children, int infants, int seniors) {
         return adults + children + infants + seniors;
+    }
+
+    /** Đếm chỗ đã giữ từ booking thực — không tin booked_seats seed/marketing trên lịch. */
+    public int resolveOccupiedSeats(Long scheduleId) {
+        if (scheduleId == null) {
+            return 0;
+        }
+        return Math.toIntExact(
+                bookingRepository.sumSeatOccupancyByScheduleIdAndStatusIn(
+                        scheduleId,
+                        SCHEDULE_OCCUPYING_STATUSES
+                )
+        );
     }
 
     public String normalizePassengerType(String rawValue) {

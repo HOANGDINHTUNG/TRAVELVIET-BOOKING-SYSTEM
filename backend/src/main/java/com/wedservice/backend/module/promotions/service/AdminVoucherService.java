@@ -118,6 +118,25 @@ public class AdminVoucherService {
         return response;
     }
 
+    /**
+     * Hard delete voucher.
+     * Chặn xoá nếu voucher đã được sử dụng (usedCount > 0) để giữ lịch sử booking minh bạch.
+     * Trong trường hợp đó, hãy deactivate thay vì xoá.
+     * Các FK liên quan: voucher_user_claims, voucher_redemptions ON DELETE CASCADE và bookings ON DELETE SET NULL,
+     * do đó việc xoá an toàn ở tầng DB; guard này chỉ bảo vệ nghiệp vụ.
+     */
+    @Transactional
+    public void deleteVoucher(Long id) {
+        Voucher voucher = findVoucher(id);
+        if (safeInteger(voucher.getUsedCount()) > 0) {
+            throw BadRequestException.i18n("api.error.voucher.deleteUsed");
+        }
+
+        VoucherResponse oldState = toResponse(voucher);
+        voucherRepository.delete(voucher);
+        auditTrailRecorder.record(AuditActionType.VOUCHER_DELETE, id, oldState, null);
+    }
+
     private void applyRequest(Voucher voucher, VoucherRequest request, String normalizedCode) {
         PromotionCampaign campaign = resolveCampaign(request.getCampaignId());
         validateScopeReferences(request.getApplicableScope(), request.getApplicableTourId(), request.getApplicableDestinationId());

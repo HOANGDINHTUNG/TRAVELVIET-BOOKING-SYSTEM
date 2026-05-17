@@ -4,6 +4,8 @@ import com.querydsl.core.BooleanBuilder;
 import com.wedservice.backend.common.exception.BadRequestException;
 import com.wedservice.backend.common.exception.ResourceNotFoundException;
 import com.wedservice.backend.common.i18n.LocaleTagUtil;
+import com.wedservice.backend.module.commerce.entity.ComboPackage;
+import com.wedservice.backend.module.commerce.repository.ComboPackageRepository;
 import com.wedservice.backend.module.destinations.entity.Destination;
 import com.wedservice.backend.module.destinations.repository.DestinationRepository;
 import com.wedservice.backend.module.tours.dto.request.TourSearchRequest;
@@ -14,6 +16,10 @@ import com.wedservice.backend.module.tours.dto.response.TagResponse;
 import com.wedservice.backend.module.tours.dto.response.TourChecklistItemResponse;
 import com.wedservice.backend.module.tours.dto.response.TourItineraryDayResponse;
 import com.wedservice.backend.module.tours.dto.response.TourMediaResponse;
+import com.wedservice.backend.module.tours.dto.response.TourComboPackageOfferResponse;
+import com.wedservice.backend.module.tours.dto.response.TourDepartureHubResponse;
+import com.wedservice.backend.module.tours.dto.response.TourInclusionFlagsResponse;
+import com.wedservice.backend.module.tours.dto.response.TourNextScheduleSummaryResponse;
 import com.wedservice.backend.module.tours.dto.response.TourResponse;
 import com.wedservice.backend.module.tours.dto.response.TourScheduleGuideResponse;
 import com.wedservice.backend.module.tours.dto.response.TourSchedulePickupPointResponse;
@@ -28,6 +34,9 @@ import com.wedservice.backend.module.tours.entity.Tag;
 import com.wedservice.backend.module.tours.entity.TourChecklistItem;
 import com.wedservice.backend.module.tours.entity.Tour;
 import com.wedservice.backend.module.tours.entity.TourSeasonality;
+import com.wedservice.backend.module.tours.entity.TourComboPackageLink;
+import com.wedservice.backend.module.tours.entity.TourDepartureHub;
+import com.wedservice.backend.module.tours.entity.TourInclusionFlags;
 import com.wedservice.backend.module.tours.entity.TourSchedule;
 import com.wedservice.backend.module.tours.entity.TourScheduleGuide;
 import com.wedservice.backend.module.tours.entity.TourScheduleStatus;
@@ -48,6 +57,9 @@ import com.wedservice.backend.module.tours.repository.TourMediaRepository;
 import com.wedservice.backend.module.tours.repository.TourSeasonalityRepository;
 import com.wedservice.backend.module.tours.repository.TourScheduleGuideRepository;
 import com.wedservice.backend.module.tours.repository.TourSchedulePickupPointRepository;
+import com.wedservice.backend.module.tours.repository.TourComboPackageLinkRepository;
+import com.wedservice.backend.module.tours.repository.TourDepartureHubRepository;
+import com.wedservice.backend.module.tours.repository.TourInclusionFlagsRepository;
 import com.wedservice.backend.module.tours.repository.TourScheduleRepository;
 import com.wedservice.backend.module.tours.repository.TourTagRepository;
 import com.wedservice.backend.module.tours.repository.TourTranslationRepository;
@@ -56,6 +68,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -63,6 +76,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -107,6 +121,10 @@ public class TourQueryServiceImpl implements TourQueryService {
     private final ItineraryItemRepository itineraryItemRepository;
     private final TourChecklistItemRepository tourChecklistItemRepository;
     private final TourScheduleRepository tourScheduleRepository;
+    private final TourDepartureHubRepository tourDepartureHubRepository;
+    private final TourInclusionFlagsRepository tourInclusionFlagsRepository;
+    private final TourComboPackageLinkRepository tourComboPackageLinkRepository;
+    private final ComboPackageRepository comboPackageRepository;
     private final TourSchedulePickupPointRepository tourSchedulePickupPointRepository;
     private final TourScheduleGuideRepository tourScheduleGuideRepository;
     private final TourTranslationRepository tourTranslationRepository;
@@ -201,6 +219,11 @@ public class TourQueryServiceImpl implements TourQueryService {
         if (Boolean.TRUE.equals(request.getFeaturedOnly())) {
             builder.and(qTour.isFeatured.isTrue());
         }
+        if (Boolean.TRUE.equals(request.getEsgOnly())) {
+            builder.and(qTour.esgScore.goe(80));
+        } else if (request.getEsgMin() != null) {
+            builder.and(qTour.esgScore.goe(request.getEsgMin()));
+        }
         if (Boolean.TRUE.equals(request.getStudentFriendlyOnly())) {
             builder.and(qTour.isStudentFriendly.isTrue());
         }
@@ -248,12 +271,16 @@ public class TourQueryServiceImpl implements TourQueryService {
             Map<Long, TourTranslation> primaryMap = loadTourTranslationsMap(tourIds, lang);
             Map<Long, TourTranslation> viMap =
                     "vi".equals(lang) ? primaryMap : loadTourTranslationsMap(tourIds, "vi");
-            return page.map(t -> buildSearchListRow(
-                    t,
-                    tourTranslationMergeHelper.merge(
-                            primaryMap.get(t.getId()),
-                            viMap.get(t.getId()),
-                            t)));
+            List<TourResponse> rows = page.getContent().stream()
+                    .map(t -> buildSearchListRow(
+                            t,
+                            tourTranslationMergeHelper.merge(
+                                    primaryMap.get(t.getId()),
+                                    viMap.get(t.getId()),
+                                    t)))
+                    .toList();
+            enrichPublicListRows(rows);
+            return new PageImpl<>(rows, pr, page.getTotalElements());
         }
 
         return page.map(t -> buildSearchListRow(t, tourTranslationMergeHelper.merge(null, null, t)));
@@ -269,7 +296,9 @@ public class TourQueryServiceImpl implements TourQueryService {
             TourTranslation vi = "vi".equals(lang)
                     ? primary
                     : tourTranslationRepository.findByTour_IdAndLocale(id, "vi").orElse(null);
-            return toResponse(tour, true, primary, vi);
+            TourResponse response = toResponse(tour, true, primary, vi);
+            enrichTourDetail(response);
+            return response;
         } catch (ResourceNotFoundException e) {
             throw e;
         } catch (Exception e) {
@@ -477,6 +506,9 @@ public class TourQueryServiceImpl implements TourQueryService {
                 .destinationProvince(destinationProvince)
                 .cancellationPolicyId(t.getCancellationPolicyId())
                 .basePrice(t.getBasePrice())
+                .esgScore(t.getEsgScore())
+                .leiScore(t.getLeiScore())
+                .listPrice(t.getListPrice())
                 .currency(t.getCurrency())
                 .durationDays(t.getDurationDays())
                 .durationNights(t.getDurationNights() != null ? t.getDurationNights() : 0)
@@ -537,6 +569,9 @@ public class TourQueryServiceImpl implements TourQueryService {
                 .destinationName(destinationName)
                 .destinationProvince(destinationProvince)
                 .basePrice(t.getBasePrice())
+                .esgScore(t.getEsgScore())
+                .leiScore(t.getLeiScore())
+                .listPrice(t.getListPrice())
                 .currency(t.getCurrency())
                 .durationDays(t.getDurationDays())
                 .durationNights(t.getDurationNights())
@@ -555,9 +590,155 @@ public class TourQueryServiceImpl implements TourQueryService {
                 .build();
     }
 
+    private void enrichPublicListRows(List<TourResponse> rows) {
+        if (rows == null || rows.isEmpty()) {
+            return;
+        }
+        List<Long> tourIds = rows.stream().map(TourResponse::getId).filter(id -> id != null).toList();
+        if (tourIds.isEmpty()) {
+            return;
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        Map<Long, TourSchedule> nextScheduleByTour = new HashMap<>();
+        for (TourSchedule schedule :
+                tourScheduleRepository.findBookableUpcomingByTourIds(
+                        tourIds, TourScheduleStatus.OPEN, now)) {
+            nextScheduleByTour.putIfAbsent(schedule.getTourId(), schedule);
+        }
+
+        Map<Long, String> departureCityByTour = new HashMap<>();
+        List<TourDepartureHub> hubs =
+                tourDepartureHubRepository.findByTourIdInAndDeletedAtIsNullOrderByTourIdAscSortOrderAsc(
+                        tourIds);
+        for (TourDepartureHub hub : hubs) {
+            if (Boolean.TRUE.equals(hub.getIsPrimary())) {
+                departureCityByTour.put(hub.getTourId(), hub.getCityNameVi());
+            }
+        }
+        for (TourDepartureHub hub : hubs) {
+            departureCityByTour.putIfAbsent(hub.getTourId(), hub.getCityNameVi());
+        }
+
+        Map<Long, TourInclusionFlags> flagsByTour = new HashMap<>();
+        for (TourInclusionFlags flags : tourInclusionFlagsRepository.findByTourIdIn(tourIds)) {
+            flagsByTour.put(flags.getTourId(), flags);
+        }
+
+        for (TourResponse row : rows) {
+            Long tourId = row.getId();
+            if (tourId == null) {
+                continue;
+            }
+            TourSchedule next = nextScheduleByTour.get(tourId);
+            if (next != null) {
+                row.setNextOpenSchedule(toNextScheduleSummary(next));
+            }
+            String city = departureCityByTour.get(tourId);
+            if (StringUtils.hasText(city)) {
+                row.setPrimaryDepartureCity(city);
+            }
+            TourInclusionFlags flags = flagsByTour.get(tourId);
+            if (flags != null) {
+                row.setInclusionFlags(toInclusionFlagsResponse(flags));
+            }
+        }
+    }
+
+    private int resolveRemainingSeats(TourSchedule schedule) {
+        if (schedule.getRemainingSeats() != null) {
+            return Math.max(0, schedule.getRemainingSeats());
+        }
+        int capacity = schedule.getCapacityTotal() != null ? schedule.getCapacityTotal() : 0;
+        int booked = schedule.getBookedSeats() != null ? schedule.getBookedSeats() : 0;
+        return Math.max(0, capacity - booked);
+    }
+
+    private TourNextScheduleSummaryResponse toNextScheduleSummary(TourSchedule schedule) {
+        int remaining = resolveRemainingSeats(schedule);
+        return TourNextScheduleSummaryResponse.builder()
+                .scheduleId(schedule.getId())
+                .scheduleCode(schedule.getScheduleCode())
+                .departureAt(schedule.getDepartureAt())
+                .returnAt(schedule.getReturnAt())
+                .remainingSeats(remaining)
+                .capacityTotal(schedule.getCapacityTotal())
+                .meetingPointName(schedule.getMeetingPointName())
+                .adultPrice(schedule.getAdultPrice())
+                .build();
+    }
+
+    private TourInclusionFlagsResponse toInclusionFlagsResponse(TourInclusionFlags flags) {
+        return TourInclusionFlagsResponse.builder()
+                .hasFlight(flags.getHasFlight())
+                .hasHotel(flags.getHasHotel())
+                .hasMeals(flags.getHasMeals())
+                .hasTickets(flags.getHasTickets())
+                .hasGuide(flags.getHasGuide())
+                .hasInsurance(flags.getHasInsurance())
+                .hasTransport(flags.getHasTransport())
+                .hotelStars(flags.getHotelStars())
+                .flightType(flags.getFlightType() != null ? flags.getFlightType().name() : null)
+                .notes(flags.getNotes())
+                .build();
+    }
+
+    private void enrichTourDetail(TourResponse response) {
+        if (response == null || response.getId() == null) {
+            return;
+        }
+        enrichPublicListRows(List.of(response));
+
+        Long tourId = response.getId();
+        List<TourDepartureHubResponse> hubs =
+                tourDepartureHubRepository.findByTourIdAndDeletedAtIsNullOrderBySortOrderAsc(tourId).stream()
+                        .map(this::toDepartureHubResponse)
+                        .toList();
+        response.setDepartureHubs(hubs);
+
+        List<TourComboPackageOfferResponse> combos = new ArrayList<>();
+        for (TourComboPackageLink link :
+                tourComboPackageLinkRepository.findByTourIdOrderBySortOrderAsc(tourId)) {
+            comboPackageRepository
+                    .findById(link.getComboId())
+                    .filter(combo -> Boolean.TRUE.equals(combo.getIsActive()))
+                    .ifPresent(combo -> combos.add(toComboOfferResponse(link, combo)));
+        }
+        response.setComboPackages(combos);
+    }
+
+    private TourDepartureHubResponse toDepartureHubResponse(TourDepartureHub hub) {
+        return TourDepartureHubResponse.builder()
+                .cityCode(hub.getCityCode())
+                .cityNameVi(hub.getCityNameVi())
+                .cityNameEn(hub.getCityNameEn())
+                .isPrimary(hub.getIsPrimary())
+                .sortOrder(hub.getSortOrder())
+                .build();
+    }
+
+    private TourComboPackageOfferResponse toComboOfferResponse(
+            TourComboPackageLink link, ComboPackage combo) {
+        BigDecimal finalPrice =
+                combo.getBasePrice().subtract(combo.getDiscountAmount()).max(BigDecimal.ZERO);
+        return TourComboPackageOfferResponse.builder()
+                .comboId(combo.getId())
+                .code(combo.getCode())
+                .name(combo.getName())
+                .description(combo.getDescription())
+                .basePrice(combo.getBasePrice())
+                .discountAmount(combo.getDiscountAmount())
+                .finalPrice(finalPrice)
+                .packageRole(link.getPackageRole() != null ? link.getPackageRole().name() : null)
+                .isDefault(link.getIsDefault())
+                .sortOrder(link.getSortOrder())
+                .build();
+    }
+
     private TourScheduleResponse toScheduleResponse(TourSchedule schedule) {
         List<TourSchedulePickupPointResponse> pickupPoints = loadSchedulePickupPoints(schedule.getId());
         List<TourScheduleGuideResponse> guideAssignments = loadScheduleGuides(schedule.getId());
+        int remainingSeats = resolveRemainingSeats(schedule);
 
         return TourScheduleResponse.builder()
                 .id(schedule.getId())
@@ -574,7 +755,7 @@ public class TourQueryServiceImpl implements TourQueryService {
                 .meetingLongitude(schedule.getMeetingLongitude())
                 .capacityTotal(schedule.getCapacityTotal())
                 .bookedSeats(schedule.getBookedSeats())
-                .remainingSeats(schedule.getRemainingSeats())
+                .remainingSeats(remainingSeats)
                 .minGuestsToOperate(schedule.getMinGuestsToOperate())
                 .adultPrice(schedule.getAdultPrice())
                 .childPrice(schedule.getChildPrice())

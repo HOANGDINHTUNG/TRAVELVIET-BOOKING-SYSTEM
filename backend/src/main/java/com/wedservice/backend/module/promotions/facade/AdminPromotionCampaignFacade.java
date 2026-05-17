@@ -33,4 +33,8 @@ public class AdminPromotionCampaignFacade {
     public PromotionCampaignResponse updatePromotionCampaignStatus(Long id, boolean isActive) {
         return adminPromotionCampaignService.updatePromotionCampaignStatus(id, isActive);
     }
+
+    public void deletePromotionCampaign(Long id) {
+        adminPromotionCampaignService.deletePromotionCampaign(id);
+    }
 }

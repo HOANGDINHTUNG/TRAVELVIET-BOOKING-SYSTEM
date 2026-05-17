@@ -27,6 +27,7 @@
       "empty": "No open schedules available right now.",
       "remaining": "Left"
     },
+    "productDetailsAria": "Program details",
     "tabs": {
       "description": "Description",
       "highlights": "Highlights",
@@ -41,6 +42,7 @@
     },
     "cta": {
       "pickSchedule": "Pick dates & book",
+      "bookNow": "Complete booking form",
       "viewPolicy": "View full policy"
     },
     "itinerarySummaryTitle": "Itinerary overview",
@@ -49,11 +51,28 @@
     "seasonMonths": "Months {{from}} – {{to}}",
     "checklistTitle": "Preparation checklist",
     "relatedTitle": "You may also like",
-    "relatedMockLead": "Demo suggestions — wire to API later.",
+    "relatedLead": "Tours that share the most experience tags with this program.",
+    "relatedPrev": "Previous",
+    "relatedNext": "Next",
     "relatedCta": "View tour",
     "reviewsShort": "reviews",
     "bookingsShort": "bookings",
+    "sustainabilityTitle": "Sustainability scores",
+    "esgLabel": "ESG",
+    "leiLabel": "LEI",
+    "sustainabilityHint": "Environmental/social and local economic impact reference scores for this program.",
     "bookingBandHint": "Pick a departure — each card shows dates, remaining seats, and price. Then set travelers in the panel on the right (desktop) or below (mobile).",
+    "departureFrom": "Depart from",
+    "nextDeparture": "Next departure",
+    "inclusionServicesTitle": "Included services",
+    "comboTitle": "Combo add-ons",
+    "comboNone": "No combo",
+    "comboIncluded": "Included in tour price",
+    "comboRoleIncluded": "Included",
+    "comboRoleRecommended": "Recommended",
+    "comboRoleOptional": "Optional",
+    "appliedCombo": "Applied combo",
+    "pickupTitle": "Meeting & pickup points",
     "galleryCount": "Photo {{current}} / {{total}}"
   }
 }

@@ -5,6 +5,7 @@ import com.wedservice.backend.common.security.AuthenticatedUserProvider;
 import com.wedservice.backend.module.bookings.dto.request.BookingProductLineRequest;
 import com.wedservice.backend.module.bookings.dto.request.BookingQuoteRequest;
 import com.wedservice.backend.module.bookings.dto.response.BookingQuoteResponse;
+import com.wedservice.backend.module.bookings.repository.BookingRepository;
 import com.wedservice.backend.module.bookings.validator.BookingValidator;
 import com.wedservice.backend.module.commerce.entity.ComboPackage;
 import com.wedservice.backend.module.commerce.entity.Product;
@@ -40,6 +41,8 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -69,6 +72,9 @@ class BookingPricingServiceTest {
     @Mock
     private AuthenticatedUserProvider authenticatedUserProvider;
 
+    @Mock
+    private BookingRepository bookingRepository;
+
     private BookingPricingService bookingPricingService;
 
     @BeforeEach
@@ -82,8 +88,12 @@ class BookingPricingServiceTest {
                 voucherUserClaimRepository,
                 userRepository,
                 authenticatedUserProvider,
-                new BookingValidator()
+                new BookingValidator(bookingRepository)
         );
+        when(bookingRepository.sumSeatOccupancyByScheduleIdAndStatusIn(
+                any(Long.class),
+                eq(BookingValidator.SCHEDULE_OCCUPYING_STATUSES)))
+                .thenReturn(0L);
     }
 
     @Test
