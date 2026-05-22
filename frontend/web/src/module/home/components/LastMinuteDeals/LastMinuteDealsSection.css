@@ -271,16 +271,33 @@
   padding: 12px 14px 10px;
 }
 
+.lmd-card__title-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.lmd-card__brand {
+  margin-top: 1px;
+  height: 24px;
+  width: auto;
+  max-width: 56px;
+  flex-shrink: 0;
+  object-fit: contain;
+  object-position: left;
+}
+
 .lmd-card__title {
-  margin: 0 0 8px;
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+  /* Luôn giữ khung 2 dòng (15px × 1.35 × 2) — 1 dòng vẫn chừa hàng dưới */
+  min-height: calc(15px * 1.35 * 2);
   color: #111;
   font-size: 15px;
   font-weight: 800;
   line-height: 1.35;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
 }
 
 .lmd-card__code {

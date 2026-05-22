@@ -64,22 +64,22 @@ function Modal(props: ModalProps) {
       }}
     >
       <div
-        className={`flex max-h-[92vh] w-full ${SIZE_CLASS[props.size ?? 'md']} flex-col overflow-hidden rounded-xl bg-white shadow-2xl`}
+        className={`tv-modal-panel flex max-h-[92vh] w-full ${SIZE_CLASS[props.size ?? 'md']} flex-col overflow-hidden rounded-xl bg-card text-foreground shadow-2xl`}
       >
-        <header className="flex items-start justify-between gap-4 border-b border-slate-200 px-5 py-4">
+        <header className="flex items-start justify-between gap-4 border-b border-border px-5 py-4">
           <div className="flex flex-col gap-1">
-            <h2 className="text-base font-semibold text-slate-900">
+            <h2 className="text-base font-semibold text-foreground">
               {props.title}
             </h2>
             {props.description ? (
-              <p className="text-xs text-slate-500">{props.description}</p>
+              <p className="text-xs text-muted-foreground">{props.description}</p>
             ) : null}
           </div>
           <button
             type="button"
             onClick={props.onClose}
             disabled={!dismissable}
-            className="rounded-md p-1 text-slate-500 hover:bg-slate-100 disabled:opacity-50"
+            className="rounded-md p-1 text-muted-foreground hover:bg-muted disabled:opacity-50"
             aria-label={props.closeAriaLabel ?? 'Close dialog'}
           >
             <X className="h-4 w-4" aria-hidden />
@@ -89,7 +89,7 @@ function Modal(props: ModalProps) {
         <div className="flex-1 overflow-y-auto px-5 py-4">{props.children}</div>
 
         {props.footer ? (
-          <footer className="flex flex-wrap items-center justify-end gap-2 border-t border-slate-200 bg-slate-50 px-5 py-3">
+          <footer className="tv-modal-footer flex flex-wrap items-center justify-end gap-2 border-t border-border bg-muted/40 px-5 py-3">
             {props.footer}
           </footer>
         ) : null}

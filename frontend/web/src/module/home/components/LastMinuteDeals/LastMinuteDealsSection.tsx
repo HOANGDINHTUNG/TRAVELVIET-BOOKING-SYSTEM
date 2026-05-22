@@ -14,6 +14,7 @@ import {
   Zap,
 } from 'lucide-react'
 import { catalogTourLinks, tourApi } from '@/api/server/Tour.api'
+import { TruncatedTextTooltip } from '@/components/ui/TruncatedTextTooltip'
 import { SmoothCarouselTrack } from '@/components/ui/SmoothCarousel/SmoothCarouselTrack'
 import { useSmoothInfiniteCarousel } from '@/components/ui/SmoothCarousel/useSmoothInfiniteCarousel'
 import {
@@ -35,6 +36,7 @@ import {
   resolveTourCardImage,
 } from './lastMinuteDealsUtils'
 import { inclusionBadgeLabels } from '@/module/tours/utils/tourInclusionBadges'
+import { HOME_TOUR_CARD_BRAND_LOGO } from '@/module/tours/utils/relatedTourCard'
 import './LastMinuteDealsSection.css'
 
 /** Cùng pattern hàng BEACH & ISLAND: tối đa 8 thẻ, 4 slot, loop vô hạn */
@@ -109,7 +111,23 @@ function FlashDealCard({
       </div>
 
       <div className="lmd-card__body">
-        <h3 className="lmd-card__title">{title}</h3>
+        <div className="lmd-card__title-row">
+          <img
+            src={HOME_TOUR_CARD_BRAND_LOGO}
+            alt=""
+            aria-hidden
+            className="lmd-card__brand"
+            loading="lazy"
+            decoding="async"
+          />
+          <TruncatedTextTooltip
+            as="h3"
+            text={title}
+            lineClamp={2}
+            side="top"
+            className="lmd-card__title"
+          />
+        </div>
         <p className="lmd-card__code">
           <Ticket size={14} strokeWidth={2} aria-hidden />
           <span>{displayTourCode(tour)}</span>

@@ -73,9 +73,37 @@
   );
   --nav-glass-bg-scrolled-dark: color-mix(in srgb, #0f172a 88%, rgba(0, 0, 0, 0.35));
 
+  /* Header surfaces */
+  --header-surface-light: color-mix(in srgb, #ffffff 96%, #f0f8ff 4%);
+  --header-surface-dark: color-mix(in srgb, #243552 94%, #2d4468 6%);
+  --header-surface-overlay: rgba(0, 0, 0, 0.38);
+  --header-border-light: color-mix(in srgb, var(--color-primary) 10%, #d4e6f4);
+  --header-border-dark: color-mix(in srgb, #ffffff 14%, transparent);
+
+  /* Home search band */
+  --home-search-outer: linear-gradient(180deg, #f8fcff 0%, #eef6fc 100%);
+  --home-search-panel: linear-gradient(165deg, #f6fbff 0%, #e9f4fc 48%, #e4f1fa 100%);
+  --home-search-field-bg: #ffffff;
+  --home-search-field-border: #c5d5e5;
+  --home-search-field-text: #334155;
+  --home-search-field-muted: #6b7a8c;
+  --home-search-icon: #ff6600;
+  --home-search-panel-shadow: 0 4px 18px rgba(15, 80, 120, 0.08);
+
   /* Neon pair (light: subtle sheen on borders / focus) */
   --color-neon-blue: #0ea5e9;
   --color-neon-purple: #7c3aed;
+
+  /* Tours catalog (/tours) hero banner */
+  --tours-catalog-hero-min-h: clamp(280px, calc(28vw + 80px), 400px);
+  --tours-catalog-hero-gradient: linear-gradient(
+    180deg,
+    rgba(8, 32, 64, 0.12) 0%,
+    rgba(8, 32, 64, 0.68) 100%
+  );
+  --tours-catalog-hero-title: #ffffff;
+  --tours-catalog-hero-lead: rgba(255, 255, 255, 0.95);
+  --tours-catalog-hero-image-filter: none;
 
   /* Home — 4 tour card 300px + gap 18px (carousel / section căn đều) */
   --home-tour-card-width: 300px;
@@ -131,8 +159,43 @@
   --focus-ring-color: color-mix(in srgb, var(--color-neon-blue) 70%, var(--color-neon-purple) 30%);
 
   --nav-glass-bg-rest: color-mix(in srgb, rgba(8, 14, 28, 0.88) 90%, transparent);
-  --nav-glass-bg-scrolled-dark: color-mix(in srgb, #0f172a 92%, rgba(0, 0, 0, 0.4));
+  --nav-glass-bg-scrolled-dark: color-mix(in srgb, #1a2a42 92%, rgba(0, 0, 0, 0.35));
+
+  --header-surface-light: color-mix(in srgb, #ffffff 96%, #f0f8ff 4%);
+  --header-surface-dark: color-mix(in srgb, #2a3f5e 92%, #354d72 8%);
+  --header-surface-overlay: rgba(0, 0, 0, 0.42);
+  --header-border-light: color-mix(in srgb, var(--color-primary) 10%, #d4e6f4);
+  --header-border-dark: color-mix(in srgb, #ffffff 16%, transparent);
+
+  --home-search-outer: var(--color-page);
+  --home-search-panel: var(--color-surface);
+  --home-search-field-bg: var(--color-surface-elevated);
+  --home-search-field-border: var(--color-border);
+  --home-search-field-text: var(--color-text);
+  --home-search-field-muted: var(--color-muted);
+  --home-search-icon: var(--color-accent);
+  --home-search-panel-shadow: 0 8px 32px rgba(0, 0, 0, 0.38);
+
+  --tours-catalog-hero-gradient: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.45) 0%,
+    rgba(0, 0, 0, 0.82) 100%
+  );
+  --tours-catalog-hero-title: #f0f9ff;
+  --tours-catalog-hero-lead: rgba(232, 240, 247, 0.88);
+  --tours-catalog-hero-image-filter: brightness(0.72) saturate(0.85);
 
   --color-neon-blue: #22d3ee;
   --color-neon-purple: #c084fc;
+}
+
+/* Chiều cao header fixed — py-1.5 + logo (Header.tsx) */
+:root {
+  --site-header-height: 3rem;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --site-header-height: 3.75rem;
+  }
 }

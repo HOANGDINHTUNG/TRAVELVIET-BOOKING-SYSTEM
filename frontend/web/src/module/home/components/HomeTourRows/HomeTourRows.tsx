@@ -14,14 +14,11 @@ import {
 import { SmoothCarouselTrack } from "../../../../components/ui/SmoothCarousel/SmoothCarouselTrack";
 import { useSmoothInfiniteCarousel } from "../../../../components/ui/SmoothCarousel/useSmoothInfiniteCarousel";
 import { tourDetailPath } from "../../../tours/utils/slug";
+import { HOME_TOUR_CARD_BRAND_LOGO } from "../../../tours/utils/relatedTourCard";
 import "./HomeTourRows.css";
 
 const MAX_TOURS = 8;
 const VISIBLE_SLOTS = 4;
-
-/** Logo trên thẻ tour (thay vòng tròn nâu mặc định) */
-const HOME_TOUR_CARD_BRAND_LOGO =
-  "https://res.cloudinary.com/dmzvum1lp/image/upload/v1778951138/logo_vqb3ks.png";
 
 function cornerLabelsForTour(tour: Tour): string[] {
   const labels: string[] = [];

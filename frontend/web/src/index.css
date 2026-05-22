@@ -2,6 +2,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "./styles/theme.css";
+@import "./styles/dark-mode-surfaces.css";
 
 /* Font Oswald (BẮT BUỘC cho BannerHome typography) — URL import phải đứng trước các rule khác */
 

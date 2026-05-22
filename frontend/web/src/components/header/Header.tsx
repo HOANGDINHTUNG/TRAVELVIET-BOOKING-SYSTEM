@@ -6,12 +6,9 @@ import { useTranslation } from "react-i18next";
 import { motion } from "motion/react";
 import { Languages, Moon, SunMedium } from "lucide-react";
 
-import {
-  HoveredLink,
-  Menu,
-  MenuItem,
-  type HeaderNavAppearance,
-} from "./ui/navbar-menu";
+import type { HeaderNavAppearance } from "./ui/navbar-menu";
+import { HeaderMegaMenu } from "./HeaderMegaMenu";
+import { HEADER_MEGA_LINKS } from "./headerMegaMenuConfig";
 import { HeaderAccountMenu } from "./HeaderAccountMenu";
 import { MobileNav } from "./MobileNav";
 import { userApi } from "../../api/server/User.api";
@@ -26,12 +23,6 @@ const BRAND = {
   logoSrc:
     "https://res.cloudinary.com/dmzvum1lp/image/upload/v1778951137/logo_web_1_o9tz3q.png",
   name: "TravelViet",
-};
-
-type NavItemConfig = {
-  label: string;
-  to: string;
-  dropdown?: React.ReactNode;
 };
 
 const HEADER_HIDE_DEADZONE_PX = 2;
@@ -66,33 +57,19 @@ export default function Header() {
   const user = useAuthStore((s) => s.user);
   const [hasManagementAccess, setHasManagementAccess] = useState(false);
 
-  const navItems = useMemo<NavItemConfig[]>(
+  const mobileNavItems = useMemo(
     () => [
+      { label: t("nav.home"), to: HEADER_MEGA_LINKS.home },
+      { label: t("homeQuick.tours"), to: HEADER_MEGA_LINKS.toursDomestic },
       {
-        label: t("nav.home"),
-        to: "/",
-        dropdown: (
-          <div className="flex flex-col space-y-3 text-sm">
-            <HoveredLink href="/">{t("nav.home")}</HoveredLink>
-            <HoveredLink href="/tours?domesticOnly=true">
-              {t("header.exploreTours")}
-            </HoveredLink>
-            <HoveredLink href="/destinations">
-              {t("homeQuick.destinations")}
-            </HoveredLink>
-          </div>
-        ),
+        label: t("header.megaMenu.tours.flash.title"),
+        to: HEADER_MEGA_LINKS.toursFlash,
       },
-      { label: t("homeQuick.tours"), to: "/tours?domesticOnly=true" },
-      { label: t("homeQuick.destinations"), to: "/destinations" },
-      { label: t("homeQuick.support"), to: "/support" },
+      { label: t("homeQuick.destinations"), to: HEADER_MEGA_LINKS.destinations },
+      { label: t("homeQuick.support"), to: HEADER_MEGA_LINKS.support },
+      { label: t("homeQuick.passport"), to: HEADER_MEGA_LINKS.passport },
     ],
     [t],
-  );
-
-  const mobileNavItems = useMemo(
-    () => navItems.map((it) => ({ label: it.label, to: it.to })),
-    [navItems],
   );
 
   const loginLabel = t("header.login");
@@ -168,41 +145,46 @@ export default function Header() {
     window.sessionStorage.removeItem("travelviet-login-welcome-pending");
   }, []);
 
-  /** Chỉ trang có banner: trong suốt + chữ sáng khi mới vào / chưa cuộn */
-  const isOverlayTop =
-    headerVariant === "over-hero" && !scrolled;
+  /** Trang hero: header kính mờ suốt (kể cả khi đã cuộn). */
+  const isOverHero = headerVariant === "over-hero";
+  /** Chỉ ảnh hưởng kích thước logo khi chưa cuộn. */
+  const isOverlayTop = isOverHero && !scrolled;
 
   const isDarkTheme = theme === "dark";
 
-  const navAppearance: HeaderNavAppearance = isOverlayTop
+  const navAppearance: HeaderNavAppearance = isOverHero
     ? "overlay"
     : isDarkTheme
       ? "solid-dark"
       : "solid-light";
 
-  const avatarRing = isOverlayTop
+  const avatarRing = isOverHero
     ? "border-white/45 bg-black/25 text-white"
     : isDarkTheme
       ? "border-white/20 bg-white/10 text-white"
       : "border-black/15 bg-black/5 text-black";
 
-  const headerSurface = isOverlayTop
-    ? "backdrop-blur-0 bg-transparent border-b border-transparent text-white [text-shadow:0_2px_10px_rgba(0,0,0,0.55)]"
-    : isDarkTheme
-      ? "backdrop-blur-xl bg-[#0f0f0f] border-b border-white/10 text-white shadow-sm shadow-black/30 [text-shadow:none]"
-      : "backdrop-blur-xl bg-[#ebe6e3] border-b border-black/10 text-black shadow-sm shadow-black/6 [text-shadow:none]";
+  /** Kính mờ — nhìn xuyên nội dung phía dưới (hero / trang cuộn). */
+  const headerGlass =
+    "backdrop-blur-xl backdrop-saturate-150 border-b supports-[backdrop-filter]:backdrop-blur-xl";
 
-  const iconBtnClass = isOverlayTop
+  const headerSurface = isOverHero
+    ? `${headerGlass} bg-[var(--header-surface-overlay)] border-b border-white/15 text-white [text-shadow:0_1px_8px_rgba(0,0,0,0.35)]`
+    : isDarkTheme
+      ? `${headerGlass} bg-[color-mix(in_srgb,var(--header-surface-dark)_92%,transparent)] border-[var(--header-border-dark)] text-white shadow-[0_8px_32px_rgba(0,0,0,0.28)] [text-shadow:none]`
+      : `${headerGlass} bg-[color-mix(in_srgb,var(--header-surface-light)_94%,transparent)] border-[var(--header-border-light)] text-[var(--color-text)] shadow-[0_8px_24px_rgba(15,80,120,0.06)] [text-shadow:none]`;
+
+  const iconBtnClass = isOverHero
     ? "border-white/25 bg-black/20 text-white hover:bg-white/15 backdrop-blur"
     : isDarkTheme
       ? "border-white/20 bg-white/10 text-white hover:bg-white/15"
-      : "border-black/15 bg-black/5 text-black hover:bg-black/10";
+      : "border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-surface)_88%,transparent)] text-[var(--color-text)] hover:bg-[var(--color-surface-soft)]";
 
-  const mobileBarClass = isOverlayTop
-    ? "bg-neutral-950/80 border-neutral-800 text-white"
+  const mobileBarClass = isOverHero
+    ? "border-transparent text-white"
     : isDarkTheme
-      ? "bg-[#0f0f0f] border-white/10 text-white"
-      : "bg-[#ebe6e3] border-black/10 text-black";
+      ? "border-transparent text-white"
+      : "border-transparent text-[var(--color-text)]";
 
   return (
     <motion.header
@@ -225,9 +207,9 @@ export default function Header() {
       <nav
         aria-label={t("nav.ariaMain")}
         className={`mx-auto hidden md:flex max-w-6xl items-center justify-between
-                   px-3 sm:px-4 md:px-8 gap-2
-                   transition-[padding] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]
-                   ${isOverlayTop ? "py-3.5" : "py-1.5"}`}
+                   px-3 sm:px-4 md:px-8 gap-2 py-1.5
+                   transition-[padding] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]`
+                  }
       >
         {/* Logo (ảnh wordmark) */}
         <Link
@@ -247,20 +229,13 @@ export default function Header() {
 
         {/* Menu giữa */}
         <div className="hidden md:flex items-center">
-          <Menu setActive={setActiveMenu}>
-            {navItems.map((it) => (
-              <MenuItem
-                key={it.to}
-                setActive={setActiveMenu}
-                active={activeMenu}
-                item={it.label}
-                to={it.to}
-                appearance={navAppearance}
-              >
-                {it.dropdown}
-              </MenuItem>
-            ))}
-          </Menu>
+          <HeaderMegaMenu
+            t={t}
+            activeMenu={activeMenu}
+            setActiveMenu={setActiveMenu}
+            appearance={navAppearance}
+            isAuthenticated={isAuthenticated}
+          />
         </div>
 
         {/* Slot phải (CTA / auth / toggles) */}
@@ -327,7 +302,7 @@ export default function Header() {
       {/* ===== NAV MOBILE ===== */}
       <nav
         aria-label={t("nav.ariaMain")}
-        className={`md:hidden px-3 py-2 border-b backdrop-blur ${mobileBarClass}`}
+        className={`md:hidden px-3 py-2 ${mobileBarClass}`}
       >
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
@@ -361,7 +336,7 @@ export default function Header() {
               language={language}
               hasManagementAccess={hasManagementAccess}
               triggerClassName={
-                isOverlayTop
+                isOverHero
                   ? "border-white/50 bg-black/20 text-white"
                   : isDarkTheme
                     ? "border-white/20 bg-white/10 text-white"

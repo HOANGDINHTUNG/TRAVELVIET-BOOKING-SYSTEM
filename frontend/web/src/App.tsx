@@ -47,7 +47,7 @@ function App() {
               ? 'min-h-[90vh]'
               : isTourPublicDetailPage
                 ? 'min-h-[90vh] pt-12 md:pt-14'
-                : 'min-h-[90vh] pt-13 md:pt-19'
+                : 'min-h-[90vh] pt-[var(--site-header-height)]'
         }
       >
         <Outlet />

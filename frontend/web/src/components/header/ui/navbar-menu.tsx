@@ -66,34 +66,38 @@ export const MenuItem: React.FC<MenuItemProps> = ({
   const isOverlay = appearance === "overlay";
   const useLightNavText = isOverlay || appearance === "solid-dark";
 
-  /** Overlay (hợp banner): chữ trắng + gạch cam. Nền tối: chữ trắng + gạch trắng. Sáng: đen. */
-  const labelTone = useLightNavText ? "!text-white" : "!text-black";
+  /** Overlay: chữ trắng; mục đang chọn → cam (không gạch dưới). Nền sáng: đen / cam. */
+  const labelTone = isPageActive
+    ? "!text-[#ff6600]"
+    : useLightNavText
+      ? "!text-white"
+      : "!text-black";
 
   const underlineTone = "!bg-[#ff6600]";
+  const showUnderline = !isPageActive;
 
   return (
     <div onMouseEnter={() => setActive(item)} className="relative">
-      {/* Label chính + sliding underline (Movizone DNA) */}
       <Link to={to} className="block group/menuitem">
         <motion.div
           transition={{ duration: 0.2 }}
-          className="relative flex flex-col items-center py-1"
+          className="relative py-1"
         >
           <span
-            className={`relative cursor-pointer text-[13px] uppercase tracking-wide transition-[color,opacity,font-weight] ${labelTone} ${
+            className={`relative inline-block cursor-pointer pb-1 text-[13px] uppercase tracking-wide transition-[color,opacity,font-weight] ${labelTone} ${
               isPageActive
                 ? "font-bold opacity-100"
                 : "font-medium opacity-70 hover:opacity-100"
             }`}
           >
             {item}
+            {showUnderline ? (
+              <span
+                aria-hidden
+                className={`pointer-events-none absolute inset-x-0 bottom-0 block h-[2px] w-full rounded-full origin-left transform-gpu transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${underlineTone} scale-x-0 group-hover/menuitem:scale-x-100 ${isHover ? "scale-x-100" : ""}`}
+              />
+            ) : null}
           </span>
-
-          <span
-            className={`pointer-events-none mt-1 block h-[2px] w-12 rounded-full origin-center transform-gpu transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${underlineTone} ${
-              isPageActive ? "scale-x-100" : "scale-x-0"
-            } group-hover/menuitem:scale-x-100 ${isHover ? "scale-x-100" : ""}`}
-          />
         </motion.div>
       </Link>
 
@@ -109,7 +113,7 @@ export const MenuItem: React.FC<MenuItemProps> = ({
             <motion.div
               layoutId="active-menu-dropdown"
               transition={springTransition}
-              className="bg-white dark:bg-black backdrop-blur-sm rounded-2xl overflow-hidden border border-black/20 dark:border-white/20 shadow-xl"
+              className="rounded-2xl overflow-hidden border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] shadow-xl backdrop-blur-md"
             >
               <motion.div layout className="w-max h-full p-4">
                 {children}
@@ -141,19 +145,20 @@ export const Menu: React.FC<MenuProps> = ({ setActive, children }) => {
 type ProductItemProps = {
   title: string;
   description: string;
-  href: string;
+  /** SPA route (ưu tiên). */
+  to: string;
   src: string;
 };
 
 export const ProductItem: React.FC<ProductItemProps> = ({
   title,
   description,
-  href,
+  to,
   src,
 }) => {
   return (
-    <a
-      href={href}
+    <Link
+      to={to}
       className="
         group flex space-x-3 rounded-lg p-2 transition-all duration-300
         hover:bg-neutral-100 dark:hover:bg-neutral-800/70
@@ -184,23 +189,36 @@ export const ProductItem: React.FC<ProductItemProps> = ({
           {description}
         </p>
       </div>
-    </a>
+    </Link>
   );
 };
 
-type HoveredLinkProps = React.AnchorHTMLAttributes<HTMLAnchorElement> & {
+type HoveredLinkProps = {
   children: React.ReactNode;
+  to?: string;
+  href?: string;
+  className?: string;
 };
 
 export const HoveredLink: React.FC<HoveredLinkProps> = ({
   children,
-  ...rest
+  to,
+  href,
+  className = "",
 }) => {
+  const tone =
+    "text-neutral-700 dark:text-neutral-200 hover:text-[#ff6600] transition-colors";
+
+  if (to) {
+    return (
+      <Link to={to} className={`${tone} ${className}`.trim()}>
+        {children}
+      </Link>
+    );
+  }
+
   return (
-    <a
-      {...rest}
-      className="text-neutral-700 dark:text-neutral-200 hover:text-red-700"
-    >
+    <a href={href ?? "#"} className={`${tone} ${className}`.trim()}>
       {children}
     </a>
   );

@@ -135,13 +135,25 @@
   color: #facc15;
 }
 
-.tours-catalog-card__panel {
-  --catalog-panel-height: 210px;
+.tours-catalog-card__foot-anchor {
   position: absolute;
   left: 0;
   right: 0;
   bottom: 0;
   z-index: 3;
+  padding: 0 0 14px;
+}
+
+.tours-catalog-card__foot-anchor-inner {
+  position: relative;
+}
+
+.tours-catalog-card__panel {
+  position: relative;
+  left: auto;
+  right: auto;
+  bottom: auto;
+  z-index: 1;
   padding: 16px 16px 14px;
   background: #ffffff;
   border-top: 1px solid color-mix(in srgb, #e2e8f0 90%, var(--color-border));

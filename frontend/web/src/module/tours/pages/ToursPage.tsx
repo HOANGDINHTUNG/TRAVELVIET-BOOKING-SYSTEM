@@ -371,16 +371,18 @@ function ToursPage() {
                           ) : null}
                       </div>
 
-                      <button
-                        type="button"
-                        className="tours-catalog-card__quick-btn"
-                        onClick={() => openQuickView(tour, title, days, provinceLine)}
-                      >
-                        <Eye size={16} strokeWidth={2.2} aria-hidden />
-                        Xem nhanh
-                      </button>
+                      <div className="tours-catalog-card__foot-anchor">
+                        <div className="tours-catalog-card__foot-anchor-inner">
+                          <button
+                            type="button"
+                            className="tours-catalog-card__quick-btn"
+                            onClick={() => openQuickView(tour, title, days, provinceLine)}
+                          >
+                            <Eye size={16} strokeWidth={2.2} aria-hidden />
+                            Xem nhanh
+                          </button>
 
-                      <div className="tours-catalog-card__panel">
+                          <div className="tours-catalog-card__panel">
                           <h2 className="tours-catalog-card__title">{title}</h2>
                           <div className="tours-catalog-card__row">
                             <span>
@@ -439,7 +441,9 @@ function ToursPage() {
                               Xem chi tiết
                             </Link>
                           </div>
+                          </div>
                         </div>
+                      </div>
                     </article>
                   )
                 })}

@@ -1,0 +1,324 @@
+/**
+ * Dark mode — nền & chữ cho vùng dưới header / search và home sections.
+ * Dùng .app-shell.theme-dark (khớp App.tsx).
+ */
+
+.app-shell.theme-light {
+  color-scheme: light;
+}
+
+.app-shell.theme-dark {
+  color-scheme: dark;
+}
+
+/* ========== Thanh tìm kiếm (dưới banner) ========== */
+.app-shell.theme-light .home-search-band {
+  background: var(--home-search-outer);
+  border-bottom-color: var(--color-border);
+}
+
+.app-shell.theme-light .home-search-band .home-search-bloom {
+  display: block;
+}
+
+.app-shell.theme-light .home-search-panel {
+  background: var(--home-search-panel);
+  border-color: var(--color-border);
+  box-shadow: var(--home-search-panel-shadow);
+}
+
+.app-shell.theme-light .home-search-band select,
+.app-shell.theme-light .home-search-band input[type="date"] {
+  color-scheme: light;
+}
+
+.app-shell.theme-light .home-search-band select option {
+  background-color: #ffffff;
+  color: var(--home-search-field-text);
+}
+
+.app-shell.theme-light .home-search-band label[class*="rounded-lg"] {
+  background: var(--home-search-field-bg);
+  border-color: var(--home-search-field-border);
+}
+
+/* ========== Thanh tìm kiếm — dark ========== */
+.app-shell.theme-dark .home-search-band {
+  background: var(--home-search-outer);
+  border-bottom-color: var(--color-border-subtle);
+}
+
+.app-shell.theme-dark .home-search-band .home-search-bloom {
+  display: none;
+}
+
+.app-shell.theme-dark .home-search-panel {
+  background: var(--home-search-panel) !important;
+  border-color: var(--color-border) !important;
+  box-shadow: var(--home-search-panel-shadow) !important;
+}
+
+.app-shell.theme-dark .home-search-band select,
+.app-shell.theme-dark .home-search-band input[type="date"] {
+  color-scheme: dark;
+}
+
+.app-shell.theme-dark .home-search-band select option {
+  background-color: var(--color-surface-elevated);
+  color: var(--color-text);
+}
+
+.app-shell.theme-dark .home-search-band label[class*="rounded-lg"] {
+  background: var(--home-search-field-bg) !important;
+  border-color: var(--home-search-field-border) !important;
+}
+
+.app-shell.theme-dark .home-search-band label span[class*="text-[#ff6600]"],
+.app-shell.theme-dark .home-search-band .text-\[\#ff6600\] {
+  color: var(--home-search-icon) !important;
+}
+
+/* ========== Home services row ========== */
+.app-shell.theme-dark .hsrow-wrap {
+  background: var(--color-surface);
+  border-bottom-color: var(--color-border-subtle);
+}
+
+.app-shell.theme-dark .hsrow-inner > * + * .hsrow-item {
+  border-left-color: var(--color-border-subtle);
+}
+
+.app-shell.theme-dark .hsrow-item:hover {
+  background: var(--color-surface-soft);
+}
+
+.app-shell.theme-dark .hsrow-item:nth-child(1),
+.app-shell.theme-dark .hsrow-item:nth-child(2) {
+  border-bottom-color: var(--color-border-subtle);
+}
+
+.app-shell.theme-dark .hsrow-label {
+  color: var(--color-aqua);
+}
+
+/* ========== Last minute deals — thẻ trắng + chữ tối ========== */
+.app-shell.theme-dark .lmd-card {
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35);
+}
+
+.app-shell.theme-dark .lmd-card__title {
+  color: var(--color-heading);
+}
+
+.app-shell.theme-dark .lmd-card__code,
+.app-shell.theme-dark .lmd-card__code svg {
+  color: var(--color-ocean);
+}
+
+.app-shell.theme-dark .lmd-card__badge {
+  background: var(--color-surface-soft);
+  color: var(--color-muted);
+  border: 1px solid var(--color-border-subtle);
+}
+
+.app-shell.theme-dark .lmd-card__meta-row,
+.app-shell.theme-dark .lmd-card__meta-row svg {
+  color: var(--color-muted);
+}
+
+.app-shell.theme-dark .lmd-card__seats {
+  color: #ff8a8a !important;
+}
+
+.app-shell.theme-dark .lmd-card__foot {
+  background: var(--color-surface-soft);
+  border-top-color: var(--color-border-subtle);
+}
+
+.app-shell.theme-dark .lmd-card__price-label,
+.app-shell.theme-dark .lmd-card__price-old {
+  color: var(--color-muted);
+}
+
+.app-shell.theme-dark .lmd-card__price-now {
+  color: var(--color-ocean);
+}
+
+.app-shell.theme-dark .lmd-card__book {
+  background: color-mix(in srgb, var(--color-danger) 22%, var(--color-surface-soft));
+  color: #ffb4b4;
+}
+
+.app-shell.theme-dark .lmd-card__book:hover {
+  background: color-mix(in srgb, var(--color-danger) 75%, #7f1d1d);
+  color: #fff;
+}
+
+.app-shell.theme-dark .lmd-card--skeleton {
+  background: linear-gradient(
+    110deg,
+    var(--color-surface-soft) 8%,
+    var(--color-surface-elevated) 18%,
+    var(--color-surface-soft) 33%
+  );
+}
+
+/* ========== Latest promotions ========== */
+.app-shell.theme-dark .latest-promotions-section {
+  background: var(--color-page);
+}
+
+.app-shell.theme-dark .latest-promotions-head h2 {
+  color: var(--color-heading);
+}
+
+.app-shell.theme-dark .latest-promotions-more {
+  color: var(--color-ocean);
+}
+
+.app-shell.theme-dark .latest-promotions-more:hover {
+  color: var(--color-aqua);
+}
+
+.app-shell.theme-dark .latest-promotions-arrow {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+  color: var(--color-muted);
+}
+
+.app-shell.theme-dark .latest-promotion-card {
+  background: var(--color-surface-soft);
+  border-color: var(--color-border);
+}
+
+.app-shell.theme-dark .latest-promotion-cta {
+  background: var(--color-surface-elevated);
+  color: var(--color-heading);
+}
+
+/* ========== Home lower sections ========== */
+.app-shell.theme-dark .hls-section {
+  background: var(--color-surface);
+}
+
+.app-shell.theme-dark .hls-title,
+.app-shell.theme-dark .hls-title-inline {
+  color: var(--color-heading);
+}
+
+.app-shell.theme-dark .hls-title-accent,
+.app-shell.theme-dark .hls-more-link,
+.app-shell.theme-dark .hls-more-icon,
+.app-shell.theme-dark .hls-meta-icon {
+  color: var(--color-ocean);
+}
+
+.app-shell.theme-dark .hls-more-link:hover,
+.app-shell.theme-dark .hls-more-link:hover .hls-more-icon {
+  color: var(--color-aqua);
+  border-color: var(--color-aqua);
+}
+
+.app-shell.theme-dark .hls-testimonials,
+.app-shell.theme-dark .hls-section.hls-gallery,
+.app-shell.theme-dark .hls-corporate {
+  background: var(--color-page-tint);
+}
+
+.app-shell.theme-dark .hls-arrow,
+.app-shell.theme-dark .hls-logo-item {
+  background: var(--color-surface-soft);
+  border-color: var(--color-border);
+  color: var(--color-muted);
+}
+
+.app-shell.theme-dark .hls-arrow:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.app-shell.theme-dark .hls-testi-card {
+  background: var(--color-surface-elevated);
+  border-color: var(--color-border);
+  box-shadow: var(--shadow-card);
+}
+
+.app-shell.theme-dark .hls-testi-text {
+  color: var(--color-muted);
+}
+
+.app-shell.theme-dark .hls-testi-author strong {
+  color: var(--color-heading);
+}
+
+.app-shell.theme-dark .hls-testi-author span {
+  color: var(--color-muted);
+}
+
+.app-shell.theme-dark .hls-article-media,
+.app-shell.theme-dark .hls-news-thumb {
+  background: var(--color-surface-soft);
+}
+
+.app-shell.theme-dark .hls-article-title,
+.app-shell.theme-dark .hls-news-title {
+  color: var(--color-heading);
+}
+
+.app-shell.theme-dark .hls-article-meta,
+.app-shell.theme-dark .hls-news-meta {
+  color: var(--color-muted);
+}
+
+.app-shell.theme-dark .hls-logo-item span {
+  color: var(--color-muted);
+}
+
+/* ========== Tour card (panel trắng + chữ #1A1A1A) ========== */
+.app-shell.theme-dark .tv-tour-card-panel {
+  background: var(--color-surface) !important;
+  box-shadow: var(--shadow-card) !important;
+}
+
+.app-shell.theme-dark .tv-tour-card-panel h3,
+.app-shell.theme-dark .tv-tour-card-panel .text-\[\#1A1A1A\] {
+  color: var(--color-heading) !important;
+}
+
+.app-shell.theme-dark .tv-tour-card-panel .text-\[\#5C6478\],
+.app-shell.theme-dark .tv-tour-card-panel .text-\[\#6B7693\],
+.app-shell.theme-dark .tv-tour-card-panel .text-\[\#8B95A8\] {
+  color: var(--color-muted) !important;
+}
+
+.app-shell.theme-dark .tv-tour-card-panel .bg-\[\#E8ECF3\] {
+  background: var(--color-border) !important;
+}
+
+.app-shell.theme-dark .tv-tour-card-panel .text-\[\#0046BE\] {
+  color: var(--color-ocean) !important;
+}
+
+.app-shell.theme-dark .tv-tour-card-panel a.bg-\[\#0046BE\] {
+  background: color-mix(in srgb, var(--color-ocean) 88%, #1e3a5f) !important;
+  color: #fff !important;
+}
+
+/* ========== Modal / confirm ========== */
+.app-shell.theme-dark .tv-modal-panel {
+  background: var(--color-surface) !important;
+  color: var(--color-text);
+}
+
+.app-shell.theme-dark .tv-modal-footer {
+  background: var(--color-surface-soft) !important;
+  border-top-color: var(--color-border) !important;
+}
+
+.app-shell.theme-dark .tv-confirm-btn-secondary {
+  background: var(--color-surface-soft) !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-text) !important;
+}

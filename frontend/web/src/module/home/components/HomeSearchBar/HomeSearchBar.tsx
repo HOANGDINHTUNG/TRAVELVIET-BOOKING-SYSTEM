@@ -14,16 +14,17 @@ type SelectOption = { value: string; label: string };
  */
 const fieldShellClass = cn(
   "group relative flex min-h-[46px] flex-1 cursor-pointer items-center overflow-hidden",
-  "rounded-lg border border-[#c5d5e5] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)]",
-  "transition-colors duration-150",
+  "rounded-lg border border-[var(--home-search-field-border)] bg-[var(--home-search-field-bg)]",
+  "shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-colors duration-150",
   "focus-within:border-[#ff6600] focus-within:shadow-[0_0_0_2px_rgba(255,102,0,0.18)]",
 );
 
 const fieldIconClass =
-  "pointer-events-none absolute left-2.5 z-[2] flex items-center text-[#ff6600]";
+  "pointer-events-none absolute left-2.5 z-[2] flex items-center text-[var(--home-search-icon,#ff6600)]";
 
 const fieldControlClass = cn(
-  "h-full min-h-[46px] w-full appearance-none bg-transparent pl-9 pr-8 text-sm text-neutral-700 outline-none",
+  "h-full min-h-[46px] w-full appearance-none bg-transparent pl-9 pr-8 text-sm",
+  "text-[var(--home-search-field-text)] outline-none",
   "[&::-webkit-calendar-picker-indicator]:cursor-pointer",
 );
 
@@ -74,26 +75,25 @@ export function HomeSearchBar() {
       as="section"
       aria-label={t("homePage.search.sectionAria")}
       className={cn(
-        "relative overflow-hidden border-b border-[#dce8f2]",
-        "bg-[linear-gradient(180deg,#f4fafd_0%,#e8f2fa_55%,#eef6fc_100%)]",
+        "home-search-band relative overflow-hidden border-b border-[var(--color-border)]",
+        "bg-[var(--home-search-outer)]",
         "px-3 py-[clamp(14px,2.5vw,22px)] sm:px-6 md:px-8 md:pb-4",
       )}
     >
-      {/* Lớp light bloom radial — giữ DNA "panel xanh nhạt" */}
+      {/* Lớp bloom — chỉ hiện ở theme sáng (ẩn qua .home-search-bloom trong dark-mode-surfaces.css) */}
       <div
         aria-hidden
         className={cn(
-          "pointer-events-none absolute inset-0 opacity-55",
+          "home-search-bloom pointer-events-none absolute inset-0 opacity-55",
           "bg-[radial-gradient(ellipse_140%_70%_at_15%_-10%,rgba(255,255,255,0.85)_0%,transparent_55%),radial-gradient(ellipse_100%_50%_at_85%_110%,rgba(255,255,255,0.5)_0%,transparent_50%),radial-gradient(ellipse_80%_40%_at_50%_30%,rgba(180,220,245,0.35)_0%,transparent_60%)]",
         )}
       />
 
       <div
         className={cn(
-          "relative z-[1] mx-auto max-w-[var(--home-content-max)] rounded-2xl border border-[#b8d9ee]",
-          "bg-[linear-gradient(165deg,#f0f8ff_0%,#e4f2fb_45%,#dff0fa_100%)]",
-          "p-3 md:p-4",
-          "shadow-[inset_0_1px_0_rgba(255,255,255,0.75),0_4px_18px_rgba(15,80,120,0.08)]",
+          "home-search-panel relative z-[1] mx-auto max-w-[var(--home-content-max)] rounded-2xl",
+          "border border-[var(--color-border)] bg-[var(--home-search-panel)] p-3 md:p-4",
+          "shadow-[var(--home-search-panel-shadow)]",
         )}
       >
         <div className="flex flex-wrap items-stretch gap-2 sm:gap-2.5">
@@ -112,7 +112,9 @@ export function HomeSearchBar() {
               onChange={(e) => setDeparture(e.target.value)}
               className={cn(
                 fieldControlClass,
-                departure ? "text-neutral-900" : "text-[#6b7a8c]",
+                departure
+                  ? "text-[var(--home-search-field-text)]"
+                  : "text-[var(--home-search-field-muted)]",
               )}
               aria-label={t("homePage.search.departurePlaceholder")}
             >
@@ -129,7 +131,7 @@ export function HomeSearchBar() {
               size={14}
               strokeWidth={2.4}
               aria-hidden
-              className="pointer-events-none absolute right-2.5 z-[2] text-neutral-800"
+              className="pointer-events-none absolute right-2.5 z-[2] text-[var(--home-search-field-text)]"
             />
           </label>
 
@@ -148,7 +150,9 @@ export function HomeSearchBar() {
               onChange={(e) => setTourType(e.target.value)}
               className={cn(
                 fieldControlClass,
-                tourType ? "text-neutral-900" : "text-[#6b7a8c]",
+                tourType
+                  ? "text-[var(--home-search-field-text)]"
+                  : "text-[var(--home-search-field-muted)]",
               )}
               aria-label={t("homePage.search.tourTypePlaceholder")}
             >
@@ -165,7 +169,7 @@ export function HomeSearchBar() {
               size={14}
               strokeWidth={2.4}
               aria-hidden
-              className="pointer-events-none absolute right-2.5 z-[2] text-neutral-800"
+              className="pointer-events-none absolute right-2.5 z-[2] text-[var(--home-search-field-text)]"
             />
           </label>
 
@@ -184,7 +188,9 @@ export function HomeSearchBar() {
               onChange={(e) => setDestination(e.target.value)}
               className={cn(
                 fieldControlClass,
-                destination ? "text-neutral-900" : "text-[#6b7a8c]",
+                destination
+                  ? "text-[var(--home-search-field-text)]"
+                  : "text-[var(--home-search-field-muted)]",
               )}
               aria-label={t("homePage.search.destinationPlaceholder")}
             >
@@ -201,7 +207,7 @@ export function HomeSearchBar() {
               size={14}
               strokeWidth={2.4}
               aria-hidden
-              className="pointer-events-none absolute right-2.5 z-[2] text-neutral-800"
+              className="pointer-events-none absolute right-2.5 z-[2] text-[var(--home-search-field-text)]"
             />
           </label>
 
@@ -224,11 +230,13 @@ export function HomeSearchBar() {
               className={cn(
                 fieldControlClass,
                 "relative z-[3] pr-3",
-                date ? "text-neutral-900" : "text-transparent",
+                date
+                  ? "text-[var(--home-search-field-text)]"
+                  : "text-transparent",
               )}
             />
             {!date ? (
-              <span className="pointer-events-none absolute left-9 right-3 top-1/2 z-[1] -translate-y-1/2 text-sm text-[#6b7a8c]">
+              <span className="pointer-events-none absolute left-9 right-3 top-1/2 z-[1] -translate-y-1/2 text-sm text-[var(--home-search-field-muted)]">
                 {t("homePage.search.datePlaceholder")}
               </span>
             ) : null}

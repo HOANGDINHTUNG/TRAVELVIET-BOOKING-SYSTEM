@@ -36,7 +36,7 @@ function ConfirmDialog(props: ConfirmDialogProps) {
             type="button"
             onClick={props.onCancel}
             disabled={props.isPending}
-            className="rounded-md border border-[var(--color-border,#e2e8f0)] bg-white px-3 py-1.5 text-sm font-medium hover:bg-slate-50 disabled:opacity-50"
+            className="tv-confirm-btn-secondary rounded-md border border-border bg-card px-3 py-1.5 text-sm font-medium hover:bg-muted disabled:opacity-50"
           >
             {props.cancelLabel ??
               String(t('common.cancel', { defaultValue: 'Huỷ' }))}

@@ -2,13 +2,13 @@
 
 .tours-vt-page {
   min-height: 100vh;
-  background: #f4f7fb;
-  color: #0f172a;
+  background: var(--color-page);
+  color: var(--color-text);
 }
 
 .tours-vt-hero {
   position: relative;
-  min-height: clamp(200px, 28vw, 320px);
+  min-height: var(--tours-catalog-hero-min-h);
   display: grid;
   align-items: end;
   overflow: hidden;
@@ -20,9 +20,10 @@
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(180deg, rgba(8, 32, 64, 0.15) 0%, rgba(8, 32, 64, 0.72) 100%),
+    var(--tours-catalog-hero-gradient),
     url('https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?auto=format&fit=crop&w=1600&q=80')
       center / cover no-repeat;
+  filter: var(--tours-catalog-hero-image-filter);
   z-index: 0;
 }
 
@@ -31,8 +32,8 @@
   z-index: 1;
   width: min(1240px, calc(100% - 32px));
   margin: 0 auto;
-  padding: clamp(48px, 8vw, 88px) 0 clamp(28px, 4vw, 40px);
-  color: #fff;
+  padding: clamp(56px, 8vw, 96px) 0 clamp(32px, 4vw, 48px);
+  color: var(--tours-catalog-hero-title);
 }
 
 .tours-vt-hero h1 {
@@ -41,6 +42,8 @@
   font-weight: 900;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+  color: var(--tours-catalog-hero-title);
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.35);
 }
 
 .tours-vt-hero p {
@@ -48,7 +51,8 @@
   max-width: 720px;
   font-size: clamp(14px, 1.8vw, 16px);
   line-height: 1.65;
-  opacity: 0.95;
+  color: var(--tours-catalog-hero-lead);
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.3);
 }
 
 .tours-vt-search-wrap {
@@ -64,9 +68,9 @@
   align-items: stretch;
   gap: 0;
   border-radius: 14px;
-  border: 1px solid #d5e3f0;
-  background: #fff;
-  box-shadow: 0 12px 40px rgba(15, 60, 100, 0.12);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
   overflow: hidden;
 }
 
@@ -74,7 +78,7 @@
   flex: 1 1 140px;
   min-width: 0;
   padding: 12px 16px;
-  border-right: 1px solid #e8eef5;
+  border-right: 1px solid var(--color-border-subtle);
 }
 
 .tours-vt-search-field:last-of-type {
@@ -88,7 +92,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: #64748b;
+  color: var(--color-muted);
 }
 
 .tours-vt-search-field strong,
@@ -100,7 +104,7 @@
   background: transparent;
   font-size: 14px;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--color-text);
   outline: none;
 }
 
@@ -145,10 +149,11 @@
   position: sticky;
   top: 88px;
   border-radius: 14px;
-  border: 1px solid #e2e8f0;
-  background: #fff;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
   padding: 18px 16px 20px;
-  box-shadow: 0 8px 28px rgba(15, 23, 42, 0.06);
+  box-shadow: var(--shadow-card);
 }
 
 .tours-vt-sidebar-head {
@@ -162,27 +167,33 @@
   margin: 0;
   font-size: 18px;
   font-weight: 900;
+  color: var(--color-heading);
 }
 
 .tours-vt-sidebar-reset {
   border: 0;
   background: transparent;
-  color: #0b63c9;
+  color: var(--color-ocean);
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
 }
 
+.tours-vt-sidebar-reset:hover {
+  color: var(--color-primary);
+}
+
 .tours-vt-filter-block {
   margin-top: 18px;
   padding-top: 18px;
-  border-top: 1px solid #eef2f7;
+  border-top: 1px solid var(--color-border-subtle);
 }
 
 .tours-vt-filter-block h3 {
   margin: 0 0 10px;
   font-size: 14px;
   font-weight: 800;
+  color: var(--color-heading);
 }
 
 .tours-vt-check-row {
@@ -193,7 +204,7 @@
   margin-bottom: 8px;
   font-size: 13px;
   font-weight: 600;
-  color: #334155;
+  color: var(--color-text);
 }
 
 .tours-vt-check-row label {
@@ -204,9 +215,13 @@
 }
 
 .tours-vt-check-row span.count {
-  color: #94a3b8;
+  color: var(--color-muted);
   font-size: 12px;
   font-weight: 700;
+}
+
+.tours-vt-check-row input[type="checkbox"] {
+  accent-color: var(--color-ocean);
 }
 
 .tours-vt-esg-toggle {
@@ -216,8 +231,8 @@
   gap: 12px;
   padding: 10px 12px;
   border-radius: 10px;
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
+  background: color-mix(in srgb, #f0fdf4 88%, var(--color-surface-soft));
+  border: 1px solid color-mix(in srgb, #bbf7d0 70%, var(--color-border));
   font-size: 13px;
   font-weight: 800;
   color: #166534;
@@ -225,7 +240,7 @@
 
 .tours-vt-range {
   width: 100%;
-  accent-color: #0b63c9;
+  accent-color: var(--color-ocean);
 }
 
 .tours-vt-range-labels {
@@ -236,11 +251,11 @@
   margin-top: 8px;
   font-size: 12px;
   font-weight: 700;
-  color: #64748b;
+  color: var(--color-muted);
 }
 
 .tours-vt-range-labels__current {
-  color: #0b63c9;
+  color: var(--color-ocean);
   font-weight: 800;
   text-align: center;
   flex: 1;
@@ -263,7 +278,7 @@
   padding: 0;
   font-size: 11px;
   font-weight: 800;
-  color: #0b63c9;
+  color: var(--color-ocean);
   cursor: pointer;
   text-decoration: underline;
 }
@@ -272,7 +287,7 @@
   margin: 0 0 10px;
   font-size: 11px;
   line-height: 1.4;
-  color: #64748b;
+  color: var(--color-muted);
 }
 
 .tours-vt-main-toolbar {
@@ -288,6 +303,7 @@
   margin: 0;
   font-size: 15px;
   font-weight: 800;
+  color: var(--color-heading);
 }
 
 .tours-vt-toolbar-actions {
@@ -305,32 +321,37 @@
   font-weight: 700;
 }
 
+.tours-vt-sort {
+  color: var(--color-text);
+}
+
 .tours-vt-sort select {
-  border: 1px solid #dbe4ee;
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   padding: 8px 10px;
   font-size: 13px;
   font-weight: 600;
-  background: #fff;
+  background: var(--color-surface);
+  color: var(--color-text);
 }
 
 .tours-vt-view-toggle {
   display: inline-flex;
-  border: 1px solid #dbe4ee;
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   overflow: hidden;
 }
 
 .tours-vt-view-toggle button {
   border: 0;
-  background: #fff;
+  background: var(--color-surface);
   padding: 8px 10px;
   cursor: pointer;
-  color: #64748b;
+  color: var(--color-muted);
 }
 
 .tours-vt-view-toggle button.is-active {
-  background: #0b63c9;
+  background: var(--color-ocean);
   color: #fff;
 }
 
@@ -460,6 +481,7 @@
 .tours-catalog-card__quick-btn {
   position: absolute;
   right: 12px;
+  bottom: calc(100% + 10px);
   z-index: 5;
   display: inline-flex;
   align-items: center;
@@ -475,11 +497,7 @@
   cursor: pointer;
   opacity: 0;
   pointer-events: none;
-  transition:
-    opacity 0.25s ease,
-    bottom 0.38s cubic-bezier(0.22, 1, 0.36, 1);
-  /* Sát phía trên panel thông tin */
-  bottom: calc(10px + var(--catalog-panel-height, 140px));
+  transition: opacity 0.25s ease;
 }
 
 .tours-catalog-card:hover .tours-catalog-card__quick-btn,
@@ -493,4 +511,116 @@
   height: 100%;
   color: inherit;
   text-decoration: none;
+}
+
+/* ========== Tours catalog — theme sáng / tối (banner + search) ========== */
+.app-shell.theme-light .tours-vt-hero::before {
+  filter: none;
+}
+
+.app-shell.theme-dark .tours-vt-page {
+  background: var(--color-page);
+  color: var(--color-text);
+}
+
+.app-shell.theme-dark .tours-vt-search-bar {
+  border-color: var(--color-border);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+.app-shell.theme-dark .tours-vt-search-field {
+  border-right-color: var(--color-border-subtle);
+}
+
+.app-shell.theme-dark .tours-vt-search-field label {
+  color: var(--color-muted);
+}
+
+.app-shell.theme-dark .tours-vt-search-field select,
+.app-shell.theme-dark .tours-vt-search-field input {
+  color: var(--color-text);
+  color-scheme: dark;
+}
+
+.app-shell.theme-dark .tours-vt-search-submit {
+  background: color-mix(in srgb, var(--color-ocean) 75%, #1e3a5f);
+}
+
+.app-shell.theme-dark .tours-vt-search-submit:hover {
+  background: color-mix(in srgb, var(--color-ocean) 88%, #0f172a);
+}
+
+.app-shell.theme-light .tours-vt-search-field select,
+.app-shell.theme-light .tours-vt-search-field input {
+  color-scheme: light;
+}
+
+/* ========== Bộ lọc trái + toolbar — theme tối ========== */
+.app-shell.theme-dark .tours-vt-sidebar {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+  box-shadow: var(--shadow-card);
+}
+
+.app-shell.theme-dark .tours-vt-sidebar-head h2,
+.app-shell.theme-dark .tours-vt-filter-block h3,
+.app-shell.theme-dark .tours-vt-budget-head h3,
+.app-shell.theme-dark .tours-vt-results-count {
+  color: var(--color-heading);
+}
+
+.app-shell.theme-dark .tours-vt-sidebar-reset,
+.app-shell.theme-dark .tours-vt-budget-clear,
+.app-shell.theme-dark .tours-vt-range-labels__current {
+  color: var(--color-aqua);
+}
+
+.app-shell.theme-dark .tours-vt-filter-block {
+  border-top-color: var(--color-border-subtle);
+}
+
+.app-shell.theme-dark .tours-vt-check-row {
+  color: var(--color-text);
+}
+
+.app-shell.theme-dark .tours-vt-check-row span.count,
+.app-shell.theme-dark .tours-vt-range-labels,
+.app-shell.theme-dark .tours-vt-budget-hint {
+  color: var(--color-muted);
+}
+
+.app-shell.theme-dark .tours-vt-check-row input[type="checkbox"] {
+  accent-color: var(--color-aqua);
+}
+
+.app-shell.theme-dark .tours-vt-esg-toggle {
+  background: color-mix(in srgb, #14532d 42%, var(--color-surface-soft));
+  border-color: color-mix(in srgb, #4ade80 35%, var(--color-border));
+  color: #86efac;
+}
+
+.app-shell.theme-dark .tours-vt-range {
+  accent-color: var(--color-aqua);
+}
+
+.app-shell.theme-dark .tours-vt-sort select {
+  background: var(--color-surface-elevated);
+  border-color: var(--color-border);
+  color: var(--color-text);
+  color-scheme: dark;
+}
+
+.app-shell.theme-dark .tours-vt-view-toggle {
+  border-color: var(--color-border);
+}
+
+.app-shell.theme-dark .tours-vt-view-toggle button {
+  background: var(--color-surface-elevated);
+  color: var(--color-muted);
+}
+
+.app-shell.theme-dark .tours-vt-view-toggle button.is-active {
+  background: color-mix(in srgb, var(--color-ocean) 80%, #0f172a);
+  color: #fff;
 }

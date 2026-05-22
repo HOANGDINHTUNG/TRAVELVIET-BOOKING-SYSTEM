@@ -5,7 +5,10 @@ type ToursCatalogHeroProps = {
 
 export function ToursCatalogHero({ title, lead }: ToursCatalogHeroProps) {
   return (
-    <header className="tours-vt-hero" aria-labelledby="tours-catalog-title">
+    <header
+      className="tours-vt-hero -mt-13 md:-mt-19"
+      aria-labelledby="tours-catalog-title"
+    >
       <div className="tours-vt-hero-inner">
         <h1 id="tours-catalog-title">{title}</h1>
         <p>{lead}</p>

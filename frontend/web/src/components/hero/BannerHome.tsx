@@ -97,6 +97,10 @@ const BannerHome: FC<BannerHomeProps> = ({
       // ⇒ logic loop/parallax không đổi, nhưng đã sạch XSS và dễ a11y.
 
       const range = (n: number) => Array(n).fill(0).map((_, j) => j);
+      const getBannerMetrics = () => ({
+        width: demoEl.clientWidth || window.innerWidth,
+        height: demoEl.clientHeight || window.innerHeight,
+      });
       const set = gsap.set;
       const getCard = (i: number) => `#card${i}`;
       const getCardContent = (i: number) => `#card-content-${i}`;
@@ -232,7 +236,7 @@ const BannerHome: FC<BannerHomeProps> = ({
         const [active, ...rest] = order;
         const detailsActive = detailsEven ? detailsEvenEl : detailsOddEl;
         const detailsInactive = detailsEven ? detailsOddEl : detailsEvenEl;
-        const { innerHeight: height, innerWidth: width } = window;
+        const { height, width } = getBannerMetrics();
 
         offsetTop = height - cardHeight - 32;
         offsetLeft = width - (cardWidth + gap) * rest.length - 32;
@@ -305,7 +309,7 @@ const BannerHome: FC<BannerHomeProps> = ({
 
           const [active, ...rest] = order;
           const prv = rest[rest.length - 1];
-          const { innerWidth: width, innerHeight: height } = window;
+          const { width, height } = getBannerMetrics();
           const offsetTopLocal = height - cardHeight - 32;
           const offsetLeftLocal = width - (cardWidth + gap) * rest.length - 32;
 
@@ -405,7 +409,7 @@ const BannerHome: FC<BannerHomeProps> = ({
           }
           if (isCancelled) break;
 
-          const { innerWidth: width } = window;
+          const { width } = getBannerMetrics();
           await animate(indicatorEl, 2, { x: 0 });
           if (isCancelled) break;
 
@@ -528,6 +532,12 @@ const BannerHome: FC<BannerHomeProps> = ({
       };
       document.addEventListener("visibilitychange", onVisibility);
 
+      const handleResize = () => {
+        if (!isAnimating) init();
+        ScrollTrigger.refresh();
+      };
+      window.addEventListener("resize", handleResize);
+
       async function start() {
         try {
           syncPauseFromVisibility();
@@ -549,6 +559,7 @@ const BannerHome: FC<BannerHomeProps> = ({
       return () => {
         io.disconnect();
         document.removeEventListener("visibilitychange", onVisibility);
+        window.removeEventListener("resize", handleResize);
         arrowRight?.removeEventListener("click", handleNext);
         arrowLeft?.removeEventListener("click", handlePrev);
         parallaxTriggers.forEach((t) => t.kill());
@@ -567,7 +578,7 @@ const BannerHome: FC<BannerHomeProps> = ({
       role="region"
       aria-roledescription="carousel"
       aria-label={t("hero.carouselAria")}
-      className="relative h-screen min-h-[640px] w-full bg-black text-white overflow-hidden font-sans -mt-13 md:-mt-19"
+      className="relative h-dvh min-h-svh w-full bg-black text-white overflow-hidden font-sans"
     >
       {/* Thanh cam indicator (cùng tông nút Tìm kiếm HomeSearchBar) */}
       <div

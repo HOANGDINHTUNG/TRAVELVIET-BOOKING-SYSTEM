@@ -426,6 +426,55 @@ export const resources = {
       header: {
         brandTagline: 'Tour • Điểm đến • Đặt chỗ',
         exploreTours: 'Khám phá tour',
+        megaMenu: {
+          home: {
+            landing: 'Trang chủ TravelViet',
+          },
+          tours: {
+            beachVn: {
+              title: 'Biển đảo Việt Nam',
+              description: 'Phú Quốc, Nha Trang, Quy Nhơn — tour nổi bật trên trang chủ.',
+            },
+            intlHot: {
+              title: 'Quốc tế đang hot',
+              description: 'Thái Lan, Nhật, Singapore và hành trình bay khứ hồi.',
+            },
+            flash: {
+              title: 'Ưu đãi giờ chót',
+              description: 'Suất giới hạn, giá tốt — đặt nhanh trước khi hết chỗ.',
+            },
+            domestic: {
+              title: 'Tour trong nước',
+              description: 'Lọc theo ngân sách, dòng tour và ngày khởi hành.',
+            },
+          },
+          destinations: {
+            central: {
+              title: 'Miền Trung',
+              description: 'Đà Nẵng, Huế, Hội An — di sản và biển.',
+            },
+            north: {
+              title: 'Miền Bắc',
+              description: 'Hạ Long, Sa Pa — vịnh và núi.',
+            },
+            south: {
+              title: 'Miền Nam',
+              description: 'Phú Quốc, Cần Thơ — biển và sông nước.',
+            },
+            highland: {
+              title: 'Tây Nguyên & Đà Lạt',
+              description: 'Khí hậu mát, thung lũng và đồi chè.',
+            },
+          },
+          more: {
+            label: 'Thêm',
+            exploreHeading: 'Khám phá',
+            personalHeading: 'Cá nhân',
+            allDestinations: 'Tất cả điểm đến',
+            international: 'Tour nước ngoài',
+            esgTours: 'Tour ESG & LEI',
+          },
+        },
         login: 'Đăng nhập',
         account: 'Tài khoản',
         ariaSwitchToLight: 'Chuyển sang giao diện sáng',
@@ -873,6 +922,55 @@ export const resources = {
       header: {
         brandTagline: 'Tour • Destination • Booking',
         exploreTours: 'Explore tours',
+        megaMenu: {
+          home: {
+            landing: 'TravelViet home',
+          },
+          tours: {
+            beachVn: {
+              title: 'Vietnam beach & islands',
+              description: 'Phu Quoc, Nha Trang, Quy Nhon — featured on the homepage.',
+            },
+            intlHot: {
+              title: 'Hot international',
+              description: 'Thailand, Japan, Singapore and round-trip flights.',
+            },
+            flash: {
+              title: 'Last-minute deals',
+              description: 'Limited seats at special rates — book before they sell out.',
+            },
+            domestic: {
+              title: 'Domestic tours',
+              description: 'Filter by budget, tour line, and departure date.',
+            },
+          },
+          destinations: {
+            central: {
+              title: 'Central Vietnam',
+              description: 'Da Nang, Hue, Hoi An — heritage and coast.',
+            },
+            north: {
+              title: 'Northern Vietnam',
+              description: 'Ha Long, Sa Pa — bays and highlands.',
+            },
+            south: {
+              title: 'Southern Vietnam',
+              description: 'Phu Quoc, Can Tho — sea and rivers.',
+            },
+            highland: {
+              title: 'Highlands & Da Lat',
+              description: 'Cool climate, valleys, and tea hills.',
+            },
+          },
+          more: {
+            label: 'More',
+            exploreHeading: 'Explore',
+            personalHeading: 'Personal',
+            allDestinations: 'All destinations',
+            international: 'International tours',
+            esgTours: 'ESG & LEI tours',
+          },
+        },
         login: 'Sign in',
         account: 'Account',
         ariaSwitchToLight: 'Switch to light theme',

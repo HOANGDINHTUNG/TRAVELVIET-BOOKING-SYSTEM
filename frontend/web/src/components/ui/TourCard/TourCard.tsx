@@ -182,34 +182,34 @@ export function TourCard({
         </div>
       )}
 
-      {/* Xem nhanh — nằm trên panel thông tin, không đè lên panel */}
-      <button
-        type="button"
-        onClick={handleQuickView}
-        className={cn(
-          'absolute right-[10px] z-[11] inline-flex items-center gap-1 rounded-full',
-          'bottom-[calc(10px+168px+4px)]',
-          'px-2 py-1 text-[11px] font-bold leading-none tracking-tight',
-          'text-[#E8C547]',
-          'bg-[rgba(26,26,26,0.78)] shadow-[0_2px_8px_rgba(0,0,0,0.35)]',
-          'ring-1 ring-white/10 backdrop-blur-[2px]',
-          'transition-[transform,background-color] duration-200 ease-out',
-          'motion-safe:hover:bg-[rgba(26,26,26,0.9)] motion-safe:active:scale-[0.98]',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E8C547] focus-visible:ring-offset-2 focus-visible:ring-offset-transparent',
-        )}
-      >
-        <PlayCircle className="h-3.5 w-3.5 shrink-0" strokeWidth={2.25} aria-hidden />
-        <span className="pr-0.5">{t('tourCard.quickView')}</span>
-      </button>
+      {/* Panel + Xem nhanh — nút luôn cách panel một khoảng cố định dù tên tour cao thấp */}
+      <div className="absolute bottom-[14px] left-[10px] right-[10px] z-10">
+        <div className="relative">
+          <button
+            type="button"
+            onClick={handleQuickView}
+            className={cn(
+              'absolute right-0 z-[11] inline-flex items-center gap-1 rounded-full',
+              'bottom-[calc(100%+10px)]',
+              'px-2 py-1 text-[11px] font-bold leading-none tracking-tight',
+              'text-[#E8C547]',
+              'bg-[rgba(26,26,26,0.78)] shadow-[0_2px_8px_rgba(0,0,0,0.35)]',
+              'ring-1 ring-white/10 backdrop-blur-[2px]',
+              'transition-[transform,background-color] duration-200 ease-out',
+              'motion-safe:hover:bg-[rgba(26,26,26,0.9)] motion-safe:active:scale-[0.98]',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E8C547] focus-visible:ring-offset-2 focus-visible:ring-offset-transparent',
+            )}
+          >
+            <PlayCircle className="h-3.5 w-3.5 shrink-0" strokeWidth={2.25} aria-hidden />
+            <span className="pr-0.5">{t('tourCard.quickView')}</span>
+          </button>
 
-      {/* Panel thông tin — nổi đè lên ảnh */}
-      <div
-        className={cn(
-          'absolute bottom-[10px] left-[10px] right-[10px] z-10',
-          'overflow-hidden rounded-[16px] bg-white',
-          'shadow-[0_4px_20px_rgba(15,23,42,0.12),0_2px_8px_rgba(15,23,42,0.06)]',
-        )}
-      >
+          <div
+            className={cn(
+              'tv-tour-card-panel overflow-hidden rounded-[16px] bg-card',
+              'shadow-[0_4px_20px_rgba(15,23,42,0.12),0_2px_8px_rgba(15,23,42,0.06)]',
+            )}
+          >
         <div className="px-4 pb-3 pt-4">
           <div className="flex items-start gap-2.5">
             {brandLogoUrl ? (
@@ -234,14 +234,14 @@ export function TourCard({
               text={title}
               lineClamp={2}
               side="top"
-              className="min-h-[38px] min-w-0 flex-1 text-[14px] font-bold leading-[1.38] text-[#1A1A1A]"
+              className="min-h-[38px] min-w-0 flex-1 text-[14px] font-bold leading-[1.38] text-foreground"
             />
           </div>
 
-          <div className="mt-2.5 flex items-center justify-between gap-2 text-[12.5px] font-medium text-[#5C6478]">
+          <div className="mt-2.5 flex items-center justify-between gap-2 text-[12.5px] font-medium text-muted-foreground">
             <span className="inline-flex min-w-0 items-center gap-1.5">
               <MapPin
-                className="h-[14px] w-[14px] shrink-0 text-[#6B7693]"
+                className="h-[14px] w-[14px] shrink-0 text-muted-foreground"
                 strokeWidth={1.75}
                 aria-hidden
               />
@@ -254,7 +254,7 @@ export function TourCard({
             </span>
             <span className="inline-flex shrink-0 items-center gap-1.5">
               <Clock
-                className="h-[14px] w-[14px] text-[#6B7693]"
+                className="h-[14px] w-[14px] text-muted-foreground"
                 strokeWidth={1.75}
                 aria-hidden
               />
@@ -262,17 +262,17 @@ export function TourCard({
             </span>
           </div>
 
-          <div className="mt-3 h-px bg-[#E8ECF3]" aria-hidden />
+          <div className="mt-3 h-px bg-border" aria-hidden />
         </div>
 
         {/* Footer: giá + CTA bám góc dưới-phải */}
         <div className="relative flex min-h-[54px] items-stretch">
           <div className="flex min-w-0 flex-1 flex-col justify-center px-4 pb-3.5 leading-tight">
-            <span className="text-[11px] font-medium text-[#8B95A8]">
+            <span className="text-[11px] font-medium text-muted-foreground">
               {t('tourCard.priceFrom')}
             </span>
             <span
-              className="truncate text-[19px] font-bold text-[#0046BE]"
+              className="truncate text-[19px] font-bold text-primary"
               style={{ letterSpacing: '-0.02em' }}
             >
               {priceLabel}
@@ -294,6 +294,8 @@ export function TourCard({
           >
             {t('tourCard.viewDetail')}
           </Link>
+        </div>
+          </div>
         </div>
       </div>
     </article>

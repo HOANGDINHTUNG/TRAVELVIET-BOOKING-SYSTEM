@@ -11,7 +11,7 @@ export function HomeBannerSkeleton({ className }: { className?: string }) {
       role="status"
       aria-busy="true"
       className={cn(
-        'relative h-screen min-h-[640px] w-full overflow-hidden bg-neutral-950 -mt-13 md:-mt-19',
+        'relative h-dvh min-h-svh w-full overflow-hidden bg-neutral-950',
         className,
       )}
     >
