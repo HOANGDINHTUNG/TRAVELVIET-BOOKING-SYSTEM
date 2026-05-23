@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import {
@@ -46,9 +46,12 @@ import {
 } from '../../../components/ui/TourCard/TourQuickViewDialog'
 import type { Tour } from '../../home/database/interface/publicTravel'
 import { ToursCatalogHero } from '../components/catalog/ToursCatalogHero'
-import { ToursCatalogSearchBar } from '../components/catalog/ToursCatalogSearchBar'
+import {
+  ToursCatalogSearchBar,
+  type ToursCatalogSearchBarHandle,
+} from '../components/catalog/ToursCatalogSearchBar'
+import { ToursCatalogStickySearch } from '../components/catalog/ToursCatalogStickySearch'
 import { ToursCatalogSidebar } from '../components/catalog/ToursCatalogSidebar'
-import { ToursCatalogFab } from '../components/catalog/ToursCatalogFab'
 import { buildTourSlug } from '../utils/slug'
 import { inclusionBadgeLabels } from '../utils/tourInclusionBadges'
 import {
@@ -60,8 +63,7 @@ import {
 import '../styles/ToursCatalogCards.css'
 import '../styles/ToursCatalogLayout.css'
 
-const formatListingPrice = (price: number) =>
-  `${new Intl.NumberFormat('vi-VN', { maximumFractionDigits: 0 }).format(price)}đ`
+import { formatCurrencyVnd } from '../../management/schedules/utils/currency'
 
 function tourListingBadge(tour: Tour): { kind: 'deal' | 'standard' | 'esg'; label: string } {
   const esg = resolveEsgScore(tour)
@@ -88,11 +90,41 @@ function ToursPage() {
   )
   const [quickView, setQuickView] = useState<TourQuickViewPayload | null>(null)
   const [quickOpen, setQuickOpen] = useState(false)
+  const searchDockRef = useRef<HTMLDivElement>(null)
+  const searchBarRef = useRef<ToursCatalogSearchBarHandle>(null)
+  const [searchDockInView, setSearchDockInView] = useState(true)
 
   const appliedFilters = useMemo(
     () => parseTourCatalogFilters(searchParams),
     [searchParams],
   )
+
+  useEffect(() => {
+    const dock = searchDockRef.current
+    if (!dock) return undefined
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setSearchDockInView(entry.isIntersecting),
+      {
+        threshold: 0,
+        rootMargin: '-72px 0px 0px 0px',
+      },
+    )
+    observer.observe(dock)
+    return () => observer.disconnect()
+  }, [loading, error])
+
+  const openSearchWithKeywordFocus = useCallback(() => {
+    const focusKeyword = () => searchBarRef.current?.focusKeyword()
+
+    if (searchDockInView) {
+      focusKeyword()
+      return
+    }
+
+    searchDockRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    window.setTimeout(focusKeyword, 420)
+  }, [searchDockInView])
 
   useEffect(() => {
     if (!searchParams.toString()) {
@@ -200,7 +232,7 @@ function ToursPage() {
       duration: days,
       price: tour.price,
       programCode: `TV${String(tour.id).padStart(4, '0')}`,
-      attractions: tour.highlights.slice(0, 3).join(' · ') || '—',
+      attractions: (tour.highlights ?? []).slice(0, 3).join(' · ') || '—',
       cuisine: 'Ẩm thực địa phương',
       detailPath: `/tour/${detailSlug}`,
     })
@@ -235,13 +267,23 @@ function ToursPage() {
 
   return (
     <>
-      <main className="tours-vt-page tours-catalog-page">
+      <main
+        className={`tours-vt-page tours-catalog-page${searchDockInView ? '' : ' has-sticky-search-btn'}`}
+      >
         <ToursCatalogHero title={hero.title} lead={hero.lead} />
 
-        <ToursCatalogSearchBar
-          filters={draftFilters}
-          onChange={(patch) => setDraftFilters((prev) => ({ ...prev, ...patch }))}
-          onSubmit={() => applyFilters(draftFilters)}
+        <div ref={searchDockRef} className="tours-vt-search-overlap">
+          <ToursCatalogSearchBar
+            ref={searchBarRef}
+            filters={draftFilters}
+            onChange={(patch) => setDraftFilters((prev) => ({ ...prev, ...patch }))}
+            onSubmit={() => applyFilters(draftFilters)}
+          />
+        </div>
+
+        <ToursCatalogStickySearch
+          visible={!searchDockInView}
+          onOpenSearch={openSearchWithKeywordFocus}
         />
 
         <div className="tours-vt-body">
@@ -383,7 +425,7 @@ function ToursPage() {
                           </button>
 
                           <div className="tours-catalog-card__panel">
-                          <h2 className="tours-catalog-card__title">{title}</h2>
+                            <h2 className="tours-catalog-card__title">{title}</h2>
                           <div className="tours-catalog-card__row">
                             <span>
                               <MapPin size={15} strokeWidth={2} aria-hidden />
@@ -427,11 +469,11 @@ function ToursPage() {
                               <span className="tours-catalog-card__price-label">Giá từ:</span>
                               {listPrice != null ? (
                                 <span className="tours-catalog-card__price-old">
-                                  {formatListingPrice(listPrice)}
+                                  {formatCurrencyVnd(listPrice)}
                                 </span>
                               ) : null}
                               <span className="tours-catalog-card__price-value">
-                                {formatListingPrice(tour.price)}
+                                {formatCurrencyVnd(tour.price)}
                               </span>
                             </div>
                             <Link
@@ -452,7 +494,6 @@ function ToursPage() {
           </section>
         </div>
 
-        <ToursCatalogFab />
       </main>
 
       <TourQuickViewDialog

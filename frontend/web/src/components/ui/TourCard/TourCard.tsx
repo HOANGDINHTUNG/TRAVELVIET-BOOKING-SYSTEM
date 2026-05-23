@@ -5,6 +5,7 @@ import { Clock, MapPin, PlayCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { showInfo } from '@/lib/toast'
 import { TruncatedTextTooltip } from '@/components/ui/TruncatedTextTooltip'
+import { useDisplayMoney } from '@/hooks/useDisplayMoney'
 
 import './TourCard.css'
 
@@ -32,11 +33,6 @@ export type TourCardProps = {
   priorityImage?: boolean
   onQuickView?: () => void
   className?: string
-}
-
-function formatPriceVnd(value: number): string {
-  if (!Number.isFinite(value) || value <= 0) return '—'
-  return `${Math.round(value).toLocaleString('vi-VN')}đ`
 }
 
 type SavingTierStyle = {
@@ -87,8 +83,7 @@ export function TourCard({
   className,
 }: TourCardProps) {
   const { t } = useTranslation('translation')
-
-  const priceLabel = formatPriceVnd(price)
+  const priceLabel = useDisplayMoney(price > 0 ? price : null)
   const ariaLabel = t('tourCard.ariaLabel', { title, price: priceLabel })
   const badgeLabel = savingTier
     ? t(`tourCard.savingTier.${savingTier}`)
@@ -210,91 +205,90 @@ export function TourCard({
               'shadow-[0_4px_20px_rgba(15,23,42,0.12),0_2px_8px_rgba(15,23,42,0.06)]',
             )}
           >
-        <div className="px-4 pb-3 pt-4">
-          <div className="flex items-start gap-2.5">
-            {brandLogoUrl ? (
-              <img
-                src={brandLogoUrl}
-                alt=""
-                aria-hidden
-                className="mt-px h-[24px] w-auto max-w-[56px] shrink-0 object-contain object-left"
-                loading="lazy"
-                decoding="async"
-              />
-            ) : (
-              <span
-                aria-hidden
-                className="mt-px inline-flex h-[26px] w-[26px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-[linear-gradient(135deg,#D4A84B_0%,#9A6B2E_100%)] text-[10px] font-bold text-white shadow-[0_2px_5px_rgba(154,107,46,0.35)] ring-1 ring-[#E8C878]/50"
+            <div className="px-4 pb-3 pt-4">
+              <div className="flex items-start gap-2.5">
+                {brandLogoUrl ? (
+                  <img
+                    src={brandLogoUrl}
+                    alt=""
+                    aria-hidden
+                    className="mt-px h-[24px] w-auto max-w-[56px] shrink-0 object-contain object-left"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                ) : (
+                  <span
+                    aria-hidden
+                    className="mt-px inline-flex h-[26px] w-[26px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-[linear-gradient(135deg,#D4A84B_0%,#9A6B2E_100%)] text-[10px] font-bold text-white shadow-[0_2px_5px_rgba(154,107,46,0.35)] ring-1 ring-[#E8C878]/50"
+                  >
+                    {t('tourCard.brandMark')}
+                  </span>
+                )}
+                <TruncatedTextTooltip
+                  as="h3"
+                  text={title}
+                  lineClamp={2}
+                  side="top"
+                  className="min-h-[38px] min-w-0 flex-1 text-[14px] font-bold leading-[1.38] text-foreground"
+                />
+              </div>
+
+              <div className="mt-2.5 flex items-center justify-between gap-2 text-[12.5px] font-medium text-muted-foreground">
+                <span className="inline-flex min-w-0 items-center gap-1.5">
+                  <MapPin
+                    className="h-[14px] w-[14px] shrink-0 text-muted-foreground"
+                    strokeWidth={1.75}
+                    aria-hidden
+                  />
+                  <TruncatedTextTooltip
+                    text={location}
+                    lineClamp={1}
+                    side="top"
+                    className="min-w-0 max-w-full"
+                  />
+                </span>
+                <span className="inline-flex shrink-0 items-center gap-1.5">
+                  <Clock
+                    className="h-[14px] w-[14px] text-muted-foreground"
+                    strokeWidth={1.75}
+                    aria-hidden
+                  />
+                  <span>{duration}</span>
+                </span>
+              </div>
+
+              <div className="mt-3 h-px bg-border" aria-hidden />
+            </div>
+
+            <div className="relative flex min-h-[54px] items-stretch">
+              <div className="flex min-w-0 flex-1 flex-col justify-center px-4 pb-3.5 leading-tight">
+                <span className="text-[11px] font-medium text-muted-foreground">
+                  {t('tourCard.priceFrom')}
+                </span>
+                <span
+                  className="truncate text-[19px] font-bold text-primary"
+                  style={{ letterSpacing: '-0.02em' }}
+                >
+                  {priceLabel}
+                </span>
+              </div>
+
+              <Link
+                to={detailPath}
+                className={cn(
+                  'inline-flex shrink-0 items-center justify-center',
+                  'min-w-[120px] px-5 py-3.5',
+                  'bg-[#0046BE] text-[13px] font-bold text-white leading-none',
+                  'rounded-tl-[24px] rounded-br-[16px]',
+                  'transition-[filter,transform] duration-200 ease-out',
+                  'hover:brightness-110 hover:scale-[1.02] motion-reduce:hover:scale-100',
+                  'active:scale-[0.98]',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0046BE] focus-visible:ring-offset-2',
+                )}
               >
-                {t('tourCard.brandMark')}
-              </span>
-            )}
-            <TruncatedTextTooltip
-              as="h3"
-              text={title}
-              lineClamp={2}
-              side="top"
-              className="min-h-[38px] min-w-0 flex-1 text-[14px] font-bold leading-[1.38] text-foreground"
-            />
-          </div>
-
-          <div className="mt-2.5 flex items-center justify-between gap-2 text-[12.5px] font-medium text-muted-foreground">
-            <span className="inline-flex min-w-0 items-center gap-1.5">
-              <MapPin
-                className="h-[14px] w-[14px] shrink-0 text-muted-foreground"
-                strokeWidth={1.75}
-                aria-hidden
-              />
-              <TruncatedTextTooltip
-                text={location}
-                lineClamp={1}
-                side="top"
-                className="min-w-0 max-w-full"
-              />
-            </span>
-            <span className="inline-flex shrink-0 items-center gap-1.5">
-              <Clock
-                className="h-[14px] w-[14px] text-muted-foreground"
-                strokeWidth={1.75}
-                aria-hidden
-              />
-              <span>{duration}</span>
-            </span>
-          </div>
-
-          <div className="mt-3 h-px bg-border" aria-hidden />
-        </div>
-
-        {/* Footer: giá + CTA bám góc dưới-phải */}
-        <div className="relative flex min-h-[54px] items-stretch">
-          <div className="flex min-w-0 flex-1 flex-col justify-center px-4 pb-3.5 leading-tight">
-            <span className="text-[11px] font-medium text-muted-foreground">
-              {t('tourCard.priceFrom')}
-            </span>
-            <span
-              className="truncate text-[19px] font-bold text-primary"
-              style={{ letterSpacing: '-0.02em' }}
-            >
-              {priceLabel}
-            </span>
-          </div>
-
-          <Link
-            to={detailPath}
-            className={cn(
-              'inline-flex shrink-0 items-center justify-center',
-              'min-w-[120px] px-5 py-3.5',
-              'bg-[#0046BE] text-[13px] font-bold text-white leading-none',
-              'rounded-tl-[24px] rounded-br-[16px]',
-              'transition-[filter,transform] duration-200 ease-out',
-              'hover:brightness-110 hover:scale-[1.02] motion-reduce:hover:scale-100',
-              'active:scale-[0.98]',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0046BE] focus-visible:ring-offset-2',
-            )}
-          >
-            {t('tourCard.viewDetail')}
-          </Link>
-        </div>
+                {t('tourCard.viewDetail')}
+              </Link>
+            </div>
           </div>
         </div>
       </div>

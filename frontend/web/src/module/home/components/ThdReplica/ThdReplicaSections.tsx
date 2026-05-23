@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import type { Destination, Tour } from "../../database/interface/publicTravel";
 import { buildTourSlug } from "../../../tours/utils/slug";
+import { formatCurrencyVnd } from "../../../management/schedules/utils/currency";
 import "./ThdReplicaSections.css";
 
 type ThdReplicaSectionsProps = {
@@ -73,7 +74,7 @@ function formatPrice(price: number) {
     return "Giá: Liên hệ";
   }
 
-  return `${new Intl.NumberFormat("vi-VN").format(price)}đ`;
+  return formatCurrencyVnd(price);
 }
 
 function TourCard({ tour }: { tour: Tour }) {

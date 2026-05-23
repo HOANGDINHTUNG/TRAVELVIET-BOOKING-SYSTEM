@@ -18,9 +18,11 @@ import {
   type BookingStatusHistory,
 } from "../../../api/server/Booking.api";
 import { paymentApi, type Payment } from "../../../api/server/Payment.api";
+import { formatCurrencyVnd } from "../../management/schedules/utils/currency";
 import { PageLoader } from "../../../components/common/ux/PageLoader";
 import { ErrorBlock } from "../../../components/common/ui/ErrorBlock";
 import { Footer } from "../../../components/Footer/Footer";
+import { CustomerPageHero } from "../../../components/ui/CustomerPageHero/CustomerPageHero";
 import {
   getStoredAuthUser,
   hasManagerRole,
@@ -69,43 +71,43 @@ type BookingDetailCopy = {
 
 const copyByLocale: Record<BookingDetailLocale, BookingDetailCopy> = {
   vi: {
-    backHome: "Ve trang chu",
-    loading: "Dang tai booking...",
-    errorTitle: "Khong the tai booking",
-    missing: "Booking khong ton tai.",
-    kicker: "Booking",
-    title: (code) => `Chi tiet booking ${code}`,
-    status: "Trang thai",
-    subtotal: "Tam tinh",
-    discount: "Giam gia",
+    backHome: "Về chuyến đi của tôi",
+    loading: "Đang tải thông tin đặt tour...",
+    errorTitle: "Không thể tải booking",
+    missing: "Booking không tồn tại.",
+    kicker: "Chi tiết đặt tour",
+    title: (code) => `Booking ${code}`,
+    status: "Trạng thái",
+    subtotal: "Tạm tính",
+    discount: "Giảm giá",
     voucherDiscount: "Voucher",
-    addon: "Phu thu",
-    finalAmount: "Can thanh toan",
-    paymentTitle: "Thanh toan booking",
+    addon: "Phụ thu",
+    finalAmount: "Cần thanh toán",
+    paymentTitle: "Thanh toán booking",
     paymentCopy:
-      "So tien duoc lay tu booking de dam bao khop voi backend khi ghi nhan thanh toan.",
-    paymentMethod: "Phuong thuc",
-    provider: "Nha cung cap",
-    transactionRef: "Ma giao dich",
-    payAction: "Xac nhan thanh toan",
-    paid: "Da thanh toan",
-    paymentSuccess: (code) => `Da ghi nhan thanh toan ${code}.`,
-    paymentError: "Khong the tao thanh toan cho booking nay.",
-    actionsTitle: "Xu ly booking",
-    actionsCopy: "Cac thao tac nay goi truc tiep booking lifecycle API va cap nhat lich su trang thai.",
-    chatTitle: "Nhom chat lich trinh",
+      "Số tiền được lấy từ booking để đảm bảo khớp với backend khi ghi nhận thanh toán.",
+    paymentMethod: "Phương thức",
+    provider: "Nhà cung cấp",
+    transactionRef: "Mã giao dịch",
+    payAction: "Xác nhận thanh toán",
+    paid: "Đã thanh toán",
+    paymentSuccess: (code) => `Đã ghi nhận thanh toán ${code}.`,
+    paymentError: "Không thể tạo thanh toán cho booking này.",
+    actionsTitle: "Xử lý booking",
+    actionsCopy: "Các thao tác này gọi trực tiếp booking lifecycle API và cập nhật lịch sử trạng thái.",
+    chatTitle: "Nhóm chat lịch trình",
     chatCopy:
-      "Trao doi voi cac thanh vien cung lich trinh va doi ngu TravelViet truoc ngay khoi hanh.",
-    openChat: "Mo nhom chat",
-    reason: "Ly do / ghi chu",
-    cancelAction: "Huy booking",
-    checkInAction: "Check-in khach",
-    completeAction: "Hoan tat booking",
-    lifecycleSuccess: "Da cap nhat trang thai booking.",
-    lifecycleError: "Khong the cap nhat booking.",
-    noActions: "Khong co thao tac kha dung voi trang thai hien tai.",
-    historyTitle: "Lich su trang thai",
-    noHistory: "Chua co lich su trang thai.",
+      "Trao đổi với các thành viên cùng lịch trình và đội ngũ TravelViet trước ngày khởi hành.",
+    openChat: "Mở nhóm chat",
+    reason: "Lý do / ghi chú",
+    cancelAction: "Hủy booking",
+    checkInAction: "Check-in khách",
+    completeAction: "Hoàn tất booking",
+    lifecycleSuccess: "Đã cập nhật trạng thái booking.",
+    lifecycleError: "Không thể cập nhật booking.",
+    noActions: "Không có thao tác khả dụng với trạng thái hiện tại.",
+    historyTitle: "Lịch sử trạng thái",
+    noHistory: "Chưa có lịch sử trạng thái.",
   },
   en: {
     backHome: "Back to home",
@@ -150,17 +152,6 @@ const copyByLocale: Record<BookingDetailLocale, BookingDetailCopy> = {
 
 function getLocale(language: string): BookingDetailLocale {
   return language === "en" ? "en" : "vi";
-}
-
-function formatMoney(value: number | string | undefined) {
-  const amount = Number(value);
-  if (!Number.isFinite(amount)) {
-    return "0 VND";
-  }
-
-  return `${new Intl.NumberFormat("vi-VN", {
-    maximumFractionDigits: 0,
-  }).format(amount)} VND`;
 }
 
 function formatDate(value: string | undefined, locale: BookingDetailLocale) {
@@ -342,8 +333,8 @@ export default function BookingDetailPage() {
   if (error || !booking) {
     return (
       <div className="booking-detail-error">
-        <Link to="/" className="booking-back-link">
-          <ArrowLeft size={20} />
+        <Link to="/my-bookings" className="booking-back-link">
+          <ArrowLeft size={16} />
           {copy.backHome}
         </Link>
         <ErrorBlock title={copy.errorTitle} message={error || copy.missing} />
@@ -360,22 +351,26 @@ export default function BookingDetailPage() {
   const hasAnyAction = canCancel || canCheckIn || canComplete;
 
   return (
-    <div className="booking-detail-page">
-      <main className="booking-detail-container">
-        <Link to="/" className="booking-back-link">
-          <ArrowLeft size={20} />
-          {copy.backHome}
-        </Link>
+    <>
+      <CustomerPageHero
+        variant="teal"
+        kicker={copy.kicker}
+        title={copy.title(bookingCode)}
+        metrics={[
+          { icon: <ReceiptText size={13} />, value: bookingCode, label: "Mã booking" },
+          { icon: <Flag size={13} />, value: booking.status ?? "—", label: copy.status },
+          { icon: <CreditCard size={13} />, value: formatCurrencyVnd(booking.finalAmount), label: copy.finalAmount },
+        ]}
+      />
 
-        <section className="booking-hero">
-          <div>
-            <p className="booking-kicker">{copy.kicker}</p>
-            <h1>{copy.title(bookingCode)}</h1>
-          </div>
-          <span className="booking-status-pill">{booking.status || copy.status}</span>
-        </section>
+      <div className="booking-detail-page">
+        <main className="booking-detail-container">
+          <Link to="/my-bookings" className="booking-back-link">
+            <ArrowLeft size={16} />
+            {copy.backHome}
+          </Link>
 
-        <div className="booking-detail-grid">
+          <div className="booking-detail-grid">
           <section className="booking-card">
             <header>
               <ReceiptText size={22} />
@@ -384,23 +379,23 @@ export default function BookingDetailPage() {
             <dl className="booking-money-list">
               <div>
                 <dt>{copy.subtotal}</dt>
-                <dd>{formatMoney(booking.subtotalAmount)}</dd>
+                <dd>{formatCurrencyVnd(booking.subtotalAmount)}</dd>
               </div>
               <div>
                 <dt>{copy.discount}</dt>
-                <dd>{formatMoney(booking.discountAmount)}</dd>
+                <dd>{formatCurrencyVnd(booking.discountAmount)}</dd>
               </div>
               <div>
                 <dt>{copy.voucherDiscount}</dt>
-                <dd>{formatMoney(booking.voucherDiscountAmount)}</dd>
+                <dd>{formatCurrencyVnd(booking.voucherDiscountAmount)}</dd>
               </div>
               <div>
                 <dt>{copy.addon}</dt>
-                <dd>{formatMoney(booking.addonAmount)}</dd>
+                <dd>{formatCurrencyVnd(booking.addonAmount)}</dd>
               </div>
               <div className="total">
                 <dt>{copy.finalAmount}</dt>
-                <dd>{formatMoney(booking.finalAmount)}</dd>
+                <dd>{formatCurrencyVnd(booking.finalAmount)}</dd>
               </div>
             </dl>
           </section>
@@ -551,8 +546,9 @@ export default function BookingDetailPage() {
             </ol>
           )}
         </section>
-      </main>
-      <Footer />
-    </div>
+        </main>
+        <Footer />
+      </div>
+    </>
   );
 }

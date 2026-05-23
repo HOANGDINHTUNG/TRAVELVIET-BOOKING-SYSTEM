@@ -1,32 +1,40 @@
 import { Link } from 'react-router-dom'
+import { ShieldAlert, Home, LifeBuoy } from 'lucide-react'
+import './ErrorPage.css'
 
 type ForbiddenPageProps = {
-  /** Tên quyền/role thiếu — hiển thị ở dòng phụ giúp user/dev hiểu nguyên nhân. */
   reason?: string
-  /** Đường dẫn nút quay lại — mặc định về trang chủ. */
   homeHref?: string
 }
 
 function ForbiddenPage({ reason, homeHref = '/' }: ForbiddenPageProps) {
   return (
-    <section className="grid min-h-screen place-items-center px-6 text-center">
-      <div className="grid gap-4">
-        <p className="text-sm font-bold uppercase tracking-[0.18em] text-[var(--color-muted)]">
-          403
-        </p>
-        <h1 className="text-4xl font-black">Bạn không có quyền truy cập</h1>
-        <p className="mx-auto max-w-md text-base text-[var(--color-muted)]">
+    <div className="error-page">
+      <div className="error-page__card">
+        <div className="error-page__code" aria-hidden="true">403</div>
+
+        <div className="error-page__icon error-page__icon--danger">
+          <ShieldAlert size={32} strokeWidth={1.6} className="error-icon-403" aria-hidden="true" />
+        </div>
+
+        <h1 className="error-page__title">Bạn không có quyền truy cập</h1>
+        <p className="error-page__desc">
           {reason ??
             'Tài khoản của bạn không đủ quyền để mở khu vực này. Vui lòng liên hệ quản trị viên nếu bạn nghĩ đây là nhầm lẫn.'}
         </p>
-        <Link
-          className="mx-auto inline-flex min-h-11 items-center rounded-md bg-[var(--color-primary)] px-5 font-bold text-white no-underline"
-          to={homeHref}
-        >
-          Về trang chủ
-        </Link>
+
+        <nav className="error-page__links" aria-label="Điều hướng gợi ý">
+          <Link className="error-page__link-primary" to={homeHref}>
+            <Home size={15} strokeWidth={2.2} aria-hidden="true" />
+            Về trang chủ
+          </Link>
+          <Link className="error-page__link-secondary" to="/support">
+            <LifeBuoy size={15} strokeWidth={2} aria-hidden="true" />
+            Liên hệ hỗ trợ
+          </Link>
+        </nav>
       </div>
-    </section>
+    </div>
   )
 }
 

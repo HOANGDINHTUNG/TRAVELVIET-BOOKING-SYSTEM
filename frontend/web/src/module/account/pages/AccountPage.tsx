@@ -17,8 +17,8 @@ import {
   Star,
   TicketPercent,
   Trash2,
-  UserRound,
 } from "lucide-react";
+import { formatCurrencyVnd } from "../../management/schedules/utils/currency";
 import {
   bookingApi,
   type Booking,
@@ -48,6 +48,7 @@ import {
 import { ErrorBlock } from "../../../components/common/ui/ErrorBlock";
 import { PageLoader } from "../../../components/common/ux/PageLoader";
 import { Footer } from "../../../components/Footer/Footer";
+import { CustomerPageHero } from "../../../components/ui/CustomerPageHero/CustomerPageHero";
 import { persistStoredAuthUser } from "../../auth/api/authApi";
 import { tourDetailPath } from "../../tours/utils/slug";
 import "./AccountPage.css";
@@ -94,89 +95,89 @@ type PreferenceForm = {
 
 const copyByLocale = {
   vi: {
-    loading: "Dang tai tai khoan...",
-    errorTitle: "Khong the tai tai khoan",
-    retry: "Thu lai",
-    kicker: "My Account",
-    title: "Trung tam tai khoan",
-    subtitle: "Quan ly ho so, booking, voucher va cac tin hieu ca nhan tu backend.",
-    profile: "Ho so",
-    profileHint: "Thong tin nay duoc dong bo voi dropdown avatar sau khi luu.",
-    fullName: "Ho ten",
-    displayName: "Ten hien thi",
-    phone: "So dien thoai",
-    gender: "Gioi tinh",
-    dateOfBirth: "Ngay sinh",
-    avatarUrl: "Avatar URL",
-    saveProfile: "Luu ho so",
-    saving: "Dang luu...",
-    saved: "Da cap nhat ho so.",
-    saveError: "Khong the cap nhat ho so.",
-    memberLevel: "Hang thanh vien",
-    loyaltyPoints: "Diem tich luy",
-    totalSpent: "Tong chi tieu",
-    bookings: "Lich su booking",
-    noBookings: "Chua co booking nao.",
-    bookingCode: "Ma booking",
-    travellers: "Khach",
-    amount: "Tong tien",
-    viewBooking: "Xem booking",
-    contact: "Lien he",
-    addresses: "Dia chi",
-    defaultAddress: "Mac dinh",
-    noAddresses: "Chua co dia chi.",
-    addAddress: "Them dia chi",
-    contactName: "Ten lien he",
-    contactPhone: "So dien thoai",
-    province: "Tinh/Thanh",
-    district: "Quan/Huyen",
-    ward: "Phuong/Xa",
-    addressLine: "Dia chi cu the",
-    setDefault: "Dat mac dinh",
-    delete: "Xoa",
-    vouchers: "Voucher cua toi",
-    noVouchers: "Chua co voucher.",
-    voucherCode: "Ma voucher",
-    claimVoucher: "Nhan voucher",
-    claimSuccess: "Da nhan voucher.",
-    wishlist: "Yeu thich",
-    noWishlist: "Chua co tour yeu thich.",
+    loading: "Đang tải tài khoản...",
+    errorTitle: "Không thể tải tài khoản",
+    retry: "Thử lại",
+    kicker: "Tài khoản của tôi",
+    title: "Trung tâm tài khoản",
+    subtitle: "Quản lý hồ sơ, đặt tour, voucher và các thiết lập cá nhân.",
+    profile: "Hồ sơ",
+    profileHint: "Thông tin này được đồng bộ với avatar trên header sau khi lưu.",
+    fullName: "Họ tên",
+    displayName: "Tên hiển thị",
+    phone: "Số điện thoại",
+    gender: "Giới tính",
+    dateOfBirth: "Ngày sinh",
+    avatarUrl: "URL Avatar",
+    saveProfile: "Lưu hồ sơ",
+    saving: "Đang lưu...",
+    saved: "Đã cập nhật hồ sơ.",
+    saveError: "Không thể cập nhật hồ sơ.",
+    memberLevel: "Hạng thành viên",
+    loyaltyPoints: "Điểm tích lũy",
+    totalSpent: "Tổng chi tiêu",
+    bookings: "Lịch sử đặt tour",
+    noBookings: "Chưa có booking nào.",
+    bookingCode: "Mã booking",
+    travellers: "Hành khách",
+    amount: "Tổng tiền",
+    viewBooking: "Xem chi tiết",
+    contact: "Liên hệ",
+    addresses: "Địa chỉ",
+    defaultAddress: "Mặc định",
+    noAddresses: "Chưa có địa chỉ.",
+    addAddress: "Thêm địa chỉ",
+    contactName: "Tên liên hệ",
+    contactPhone: "Số điện thoại",
+    province: "Tỉnh/Thành",
+    district: "Quận/Huyện",
+    ward: "Phường/Xã",
+    addressLine: "Địa chỉ cụ thể",
+    setDefault: "Đặt mặc định",
+    delete: "Xóa",
+    vouchers: "Voucher của tôi",
+    noVouchers: "Chưa có voucher.",
+    voucherCode: "Mã voucher",
+    claimVoucher: "Nhận voucher",
+    claimSuccess: "Đã nhận voucher.",
+    wishlist: "Yêu thích",
+    noWishlist: "Chưa có tour yêu thích.",
     viewTour: "Xem tour",
-    removeWishlist: "Bo luu",
-    notifications: "Thong bao",
-    markAllRead: "Doc tat ca",
-    markRead: "Da doc",
-    noNotifications: "Chua co thong bao.",
-    preferences: "So thich",
-    savePreferences: "Luu so thich",
-    budgetLevel: "Ngan sach",
-    preferredTripMode: "Kieu chuyen di",
-    travelStyle: "Phong cach",
-    preferredDepartureCity: "Noi khoi hanh",
-    favoriteRegions: "Vung yeu thich",
-    favoriteTags: "Tag yeu thich",
-    commaHint: "Cach nhau bang dau phay",
-    actionSuccess: "Da cap nhat.",
-    actionError: "Khong the xu ly yeu cau.",
-    reviews: "Danh gia cua toi",
-    reviewable: "Cho danh gia",
-    noReviewableBookings: "Chua co booking da hoan tat de danh gia.",
-    myReviews: "Da danh gia",
-    noMyReviews: "Chua co danh gia nao.",
-    writeReview: "Viet danh gia",
-    cancelReview: "Huy",
-    submitReview: "Gui danh gia",
-    submittingReview: "Dang gui...",
-    reviewTitle: "Tieu de",
-    reviewContent: "Cam nhan cua ban",
-    recommendTour: "Se gioi thieu tour nay",
-    overallRating: "Tong the",
-    itineraryRating: "Lich trinh",
-    serviceRating: "Dich vu",
-    valueRating: "Gia tri",
-    reviewSaved: "Da gui danh gia.",
-    reviewError: "Khong the gui danh gia.",
-    notUpdated: "Chua cap nhat",
+    removeWishlist: "Bỏ lưu",
+    notifications: "Thông báo",
+    markAllRead: "Đọc tất cả",
+    markRead: "Đã đọc",
+    noNotifications: "Chưa có thông báo.",
+    preferences: "Sở thích du lịch",
+    savePreferences: "Lưu sở thích",
+    budgetLevel: "Ngân sách",
+    preferredTripMode: "Kiểu chuyến đi",
+    travelStyle: "Phong cách",
+    preferredDepartureCity: "Nơi khởi hành",
+    favoriteRegions: "Vùng yêu thích",
+    favoriteTags: "Tag yêu thích",
+    commaHint: "Cách nhau bằng dấu phẩy",
+    actionSuccess: "Đã cập nhật.",
+    actionError: "Không thể xử lý yêu cầu.",
+    reviews: "Đánh giá của tôi",
+    reviewable: "Chờ đánh giá",
+    noReviewableBookings: "Chưa có booking hoàn tất để đánh giá.",
+    myReviews: "Đã đánh giá",
+    noMyReviews: "Chưa có đánh giá nào.",
+    writeReview: "Viết đánh giá",
+    cancelReview: "Hủy",
+    submitReview: "Gửi đánh giá",
+    submittingReview: "Đang gửi...",
+    reviewTitle: "Tiêu đề",
+    reviewContent: "Cảm nhận của bạn",
+    recommendTour: "Tôi sẽ giới thiệu tour này",
+    overallRating: "Tổng thể",
+    itineraryRating: "Lịch trình",
+    serviceRating: "Dịch vụ",
+    valueRating: "Giá trị",
+    reviewSaved: "Đã gửi đánh giá.",
+    reviewError: "Không thể gửi đánh giá.",
+    notUpdated: "Chưa cập nhật",
   },
   en: {
     loading: "Loading account...",
@@ -320,17 +321,6 @@ function splitCommaList(value: string) {
     .split(",")
     .map((item) => item.trim())
     .filter(Boolean);
-}
-
-function formatMoney(value: number | string | undefined, currency = "VND") {
-  const amount = Number(value);
-  if (!Number.isFinite(amount)) {
-    return `0 ${currency}`;
-  }
-
-  return `${new Intl.NumberFormat("vi-VN", {
-    maximumFractionDigits: 0,
-  }).format(amount)} ${currency}`;
 }
 
 function formatDate(value: string | undefined, locale: AccountLocale) {
@@ -770,33 +760,27 @@ export default function AccountPage() {
     );
   }
 
-  return (
-    <div className="account-page">
-      <main className="account-shell">
-        <section className="account-hero">
-          <div className="account-hero-copy">
-            <span>{copy.kicker}</span>
-            <h1>{copy.title}</h1>
-            <p>{copy.subtitle}</p>
-          </div>
-          <div className="account-identity">
-            <div className="account-avatar">
-              {profile?.avatarUrl ? (
-                <img src={profile.avatarUrl} alt="" />
-              ) : (
-                <UserRound aria-hidden="true" />
-              )}
-            </div>
-            <div>
-              <strong>
-                {profile?.displayName || profile?.fullName || profile?.email}
-              </strong>
-              <span>{profile?.email || copy.notUpdated}</span>
-            </div>
-          </div>
-        </section>
+  const heroMetrics = [
+    { icon: <BadgeCheck size={14} />, value: profile?.memberLevel || "—", label: copy.memberLevel },
+    { icon: <TicketPercent size={14} />, value: profile?.loyaltyPoints ?? 0, label: copy.loyaltyPoints },
+    { icon: <ReceiptText size={14} />, value: formatCurrencyVnd(profile?.totalSpent), label: copy.totalSpent },
+    { icon: <Bell size={14} />, value: unreadCount || "—", label: copy.notifications },
+  ];
 
-        <section className="account-metric-grid" aria-label="Account summary">
+  return (
+    <>
+      <CustomerPageHero
+        variant="teal"
+        kicker={copy.kicker}
+        title={profile?.displayName || profile?.fullName || copy.title}
+        lead={copy.subtitle}
+        avatar={profile?.avatarUrl ?? ""}
+        metrics={heroMetrics}
+      />
+
+      <div className="account-page">
+        <main className="account-shell">
+          <section className="account-metric-grid" aria-label="Account summary">
           <article>
             <BadgeCheck aria-hidden="true" />
             <span>{copy.memberLevel}</span>
@@ -810,7 +794,7 @@ export default function AccountPage() {
           <article>
             <ReceiptText aria-hidden="true" />
             <span>{copy.totalSpent}</span>
-            <strong>{formatMoney(profile?.totalSpent)}</strong>
+            <strong>{formatCurrencyVnd(profile?.totalSpent)}</strong>
           </article>
           <article>
             <Bell aria-hidden="true" />
@@ -889,7 +873,7 @@ export default function AccountPage() {
                       </div>
                       <div>
                         <dt>{copy.amount}</dt>
-                        <dd>{formatMoney(booking.finalAmount, booking.currency)}</dd>
+                        <dd>{formatCurrencyVnd(booking.finalAmount)}</dd>
                       </div>
                       <div>
                         <dt>{copy.contact}</dt>
@@ -1040,7 +1024,7 @@ export default function AccountPage() {
                     <strong>{voucher.voucherCode || voucher.code || voucher.name}</strong>
                     <span>{voucher.name || voucher.description || copy.notUpdated}</span>
                     <p>
-                      {formatMoney(voucher.discountValue)}
+                      {formatCurrencyVnd(voucher.discountValue)}
                       {voucher.endAt ? ` · ${formatDate(voucher.endAt, locale)}` : ""}
                     </p>
                   </article>
@@ -1064,7 +1048,7 @@ export default function AccountPage() {
                 {wishlist.map((item) => (
                   <article key={item.wishlistId}>
                     <strong>{item.tourName || item.tourCode || `Tour #${item.tourId}`}</strong>
-                    <span>{formatMoney(item.basePrice, item.currency)}</span>
+                    <span>{formatCurrencyVnd(item.basePrice)}</span>
                     <Link to={tourDetailPath(item.tourId, item.tourName)}>
                       {copy.viewTour}
                       <ChevronRight aria-hidden="true" />
@@ -1105,7 +1089,7 @@ export default function AccountPage() {
                     {reviewableBookings.slice(0, 3).map((booking) => (
                       <article className="account-reviewable-card" key={booking.id}>
                         <strong>{booking.bookingCode || `#${booking.id}`}</strong>
-                        <span>{formatMoney(booking.finalAmount, booking.currency)}</span>
+                        <span>{formatCurrencyVnd(booking.finalAmount)}</span>
                         <p>{formatDate(booking.createdAt, locale)}</p>
                         {activeReviewBookingId === booking.id ? (
                           <div className="account-review-form">
@@ -1348,8 +1332,9 @@ export default function AccountPage() {
         {accountActionMessage && (
           <p className="account-global-message">{accountActionMessage}</p>
         )}
-      </main>
-      <Footer />
-    </div>
+        </main>
+        <Footer />
+      </div>
+    </>
   );
 }

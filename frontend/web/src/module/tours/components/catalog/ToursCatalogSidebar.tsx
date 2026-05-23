@@ -3,6 +3,7 @@ import {
   priceSliderStep,
   type TourLineFacet,
 } from '../../utils/tourCatalogFacets'
+import { formatCurrencyVnd } from '../../../management/schedules/utils/currency'
 
 type ToursCatalogSidebarProps = {
   filters: TourCatalogUiFilters
@@ -10,10 +11,6 @@ type ToursCatalogSidebarProps = {
   priceBounds: { min: number; max: number }
   onChange: (patch: Partial<TourCatalogUiFilters>) => void
   onReset: () => void
-}
-
-function formatVnd(value: number) {
-  return `${new Intl.NumberFormat('vi-VN', { maximumFractionDigits: 0 }).format(value)}đ`
 }
 
 export function ToursCatalogSidebar({
@@ -156,11 +153,11 @@ export function ToursCatalogSidebar({
             />
           )}
           <div className="tours-vt-range-labels">
-            <span>{formatVnd(priceBounds.min)}</span>
+            <span>{formatCurrencyVnd(priceBounds.min)}</span>
             <span className="tours-vt-range-labels__current">
-              {budgetActive ? formatVnd(effectiveMax) : 'Không giới hạn'}
+              {budgetActive ? formatCurrencyVnd(effectiveMax) : 'Không giới hạn'}
             </span>
-            <span>{formatVnd(priceBounds.max)}</span>
+            <span>{formatCurrencyVnd(priceBounds.max)}</span>
           </div>
         </div>
       ) : null}

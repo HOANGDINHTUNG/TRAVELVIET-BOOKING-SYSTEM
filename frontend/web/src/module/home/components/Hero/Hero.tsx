@@ -10,6 +10,7 @@ import {
 } from '../../database/travelData'
 import { GlassCard } from '../../../../components/ui/GlassCard'
 import { MotionSection } from '../../../../components/ui/MotionSection'
+import { formatCurrencyVnd } from '../../../management/schedules/utils/currency'
 import { tourDetailPath } from '../../../tours/utils/slug'
 import './Hero.css'
 
@@ -79,12 +80,7 @@ function formatTourPrice(tour: Tour) {
     return 'TravelViet tour'
   }
 
-  const currency = tour.currency || 'VND'
-  return new Intl.NumberFormat('vi-VN', {
-    style: 'currency',
-    currency,
-    maximumFractionDigits: 0,
-  }).format(tour.price)
+  return formatCurrencyVnd(tour.price)
 }
 
 function toTourHeroSlide(tour: Tour): HeroTourSlide {

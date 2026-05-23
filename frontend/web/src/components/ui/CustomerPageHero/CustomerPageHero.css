@@ -1,0 +1,272 @@
+/* ============================================================
+   CustomerPageHero — Shared authenticated-page hero strip.
+   Variant colours resolved via CSS custom properties on the
+   element itself; no hard-coded palette here.
+   ============================================================ */
+
+/* ── Root ──────────────────────────────────────────────────── */
+
+.cph {
+  position: relative;
+  min-height: var(--cph-min-h, clamp(180px, 20vw, 260px));
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding-bottom: clamp(24px, 3.5vw, 40px);
+  /* default gradient — overridden per variant */
+  background: var(--cph-gradient);
+  color: #fff;
+}
+
+/* Noise / grain overlay for depth (CSS only, no image needed) */
+.cph::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+  opacity: 0.45;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Decorative blob — top-right */
+.cph::after {
+  content: '';
+  position: absolute;
+  top: -40%;
+  right: -10%;
+  width: clamp(220px, 40vw, 480px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--cph-blob-color, rgba(255, 255, 255, 0.07));
+  filter: blur(60px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Variant gradients ─────────────────────────────────────── */
+
+.cph--teal {
+  --cph-gradient: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--color-primary) 90%, #000) 0%,
+    color-mix(in srgb, var(--color-primary) 60%, var(--color-aqua)) 60%,
+    color-mix(in srgb, var(--color-aqua) 80%, var(--color-page-tint)) 100%
+  );
+  --cph-blob-color: rgba(46, 196, 182, 0.14);
+}
+
+.cph--ocean {
+  --cph-gradient: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--color-ocean) 70%, #0a1a2e) 0%,
+    color-mix(in srgb, var(--color-neon-blue) 55%, #063848) 60%,
+    color-mix(in srgb, var(--color-aqua) 65%, var(--color-page-tint)) 100%
+  );
+  --cph-blob-color: rgba(14, 165, 233, 0.14);
+}
+
+.cph--sunset {
+  --cph-gradient: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--color-accent) 85%, #1a0800) 0%,
+    color-mix(in srgb, var(--color-accent) 55%, var(--color-primary)) 60%,
+    color-mix(in srgb, var(--color-primary) 75%, var(--color-aqua)) 100%
+  );
+  --cph-blob-color: rgba(232, 93, 44, 0.14);
+}
+
+.cph--neutral {
+  --cph-gradient: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--color-heading) 90%, #000) 0%,
+    color-mix(in srgb, var(--color-heading) 65%, var(--color-primary)) 60%,
+    color-mix(in srgb, var(--color-primary) 50%, var(--color-page-tint)) 100%
+  );
+  --cph-blob-color: rgba(255, 255, 255, 0.08);
+}
+
+/* ── Inner layout ──────────────────────────────────────────── */
+
+.cph__inner {
+  position: relative;
+  z-index: 1;
+  width: min(1280px, calc(100% - 40px));
+  margin: 0 auto;
+  padding-top: calc(var(--site-header-height, 3.5rem) + 20px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 20px 32px;
+  align-items: end;
+}
+
+.cph__text {
+  min-width: 0;
+}
+
+.cph__kicker {
+  margin: 0 0 8px;
+  font-size: 11.5px;
+  font-weight: 950;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.72);
+  /* entrance animation */
+  animation: cph-fade-up 0.38s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: 0.05s;
+}
+
+.cph__title {
+  margin: 0;
+  font-size: clamp(22px, 3.2vw, 38px);
+  font-weight: 900;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: #fff;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.22);
+  animation: cph-fade-up 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: 0.1s;
+}
+
+.cph__lead {
+  margin: 10px 0 0;
+  font-size: clamp(13px, 1.4vw, 15px);
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.82);
+  max-width: 520px;
+  animation: cph-fade-up 0.46s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: 0.15s;
+}
+
+/* ── Avatar slot ───────────────────────────────────────────── */
+
+.cph__avatar {
+  align-self: end;
+  animation: cph-fade-up 0.44s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: 0.08s;
+}
+
+.cph__avatar-img {
+  width: clamp(56px, 6vw, 76px);
+  height: clamp(56px, 6vw, 76px);
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.5);
+  object-fit: cover;
+  display: block;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.28);
+}
+
+.cph__avatar-placeholder {
+  width: clamp(56px, 6vw, 76px);
+  height: clamp(56px, 6vw, 76px);
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.4);
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* ── Actions slot ──────────────────────────────────────────── */
+
+.cph__actions {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  animation: cph-fade-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: 0.2s;
+}
+
+/* ── Metrics slot ──────────────────────────────────────────── */
+
+.cph__metrics {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+  animation: cph-fade-up 0.54s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: 0.22s;
+}
+
+.cph-metric {
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px) saturate(1.2);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: background 0.18s ease;
+}
+
+.cph-metric:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.cph-metric__value {
+  font-size: clamp(18px, 2.4vw, 26px);
+  font-weight: 900;
+  line-height: 1;
+  color: #fff;
+  letter-spacing: -0.02em;
+}
+
+.cph-metric__label {
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.cph-metric__icon {
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 2px;
+}
+
+/* ── Entrance animation ──────────────────────────────────────*/
+
+@keyframes cph-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Reduced motion ────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .cph__kicker,
+  .cph__title,
+  .cph__lead,
+  .cph__avatar,
+  .cph__actions,
+  .cph__metrics {
+    animation: none;
+  }
+}
+
+/* ── Responsive ────────────────────────────────────────────── */
+
+@media (max-width: 680px) {
+  .cph__inner {
+    grid-template-columns: 1fr;
+  }
+
+  .cph__avatar {
+    display: none;
+  }
+
+  .cph__metrics {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

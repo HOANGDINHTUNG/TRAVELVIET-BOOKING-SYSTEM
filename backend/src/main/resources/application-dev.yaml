@@ -1,17 +1,26 @@
+# =============================================================================
+# Profile DEV — cấu hình đọc trực tiếp tại đây (không cần DB_HOST, DB_PORT trong .env).
+#
+# Thứ tự database khi failover bật:
+#   1) Aiven (cloud)  — cần AIVEN_DB_PASSWORD trong backend/.env
+#   2) MySQL local    — 127.0.0.1:3307 / wedservice
+#
+# API cho frontend: http://localhost:8088/api/v1  (không liên quan cổng 3307)
+# =============================================================================
+
 spring:
   debug: true
   datasource:
-    # 127.0.0.1 + DB_HOST/DB_PORT: tránh IPv6 localhost; đồng bộ với script ensure-mysql-dev-user.ps1
-    url: jdbc:mysql://${DB_HOST:127.0.0.1}:${DB_PORT:3307}/wedservice?useSSL=false&serverTimezone=Asia/Ho_Chi_Minh&allowPublicKeyRetrieval=true
-    username: ${DB_USERNAME:wed_app_user}
-    password: ${DB_PASSWORD:123456}
+    # Chỉ dùng khi tắt app.datasource.failover.enabled
+    url: jdbc:mysql://127.0.0.1:3307/wedservice?useSSL=false&serverTimezone=Asia/Ho_Chi_Minh&allowPublicKeyRetrieval=true
+    username: wed_app_user
+    password: "123456"
   flyway:
     enabled: true
     locations: classpath:db/migration
     baseline-on-migrate: true
     validate-on-migrate: false
     repair-on-migrate: true
-
   jpa:
     hibernate:
       ddl-auto: none
@@ -20,7 +29,8 @@ spring:
     properties:
       hibernate:
         format_sql: true
-
+        type:
+          preferred_uuid_jdbc_type: CHAR
   jackson:
     time-zone: Asia/Ho_Chi_Minh
 
@@ -35,6 +45,28 @@ logging:
     org.springframework.boot.autoconfigure.flyway: DEBUG
 
 app:
+  datasource:
+    failover:
+      enabled: true
+      prefer-remote: true
+      probe-timeout-ms: 8000
+      remote:
+        enabled: true
+        host: mysql-lab-mtung3365-864a.f.aivencloud.com
+        port: 23132
+        database: defaultdb
+        username: avnadmin
+        password: ${AIVEN_DB_PASSWORD:}
+        ssl-mode: REQUIRED
+        ca-cert-path: ca.pem
+      local:
+        enabled: true
+        host: 127.0.0.1
+        port: 3307
+        database: wedservice
+        username: wed_app_user
+        password: "123456"
+        use-ssl: false
   security:
     whitelist:
       - "/auth/register"
@@ -46,7 +78,6 @@ app:
       - "/system/health"
       - "/payments/vnpay/ipn"
     jwt:
-      # Chỉ dùng khi chạy profile dev; production phải set JWT_SECRET (đủ dài, không commit).
-      secret: ${JWT_SECRET:local-dev-jwt-secret-change-via-env-min-32-chars-ok}
-      expiration: ${JWT_EXPIRATION:3600000} # 1 hour (default)
-      refresh-expiration: ${JWT_REFRESH_EXPIRATION:2592000000} # 30 days (default)
+      secret: local-dev-jwt-secret-change-via-env-min-32-chars-ok
+      expiration: 3600000
+      refresh-expiration: 2592000000

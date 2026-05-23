@@ -1,528 +1,140 @@
-.account-page {
-  min-height: 100vh;
-  color: #283618;
-  background:
-    linear-gradient(180deg, rgba(246, 244, 235, 0.92), rgba(230, 235, 220, 0.9)),
-    #f6f4eb;
-}
+/* ============================================================
+   AccountPage — Luxe Travel 2026
+   ============================================================ */
 
-.theme-dark .account-page {
-  color: #f2eadb;
-  background:
-    linear-gradient(180deg, rgba(20, 24, 24, 0.96), rgba(43, 34, 28, 0.96)),
-    #151817;
+/* ── Page shell ──────────────────────────────────────────── */
+
+.account-page {
+  background: var(--color-page);
+  color: var(--color-text);
+  min-height: 60vh;
 }
 
 .account-shell {
-  width: min(1180px, calc(100% - 32px));
+  width: min(1180px, calc(100% - 40px));
   margin: 0 auto;
-  padding: 128px 0 64px;
+  padding: clamp(28px, 4vw, 44px) 0 clamp(80px, 12vw, 120px);
 }
 
-.account-hero {
-  min-height: 260px;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 24px;
-  align-items: end;
-  padding: clamp(28px, 5vw, 52px);
-  border-radius: 8px;
-  background:
-    linear-gradient(110deg, rgba(40, 54, 24, 0.88), rgba(89, 92, 50, 0.78)),
-    url("../../../assets/hero.png")
-      center/cover;
-  color: #fff;
-  box-shadow: 0 24px 72px rgba(40, 54, 24, 0.2);
-}
-
-.account-hero-copy {
-  max-width: 720px;
-}
-
-.account-hero-copy span {
-  display: inline-block;
-  margin-bottom: 10px;
-  color: #f0d8a8;
-  font-size: 13px;
-  font-weight: 900;
-  text-transform: uppercase;
-}
-
-.account-hero-copy h1 {
-  margin: 0;
-  font-size: clamp(38px, 6vw, 74px);
-  line-height: 0.95;
-}
-
-.account-hero-copy p {
-  max-width: 620px;
-  margin: 18px 0 0;
-  color: rgba(255, 255, 255, 0.78);
-  font-size: 17px;
-  font-weight: 700;
-  line-height: 1.6;
-}
-
-.account-identity {
-  min-width: min(100%, 320px);
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: 14px;
-  align-items: center;
-  padding: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(14px);
-}
-
-.account-avatar {
-  width: 64px;
-  height: 64px;
-  border: 2px solid rgba(255, 255, 255, 0.48);
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  overflow: hidden;
-  background: #fff;
-  color: #283618;
-}
-
-.account-avatar img {
-  width: 100%;
-  height: 100%;
-  display: block;
-  object-fit: cover;
-}
-
-.account-avatar svg {
-  width: 28px;
-  height: 28px;
-}
-
-.account-identity strong,
-.account-identity span {
-  display: block;
-  overflow-wrap: anywhere;
-}
-
-.account-identity strong {
-  font-size: 18px;
-  line-height: 1.25;
-}
-
-.account-identity span {
-  margin-top: 4px;
-  color: rgba(255, 255, 255, 0.72);
-  font-size: 13px;
-  font-weight: 800;
-}
+/* ── Metric grid ─────────────────────────────────────────── */
 
 .account-metric-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 14px;
-  margin: 18px 0;
-}
-
-.account-metric-grid article,
-.account-panel {
-  border: 1px solid rgba(96, 108, 56, 0.16);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.78);
-  box-shadow: 0 18px 48px rgba(40, 54, 24, 0.08);
-}
-
-.theme-dark .account-metric-grid article,
-.theme-dark .account-panel {
-  border-color: rgba(234, 220, 197, 0.14);
-  background: rgba(255, 255, 255, 0.06);
-  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.22);
+  margin-bottom: 22px;
 }
 
 .account-metric-grid article {
-  min-height: 118px;
+  min-height: 110px;
   display: grid;
   align-content: space-between;
   gap: 10px;
   padding: 18px;
+  border-radius: 12px;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg-solid);
+  box-shadow: var(--glass-shadow-outer);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  animation: acc-section-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.account-metric-grid svg,
-.account-panel > header > svg {
+.account-metric-grid article:hover {
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-2px);
+}
+
+.account-metric-grid article:nth-child(1) { animation-delay: 0.04s; }
+.account-metric-grid article:nth-child(2) { animation-delay: 0.08s; }
+.account-metric-grid article:nth-child(3) { animation-delay: 0.12s; }
+.account-metric-grid article:nth-child(4) { animation-delay: 0.16s; }
+
+@keyframes acc-section-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.account-metric-grid svg {
   width: 22px;
   height: 22px;
-  color: #607044;
+  color: var(--color-ocean);
 }
 
-.theme-dark .account-metric-grid svg,
-.theme-dark .account-panel > header > svg {
-  color: #dfc38f;
-}
-
-.account-metric-grid span,
-.account-panel header p,
-.account-stack-list span,
-.account-stack-list p,
-.account-booking-item dt,
-.account-booking-item > div > span,
-.account-empty,
-.account-profile-panel header p,
-.account-preference-panel dt {
-  color: rgba(40, 54, 24, 0.66);
-  font-weight: 800;
-}
-
-.theme-dark .account-metric-grid span,
-.theme-dark .account-panel header p,
-.theme-dark .account-stack-list span,
-.theme-dark .account-stack-list p,
-.theme-dark .account-booking-item dt,
-.theme-dark .account-booking-item > div > span,
-.theme-dark .account-empty,
-.theme-dark .account-profile-panel header p,
-.theme-dark .account-preference-panel dt {
-  color: rgba(242, 234, 219, 0.62);
+.account-metric-grid span {
+  color: var(--color-muted);
+  font-size: 12.5px;
+  font-weight: 700;
 }
 
 .account-metric-grid strong {
-  font-size: 24px;
+  font-size: clamp(20px, 2.5vw, 26px);
+  font-weight: 900;
+  color: var(--color-heading);
   line-height: 1.1;
   overflow-wrap: anywhere;
 }
 
-.account-layout {
-  display: grid;
-  grid-template-columns: minmax(320px, 0.82fr) minmax(0, 1.18fr);
-  gap: 18px;
-  align-items: start;
-}
+/* ── Panels ──────────────────────────────────────────────── */
 
 .account-panel {
-  padding: 20px;
+  border-radius: 14px;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg-solid);
+  box-shadow: var(--glass-shadow-outer), var(--glass-shadow-inset);
+  padding: clamp(18px, 2.5vw, 26px);
+  animation: acc-section-in 0.44s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
 }
 
-.account-panel header {
+.account-panel > header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.account-panel > header > svg {
+  width: 22px;
+  height: 22px;
+  color: var(--color-ocean);
+  flex-shrink: 0;
 }
 
 .account-panel h2 {
   margin: 0;
-  font-size: 22px;
-  line-height: 1.15;
-}
-
-.account-panel header p {
-  margin: 6px 0 0;
-  font-size: 13px;
-}
-
-.account-profile-form {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.account-profile-form label {
-  display: grid;
-  gap: 7px;
-}
-
-.account-profile-form label.is-wide,
-.account-profile-form button,
-.account-form-message {
-  grid-column: 1 / -1;
-}
-
-.account-profile-form span {
-  font-size: 12px;
+  font-size: clamp(17px, 2vw, 21px);
   font-weight: 900;
-  text-transform: uppercase;
+  color: var(--color-heading);
+  line-height: 1.2;
 }
 
-.account-profile-form input,
-.account-compact-form input,
-.account-inline-form input,
-.account-review-form input,
-.account-review-form textarea,
-.account-profile-form button,
-.account-compact-form button,
-.account-inline-form button,
-.account-small-action,
-.account-inline-action,
-.account-card-actions button,
-.account-review-actions button {
-  min-height: 44px;
-  border: 1px solid rgba(96, 108, 56, 0.18);
-  border-radius: 8px;
-  font: inherit;
-}
-
-.account-profile-form input,
-.account-compact-form input,
-.account-inline-form input,
-.account-review-form input,
-.account-review-form textarea {
-  width: 100%;
-  padding: 0 12px;
-  color: inherit;
-  background: rgba(255, 255, 255, 0.72);
-  box-sizing: border-box;
-}
-
-.account-review-form textarea {
-  min-height: 112px;
-  padding: 10px 12px;
-  resize: vertical;
-}
-
-.theme-dark .account-profile-form input,
-.theme-dark .account-compact-form input,
-.theme-dark .account-inline-form input,
-.theme-dark .account-review-form input,
-.theme-dark .account-review-form textarea {
-  border-color: rgba(234, 220, 197, 0.16);
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.account-profile-form button,
-.account-compact-form button,
-.account-inline-form button,
-.account-small-action,
-.account-inline-action,
-.account-card-actions button,
-.account-review-actions button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 0 14px;
-  color: #fff;
-  background: #606c38;
-  font-weight: 900;
-  cursor: pointer;
-}
-
-.account-profile-form button:disabled,
-.account-compact-form button:disabled,
-.account-inline-form button:disabled,
-.account-small-action:disabled,
-.account-inline-action:disabled,
-.account-card-actions button:disabled,
-.account-review-actions button:disabled {
-  cursor: not-allowed;
-  opacity: 0.55;
-}
-
-.account-profile-form button svg,
-.account-compact-form button svg,
-.account-inline-form button svg,
-.account-small-action svg,
-.account-inline-action svg,
-.account-card-actions button svg,
-.account-review-actions button svg {
-  width: 17px;
-  height: 17px;
-}
-
-.account-form-message {
-  margin: 0;
-  color: #4f6428;
-  font-weight: 900;
-}
-
-.theme-dark .account-form-message {
-  color: #d9bf80;
-}
-
-.account-global-message {
-  position: sticky;
-  bottom: 18px;
-  z-index: 5;
-  width: fit-content;
-  max-width: min(520px, 100%);
-  margin: 18px 0 0 auto;
-  border: 1px solid rgba(96, 108, 56, 0.18);
-  border-radius: 8px;
-  padding: 12px 14px;
-  color: #3f4d21;
-  background: rgba(255, 255, 255, 0.94);
-  box-shadow: 0 18px 48px rgba(40, 54, 24, 0.14);
-  font-weight: 900;
-}
-
-.theme-dark .account-global-message {
-  border-color: rgba(234, 220, 197, 0.16);
-  color: #f2eadb;
-  background: rgba(28, 24, 22, 0.94);
-}
-
-.account-compact-form,
-.account-inline-form {
-  display: grid;
-  gap: 10px;
-  margin-bottom: 14px;
-}
-
-.account-compact-form label,
-.account-inline-form label {
-  display: grid;
-  gap: 7px;
-}
-
-.account-compact-form span,
-.account-inline-form span {
-  font-size: 12px;
-  font-weight: 900;
-  text-transform: uppercase;
-}
-
-.account-checkbox-row {
-  grid-template-columns: auto minmax(0, 1fr);
-  align-items: center;
-}
-
-.account-checkbox-row input {
-  width: 18px;
-  min-height: 18px;
-  padding: 0;
-  accent-color: #606c38;
-}
-
-.account-card-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 6px;
-}
-
-.account-card-actions button,
-.account-inline-action {
-  width: fit-content;
-  min-height: 38px;
-  padding: 0 12px;
-}
-
-.account-card-actions button.is-danger,
-.account-inline-action.is-danger {
-  border-color: rgba(190, 62, 62, 0.18);
-  color: #a73535;
-  background: rgba(190, 62, 62, 0.08);
-}
-
-.theme-dark .account-card-actions button.is-danger,
-.theme-dark .account-inline-action.is-danger {
-  color: #ffb3aa;
-  background: rgba(201, 71, 71, 0.14);
-}
-
-.account-booking-list,
-.account-stack-list {
-  display: grid;
-  gap: 12px;
-}
-
-.account-booking-item,
-.account-stack-list article {
-  border: 1px solid rgba(96, 108, 56, 0.12);
-  border-radius: 8px;
-  background: rgba(246, 244, 235, 0.66);
-}
-
-.theme-dark .account-booking-item,
-.theme-dark .account-stack-list article {
-  border-color: rgba(234, 220, 197, 0.12);
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.account-booking-item {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 14px;
-  padding: 16px;
-}
-
-.account-booking-item > div > strong {
-  display: block;
-  margin-top: 4px;
-  font-size: 18px;
-}
-
-.account-status {
-  align-self: start;
-  border-radius: 999px;
-  padding: 7px 10px;
-  color: #3f4d21;
-  background: rgba(96, 108, 56, 0.16);
-  font-size: 12px;
-  font-weight: 900;
-  text-transform: uppercase;
-}
-
-.account-status.is-confirmed,
-.account-status.is-completed,
-.account-status.is-checked-in {
-  color: #1f5c3d;
-  background: rgba(64, 145, 108, 0.16);
-}
-
-.account-status.is-cancelled,
-.account-status.is-cancel-requested {
-  color: #9a3535;
-  background: rgba(190, 62, 62, 0.12);
-}
-
-.account-booking-item dl {
-  grid-column: 1 / -1;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-  margin: 0;
-}
-
-.account-booking-item dd {
+.account-panel > header p {
   margin: 4px 0 0;
-  font-weight: 900;
-  overflow-wrap: anywhere;
+  color: var(--color-muted);
+  font-size: 13px;
+  font-weight: 700;
 }
 
-.account-booking-item a,
-.account-stack-list a {
-  width: fit-content;
-  min-height: 38px;
-  grid-column: 1 / -1;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: #606c38;
-  font-weight: 900;
-  text-decoration: none;
-}
+/* ── Layout grids ────────────────────────────────────────── */
 
-.theme-dark .account-booking-item a,
-.theme-dark .account-stack-list a {
-  color: #dfc38f;
-}
-
-.account-booking-item a svg,
-.account-stack-list a svg {
-  width: 16px;
-  height: 16px;
+.account-layout {
+  display: grid;
+  grid-template-columns: minmax(300px, 0.82fr) minmax(0, 1.18fr);
+  gap: 18px;
+  align-items: start;
+  margin-bottom: 18px;
 }
 
 .account-secondary-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 18px;
-  margin-top: 18px;
 }
 
 .account-secondary-grid .account-panel {
-  min-height: 260px;
+  min-height: 240px;
 }
 
 .account-reviews-panel {
@@ -536,86 +148,186 @@
 }
 
 .account-review-columns h3 {
-  margin: 0 0 10px;
-  font-size: 15px;
-  line-height: 1.25;
-}
-
-.account-stack-list article {
-  display: grid;
-  gap: 5px;
-  padding: 14px;
-}
-
-.account-stack-list article.is-unread {
-  border-color: rgba(96, 108, 56, 0.32);
-  box-shadow: inset 4px 0 0 #606c38;
-}
-
-.account-stack-list strong {
-  overflow-wrap: anywhere;
-}
-
-.account-stack-list p {
-  margin: 0;
-  font-size: 13px;
-  line-height: 1.45;
-}
-
-.account-stack-list small {
-  width: fit-content;
-  border-radius: 999px;
-  padding: 4px 9px;
-  color: #fff;
-  background: #606c38;
+  margin: 0 0 12px;
+  font-size: 14.5px;
   font-weight: 900;
+  color: var(--color-heading);
 }
 
+/* ── Forms: shared inputs ────────────────────────────────── */
+
+.account-profile-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.account-profile-form label,
+.account-compact-form label,
+.account-inline-form label {
+  display: grid;
+  gap: 6px;
+}
+
+.account-profile-form label.is-wide,
+.account-profile-form button,
+.account-form-message {
+  grid-column: 1 / -1;
+}
+
+.account-profile-form > label > span,
+.account-compact-form > label > span,
+.account-inline-form > label > span {
+  font-size: 11.5px;
+  font-weight: 950;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.account-profile-form input,
+.account-compact-form input,
+.account-inline-form input,
+.account-review-form input,
+.account-review-form textarea {
+  min-height: 44px;
+  padding: 0 12px;
+  width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  box-sizing: border-box;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.account-profile-form input:focus,
+.account-compact-form input:focus,
+.account-inline-form input:focus,
+.account-review-form input:focus,
+.account-review-form textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 16%, transparent);
+}
+
+.account-review-form textarea {
+  min-height: 112px;
+  padding: 10px 12px;
+  resize: vertical;
+}
+
+.account-compact-form,
+.account-inline-form {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+/* ── Shared buttons ──────────────────────────────────────── */
+
+.account-profile-form button,
+.account-compact-form button,
+.account-inline-form button,
+.account-small-action,
+.account-inline-action,
+.account-card-actions button,
+.account-review-actions button {
+  min-height: 42px;
+  border: 1px solid color-mix(in srgb, var(--color-primary) 50%, transparent);
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 14px;
+  background: var(--color-primary);
+  color: #fff;
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 900;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background 0.16s ease,
+    transform 0.16s ease,
+    box-shadow 0.16s ease;
+}
+
+.account-profile-form button:hover:not(:disabled),
+.account-compact-form button:hover:not(:disabled),
+.account-inline-form button:hover:not(:disabled),
+.account-small-action:hover:not(:disabled),
+.account-inline-action:hover:not(:disabled),
+.account-card-actions button:hover:not(:disabled),
+.account-review-actions button:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--color-primary) 24%, transparent);
+}
+
+.account-profile-form button:disabled,
+.account-compact-form button:disabled,
+.account-inline-form button:disabled,
+.account-small-action:disabled,
+.account-inline-action:disabled,
+.account-card-actions button:disabled,
+.account-review-actions button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.account-profile-form button:focus-visible,
+.account-compact-form button:focus-visible,
+.account-inline-form button:focus-visible,
+.account-small-action:focus-visible,
+.account-inline-action:focus-visible,
+.account-card-actions button:focus-visible,
+.account-review-actions button:focus-visible {
+  outline: 2px solid var(--focus-ring-color);
+  outline-offset: 2px;
+}
+
+.account-card-actions button,
 .account-inline-action {
   width: fit-content;
-  min-height: 38px;
+  min-height: 36px;
   padding: 0 12px;
 }
 
-.account-review-form {
-  display: grid;
-  gap: 10px;
+.account-card-actions button.is-danger,
+.account-inline-action.is-danger {
+  border-color: color-mix(in srgb, var(--color-danger) 35%, transparent);
+  background: color-mix(in srgb, var(--color-danger) 8%, var(--color-surface));
+  color: var(--color-danger);
+}
+
+.account-card-actions button.is-danger:hover:not(:disabled),
+.account-inline-action.is-danger:hover:not(:disabled) {
+  background: var(--color-danger);
+  color: #fff;
+}
+
+.account-review-actions button.is-secondary {
+  border-color: var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.account-review-actions button.is-secondary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface));
+  color: var(--color-primary);
+}
+
+.account-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
   margin-top: 8px;
-}
-
-.account-review-form label {
-  display: grid;
-  grid-template-columns: minmax(84px, 0.7fr) minmax(0, 1fr) auto;
-  gap: 10px;
-  align-items: center;
-}
-
-.account-review-form label.is-wide {
-  grid-template-columns: 1fr;
-}
-
-.account-review-form label > span,
-.account-review-form label > strong {
-  font-size: 12px;
-  font-weight: 900;
-}
-
-.account-review-form input[type='range'] {
-  min-height: 24px;
-  padding: 0;
-  accent-color: #606c38;
-}
-
-.account-review-checkbox {
-  grid-template-columns: auto minmax(0, 1fr) !important;
-  justify-content: start;
-}
-
-.account-review-checkbox input {
-  width: 18px;
-  min-height: 18px;
-  padding: 0;
-  accent-color: #606c38;
 }
 
 .account-review-actions {
@@ -626,30 +338,318 @@
 
 .account-review-actions button {
   min-height: 40px;
-  padding: 0 12px;
+  padding: 0 14px;
 }
 
-.account-review-actions button.is-secondary {
-  color: inherit;
-  background: rgba(96, 108, 56, 0.12);
+/* ── Form messages ───────────────────────────────────────── */
+
+.account-form-message {
+  margin: 4px 0 0;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 700;
+  background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface));
+  border: 1px solid color-mix(in srgb, var(--color-primary) 22%, transparent);
+  color: var(--color-primary);
 }
 
-.theme-dark .account-review-actions button.is-secondary {
-  background: rgba(234, 220, 197, 0.1);
+.account-global-message {
+  position: sticky;
+  bottom: 18px;
+  z-index: 5;
+  width: fit-content;
+  max-width: min(520px, 100%);
+  margin: 18px 0 0 auto;
+  border-radius: 10px;
+  padding: 12px 16px;
+  border: 1px solid color-mix(in srgb, var(--color-primary) 25%, transparent);
+  background: var(--glass-bg-solid);
+  backdrop-filter: blur(16px);
+  color: var(--color-primary);
+  font-size: 13.5px;
+  font-weight: 900;
+  box-shadow: var(--glass-shadow-outer);
+}
+
+/* ── Booking list ────────────────────────────────────────── */
+
+.account-booking-list,
+.account-stack-list {
+  display: grid;
+  gap: 10px;
+}
+
+.account-booking-item,
+.account-stack-list article {
+  border-radius: 10px;
+  border: 1px solid var(--color-border-subtle);
+  background: color-mix(in srgb, var(--color-surface) 55%, transparent);
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.account-booking-item:hover,
+.account-stack-list article:hover {
+  border-color: color-mix(in srgb, var(--color-aqua) 35%, var(--color-border));
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--color-primary) 8%, transparent);
+}
+
+.account-booking-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  padding: 14px 16px;
+}
+
+.account-booking-item > div > span {
+  font-size: 12px;
+  color: var(--color-muted);
+  font-weight: 700;
+}
+
+.account-booking-item > div > strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 16px;
+  font-weight: 900;
+  color: var(--color-heading);
+}
+
+/* Status pill */
+.account-status {
+  align-self: start;
+  border-radius: 999px;
+  padding: 5px 11px;
+  font-size: 11.5px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 10%, var(--color-surface));
+  border: 1px solid color-mix(in srgb, var(--color-primary) 28%, transparent);
+}
+
+.account-status.is-confirmed,
+.account-status.is-completed,
+.account-status.is-checked-in {
+  color: #16a34a;
+  background: color-mix(in srgb, #22c55e 10%, var(--color-surface));
+  border-color: color-mix(in srgb, #22c55e 28%, transparent);
+}
+
+.account-status.is-cancelled,
+.account-status.is-cancel-requested {
+  color: var(--color-danger);
+  background: color-mix(in srgb, var(--color-danger) 8%, var(--color-surface));
+  border-color: color-mix(in srgb, var(--color-danger) 28%, transparent);
+}
+
+.account-booking-item dl {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+
+.account-booking-item dt {
+  font-size: 11.5px;
+  font-weight: 950;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.account-booking-item dd {
+  margin: 4px 0 0;
+  font-size: 14px;
+  font-weight: 900;
+  color: var(--color-text);
+  overflow-wrap: anywhere;
+}
+
+.account-booking-item a,
+.account-stack-list a {
+  width: fit-content;
+  min-height: 36px;
+  grid-column: 1 / -1;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--color-primary);
+  font-size: 13px;
+  font-weight: 900;
+  text-decoration: none;
+  transition: color 0.16s ease;
+}
+
+.account-booking-item a:hover,
+.account-stack-list a:hover {
+  color: var(--color-primary-hover);
+}
+
+/* ── Stack list (addresses, vouchers, wishlist, notif) ───── */
+
+.account-stack-list article {
+  display: grid;
+  gap: 5px;
+  padding: 12px 14px;
+}
+
+.account-stack-list strong {
+  font-size: 14px;
+  font-weight: 900;
+  color: var(--color-heading);
+  overflow-wrap: anywhere;
+}
+
+.account-stack-list span {
+  font-size: 13px;
+  color: var(--color-muted);
+  font-weight: 600;
+}
+
+.account-stack-list p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-muted);
+  line-height: 1.45;
+}
+
+.account-stack-list small {
+  width: fit-content;
+  border-radius: 999px;
+  padding: 3px 9px;
+  font-size: 11px;
+  font-weight: 900;
+  color: #fff;
+  background: var(--color-primary);
+}
+
+.account-stack-list article.is-unread {
+  border-color: color-mix(in srgb, var(--color-primary) 35%, transparent);
+  box-shadow: inset 3px 0 0 var(--color-primary);
+}
+
+/* ── Empty state ─────────────────────────────────────────── */
+
+.account-empty {
+  margin: 8px 0;
+  font-size: 13.5px;
+  color: var(--color-muted);
+  line-height: 1.6;
+}
+
+/* ── Checkbox rows ───────────────────────────────────────── */
+
+.account-checkbox-row {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+}
+
+.account-checkbox-row input {
+  width: 17px;
+  min-height: 17px;
+  padding: 0;
+  accent-color: var(--color-primary);
+}
+
+/* ── Review form ─────────────────────────────────────────── */
+
+.account-review-form {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.account-review-form label {
+  display: grid;
+  grid-template-columns: minmax(80px, 0.7fr) minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.account-review-form label.is-wide {
+  grid-template-columns: 1fr;
+}
+
+.account-review-form label > span {
+  font-size: 11.5px;
+  font-weight: 950;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.account-review-form label > strong {
+  font-size: 13px;
+  font-weight: 900;
+  color: var(--color-primary);
+}
+
+.account-review-form input[type='range'] {
+  min-height: 22px;
+  padding: 0;
+  accent-color: var(--color-primary);
+}
+
+.account-review-checkbox {
+  grid-template-columns: auto minmax(0, 1fr) !important;
+  justify-content: start;
+}
+
+.account-review-checkbox input {
+  width: 17px;
+  min-height: 17px;
+  padding: 0;
+  accent-color: var(--color-primary);
+}
+
+/* Review cards */
+.account-reviewable-card,
+.account-review-card {
+  border-radius: 10px;
+  border: 1px solid var(--color-border-subtle);
+  background: color-mix(in srgb, var(--color-surface) 55%, transparent);
+  display: grid;
+  gap: 5px;
+  padding: 12px 14px;
+}
+
+.account-reviewable-card strong,
+.account-review-card strong {
+  font-size: 14px;
+  font-weight: 900;
+  color: var(--color-heading);
 }
 
 .account-review-card strong {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
 }
 
 .account-review-card strong svg {
-  width: 16px;
-  height: 16px;
-  color: #bc6c25;
+  width: 15px;
+  height: 15px;
+  color: var(--color-accent);
   fill: currentColor;
 }
+
+.account-reviewable-card span,
+.account-review-card span,
+.account-reviewable-card p,
+.account-review-card p,
+.account-reviewable-card small,
+.account-review-card small {
+  font-size: 13px;
+  color: var(--color-muted);
+  margin: 0;
+  line-height: 1.45;
+}
+
+/* ── Preferences form (was `dl` based) ───────────────────── */
 
 .account-preference-panel dl {
   display: grid;
@@ -663,16 +663,20 @@
   gap: 12px;
 }
 
+.account-preference-panel dt {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-muted);
+}
+
 .account-preference-panel dd {
   margin: 0;
   font-weight: 900;
+  color: var(--color-text);
   overflow-wrap: anywhere;
 }
 
-.account-empty {
-  margin: 0;
-  line-height: 1.6;
-}
+/* ── Error page ──────────────────────────────────────────── */
 
 .account-error {
   min-height: 100vh;
@@ -680,22 +684,78 @@
   place-content: center;
   gap: 16px;
   padding: 24px;
-  background: #f6f4eb;
+  background: var(--color-page);
 }
 
 .account-error button {
   min-height: 44px;
-  border: 0;
+  border: none;
   border-radius: 8px;
-  padding: 0 16px;
+  padding: 0 18px;
+  background: var(--color-primary);
   color: #fff;
-  background: #606c38;
   font: inherit;
+  font-size: 14px;
   font-weight: 900;
+  cursor: pointer;
 }
 
+/* ── Dark mode ───────────────────────────────────────────── */
+
+.theme-dark .account-metric-grid article,
+.theme-dark .account-panel {
+  background: linear-gradient(
+    185deg,
+    color-mix(in srgb, var(--color-surface) 94%, transparent),
+    color-mix(in srgb, var(--color-surface) 80%, transparent)
+  );
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.theme-dark .account-booking-item,
+.theme-dark .account-stack-list article,
+.theme-dark .account-reviewable-card,
+.theme-dark .account-review-card {
+  background: color-mix(in srgb, var(--color-surface) 50%, transparent);
+  border-color: rgba(255, 255, 255, 0.07);
+}
+
+.theme-dark .account-profile-form input,
+.theme-dark .account-compact-form input,
+.theme-dark .account-inline-form input,
+.theme-dark .account-review-form input,
+.theme-dark .account-review-form textarea {
+  background: var(--color-surface-elevated);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* ── Reduced motion ──────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .account-metric-grid article,
+  .account-panel {
+    animation: none;
+  }
+
+  .account-metric-grid article:hover,
+  .account-booking-item:hover,
+  .account-stack-list article:hover {
+    transform: none;
+  }
+
+  .account-profile-form button:hover:not(:disabled),
+  .account-compact-form button:hover:not(:disabled),
+  .account-inline-form button:hover:not(:disabled),
+  .account-inline-action:hover:not(:disabled),
+  .account-card-actions button:hover:not(:disabled),
+  .account-review-actions button:hover:not(:disabled) {
+    transform: none;
+  }
+}
+
+/* ── Responsive ──────────────────────────────────────────── */
+
 @media (max-width: 1020px) {
-  .account-hero,
   .account-layout,
   .account-secondary-grid,
   .account-review-columns {
@@ -709,28 +769,9 @@
   .account-metric-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-
-  .account-identity {
-    width: 100%;
-    box-sizing: border-box;
-  }
 }
 
 @media (max-width: 640px) {
-  .account-shell {
-    width: min(100% - 20px, 1180px);
-    padding-top: 104px;
-  }
-
-  .account-hero {
-    padding: 24px;
-  }
-
-  .account-hero-copy h1 {
-    font-size: 40px;
-  }
-
-  .account-metric-grid,
   .account-profile-form,
   .account-booking-item dl {
     grid-template-columns: 1fr;

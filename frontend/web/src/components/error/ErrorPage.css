@@ -1,0 +1,208 @@
+/* ============================================================
+   Error pages — 404 NotFound & 403 Forbidden
+   Luxe Travel 2026 brand treatment.
+   ============================================================ */
+
+.error-page {
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  padding: clamp(48px, 8vw, 96px) 24px;
+  background: radial-gradient(
+      ellipse 80% 60% at 50% -10%,
+      color-mix(in srgb, var(--color-primary) 12%, transparent),
+      transparent 70%
+    ),
+    var(--color-page);
+  color: var(--color-text);
+}
+
+.error-page__card {
+  width: min(540px, 100%);
+  display: grid;
+  place-items: center;
+  gap: 0;
+  text-align: center;
+}
+
+/* Big decorative code number */
+.error-page__code {
+  font-size: clamp(100px, 22vw, 180px);
+  font-weight: 950;
+  line-height: 0.88;
+  letter-spacing: -0.06em;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--color-primary) 40%, var(--color-page-tint)) 0%,
+    color-mix(in srgb, var(--color-aqua) 30%, var(--color-page-tint)) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  user-select: none;
+  margin-bottom: 8px;
+}
+
+/* Icon wrapper */
+.error-page__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  margin: 0 auto 20px;
+  color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 10%, var(--color-surface));
+  border: 1px solid color-mix(in srgb, var(--color-primary) 22%, transparent);
+}
+
+.error-page__icon--danger {
+  color: var(--color-danger);
+  background: color-mix(in srgb, var(--color-danger) 10%, var(--color-surface));
+  border-color: color-mix(in srgb, var(--color-danger) 22%, transparent);
+}
+
+.error-page__title {
+  margin: 0 0 12px;
+  font-size: clamp(22px, 3.5vw, 32px);
+  font-weight: 900;
+  line-height: 1.18;
+  color: var(--color-heading);
+}
+
+.error-page__desc {
+  margin: 0 0 28px;
+  font-size: 15px;
+  line-height: 1.68;
+  color: var(--color-muted);
+  max-width: 400px;
+}
+
+/* Quick links */
+.error-page__links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 0;
+}
+
+.error-page__link-primary {
+  min-height: 44px;
+  border: none;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 22px;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 900;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background 0.18s ease,
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.error-page__link-primary:hover {
+  background: var(--color-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--color-primary) 30%, transparent);
+}
+
+.error-page__link-primary:focus-visible {
+  outline: 2px solid var(--focus-ring-color);
+  outline-offset: 2px;
+}
+
+.error-page__link-secondary {
+  min-height: 44px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 18px;
+  background: transparent;
+  color: var(--color-muted);
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease;
+}
+
+.error-page__link-secondary:hover {
+  background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface));
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.error-page__link-secondary:focus-visible {
+  outline: 2px solid var(--focus-ring-color);
+  outline-offset: 2px;
+}
+
+/* ── 404 compass icon animation ──────────────────────────── */
+
+.error-icon-404 {
+  animation: compass-sweep 3.6s cubic-bezier(0.4, 0, 0.6, 1) 0.6s 1 forwards;
+  transform-origin: center;
+}
+
+@keyframes compass-sweep {
+  0%   { transform: rotate(0deg); }
+  18%  { transform: rotate(28deg); }
+  36%  { transform: rotate(-18deg); }
+  54%  { transform: rotate(14deg); }
+  72%  { transform: rotate(-8deg); }
+  88%  { transform: rotate(4deg); }
+  100% { transform: rotate(0deg); }
+}
+
+/* ── 403 shield shake animation ──────────────────────────── */
+
+.error-icon-403 {
+  animation: shield-shake 0.52s cubic-bezier(0.36, 0.07, 0.19, 0.97) 0.4s 1 both;
+}
+
+@keyframes shield-shake {
+  0%, 100% { transform: translateX(0); }
+  16%  { transform: translateX(-5px) rotate(-2deg); }
+  33%  { transform: translateX(5px)  rotate(2deg); }
+  50%  { transform: translateX(-4px) rotate(-1deg); }
+  66%  { transform: translateX(4px)  rotate(1deg); }
+  83%  { transform: translateX(-2px); }
+}
+
+/* ── Page entrance ───────────────────────────────────────── */
+
+.error-page__card {
+  animation: error-card-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes error-card-in {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Reduced motion ──────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .error-page__card,
+  .error-icon-404,
+  .error-icon-403 {
+    animation: none;
+  }
+
+  .error-page__link-primary:hover,
+  .error-page__link-secondary:hover {
+    transform: none;
+  }
+}

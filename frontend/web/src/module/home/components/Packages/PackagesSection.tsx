@@ -5,6 +5,7 @@ import { FiArrowUpRight } from "react-icons/fi";
 import { Link, useNavigate } from "react-router-dom";
 import type { Tour } from "../../database/travelData";
 import { tourDetailPath } from "../../../tours/utils/slug";
+import { formatCurrencyVnd } from "../../../management/schedules/utils/currency";
 import "./PackagesSection.css";
 
 type PackagesSectionProps = {
@@ -15,13 +16,6 @@ type PackagesSectionProps = {
 type TourCardVariant = "featured" | "regular";
 
 const ALL_CATEGORY = "Tat ca";
-
-const formatPrice = (price: number) =>
-  new Intl.NumberFormat("vi-VN", {
-    style: "currency",
-    currency: "VND",
-    maximumFractionDigits: 0,
-  }).format(price);
 
 function normalizeText(value: string) {
   return value.trim().toLowerCase();
@@ -129,7 +123,7 @@ export function PackagesSection({ tours, onSelectTour }: PackagesSectionProps) {
           {isFeatured ? (
             <div className="tour-card-heading">
               <h3>{title}</h3>
-              <strong>{formatPrice(tour.price)}</strong>
+              <strong>{formatCurrencyVnd(tour.price)}</strong>
             </div>
           ) : (
             <h3>{title}</h3>
@@ -166,7 +160,7 @@ export function PackagesSection({ tours, onSelectTour }: PackagesSectionProps) {
               </button>
             ) : (
               <div>
-                <strong>{formatPrice(tour.price)}</strong>
+                <strong>{formatCurrencyVnd(tour.price)}</strong>
                 <span>{t("packages.perPerson")}</span>
               </div>
             )}

@@ -1,19 +1,18 @@
-/**
- * Helpers định dạng tiền tệ. Mặc định VND (đồng) — không decimal.
- */
-const VND = new Intl.NumberFormat('vi-VN', {
-  style: 'currency',
-  currency: 'VND',
-  maximumFractionDigits: 0,
-})
+import { formatDisplayMoney } from '@/lib/currencyDisplay'
+import { store } from '@/stores'
 
 const PLAIN = new Intl.NumberFormat('vi-VN', {
   maximumFractionDigits: 0,
 })
 
+/**
+ * Hiển thị số tiền (BE lưu VND). Theo preferences: VND hoặc USD ($, ÷ 26.300).
+ */
 export function formatCurrencyVnd(value: number | null | undefined): string {
-  if (value == null || Number.isNaN(value)) return '—'
-  return VND.format(value)
+  const amount = typeof value === 'string' ? Number(value) : value
+  if (amount == null || Number.isNaN(amount)) return '—'
+  const { currency, language } = store.getState().preferences
+  return formatDisplayMoney(amount, currency, language)
 }
 
 export function formatNumberVi(value: number | null | undefined): string {

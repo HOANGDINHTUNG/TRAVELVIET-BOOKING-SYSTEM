@@ -8,8 +8,11 @@ import {
   useAuthStore,
 } from '../../../stores/authStore'
 import { AuthApi } from '../api/Auth.api'
-import type { LoginRequest, LoginResponse } from '../types/auth'
+import { registerWithPassword } from '../api/authApi'
+import type { RegisterPayload } from '../database/interface/users'
+import type { AuthLoginUser, LoginRequest, LoginResponse } from '../types/auth'
 import { toUserMeResponse } from '../types/auth'
+import type { AuthResponse } from '../database/interface/users'
 
 export type UseLoginOptions = {
   /** Override redirect path. Mặc định: manager → `/management/dashboard`, còn lại → `/`. */
@@ -68,6 +71,64 @@ export function useLogin(options: UseLoginOptions = {}) {
         t('loginFailed', {
           ns: 'auth',
           defaultValue: 'Đăng nhập thất bại. Vui lòng thử lại.',
+        }),
+      )
+      toast.error(handleApiError(error, fallback))
+    },
+  })
+}
+
+export type UseRegisterOptions = {
+  redirectTo?: string
+  disableRedirect?: boolean
+  onRegistered?: (data: AuthResponse) => void
+} & Omit<
+  UseMutationOptions<AuthResponse, unknown, RegisterPayload>,
+  'mutationFn' | 'onSuccess' | 'onError'
+>
+
+export function useRegister(options: UseRegisterOptions = {}) {
+  const navigate = useNavigate()
+  const { t } = useTranslation()
+  const setAuth = useAuthStore((state) => state.setAuth)
+  const {
+    redirectTo,
+    disableRedirect = false,
+    onRegistered,
+    ...mutationOptions
+  } = options
+
+  return useMutation<AuthResponse, unknown, RegisterPayload>({
+    ...mutationOptions,
+    mutationFn: (payload) => registerWithPassword(payload),
+    onSuccess: (data) => {
+      const user = toUserMeResponse(data.user as AuthLoginUser)
+      setAuth(data.accessToken, user, {
+        refreshToken: data.refreshToken,
+      })
+
+      toast.success(
+        String(
+          t('registerSuccess', {
+            ns: 'auth',
+            defaultValue: 'Đăng ký thành công!',
+          }),
+        ),
+      )
+
+      onRegistered?.(data)
+
+      if (!disableRedirect) {
+        const target =
+          redirectTo ?? (hasManagerRole(user) ? '/management/dashboard' : '/')
+        navigate(target, { replace: true })
+      }
+    },
+    onError: (error: unknown) => {
+      const fallback = String(
+        t('registerFailed', {
+          ns: 'auth',
+          defaultValue: 'Có lỗi xảy ra khi đăng ký. Vui lòng thử lại.',
         }),
       )
       toast.error(handleApiError(error, fallback))

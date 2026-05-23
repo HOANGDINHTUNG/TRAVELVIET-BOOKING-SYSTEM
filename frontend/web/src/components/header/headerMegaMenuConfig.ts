@@ -1,5 +1,3 @@
-import { catalogTourLinks } from '@/api/server/Tour.api'
-
 /** Ảnh thumbnail dropdown (w≈300). */
 export const HEADER_MEGA_IMAGES = {
   beachVn:
@@ -18,23 +16,9 @@ export const HEADER_MEGA_IMAGES = {
     'https://images.unsplash.com/photo-1519046909882-ff08b4f4c1be?auto=format&fit=crop&w=300&q=80',
   destHighland:
     'https://images.unsplash.com/photo-1506905925340-21bda4d32df4?auto=format&fit=crop&w=300&q=80',
+  /** Ảnh “Tất cả điểm đến” — dropdown Điểm đến. */
+  destAll:
+    'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=300&q=80',
 } as const
 
-export const HEADER_MEGA_LINKS = {
-  home: '/',
-  toursDomestic: '/tours?domesticOnly=true',
-  toursInternational: '/tours?internationalOnly=true',
-  toursBeach: catalogTourLinks.domesticBeachFeatured,
-  toursIntlHot: catalogTourLinks.internationalFeatured,
-  toursFlash: catalogTourLinks.lastMinuteDeals,
-  toursEsg: '/tours?domesticOnly=true&tourLine=esg',
-  destinations: '/destinations',
-  destDaNang: '/destinations/branch/da-nang',
-  destHaLong: '/destinations/branch/vinh-ha-long',
-  destPhuQuoc: '/destinations/branch/phu-quoc',
-  destDaLat: '/destinations/branch/da-lat',
-  support: '/support',
-  passport: '/passport',
-  account: '/account',
-  login: '/login',
-} as const
+export { HEADER_NAV_LINKS as HEADER_MEGA_LINKS } from './headerNavConfig'

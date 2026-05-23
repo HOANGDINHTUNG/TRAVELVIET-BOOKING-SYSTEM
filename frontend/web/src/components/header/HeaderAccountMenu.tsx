@@ -7,6 +7,7 @@ import {
   LifeBuoy,
   LogOut,
   Moon,
+  ReceiptText,
   Stamp,
   SunMedium,
   UserCircle2,
@@ -127,7 +128,7 @@ export function HeaderAccountMenu({
       <DropdownMenuContent
         align="end"
         sideOffset={8}
-        className="w-[min(100vw-2rem,300px)] p-0"
+        className="z-[1100] w-[min(100vw-2rem,300px)] p-0"
       >
         {/* Khối profile header */}
         <div className="flex items-start gap-3 border-b border-border/70 bg-muted/30 px-3 py-3">
@@ -169,6 +170,13 @@ export function HeaderAccountMenu({
             <Link to="/account" className="cursor-pointer">
               <UserRound className="h-4 w-4 opacity-70" aria-hidden />
               <span>{t('header.accountPage')}</span>
+            </Link>
+          </DropdownMenuItem>
+
+          <DropdownMenuItem asChild>
+            <Link to="/my-bookings" className="cursor-pointer">
+              <ReceiptText className="h-4 w-4 opacity-70" aria-hidden />
+              <span>{t('header.myBookings', { defaultValue: 'Đơn đã đặt' })}</span>
             </Link>
           </DropdownMenuItem>
 

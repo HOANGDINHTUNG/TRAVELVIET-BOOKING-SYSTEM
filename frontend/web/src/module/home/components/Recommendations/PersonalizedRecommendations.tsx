@@ -9,6 +9,7 @@ import {
   type RecommendedTour,
 } from '../../../../api/server/Recommendation.api'
 import { getStoredAccessToken } from '../../../../utils/authSessionStorage'
+import { formatCurrencyVnd } from '../../../management/schedules/utils/currency'
 import { tourDetailPath } from '../../../tours/utils/slug'
 import './PersonalizedRecommendations.css'
 
@@ -90,17 +91,6 @@ function getCopy(language: string) {
     allMode: 'Theo so thich',
     error: 'Khong the tao goi y.',
   }
-}
-
-function formatMoney(value: number | string | undefined, currency = 'VND') {
-  const amount = Number(value)
-  if (!Number.isFinite(amount)) {
-    return `0 ${currency}`
-  }
-
-  return `${new Intl.NumberFormat('vi-VN', {
-    maximumFractionDigits: 0,
-  }).format(amount)} ${currency}`
 }
 
 function formatDate(value: string | undefined, language: string) {
@@ -320,7 +310,7 @@ export function PersonalizedRecommendations() {
                         {tour.totalBookings ?? 0} {copy.bookings}
                       </span>
                     </div>
-                    <strong>{formatMoney(tour.basePrice, tour.currency)}</strong>
+                    <strong>{formatCurrencyVnd(tour.basePrice)}</strong>
                     {(tour.scoringReasons ?? []).length > 0 && (
                       <small>
                         {copy.reasons}: {(tour.scoringReasons ?? []).join(', ')}

@@ -32,7 +32,7 @@
   z-index: 1;
   width: min(1240px, calc(100% - 32px));
   margin: 0 auto;
-  padding: clamp(56px, 8vw, 96px) 0 clamp(32px, 4vw, 48px);
+  padding: clamp(56px, 8vw, 96px) 0 clamp(72px, 10vw, 112px);
   color: var(--tours-catalog-hero-title);
 }
 
@@ -55,50 +55,73 @@
   text-shadow: 0 1px 12px rgba(0, 0, 0, 0.3);
 }
 
-.tours-vt-search-wrap {
+/* Form tìm kiếm: một nửa trên banner, một nửa phía dưới */
+.tours-vt-search-overlap {
   position: relative;
-  z-index: 2;
+  z-index: 12;
   width: min(1240px, calc(100% - 32px));
-  margin: -28px auto 0;
+  margin: clamp(-52px, -6vw, -64px) auto 0;
+  padding: 0 0 clamp(20px, 3vw, 28px);
 }
 
-.tours-vt-search-bar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: stretch;
-  gap: 0;
-  border-radius: 14px;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-card);
-  overflow: hidden;
+.tours-vt-search-form {
+  padding: clamp(14px, 2vw, 18px);
+  border-radius: 18px;
+  border: 1px solid color-mix(in srgb, #ffffff 42%, var(--color-border));
+  background: color-mix(in srgb, var(--color-surface) 94%, transparent);
+  box-shadow:
+    0 22px 56px rgba(8, 32, 64, 0.28),
+    inset 0 1px 0 color-mix(in srgb, #ffffff 55%, transparent);
+  backdrop-filter: blur(16px) saturate(1.12);
 }
 
-.tours-vt-search-field {
-  flex: 1 1 140px;
-  min-width: 0;
-  padding: 12px 16px;
-  border-right: 1px solid var(--color-border-subtle);
-}
-
-.tours-vt-search-field:last-of-type {
-  border-right: 0;
-}
-
-.tours-vt-search-field label {
-  display: block;
-  margin-bottom: 4px;
+.tours-vt-search-form__kicker {
+  margin: 0 0 12px;
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 800;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  color: color-mix(in srgb, var(--color-muted) 88%, #fff);
+}
+
+.tours-vt-search-form__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) repeat(4, minmax(0, 1fr)) auto;
+  gap: 10px;
+  align-items: end;
+}
+
+.tours-vt-search-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--color-surface-soft) 88%, var(--color-surface));
+  border: 1px solid var(--color-border-subtle);
+  cursor: text;
+}
+
+.tours-vt-search-cell__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   color: var(--color-muted);
 }
 
-.tours-vt-search-field strong,
-.tours-vt-search-field select,
-.tours-vt-search-field input {
-  display: block;
+.tours-vt-search-cell__label svg {
+  color: #ff6600;
+  flex-shrink: 0;
+}
+
+.tours-vt-search-cell__value,
+.tours-vt-search-cell select,
+.tours-vt-search-cell input {
   width: 100%;
   border: 0;
   background: transparent;
@@ -108,25 +131,89 @@
   outline: none;
 }
 
+.tours-vt-search-cell__value {
+  display: block;
+  line-height: 1.35;
+}
+
 .tours-vt-search-submit {
-  flex: 0 0 auto;
   display: inline-flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  min-width: 148px;
-  padding: 0 22px;
+  gap: 4px;
+  min-height: 100%;
+  min-width: clamp(108px, 10vw, 132px);
+  padding: 12px 16px;
   border: 0;
-  background: #0b63c9;
+  border-radius: 12px;
+  background: linear-gradient(145deg, #ff7a1a 0%, #ff6600 48%, #e65c00 100%);
   color: #fff;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 800;
+  line-height: 1.2;
   cursor: pointer;
-  transition: background 0.2s ease;
+  box-shadow: 0 8px 22px rgba(255, 102, 0, 0.38);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    filter 0.2s ease;
 }
 
 .tours-vt-search-submit:hover {
-  background: #094cad;
+  filter: brightness(1.05);
+  box-shadow: 0 10px 28px rgba(255, 102, 0, 0.45);
+}
+
+.tours-vt-search-submit:active {
+  transform: scale(0.98);
+}
+
+/* Nút tìm kiếm cố định khi đã cuộn qua form (không còn thanh chip) */
+.tours-vt-sticky-search-btn {
+  position: fixed;
+  top: calc(var(--site-header-height) + 14px);
+  right: max(16px, calc((100vw - 1240px) / 2 + 16px));
+  z-index: 34;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(145deg, #ff7a1a 0%, #ff6600 48%, #e65c00 100%);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  box-shadow:
+    0 10px 28px rgba(255, 102, 0, 0.42),
+    0 2px 8px rgba(15, 23, 42, 0.12);
+  transform: translateY(-140%) scale(0.92);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform 0.32s var(--ease-smooth, cubic-bezier(0.32, 0.72, 0, 1)),
+    opacity 0.26s ease,
+    box-shadow 0.2s ease;
+}
+
+.tours-vt-sticky-search-btn.is-visible {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.tours-vt-sticky-search-btn:hover {
+  filter: brightness(1.06);
+  box-shadow:
+    0 14px 34px rgba(255, 102, 0, 0.48),
+    0 4px 12px rgba(15, 23, 42, 0.14);
+}
+
+.tours-vt-sticky-search-btn:active {
+  transform: translateY(0) scale(0.97);
 }
 
 .tours-vt-body {
@@ -143,11 +230,40 @@
   .tours-vt-body {
     grid-template-columns: 1fr;
   }
+
+  .tours-vt-search-form__grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .tours-vt-search-cell--wide {
+    grid-column: 1 / -1;
+  }
+
+  .tours-vt-search-submit {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    min-height: 48px;
+  }
+
+  .tours-vt-sticky-search-btn {
+    right: 16px;
+    padding: 11px 16px;
+    font-size: 13px;
+  }
+
+  .tours-vt-sidebar {
+    position: static;
+    top: auto;
+  }
+}
+
+.tours-vt-page.has-sticky-search-btn .tours-vt-sidebar {
+  top: calc(var(--site-header-height) + var(--tours-catalog-sticky-btn-size) + 20px);
 }
 
 .tours-vt-sidebar {
   position: sticky;
-  top: 88px;
+  top: calc(var(--site-header-height) + 12px);
   border-radius: 14px;
   border: 1px solid var(--color-border);
   background: var(--color-surface);
@@ -402,82 +518,6 @@
   pointer-events: none;
 }
 
-.tours-vt-fab-stack {
-  position: fixed;
-  right: 22px;
-  bottom: 22px;
-  z-index: 40;
-  display: grid;
-  gap: 10px;
-}
-
-/* AI chat gắn cụm FAB trang /tours (mobile-first) */
-.ai-chatbox.ai-chatbox--tours-fab {
-  right: 22px;
-  bottom: calc(22px + 52px * 3 + 10px * 2);
-  z-index: 45;
-}
-
-.tours-vt-fab--ai {
-  background: linear-gradient(145deg, #dda15e 0%, #bc6c25 100%);
-  color: #283618;
-  box-shadow: 0 10px 28px rgba(188, 108, 37, 0.38);
-}
-
-.tours-vt-fab--ai:hover {
-  background: linear-gradient(145deg, #e8b56a 0%, #c77b2a 100%);
-}
-
-.tours-vt-fab--ai.is-active {
-  box-shadow:
-    0 0 0 3px rgba(221, 161, 94, 0.45),
-    0 10px 28px rgba(188, 108, 37, 0.38);
-}
-
-@media (max-width: 640px) {
-  .ai-chatbox.ai-chatbox--tours-fab {
-    right: 16px;
-    bottom: calc(16px + 52px * 3 + 10px * 2);
-  }
-
-  .ai-chatbox.ai-chatbox--tours-fab .ai-chatbox-panel {
-    width: min(430px, calc(100vw - 24px));
-    height: min(520px, calc(100vh - 200px));
-    min-height: 380px;
-  }
-
-  .tours-vt-fab-stack {
-    right: 16px;
-    bottom: max(16px, env(safe-area-inset-bottom, 0px));
-  }
-}
-
-.tours-vt-fab {
-  width: 52px;
-  height: 52px;
-  border: 0;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  background: #0b63c9;
-  color: #fff;
-  box-shadow: 0 10px 28px rgba(11, 99, 201, 0.35);
-  cursor: pointer;
-  transition: transform 0.2s ease, background 0.2s ease;
-}
-
-.tours-vt-fab:hover {
-  transform: translateY(-2px);
-  background: #094cad;
-}
-
-.tours-vt-fab.is-muted {
-  background: #fff;
-  color: #0b63c9;
-  border: 1px solid #dbe4ee;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.1);
-}
-
 .tours-catalog-card__quick-btn {
   position: absolute;
   right: 12px;
@@ -523,36 +563,34 @@
   color: var(--color-text);
 }
 
-.app-shell.theme-dark .tours-vt-search-bar {
-  border-color: var(--color-border);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-card);
+.app-shell.theme-dark .tours-vt-search-form {
+  border-color: color-mix(in srgb, #ffffff 14%, var(--color-border));
+  background: color-mix(in srgb, var(--color-surface) 90%, transparent);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
 }
 
-.app-shell.theme-dark .tours-vt-search-field {
-  border-right-color: var(--color-border-subtle);
-}
-
-.app-shell.theme-dark .tours-vt-search-field label {
+.app-shell.theme-dark .tours-vt-search-form__kicker {
   color: var(--color-muted);
 }
 
-.app-shell.theme-dark .tours-vt-search-field select,
-.app-shell.theme-dark .tours-vt-search-field input {
-  color: var(--color-text);
+.app-shell.theme-dark .tours-vt-search-cell {
+  background: var(--color-surface-soft);
+  border-color: var(--color-border-subtle);
+}
+
+.app-shell.theme-dark .tours-vt-search-cell select,
+.app-shell.theme-dark .tours-vt-search-cell input {
   color-scheme: dark;
 }
 
-.app-shell.theme-dark .tours-vt-search-submit {
-  background: color-mix(in srgb, var(--color-ocean) 75%, #1e3a5f);
+.app-shell.theme-dark .tours-vt-sticky-search-btn {
+  box-shadow:
+    0 12px 32px rgba(255, 102, 0, 0.35),
+    0 4px 16px rgba(0, 0, 0, 0.45);
 }
 
-.app-shell.theme-dark .tours-vt-search-submit:hover {
-  background: color-mix(in srgb, var(--color-ocean) 88%, #0f172a);
-}
-
-.app-shell.theme-light .tours-vt-search-field select,
-.app-shell.theme-light .tours-vt-search-field input {
+.app-shell.theme-light .tours-vt-search-cell select,
+.app-shell.theme-light .tours-vt-search-cell input {
   color-scheme: light;
 }
 

@@ -1,5 +1,6 @@
-import { useEffect, useMemo } from 'react'
+import type { ReactNode } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
+import { useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { motion } from 'motion/react'
 import {
@@ -24,20 +25,14 @@ import { isPayable } from '../constants/bookingStatus'
 import { formatCurrencyVnd } from '../../management/schedules/utils/currency'
 import BookingStatusBadge from '../components/BookingStatusBadge'
 import PaymentStatusBadge from '../components/PaymentStatusBadge'
+import { Footer } from '../../../components/Footer/Footer'
+import './PaymentReturn.css'
 
 /**
  * Payment Return Page (route `/payment/vnpay-return`).
  *
- * 🔐 Security: KHÔNG verify checksum ở FE. BE đã verify qua IPN
- * (`GET /payments/vnpay/ipn` server-to-server). Trang này chỉ:
- *   1. Đọc query params từ VNPay (info-only, không trust)
- *   2. Map `vnp_TxnRef` → `bookingId` (qua sessionStorage)
- *   3. Poll `GET /bookings/{id}` cho đến khi BE cập nhật `paymentStatus`
- *
- * 🔁 Idempotency: F5 không gây side-effect. Chỉ là GET booking thuần.
- *
- * ⏱  Polling: tối đa 6 lần × 1.5s (~9s). Sau đó dừng — user dùng nút
- *    "Cập nhật ngay" để force refetch nếu IPN chậm.
+ * Security: VNPay checksum verified server-side via IPN. FE only reads
+ * query params for display, polls `GET /bookings/{id}` until BE settles.
  */
 function PaymentReturnPage() {
   const { t } = useTranslation('bookings')
@@ -68,13 +63,11 @@ function PaymentReturnPage() {
   const polling = useBookingPolling(bookingId)
   const vnpayMutation = useVnpayCheckout()
 
-  // VNPay gửi amount nhân 100 (đơn vị nhỏ nhất). Chia về VND để hiển thị.
   const reportedAmountVnd = useMemo(() => {
     const raw = vnpay.vnp_Amount
     if (!raw) return null
     const numeric = Number(raw)
-    if (!Number.isFinite(numeric)) return null
-    return numeric / 100
+    return Number.isFinite(numeric) ? numeric / 100 : null
   }, [vnpay.vnp_Amount])
 
   const errorCode = vnpay.vnp_ResponseCode ?? '99'
@@ -84,8 +77,6 @@ function PaymentReturnPage() {
   const isSettled =
     settledStatus != null && settledStatus !== 'pending' && settledStatus !== ''
 
-  // Cleanup mapping `txnRef → bookingId` sau khi BE đã settle. Side-effect
-  // ngoài React, dùng useEffect để không chạy lúc render.
   useEffect(() => {
     if (isSettled && vnpay.vnp_TxnRef) {
       forgetVnpayTxnRef(vnpay.vnp_TxnRef)
@@ -98,240 +89,224 @@ function PaymentReturnPage() {
 
   function handleRetryPay() {
     if (!polling.data || polling.data.finalAmount == null) return
-    vnpayMutation.mutate({
-      bookingId: polling.data.id,
-      amount: polling.data.finalAmount,
-    })
+    vnpayMutation.mutate({ bookingId: polling.data.id, amount: polling.data.finalAmount })
   }
 
-  /* ----------------------------- Render shells ----------------------------- */
+  /* ── Cases ──────────────────────────────────────────────── */
 
-  // Trường hợp không tìm thấy bookingId (sessionStorage bị xoá hoặc browser khác)
   if (bookingId == null) {
     return (
-      <ResultShell
-        tone="warn"
-        Icon={Loader2}
-        title={String(t('paymentReturn.lookupFailedTitle'))}
-        message={String(t('paymentReturn.lookupFailedMessage'))}
-      >
-        <Link
-          to="/my-bookings"
-          className="inline-flex items-center gap-2 rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white"
+      <WithLayout>
+        <ResultShell
+          tone="warn"
+          icon={<Loader2 size={28} strokeWidth={1.8} />}
+          title={String(t('paymentReturn.lookupFailedTitle'))}
+          message={String(t('paymentReturn.lookupFailedMessage'))}
         >
-          {String(t('paymentReturn.viewMyBookings'))}
-        </Link>
-      </ResultShell>
+          <div className="pret-actions">
+            <Link to="/my-bookings" className="pret-btn pret-btn--primary">
+              {String(t('paymentReturn.viewMyBookings'))}
+            </Link>
+          </div>
+        </ResultShell>
+      </WithLayout>
     )
   }
 
-  // Đang polling lần đầu
   if (polling.isPending) {
     return (
-      <ResultShell
-        tone="info"
-        Icon={Loader2}
-        iconClassName="animate-spin"
-        title={String(t('paymentReturn.pollingTitle'))}
-        message={String(t('paymentReturn.pollingMessage'))}
-      />
+      <WithLayout>
+        <ResultShell
+          tone="info"
+          icon={<Loader2 size={28} strokeWidth={1.8} className="animate-spin" />}
+          title={String(t('paymentReturn.pollingTitle'))}
+          message={String(t('paymentReturn.pollingMessage'))}
+        />
+      </WithLayout>
     )
   }
 
   if (polling.error) {
     return (
-      <ResultShell
-        tone="error"
-        Icon={XCircle}
-        title={String(t('paymentReturn.fetchErrorTitle'))}
-        message={String(t('paymentReturn.fetchErrorMessage'))}
-      >
-        <button
-          type="button"
-          onClick={handleRefresh}
-          className="inline-flex items-center gap-2 rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+      <WithLayout>
+        <ResultShell
+          tone="error"
+          icon={<XCircle size={28} strokeWidth={1.8} />}
+          title={String(t('paymentReturn.fetchErrorTitle'))}
+          message={String(t('paymentReturn.fetchErrorMessage'))}
         >
-          <RefreshCw className="h-4 w-4" aria-hidden />
-          {String(t('paymentReturn.refresh'))}
-        </button>
-      </ResultShell>
+          <div className="pret-actions">
+            <button type="button" onClick={handleRefresh} className="pret-btn pret-btn--secondary">
+              <RefreshCw size={15} strokeWidth={2} aria-hidden="true" />
+              {String(t('paymentReturn.refresh'))}
+            </button>
+          </div>
+        </ResultShell>
+      </WithLayout>
     )
   }
 
   const booking = polling.data
 
-  /* ----------------------- Trường hợp VNPay báo fail ----------------------- */
   if (!isVnpaySuccess) {
     return (
+      <WithLayout>
+        <ResultShell
+          tone="error"
+          icon={<XCircle size={28} strokeWidth={1.8} />}
+          title={String(t('paymentReturn.failureTitle'))}
+          message={String(
+            t('paymentReturn.failureMessage', {
+              defaultValue: 'Mã lỗi: {{code}} ({{reason}})',
+              code: errorCode,
+              reason: String(t(`vnpay.errorCodes.${errorReasonKey}`)),
+            }),
+          )}
+        >
+          <BookingSummary booking={booking} reportedAmountVnd={reportedAmountVnd} />
+          <div className="pret-actions">
+            <Link to="/my-bookings" className="pret-btn pret-btn--secondary">
+              {String(t('paymentReturn.viewMyBookings'))}
+            </Link>
+            {isPayable(booking?.status, booking?.paymentStatus) ? (
+              <button
+                type="button"
+                onClick={handleRetryPay}
+                disabled={vnpayMutation.isPending}
+                className="pret-btn pret-btn--pay"
+              >
+                {vnpayMutation.isPending ? (
+                  <Loader2 size={15} strokeWidth={2} className="animate-spin" aria-hidden="true" />
+                ) : (
+                  <CreditCard size={15} strokeWidth={2} aria-hidden="true" />
+                )}
+                {String(t('paymentReturn.retryPay'))}
+              </button>
+            ) : null}
+          </div>
+        </ResultShell>
+      </WithLayout>
+    )
+  }
+
+  if (!isSettled) {
+    return (
+      <WithLayout>
+        <ResultShell
+          tone="info"
+          icon={<Loader2 size={28} strokeWidth={1.8} className="animate-spin" />}
+          title={String(t('paymentReturn.waitingIpnTitle'))}
+          message={String(t('paymentReturn.waitingIpnMessage'))}
+        >
+          <BookingSummary booking={booking} reportedAmountVnd={reportedAmountVnd} />
+          <div className="pret-actions">
+            <button
+              type="button"
+              onClick={handleRefresh}
+              disabled={polling.isFetching}
+              className="pret-btn pret-btn--secondary"
+            >
+              <RefreshCw
+                size={15}
+                strokeWidth={2}
+                className={polling.isFetching ? 'animate-spin' : ''}
+                aria-hidden="true"
+              />
+              {String(t('paymentReturn.refresh'))}
+            </button>
+          </div>
+        </ResultShell>
+      </WithLayout>
+    )
+  }
+
+  const isPaid = booking?.paymentStatus === 'paid'
+  return (
+    <WithLayout>
       <ResultShell
-        tone="error"
-        Icon={XCircle}
-        title={String(t('paymentReturn.failureTitle'))}
+        tone={isPaid ? 'success' : 'warn'}
+        icon={
+          isPaid
+            ? <CheckCircle2 size={28} strokeWidth={1.8} />
+            : <XCircle size={28} strokeWidth={1.8} />
+        }
+        title={String(isPaid ? t('paymentReturn.successTitle') : t('paymentReturn.settledNotPaidTitle'))}
         message={String(
-          t('paymentReturn.failureMessage', {
-            defaultValue: 'Mã lỗi: {{code}} ({{reason}})',
-            code: errorCode,
-            reason: String(t(`vnpay.errorCodes.${errorReasonKey}`)),
-          }),
+          isPaid
+            ? t('paymentReturn.successMessage')
+            : t('paymentReturn.settledNotPaidMessage', {
+                defaultValue: 'Trạng thái hiện tại: {{status}}',
+                status: booking?.paymentStatus ?? '',
+              }),
         )}
       >
         <BookingSummary booking={booking} reportedAmountVnd={reportedAmountVnd} />
-        <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
-          <Link
-            to="/my-bookings"
-            className="inline-flex items-center gap-2 rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50"
-          >
+        <div className="pret-actions">
+          <Link to="/my-bookings" className="pret-btn pret-btn--primary">
             {String(t('paymentReturn.viewMyBookings'))}
           </Link>
-          {isPayable(booking?.status, booking?.paymentStatus) ? (
-            <button
-              type="button"
-              onClick={handleRetryPay}
-              disabled={vnpayMutation.isPending}
-              className="inline-flex items-center gap-2 rounded-md bg-[var(--color-primary,#0ea5e9)] px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
-            >
-              {vnpayMutation.isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-              ) : (
-                <CreditCard className="h-4 w-4" aria-hidden />
-              )}
-              {String(t('paymentReturn.retryPay'))}
-            </button>
+          {booking ? (
+            <Link to={`/booking-confirmation/${booking.id}`} className="pret-btn pret-btn--secondary">
+              {String(t('paymentReturn.viewBooking'))}
+            </Link>
           ) : null}
         </div>
       </ResultShell>
-    )
-  }
-
-  /* ---------------- Trường hợp VNPay báo success — chờ IPN -----------------*/
-  if (!isSettled) {
-    return (
-      <ResultShell
-        tone="info"
-        Icon={Loader2}
-        iconClassName="animate-spin"
-        title={String(t('paymentReturn.waitingIpnTitle'))}
-        message={String(t('paymentReturn.waitingIpnMessage'))}
-      >
-        <BookingSummary booking={booking} reportedAmountVnd={reportedAmountVnd} />
-        <button
-          type="button"
-          onClick={handleRefresh}
-          disabled={polling.isFetching}
-          className="mt-3 inline-flex items-center gap-2 rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50 disabled:opacity-60"
-        >
-          <RefreshCw
-            className={`h-4 w-4 ${polling.isFetching ? 'animate-spin' : ''}`}
-            aria-hidden
-          />
-          {String(t('paymentReturn.refresh'))}
-        </button>
-      </ResultShell>
-    )
-  }
-
-  /* --------------- Trường hợp BE đã settle — hiển thị kết quả -------------- */
-  const isPaid = booking?.paymentStatus === 'paid'
-  return (
-    <ResultShell
-      tone={isPaid ? 'success' : 'warn'}
-      Icon={isPaid ? CheckCircle2 : XCircle}
-      title={String(
-        isPaid
-          ? t('paymentReturn.successTitle')
-          : t('paymentReturn.settledNotPaidTitle'),
-      )}
-      message={String(
-        isPaid
-          ? t('paymentReturn.successMessage')
-          : t('paymentReturn.settledNotPaidMessage', {
-              defaultValue: 'Trạng thái hiện tại: {{status}}',
-              status: booking?.paymentStatus ?? '',
-            }),
-      )}
-    >
-      <BookingSummary booking={booking} reportedAmountVnd={reportedAmountVnd} />
-      <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
-        <Link
-          to="/my-bookings"
-          className="inline-flex items-center gap-2 rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white"
-        >
-          {String(t('paymentReturn.viewMyBookings'))}
-        </Link>
-        {booking ? (
-          <Link
-            to={`/booking-confirmation/${booking.id}`}
-            className="inline-flex items-center gap-2 rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50"
-          >
-            {String(t('paymentReturn.viewBooking'))}
-          </Link>
-        ) : null}
-      </div>
-    </ResultShell>
+    </WithLayout>
   )
 }
 
-/* -------------------------------------------------------------------------- */
+/* ─────────────────────────────────────────────────────────── */
+
+function WithLayout({ children }: { children: ReactNode }) {
+  return (
+    <>
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
+        className="pret-page"
+      >
+        <div className="pret-inner">{children}</div>
+      </motion.div>
+      <Footer />
+    </>
+  )
+}
+
+/* ─────────────────────────────────────────────────────────── */
 
 type ResultTone = 'info' | 'success' | 'error' | 'warn'
 
-const TONE_CLASS: Record<ResultTone, string> = {
-  info: 'border-sky-200 bg-sky-50 text-sky-900',
-  success: 'border-emerald-200 bg-emerald-50 text-emerald-900',
-  error: 'border-rose-200 bg-rose-50 text-rose-900',
-  warn: 'border-amber-200 bg-amber-50 text-amber-900',
-}
-
-const ICON_TONE: Record<ResultTone, string> = {
-  info: 'text-sky-600',
-  success: 'text-emerald-600',
-  error: 'text-rose-600',
-  warn: 'text-amber-600',
-}
-
 type ResultShellProps = {
   tone: ResultTone
-  Icon: React.ComponentType<{ className?: string; 'aria-hidden'?: boolean }>
-  iconClassName?: string
+  icon: ReactNode
   title: string
   message: string
-  children?: React.ReactNode
+  children?: ReactNode
 }
 
-function ResultShell(props: ResultShellProps) {
+function ResultShell({ tone, icon, title, message, children }: ResultShellProps) {
   return (
-    <motion.section
-      initial={{ opacity: 0, y: 6 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      className="mx-auto max-w-2xl px-4 py-12"
-    >
-      <div
-        className={`flex flex-col items-center gap-3 rounded-2xl border p-6 text-center ${TONE_CLASS[props.tone]}`}
-      >
-        <props.Icon
-          className={`h-10 w-10 ${ICON_TONE[props.tone]} ${props.iconClassName ?? ''}`}
-          aria-hidden
-        />
-        <h1 className="text-xl font-bold">{props.title}</h1>
-        <p className="text-sm opacity-90">{props.message}</p>
-        {props.children}
-      </div>
-    </motion.section>
+    <div className={`pret-shell pret-shell--${tone}`} role={tone === 'error' ? 'alert' : 'status'}>
+      <div className="pret-icon" aria-hidden="true">{icon}</div>
+      <h1 className="pret-title">{title}</h1>
+      <p className="pret-message">{message}</p>
+      {children}
+    </div>
   )
 }
 
+/* ─────────────────────────────────────────────────────────── */
+
 type BookingSummaryProps = {
-  booking:
-    | {
-        id: number
-        bookingCode: string | null
-        status: string | null
-        paymentStatus: string | null
-        finalAmount: number | null
-      }
-    | null
-    | undefined
+  booking: {
+    id: number
+    bookingCode: string | null
+    status: string | null
+    paymentStatus: string | null
+    finalAmount: number | null
+  } | null | undefined
   reportedAmountVnd: number | null
 }
 
@@ -339,36 +314,31 @@ function BookingSummary({ booking, reportedAmountVnd }: BookingSummaryProps) {
   const { t } = useTranslation('bookings')
   if (!booking) return null
   return (
-    <dl className="mt-3 w-full max-w-md space-y-1.5 rounded-xl bg-white/80 p-3 text-left text-xs text-slate-800 ring-1 ring-slate-200">
-      <SummaryRow label={String(t('paymentReturn.summary.bookingCode'))}>
-        {booking.bookingCode ?? `#${booking.id}`}
-      </SummaryRow>
-      <SummaryRow label={String(t('paymentReturn.summary.status'))}>
-        <span className="inline-flex flex-wrap items-center gap-1">
-          <BookingStatusBadge status={booking.status} />
-          <PaymentStatusBadge status={booking.paymentStatus} />
-        </span>
-      </SummaryRow>
-      <SummaryRow label={String(t('paymentReturn.summary.amount'))}>
-        {formatCurrencyVnd(booking.finalAmount)}
-      </SummaryRow>
+    <dl className="pret-summary">
+      <div className="pret-summary-row">
+        <dt>{String(t('paymentReturn.summary.bookingCode'))}</dt>
+        <dd>{booking.bookingCode ?? `#${booking.id}`}</dd>
+      </div>
+      <div className="pret-summary-row">
+        <dt>{String(t('paymentReturn.summary.status'))}</dt>
+        <dd>
+          <span className="inline-flex flex-wrap items-center gap-1">
+            <BookingStatusBadge status={booking.status} />
+            <PaymentStatusBadge status={booking.paymentStatus} />
+          </span>
+        </dd>
+      </div>
+      <div className="pret-summary-row">
+        <dt>{String(t('paymentReturn.summary.amount'))}</dt>
+        <dd>{formatCurrencyVnd(booking.finalAmount)}</dd>
+      </div>
       {reportedAmountVnd != null ? (
-        <SummaryRow label={String(t('paymentReturn.summary.reportedAmount'))}>
-          {formatCurrencyVnd(reportedAmountVnd)}
-        </SummaryRow>
+        <div className="pret-summary-row">
+          <dt>{String(t('paymentReturn.summary.reportedAmount'))}</dt>
+          <dd>{formatCurrencyVnd(reportedAmountVnd)}</dd>
+        </div>
       ) : null}
     </dl>
-  )
-}
-
-function SummaryRow(props: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="flex items-baseline justify-between gap-3">
-      <dt className="text-[10px] uppercase tracking-wide text-slate-500">
-        {props.label}
-      </dt>
-      <dd className="text-right">{props.children}</dd>
-    </div>
   )
 }
 

@@ -22,7 +22,10 @@ export function resolveHeaderVariant(pathname: string): HeaderVariant {
     pathname === '/support' ||
     pathname === '/passport' ||
     pathname === '/account' ||
-    /^\/bookings\/\d+/.test(pathname)
+    pathname === '/my-bookings' ||
+    pathname === '/schedules' ||
+    /^\/bookings\//.test(pathname) ||
+    /^\/schedules\/.+\/chat$/.test(pathname)
   ) {
     return 'over-hero'
   }

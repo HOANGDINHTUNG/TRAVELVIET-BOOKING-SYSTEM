@@ -92,6 +92,9 @@ const lazyPaymentReturnPage = lazy(
 const lazyMyBookingsPage = lazy(
   () => import("../module/bookings/pages/MyBookingsPage"),
 );
+const lazyServiceHubPage = lazy(
+  () => import("../module/services/pages/ServiceHubPage"),
+);
 const lazyManagementBookingsPage = lazy(
   () => import("../module/management/bookings/pages/ManagementBookingsPage"),
 );
@@ -124,6 +127,22 @@ const router = createBrowserRouter([
       {
         path: "tours",
         element: withSuspense(createElement(lazyToursPage)),
+      },
+      {
+        path: "flights",
+        element: withSuspense(createElement(lazyServiceHubPage)),
+      },
+      {
+        path: "hotels",
+        element: withSuspense(createElement(lazyServiceHubPage)),
+      },
+      {
+        path: "car-rental",
+        element: withSuspense(createElement(lazyServiceHubPage)),
+      },
+      {
+        path: "visa",
+        element: withSuspense(createElement(lazyServiceHubPage)),
       },
       {
         // Public tour detail — slug-friendly URL

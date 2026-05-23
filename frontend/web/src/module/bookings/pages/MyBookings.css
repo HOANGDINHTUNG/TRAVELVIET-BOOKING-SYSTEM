@@ -1,0 +1,394 @@
+/* ============================================================
+   MyBookingsPage — Luxe Travel 2026
+   ============================================================ */
+
+/* ── Page wrapper ────────────────────────────────────────── */
+
+.mybk-page {
+  background: var(--color-page);
+  min-height: 60vh;
+}
+
+.mybk-inner {
+  width: min(960px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: clamp(28px, 4vw, 44px) 0 clamp(72px, 10vw, 112px);
+}
+
+/* ── Filter bar ──────────────────────────────────────────── */
+
+.mybk-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg-solid);
+  backdrop-filter: blur(12px) saturate(1.06);
+  box-shadow: var(--glass-shadow-outer), var(--glass-shadow-inset);
+}
+
+.mybk-filter-chip {
+  min-height: 32px;
+  border: 1px solid color-mix(in srgb, var(--color-border) 80%, transparent);
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 0 13px;
+  background: var(--color-surface);
+  color: var(--color-muted);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background 0.16s ease,
+    border-color 0.16s ease,
+    color 0.16s ease;
+}
+
+.mybk-filter-chip:hover {
+  border-color: var(--color-aqua);
+  background: color-mix(in srgb, var(--color-aqua) 10%, var(--color-surface));
+  color: var(--color-primary);
+}
+
+.mybk-filter-chip.is-active {
+  border-color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface));
+  color: var(--color-primary);
+  font-weight: 900;
+}
+
+.mybk-filter-chip:focus-visible {
+  outline: 2px solid var(--focus-ring-color);
+  outline-offset: 2px;
+}
+
+.mybk-filter-count {
+  margin-left: auto;
+  color: var(--color-muted);
+  font-size: 12px;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+/* ── Booking card ────────────────────────────────────────── */
+
+.mybk-card {
+  border-radius: 14px;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg-solid);
+  box-shadow: var(--glass-shadow-outer);
+  overflow: hidden;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.mybk-card:hover {
+  border-color: color-mix(in srgb, var(--color-aqua) 40%, var(--glass-border));
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-2px);
+}
+
+.mybk-card__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  padding: 18px 20px 14px;
+  align-items: start;
+}
+
+.mybk-card__left {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mybk-card__meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.mybk-card__code {
+  font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-muted);
+  background: color-mix(in srgb, var(--color-surface-soft) 80%, transparent);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+
+.mybk-card__title {
+  margin: 0;
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1.4;
+}
+
+.mybk-card__info {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  font-size: 12.5px;
+  color: var(--color-muted);
+}
+
+.mybk-card__info-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.mybk-card__info-item svg {
+  color: var(--color-ocean);
+  flex-shrink: 0;
+}
+
+/* Amount block */
+.mybk-card__amount {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.mybk-card__amount-label {
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.mybk-card__amount-value {
+  font-size: clamp(17px, 2vw, 22px);
+  font-weight: 900;
+  color: var(--color-primary);
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Action footer */
+.mybk-card__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 10px 20px 14px;
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+/* Action buttons */
+.mybk-btn {
+  min-height: 34px;
+  border-radius: 7px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 14px;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background 0.16s ease,
+    border-color 0.16s ease,
+    color 0.16s ease,
+    transform 0.16s ease;
+}
+
+.mybk-btn:focus-visible {
+  outline: 2px solid var(--focus-ring-color);
+  outline-offset: 2px;
+}
+
+.mybk-btn--view {
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-muted);
+  text-decoration: none;
+}
+
+.mybk-btn--view:hover {
+  background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface));
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.mybk-btn--pay {
+  border: none;
+  background: var(--color-accent);
+  color: #fff;
+}
+
+.mybk-btn--pay:hover:not(:disabled) {
+  background: var(--color-accent-hover);
+  transform: translateY(-1px);
+}
+
+.mybk-btn--pay:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.mybk-btn--cancel {
+  border: 1px solid color-mix(in srgb, var(--color-danger) 40%, transparent);
+  background: transparent;
+  color: var(--color-danger);
+}
+
+.mybk-btn--cancel:hover {
+  background: color-mix(in srgb, var(--color-danger) 8%, var(--color-surface));
+  border-color: var(--color-danger);
+}
+
+.mybk-btn--cancel-confirm {
+  border: none;
+  background: var(--color-danger);
+  color: #fff;
+}
+
+.mybk-btn--cancel-confirm:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.mybk-btn--neutral {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.mybk-cancel-confirm-text {
+  font-size: 12px;
+  color: var(--color-danger);
+  font-weight: 700;
+}
+
+/* ── Empty / loading / error states ─────────────────────── */
+
+.mybk-state {
+  display: grid;
+  place-items: center;
+  gap: 14px;
+  padding: 64px 24px;
+  text-align: center;
+  border: 1px dashed var(--color-border-subtle);
+  border-radius: 16px;
+  background: var(--glass-bg-solid);
+  color: var(--color-muted);
+}
+
+.mybk-state svg {
+  color: color-mix(in srgb, var(--color-ocean) 60%, transparent);
+}
+
+.mybk-state__title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 900;
+  color: var(--color-text);
+}
+
+.mybk-state__desc {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+
+.mybk-state--error {
+  border-color: color-mix(in srgb, var(--color-danger) 30%, transparent);
+  background: color-mix(in srgb, var(--color-danger) 5%, var(--color-surface));
+}
+
+.mybk-state--error svg {
+  color: var(--color-danger);
+}
+
+.mybk-spinner {
+  display: inline-block;
+  width: 28px;
+  height: 28px;
+  border: 3px solid var(--color-border-subtle);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: mybk-spin 0.7s linear infinite;
+}
+
+@keyframes mybk-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Dark mode ───────────────────────────────────────────── */
+
+.theme-dark .mybk-filters {
+  border-color: rgba(255, 255, 255, 0.09);
+  background: color-mix(in srgb, var(--color-surface) 88%, transparent);
+}
+
+.theme-dark .mybk-filter-chip {
+  background: color-mix(in srgb, var(--color-surface) 90%, transparent);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.theme-dark .mybk-card {
+  background: linear-gradient(
+    185deg,
+    color-mix(in srgb, var(--color-surface) 94%, transparent),
+    color-mix(in srgb, var(--color-surface) 80%, transparent)
+  );
+  border-color: rgba(255, 255, 255, 0.07);
+}
+
+.theme-dark .mybk-card:hover {
+  box-shadow: 0 22px 56px rgba(0, 0, 0, 0.45);
+}
+
+.theme-dark .mybk-card__footer {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+/* ── Reduced motion ──────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .mybk-card,
+  .mybk-card:hover {
+    transform: none;
+  }
+
+  .mybk-spinner {
+    animation: none;
+    border-top-color: var(--color-primary);
+  }
+}
+
+/* ── Responsive ──────────────────────────────────────────── */
+
+@media (max-width: 600px) {
+  .mybk-card__body {
+    grid-template-columns: 1fr;
+  }
+
+  .mybk-card__amount {
+    text-align: left;
+    padding-top: 4px;
+    padding-bottom: 4px;
+  }
+}

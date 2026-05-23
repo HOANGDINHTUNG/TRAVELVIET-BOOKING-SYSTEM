@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { cn } from '@/lib/utils'
+import { useDisplayMoney } from '@/hooks/useDisplayMoney'
 
 import type { TourCardSavingTier } from './TourCard'
 
@@ -38,11 +39,6 @@ export type TourQuickViewPayload = {
 
 const DEFAULT_HOTLINE = 'tel:+0883459876'
 
-function formatPriceVnd(value: number): string {
-  if (!Number.isFinite(value) || value <= 0) return '—'
-  return `${Math.round(value).toLocaleString('vi-VN')}đ`
-}
-
 type TourQuickViewDialogProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -58,10 +54,9 @@ export function TourQuickViewDialog({
   hotlineHref = DEFAULT_HOTLINE,
 }: TourQuickViewDialogProps) {
   const { t } = useTranslation('translation')
+  const priceLabel = useDisplayMoney(tour?.price && tour.price > 0 ? tour.price : null)
 
   if (!tour) return null
-
-  const priceLabel = formatPriceVnd(tour.price)
   const tierStyle = tour.savingTier
     ? SAVING_BADGE[tour.savingTier]
     : null

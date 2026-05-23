@@ -6,6 +6,14 @@ import { sendAiMessage } from '../../api/server/AiChat.api'
 import type { AiRelatedItem } from '../../api/server/AiChat.api'
 import { cn } from '@/lib/utils'
 import { buildAssetUrl } from '../../utils/buildAssetUrl'
+import { useAppSelector } from '../../hooks/reduxHooks'
+import { useAuthStore } from '../../stores/authStore'
+import { useAiChatNotificationStore } from '../../stores/aiChatNotificationStore'
+import {
+  buildGuestWelcomeMessage,
+  buildPersonalizedWelcomeMessage,
+  resolveUserDisplayName,
+} from './aiChatMessages'
 import './AiChatBox.css'
 
 export type AiChatBoxProps = {
@@ -23,18 +31,6 @@ type ChatMessage = {
   createdAt: Date
   suggestions?: string[]
   relatedItems?: AiRelatedItem[]
-}
-
-const initialMessage: ChatMessage = {
-  id: 'welcome',
-  role: 'ai',
-  text: 'Xin chào, mình có thể tìm tour, gợi ý điểm đến và hỗ trợ thông tin đặt tour dựa trên dữ liệu hiện có của TravelViet.',
-  createdAt: new Date(),
-  suggestions: [
-    'Tìm tour Đà Lạt 3 ngày 2 đêm',
-    'Tôi có 5 triệu nên đi đâu?',
-    'Có địa điểm nào đẹp ở miền Trung không?',
-  ],
 }
 
 function relatedItemLabel(type: string) {
@@ -98,11 +94,56 @@ export function AiChatBox({
       setInternalOpen(next)
     }
   }
-  const [messages, setMessages] = useState<ChatMessage[]>([initialMessage])
+  const language = useAppSelector((state) => state.preferences.language)
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
+  const user = useAuthStore((state) => state.user)
+  const markAsRead = useAiChatNotificationStore((state) => state.markAsRead)
+  const setUnreadCount = useAiChatNotificationStore((state) => state.setUnreadCount)
+  const resetNotifications = useAiChatNotificationStore((state) => state.reset)
+
+  const [messages, setMessages] = useState<ChatMessage[]>(() => [
+    buildGuestWelcomeMessage('vi'),
+  ])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const messagesRef = useRef<HTMLDivElement | null>(null)
+  const welcomedUserIdRef = useRef<string | null>(null)
+
+  useEffect(() => {
+    if (isOpen) {
+      markAsRead()
+    }
+  }, [isOpen, markAsRead])
+
+  useEffect(() => {
+    if (!isAuthenticated || !user?.id) {
+      welcomedUserIdRef.current = null
+      setMessages([buildGuestWelcomeMessage(language)])
+      resetNotifications()
+      return
+    }
+
+    if (welcomedUserIdRef.current === user.id) {
+      return
+    }
+
+    welcomedUserIdRef.current = user.id
+    const name = resolveUserDisplayName(user, language)
+    const welcome = buildPersonalizedWelcomeMessage(name, language)
+    setMessages([welcome])
+
+    if (!isOpen) {
+      setUnreadCount(1)
+    }
+  }, [
+    isAuthenticated,
+    user,
+    language,
+    isOpen,
+    setUnreadCount,
+    resetNotifications,
+  ])
 
   useEffect(() => {
     if (!isOpen) {
@@ -213,7 +254,7 @@ export function AiChatBox({
                 }`}
                 key={message.id}
               >
-                <p>{message.text}</p>
+                <p className="ai-chatbox-message__text">{message.text}</p>
                 {message.relatedItems?.length ? (
                   <div className="ai-chatbox-related-list">
                     {message.relatedItems.map(renderRelatedItem)}

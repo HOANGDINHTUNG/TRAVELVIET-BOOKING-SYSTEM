@@ -43,10 +43,7 @@ export function pickLastMinuteDealTours(
   return out
 }
 
-export function formatDealPriceVnd(value: number): string {
-  if (!Number.isFinite(value) || value <= 0) return '—'
-  return `${Math.round(value).toLocaleString('vi-VN')}đ`
-}
+export { formatCurrencyVnd as formatDealPriceVnd } from '@/module/management/schedules/utils/currency'
 
 export { resolveListPrice } from '@/module/tours/utils/tourSustainability'
 

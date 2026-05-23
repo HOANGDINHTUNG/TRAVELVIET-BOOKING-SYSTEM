@@ -1,21 +1,38 @@
 import { Link } from 'react-router-dom'
+import { Compass, MapPin, LifeBuoy } from 'lucide-react'
+import './ErrorPage.css'
 
 function NotFoundPage() {
   return (
-    <section className="grid min-h-screen place-items-center px-6 text-center">
-      <div className="grid gap-4">
-        <p className="text-sm font-bold uppercase tracking-[0.18em] text-[var(--color-muted)]">
-          404
+    <div className="error-page">
+      <div className="error-page__card">
+        <div className="error-page__code" aria-hidden="true">404</div>
+
+        <div className="error-page__icon">
+          <Compass size={32} strokeWidth={1.6} className="error-icon-404" aria-hidden="true" />
+        </div>
+
+        <h1 className="error-page__title">Không tìm thấy trang</h1>
+        <p className="error-page__desc">
+          Trang bạn tìm kiếm có thể đã bị di chuyển, đổi tên hoặc không còn tồn tại.
+          Hãy thử một trong các đường dẫn bên dưới.
         </p>
-        <h1 className="text-4xl font-black">Không tìm thấy trang</h1>
-        <Link
-          className="mx-auto inline-flex min-h-11 items-center rounded-md bg-[var(--color-primary)] px-5 font-bold text-white no-underline"
-          to="/"
-        >
-          Về trang chủ
-        </Link>
+
+        <nav className="error-page__links" aria-label="Điều hướng gợi ý">
+          <Link className="error-page__link-primary" to="/">
+            <MapPin size={15} strokeWidth={2.2} aria-hidden="true" />
+            Về trang chủ
+          </Link>
+          <Link className="error-page__link-secondary" to="/tours">
+            Xem tour
+          </Link>
+          <Link className="error-page__link-secondary" to="/support">
+            <LifeBuoy size={15} strokeWidth={2} aria-hidden="true" />
+            Hỗ trợ
+          </Link>
+        </nav>
       </div>
-    </section>
+    </div>
   )
 }
 

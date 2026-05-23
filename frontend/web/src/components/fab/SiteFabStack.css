@@ -1,0 +1,145 @@
+/* FAB cố định góc phải — đồng bộ trang /tours */
+
+.site-vt-fab-stack {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 2147483640;
+  display: grid;
+  gap: 10px;
+}
+
+.ai-chatbox.ai-chatbox--site-fab {
+  right: 22px;
+  bottom: calc(22px + 52px * 3 + 10px * 2);
+  z-index: 2147483644;
+}
+
+.site-vt-fab--ai {
+  position: relative;
+  background: linear-gradient(145deg, #dda15e 0%, #bc6c25 100%);
+  color: #283618;
+  box-shadow: 0 10px 28px rgba(188, 108, 37, 0.38);
+}
+
+.site-vt-fab__badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  z-index: 2;
+  display: grid;
+  min-width: 18px;
+  height: 18px;
+  place-items: center;
+  padding: 0 5px;
+  border: 2px solid #fff;
+  border-radius: 999px;
+  background: #e63946;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+  box-shadow: 0 4px 12px rgba(230, 57, 70, 0.45);
+  pointer-events: none;
+}
+
+.site-vt-fab--ai:hover {
+  background: linear-gradient(145deg, #e8b56a 0%, #c77b2a 100%);
+}
+
+.site-vt-fab--ai.is-active {
+  box-shadow:
+    0 0 0 3px rgba(221, 161, 94, 0.45),
+    0 10px 28px rgba(188, 108, 37, 0.38);
+}
+
+.site-vt-fab {
+  width: 52px;
+  height: 52px;
+  border: 0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #0b63c9;
+  color: #fff;
+  box-shadow: 0 10px 28px rgba(11, 99, 201, 0.35);
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.site-vt-fab:hover {
+  transform: translateY(-2px);
+  background: #094cad;
+}
+
+.site-vt-fab.is-muted {
+  background: #fff;
+  color: #0b63c9;
+  border: 1px solid #dbe4ee;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.1);
+}
+
+.site-vt-fab.is-muted:hover {
+  background: #f4f8fc;
+}
+
+/* Lắc nhẹ — thu hút chú ý */
+@keyframes site-fab-wiggle {
+  0%,
+  72%,
+  100% {
+    transform: rotate(0deg) translateY(0);
+  }
+  74% {
+    transform: rotate(-7deg) translateY(-1px);
+  }
+  78% {
+    transform: rotate(7deg) translateY(-1px);
+  }
+  82% {
+    transform: rotate(-5deg) translateY(0);
+  }
+  86% {
+    transform: rotate(5deg) translateY(0);
+  }
+  90% {
+    transform: rotate(0deg) translateY(0);
+  }
+}
+
+.site-vt-fab--wiggle {
+  animation: site-fab-wiggle 3.2s ease-in-out infinite;
+  transform-origin: center bottom;
+}
+
+.site-vt-fab--wiggle:hover {
+  animation-play-state: paused;
+}
+
+@media (max-width: 640px) {
+  .ai-chatbox.ai-chatbox--site-fab {
+    right: 16px;
+    bottom: calc(16px + 52px * 3 + 10px * 2);
+  }
+
+  .ai-chatbox.ai-chatbox--site-fab .ai-chatbox-panel {
+    width: min(430px, calc(100vw - 24px));
+    height: min(520px, calc(100vh - 200px));
+    min-height: 380px;
+  }
+
+  .site-vt-fab-stack {
+    right: 16px;
+    bottom: max(16px, env(safe-area-inset-bottom, 0px));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-vt-fab--wiggle {
+    animation: none;
+  }
+}

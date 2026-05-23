@@ -1,0 +1,61 @@
+/* Liquid Glass Auth — design tokens (no raw hex in components) */
+.auth-liquid {
+  --auth-accent: #6366f1;
+  --auth-accent-hover: #4f46e5;
+  --auth-accent-glow: rgba(99, 102, 241, 0.45);
+  --auth-accent-soft: rgba(99, 102, 241, 0.12);
+
+  --auth-bg-start: #f8fafc;
+  --auth-bg-mid: #ecfdf5;
+  --auth-bg-end: #ede9fe;
+  --auth-orb-1: rgba(45, 212, 191, 0.35);
+  --auth-orb-2: rgba(167, 139, 250, 0.28);
+
+  --auth-card-bg: rgba(255, 255, 255, 0.7);
+  --auth-card-border: rgba(255, 255, 255, 0.4);
+  --auth-card-shadow: 0 32px 80px rgba(15, 23, 42, 0.12);
+
+  --auth-title: #0f172a;
+  --auth-subtitle: #64748b;
+  --auth-input-bg: rgba(255, 255, 255, 0.55);
+  --auth-input-border: rgba(148, 163, 184, 0.35);
+  --auth-input-text: #0f172a;
+  --auth-error: #ef4444;
+  --auth-error-soft: rgba(239, 68, 68, 0.12);
+  --auth-success: #22c55e;
+
+  --auth-visual-text: #f8fafc;
+  --auth-visual-muted: rgba(248, 250, 252, 0.78);
+
+  --auth-transition-theme: color 0.3s ease, background-color 0.3s ease,
+    border-color 0.3s ease, box-shadow 0.3s ease;
+  --auth-ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --auth-font: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+.auth-liquid[data-accent='sunset'] {
+  --auth-accent: #f97316;
+  --auth-accent-hover: #ea580c;
+  --auth-accent-glow: rgba(249, 115, 22, 0.42);
+  --auth-accent-soft: rgba(249, 115, 22, 0.14);
+}
+
+.theme-dark .auth-liquid,
+.dark .auth-liquid {
+  --auth-bg-start: #14181f;
+  --auth-bg-mid: #1a2332;
+  --auth-bg-end: #1e1b2e;
+  --auth-orb-1: rgba(99, 102, 241, 0.22);
+  --auth-orb-2: rgba(249, 115, 22, 0.14);
+
+  --auth-card-bg: rgba(15, 23, 42, 0.6);
+  --auth-card-border: rgba(51, 65, 85, 0.5);
+  --auth-card-shadow: 0 40px 100px rgba(0, 0, 0, 0.45);
+
+  --auth-title: #f8fafc;
+  --auth-subtitle: #94a3b8;
+  --auth-input-bg: rgba(15, 23, 42, 0.55);
+  --auth-input-border: rgba(71, 85, 105, 0.55);
+  --auth-input-text: #f1f5f9;
+  --auth-error-soft: rgba(248, 113, 113, 0.14);
+}

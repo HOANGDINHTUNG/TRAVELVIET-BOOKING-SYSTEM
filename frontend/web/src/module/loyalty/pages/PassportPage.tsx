@@ -23,44 +23,44 @@ import {
 import { ErrorBlock } from '../../../components/common/ui/ErrorBlock'
 import { PageLoader } from '../../../components/common/ux/PageLoader'
 import { Footer } from '../../../components/Footer/Footer'
+import { CustomerPageHero } from '../../../components/ui/CustomerPageHero/CustomerPageHero'
 import './PassportPage.css'
 
 type PassportLocale = 'vi' | 'en'
 
 const copyByLocale = {
   vi: {
-    loading: 'Dang tai passport...',
-    errorTitle: 'Khong the tai passport',
-    retry: 'Thu lai',
-    backAccount: 'Ve tai khoan',
+    loading: 'Đang tải hộ chiếu du lịch...',
+    errorTitle: 'Không thể tải hộ chiếu',
+    retry: 'Thử lại',
+    backAccount: 'Về tài khoản',
     kicker: 'Travel Passport',
-    title: 'Ho chieu du lich cua ban',
-    subtitle:
-      'Theo doi diem da di, huy hieu da mo khoa, check-in va nhiem vu thanh vien.',
-    passportNo: 'So passport',
-    totalTours: 'Tour da di',
-    totalDestinations: 'Diem den',
+    title: 'Hộ chiếu du lịch của bạn',
+    subtitle: 'Theo dõi điểm đã đi, huy hiệu đã mở khóa, check-in và nhiệm vụ thành viên.',
+    passportNo: 'Số hộ chiếu',
+    totalTours: 'Tour đã đi',
+    totalDestinations: 'Điểm đến',
     totalCheckins: 'Check-in',
-    lastTrip: 'Chuyen gan nhat',
-    badges: 'Huy hieu',
-    noBadges: 'Chua mo khoa huy hieu.',
-    destinations: 'Diem da ghe tham',
-    noDestinations: 'Chua co diem den trong passport.',
-    missions: 'Nhiem vu',
-    noMissions: 'Chua co nhiem vu.',
-    claim: 'Nhan thuong',
-    claimed: 'Da nhan',
-    expired: 'Het han',
-    inProgress: 'Dang lam',
-    completed: 'Hoan thanh',
-    reward: 'Thuong',
-    progress: 'Tien do',
-    claimSuccess: 'Da nhan thuong nhiem vu.',
-    claimError: 'Khong the nhan thuong.',
-    checkins: 'Lich su check-in',
-    noCheckins: 'Chua co check-in.',
+    lastTrip: 'Chuyến gần nhất',
+    badges: 'Huy hiệu',
+    noBadges: 'Chưa mở khóa huy hiệu.',
+    destinations: 'Điểm đã ghé thăm',
+    noDestinations: 'Chưa có điểm đến trong hộ chiếu.',
+    missions: 'Nhiệm vụ',
+    noMissions: 'Chưa có nhiệm vụ.',
+    claim: 'Nhận thưởng',
+    claimed: 'Đã nhận',
+    expired: 'Hết hạn',
+    inProgress: 'Đang làm',
+    completed: 'Hoàn thành',
+    reward: 'Phần thưởng',
+    progress: 'Tiến độ',
+    claimSuccess: 'Đã nhận thưởng nhiệm vụ.',
+    claimError: 'Không thể nhận thưởng.',
+    checkins: 'Lịch sử check-in',
+    noCheckins: 'Chưa có check-in.',
     booking: 'Booking',
-    notUpdated: 'Chua cap nhat',
+    notUpdated: 'Chưa cập nhật',
   },
   en: {
     loading: 'Loading passport...',
@@ -225,50 +225,35 @@ export default function PassportPage() {
   }
 
   return (
-    <div className="passport-page">
-      <main className="passport-shell">
-        <Link className="passport-back-link" to="/account">
-          <ArrowLeft aria-hidden="true" />
-          {copy.backAccount}
-        </Link>
+    <>
+      <CustomerPageHero
+        variant="ocean"
+        kicker={copy.kicker}
+        title={copy.title}
+        lead={copy.subtitle}
+        metrics={[
+          { icon: <Plane size={14} />, value: passport?.totalTours ?? 0, label: copy.totalTours },
+          { icon: <MapPinned size={14} />, value: passport?.totalDestinations ?? 0, label: copy.totalDestinations },
+          { icon: <CheckCircle2 size={14} />, value: passport?.totalCheckins ?? 0, label: copy.totalCheckins },
+          { icon: <Award size={14} />, value: unlockedBadgeCount, label: copy.badges },
+        ]}
+      />
 
-        <section className="passport-hero">
-          <div>
-            <span>{copy.kicker}</span>
-            <h1>{copy.title}</h1>
-            <p>{copy.subtitle}</p>
-          </div>
+      <div className="passport-page">
+        <main className="passport-shell">
+          <Link className="passport-back-link" to="/account">
+            <ArrowLeft size={15} aria-hidden="true" />
+            {copy.backAccount}
+          </Link>
+
+          {/* Passport booklet mini-card */}
           <div className="passport-booklet">
-            <Stamp aria-hidden="true" />
+            <Stamp size={36} aria-hidden="true" />
             <small>{copy.passportNo}</small>
             <strong>{passport?.passportNo || copy.notUpdated}</strong>
           </div>
-        </section>
 
-        <section className="passport-metrics" aria-label="Passport summary">
-          <article>
-            <Plane aria-hidden="true" />
-            <span>{copy.totalTours}</span>
-            <strong>{passport?.totalTours ?? 0}</strong>
-          </article>
-          <article>
-            <MapPinned aria-hidden="true" />
-            <span>{copy.totalDestinations}</span>
-            <strong>{passport?.totalDestinations ?? 0}</strong>
-          </article>
-          <article>
-            <CheckCircle2 aria-hidden="true" />
-            <span>{copy.totalCheckins}</span>
-            <strong>{passport?.totalCheckins ?? 0}</strong>
-          </article>
-          <article>
-            <Award aria-hidden="true" />
-            <span>{copy.badges}</span>
-            <strong>{unlockedBadgeCount}</strong>
-          </article>
-        </section>
-
-        <div className="passport-layout">
+          <div className="passport-layout">
           <section className="passport-panel passport-missions-panel">
             <header>
               <div>
@@ -416,8 +401,9 @@ export default function PassportPage() {
             )}
           </section>
         </div>
-      </main>
-      <Footer />
-    </div>
+        </main>
+        <Footer />
+      </div>
+    </>
   )
 }

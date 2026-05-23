@@ -1,0 +1,233 @@
+/* ============================================================
+   PaymentReturnPage — Luxe Travel 2026
+   ============================================================ */
+
+/* ── Page wrapper ────────────────────────────────────────── */
+
+.pret-page {
+  background: var(--color-page);
+  min-height: 80vh;
+  display: grid;
+  place-items: center;
+  padding: clamp(48px, 8vw, 96px) 20px;
+}
+
+.pret-inner {
+  width: min(600px, 100%);
+}
+
+/* ── Result shell ────────────────────────────────────────── */
+
+.pret-shell {
+  border-radius: 18px;
+  border: 1px solid;
+  padding: clamp(28px, 5vw, 44px) clamp(24px, 4vw, 36px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+  animation: pret-shell-in 0.46s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes pret-shell-in {
+  from { opacity: 0; transform: scale(0.96) translateY(14px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* Tone variants */
+.pret-shell--info {
+  border-color: color-mix(in srgb, var(--color-primary) 28%, transparent);
+  background: color-mix(in srgb, var(--color-primary) 6%, var(--color-surface));
+}
+
+.pret-shell--success {
+  border-color: color-mix(in srgb, #22c55e 30%, transparent);
+  background: color-mix(in srgb, #22c55e 6%, var(--color-surface));
+}
+
+.pret-shell--error {
+  border-color: color-mix(in srgb, var(--color-danger) 30%, transparent);
+  background: color-mix(in srgb, var(--color-danger) 6%, var(--color-surface));
+}
+
+.pret-shell--warn {
+  border-color: color-mix(in srgb, #f59e0b 30%, transparent);
+  background: color-mix(in srgb, #f59e0b 6%, var(--color-surface));
+}
+
+/* ── Icon ────────────────────────────────────────────────── */
+
+.pret-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  border: 2px solid;
+  animation: pret-icon-in 0.52s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+}
+
+@keyframes pret-icon-in {
+  from { opacity: 0; transform: scale(0.5); }
+  70%  { transform: scale(1.08); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.pret-shell--info    .pret-icon { color: var(--color-primary);     background: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface)); border-color: color-mix(in srgb, var(--color-primary) 30%, transparent); }
+.pret-shell--success .pret-icon { color: #16a34a;  background: color-mix(in srgb, #22c55e 12%, var(--color-surface)); border-color: color-mix(in srgb, #22c55e 30%, transparent); }
+.pret-shell--error   .pret-icon { color: var(--color-danger);  background: color-mix(in srgb, var(--color-danger) 12%, var(--color-surface)); border-color: color-mix(in srgb, var(--color-danger) 30%, transparent); }
+.pret-shell--warn    .pret-icon { color: #d97706;  background: color-mix(in srgb, #f59e0b 12%, var(--color-surface)); border-color: color-mix(in srgb, #f59e0b 30%, transparent); }
+
+/* ── Title & message ─────────────────────────────────────── */
+
+.pret-title {
+  margin: 0;
+  font-size: clamp(20px, 3vw, 26px);
+  font-weight: 900;
+  color: var(--color-heading);
+}
+
+.pret-message {
+  margin: 0;
+  font-size: 14.5px;
+  color: var(--color-muted);
+  line-height: 1.6;
+  max-width: 440px;
+}
+
+/* ── Actions row ─────────────────────────────────────────── */
+
+.pret-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+/* Shared button base */
+.pret-btn {
+  min-height: 42px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 18px;
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 900;
+  cursor: pointer;
+  white-space: nowrap;
+  text-decoration: none;
+  transition:
+    background 0.16s ease,
+    border-color 0.16s ease,
+    transform 0.16s ease;
+}
+
+.pret-btn:focus-visible {
+  outline: 2px solid var(--focus-ring-color);
+  outline-offset: 2px;
+}
+
+.pret-btn--primary {
+  border: none;
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.pret-btn--primary:hover {
+  background: var(--color-primary-hover);
+  transform: translateY(-1px);
+}
+
+.pret-btn--secondary {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.pret-btn--secondary:hover {
+  border-color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface));
+  color: var(--color-primary);
+}
+
+.pret-btn--pay {
+  border: none;
+  background: var(--color-accent);
+  color: #fff;
+}
+
+.pret-btn--pay:hover:not(:disabled) {
+  background: var(--color-accent-hover);
+  transform: translateY(-1px);
+}
+
+.pret-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ── Booking summary mini-card ───────────────────────────── */
+
+.pret-summary {
+  width: 100%;
+  max-width: 420px;
+  border-radius: 10px;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg-solid);
+  overflow: hidden;
+  text-align: left;
+}
+
+.pret-summary-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--color-border-subtle);
+  font-size: 12.5px;
+}
+
+.pret-summary-row:last-child { border-bottom: none; }
+
+.pret-summary-row dt {
+  font-size: 10.5px;
+  font-weight: 950;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.pret-summary-row dd {
+  margin: 0;
+  font-weight: 700;
+  color: var(--color-text);
+  text-align: right;
+}
+
+/* ── Dark mode ───────────────────────────────────────────── */
+
+.theme-dark .pret-summary {
+  background: color-mix(in srgb, var(--color-surface) 90%, transparent);
+  border-color: rgba(255, 255, 255, 0.09);
+}
+
+/* ── Reduced motion ──────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .pret-shell,
+  .pret-icon {
+    animation: none;
+  }
+
+  .pret-btn--primary:hover,
+  .pret-btn--pay:hover:not(:disabled) {
+    transform: none;
+  }
+}

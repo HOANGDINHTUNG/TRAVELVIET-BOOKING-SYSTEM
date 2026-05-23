@@ -96,6 +96,7 @@
 
   /* Tours catalog (/tours) hero banner */
   --tours-catalog-hero-min-h: clamp(280px, calc(28vw + 80px), 400px);
+  --tours-catalog-sticky-btn-size: 3.25rem;
   --tours-catalog-hero-gradient: linear-gradient(
     180deg,
     rgba(8, 32, 64, 0.12) 0%,
@@ -104,6 +105,17 @@
   --tours-catalog-hero-title: #ffffff;
   --tours-catalog-hero-lead: rgba(255, 255, 255, 0.95);
   --tours-catalog-hero-image-filter: none;
+
+  /* Destinations catalog page hero */
+  --dest-hero-min-h: clamp(380px, calc(30vw + 140px), 520px);
+  --dest-hero-gradient: linear-gradient(
+    180deg,
+    rgba(6, 28, 40, 0.14) 0%,
+    rgba(6, 28, 40, 0.72) 100%
+  );
+  --dest-hero-title: #ffffff;
+  --dest-hero-lead: rgba(255, 255, 255, 0.88);
+  --dest-hero-image-filter: none;
 
   /* Home — 4 tour card 300px + gap 18px (carousel / section căn đều) */
   --home-tour-card-width: 300px;
@@ -185,17 +197,24 @@
   --tours-catalog-hero-lead: rgba(232, 240, 247, 0.88);
   --tours-catalog-hero-image-filter: brightness(0.72) saturate(0.85);
 
+  --dest-hero-gradient: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.38) 0%,
+    rgba(0, 0, 0, 0.82) 100%
+  );
+  --dest-hero-image-filter: brightness(0.72) saturate(0.85);
+
   --color-neon-blue: #22d3ee;
   --color-neon-purple: #c084fc;
 }
 
-/* Chiều cao header fixed — py-1.5 + logo (Header.tsx) */
+/* Chiều cao header fixed — đủ 1 dòng nav VI/EN (Header.tsx) */
 :root {
-  --site-header-height: 3rem;
+  --site-header-height: 3.25rem;
 }
 
 @media (min-width: 768px) {
   :root {
-    --site-header-height: 3.75rem;
+    --site-header-height: 4rem;
   }
 }

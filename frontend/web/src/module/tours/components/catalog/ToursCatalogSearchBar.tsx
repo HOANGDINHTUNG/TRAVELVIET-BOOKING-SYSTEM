@@ -1,5 +1,10 @@
-import { Search } from 'lucide-react'
+import { forwardRef, useImperativeHandle, useRef } from 'react'
+import { Calendar, MapPin, Plane, Search } from 'lucide-react'
 import type { TourCatalogUiFilters } from '../../utils/tourCatalogSearch'
+
+export type ToursCatalogSearchBarHandle = {
+  focusKeyword: () => void
+}
 
 type ToursCatalogSearchBarProps = {
   filters: TourCatalogUiFilters
@@ -7,33 +12,51 @@ type ToursCatalogSearchBarProps = {
   onSubmit: () => void
 }
 
-export function ToursCatalogSearchBar({
-  filters,
-  onChange,
-  onSubmit,
-}: ToursCatalogSearchBarProps) {
+export const ToursCatalogSearchBar = forwardRef<
+  ToursCatalogSearchBarHandle,
+  ToursCatalogSearchBarProps
+>(function ToursCatalogSearchBar({ filters, onChange, onSubmit }, ref) {
+  const keywordInputRef = useRef<HTMLInputElement>(null)
+
+  useImperativeHandle(ref, () => ({
+    focusKeyword: () => {
+      const input = keywordInputRef.current
+      if (!input) return
+      input.focus({ preventScroll: true })
+      input.select()
+    },
+  }))
+
   return (
-    <div className="tours-vt-search-wrap">
-      <form
-        className="tours-vt-search-bar"
-        onSubmit={(e) => {
-          e.preventDefault()
-          onSubmit()
-        }}
-      >
-        <div className="tours-vt-search-field">
-          <label htmlFor="tour-keyword">Từ khóa</label>
+    <form
+      className="tours-vt-search-form"
+      onSubmit={(e) => {
+        e.preventDefault()
+        onSubmit()
+      }}
+    >
+      <p className="tours-vt-search-form__kicker">Tìm tour phù hợp</p>
+      <div className="tours-vt-search-form__grid">
+        <label className="tours-vt-search-cell tours-vt-search-cell--wide">
+          <span className="tours-vt-search-cell__label">
+            <Search size={14} strokeWidth={2.4} aria-hidden />
+            Từ khóa
+          </span>
           <input
+            ref={keywordInputRef}
             id="tour-keyword"
             type="search"
             placeholder="Tên tour, điểm đến..."
             value={filters.keyword}
             onChange={(e) => onChange({ keyword: e.target.value })}
           />
-        </div>
+        </label>
 
-        <div className="tours-vt-search-field">
-          <label htmlFor="tour-type">Loại</label>
+        <label className="tours-vt-search-cell">
+          <span className="tours-vt-search-cell__label">
+            <Plane size={14} strokeWidth={2.4} aria-hidden />
+            Loại
+          </span>
           <select
             id="tour-type"
             value={filters.scope}
@@ -51,10 +74,13 @@ export function ToursCatalogSearchBar({
             <option value="domestic">Trong nước</option>
             <option value="international">Nước ngoài</option>
           </select>
-        </div>
+        </label>
 
-        <div className="tours-vt-search-field">
-          <label htmlFor="tour-departure">Điểm khởi hành</label>
+        <label className="tours-vt-search-cell">
+          <span className="tours-vt-search-cell__label">
+            <MapPin size={14} strokeWidth={2.4} aria-hidden />
+            Khởi hành
+          </span>
           <select
             id="tour-departure"
             value={filters.departure}
@@ -65,28 +91,36 @@ export function ToursCatalogSearchBar({
             <option value="TP. Hồ Chí Minh">TP. Hồ Chí Minh</option>
             <option value="Đà Nẵng">Đà Nẵng</option>
           </select>
-        </div>
+        </label>
 
-        <div className="tours-vt-search-field">
-          <label htmlFor="tour-destination">Điểm đến</label>
-          <strong id="tour-destination">{filters.destinationLabel}</strong>
-        </div>
+        <label className="tours-vt-search-cell">
+          <span className="tours-vt-search-cell__label">
+            <MapPin size={14} strokeWidth={2.4} aria-hidden />
+            Điểm đến
+          </span>
+          <strong className="tours-vt-search-cell__value" id="tour-destination">
+            {filters.destinationLabel}
+          </strong>
+        </label>
 
-        <div className="tours-vt-search-field">
-          <label htmlFor="tour-date">Ngày đi</label>
+        <label className="tours-vt-search-cell">
+          <span className="tours-vt-search-cell__label">
+            <Calendar size={14} strokeWidth={2.4} aria-hidden />
+            Ngày đi
+          </span>
           <input
             id="tour-date"
             type="date"
             value={filters.departDate}
             onChange={(e) => onChange({ departDate: e.target.value })}
           />
-        </div>
+        </label>
 
         <button className="tours-vt-search-submit" type="submit">
-          <Search size={18} strokeWidth={2.2} aria-hidden />
-          Đổi tìm kiếm
+          <Search size={18} strokeWidth={2.4} aria-hidden />
+          <span>Tìm tour</span>
         </button>
-      </form>
-    </div>
+      </div>
+    </form>
   )
-}
+})

@@ -423,9 +423,79 @@ export const resources = {
           linkCopyFailed: 'Không thể sao chép liên kết',
         },
       },
+      siteFab: {
+        aria: 'Tiện ích nhanh',
+        scrollTop: 'Lên đầu trang',
+        aiOpen: 'Mở trợ lý AI',
+        aiOpenUnread: 'Mở trợ lý AI — {{count}} tin nhắn mới',
+        aiClose: 'Đóng trợ lý AI',
+        call: 'Gọi tư vấn',
+        tabUnreadOne: '1 tin nhắn mới',
+        tabUnreadMany: '{{count}} tin nhắn mới',
+      },
+      serviceHub: {
+        serviceLabel: 'Dịch vụ Travel Viet',
+        contactSupport: 'Liên hệ tư vấn',
+        browseTours: 'Xem danh sách tour',
+        flights: {
+          lead: 'Đặt vé máy bay nội địa và quốc tế — Travel Viet đang tích hợp đối tác hàng không, bạn có thể xem combo tour có vé bay sẵn.',
+          primaryCta: 'Tour có vé bay',
+          body: 'Trang vé máy bay đang được hoàn thiện. Trong lúc chờ, bạn có thể chọn tour quốc tế hoặc combo đã bao gồm vé khứ hồi, hành trình và hỗ trợ visa nhanh.',
+        },
+        hotels: {
+          lead: 'Khách sạn & resort đối tác — gợi ý lưu trú theo ngân sách, vị trí và tiêu chuẩn phòng.',
+          primaryCta: 'Tour kèm khách sạn',
+          body: 'Danh mục khách sạn riêng đang cập nhật. Hầu hết tour trọn gói của Travel Viet đã bao gồm khách sạn tiêu chuẩn hoặc cao cấp — xem chi tiết trong từng hành trình.',
+        },
+        'car-rental': {
+          lead: 'Thuê xe có tài xế hoặc tự lái cho chuyến đi linh hoạt.',
+          primaryCta: 'Tour trong nước',
+          body: 'Dịch vụ thuê xe đang được bổ sung. Bạn có thể đặt tour có xe đưa đón sân bay và di chuyển theo lịch trình, hoặc liên hệ tư vấn viên để báo giá riêng.',
+        },
+        visa: {
+          lead: 'Hỗ trợ hồ sơ visa du lịch — checklist, lịch nộp và theo dõi tiến độ.',
+          primaryCta: 'Trung tâm hỗ trợ',
+          body: 'Travel Viet hỗ trợ tư vấn visa kèm tour quốc tế. Gửi yêu cầu qua trung tâm hỗ trợ để nhận hướng dẫn chi tiết theo quốc gia bạn dự định đi.',
+        },
+      },
       header: {
         brandTagline: 'Tour • Điểm đến • Đặt chỗ',
         exploreTours: 'Khám phá tour',
+        myBookings: 'Đơn đã đặt',
+        nav: {
+          packageTour: 'Tour trọn gói',
+          flightTicket: 'Vé máy bay',
+          hotel: 'Khách sạn',
+          travelCombo: 'Combo du lịch',
+          addOnServices: 'Dịch vụ bổ sung',
+        },
+        utility: {
+          currencyAria: 'Chọn loại tiền tệ',
+          locationAria: 'Chọn khu vực khởi hành',
+          cartAria: 'Giỏ đặt tour / đơn của tôi',
+          locations: {
+            hcm: 'TP. Hồ Chí Minh',
+            hanoi: 'Hà Nội',
+            danang: 'Đà Nẵng',
+          },
+        },
+        localePanel: {
+          aria: 'Ngôn ngữ, tiền tệ và giao diện',
+          ariaVi: 'Tiếng Việt · {{currency}} · giao diện {{theme}}',
+          ariaEn: 'English · {{currency}} · {{theme}} theme',
+          title: 'Tùy chọn hiển thị',
+          language: 'Ngôn ngữ',
+          currency: 'Tiền tệ',
+          theme: 'Giao diện',
+          viTitle: 'Tiếng Việt',
+          viSub: '(Việt Nam)',
+          enTitle: 'English',
+          enSub: '(Quốc tế)',
+          vndSub: 'Đồng Việt Nam',
+          usdSub: 'Đô la Mỹ',
+          confirm: 'Xác nhận',
+          rateHint: 'Quy đổi USD: 1 USD = {{rate}} VND (làm tròn 2 chữ số thập phân).',
+        },
         megaMenu: {
           home: {
             landing: 'Trang chủ TravelViet',
@@ -449,6 +519,9 @@ export const resources = {
             },
           },
           destinations: {
+            all: {
+              description: 'Khám phá toàn bộ điểm đến nổi bật trên TravelViet.',
+            },
             central: {
               title: 'Miền Trung',
               description: 'Đà Nẵng, Huế, Hội An — di sản và biển.',
@@ -919,9 +992,79 @@ export const resources = {
           linkCopyFailed: 'Could not copy the link',
         },
       },
+      siteFab: {
+        aria: 'Quick actions',
+        scrollTop: 'Back to top',
+        aiOpen: 'Open AI assistant',
+        aiOpenUnread: 'Open AI assistant — {{count}} new message',
+        aiClose: 'Close AI assistant',
+        call: 'Call support',
+        tabUnreadOne: '1 new message',
+        tabUnreadMany: '{{count}} new messages',
+      },
+      serviceHub: {
+        serviceLabel: 'Travel Viet service',
+        contactSupport: 'Contact support',
+        browseTours: 'Browse all tours',
+        flights: {
+          lead: 'Domestic and international flights — Travel Viet is integrating airline partners; browse tour packages that already include flights.',
+          primaryCta: 'Tours with flights',
+          body: 'The dedicated flights page is coming soon. For now, pick international tours or combos that include round-trip tickets, itinerary, and fast visa support.',
+        },
+        hotels: {
+          lead: 'Partner hotels and resorts — stays matched to your budget, location, and room standard.',
+          primaryCta: 'Tours with hotels',
+          body: 'A standalone hotel catalog is being updated. Most Travel Viet packages already include standard or premium hotels — see each itinerary for details.',
+        },
+        'car-rental': {
+          lead: 'Chauffeur or self-drive options for flexible trips.',
+          primaryCta: 'Domestic tours',
+          body: 'Car rental is being added. You can book tours with airport transfers and scheduled transport, or contact an advisor for a custom quote.',
+        },
+        visa: {
+          lead: 'Tourist visa paperwork — checklists, submission timing, and status tracking.',
+          primaryCta: 'Support center',
+          body: 'Travel Viet advises on visas bundled with international tours. Submit a request via support for country-specific guidance.',
+        },
+      },
       header: {
         brandTagline: 'Tour • Destination • Booking',
         exploreTours: 'Explore tours',
+        myBookings: 'My bookings',
+        nav: {
+          packageTour: 'Package Tour',
+          flightTicket: 'Flight Ticket',
+          hotel: 'Hotel',
+          travelCombo: 'Travel Combo',
+          addOnServices: 'Add-on Services',
+        },
+        utility: {
+          currencyAria: 'Select currency',
+          locationAria: 'Select departure region',
+          cartAria: 'Booking cart / my orders',
+          locations: {
+            hcm: 'Ho Chi Minh City',
+            hanoi: 'Hanoi',
+            danang: 'Da Nang',
+          },
+        },
+        localePanel: {
+          aria: 'Language, currency and theme',
+          ariaVi: 'Vietnamese · {{currency}} · {{theme}} theme',
+          ariaEn: 'English · {{currency}} · {{theme}} theme',
+          title: 'Display preferences',
+          language: 'Language',
+          currency: 'Currency',
+          theme: 'Theme',
+          viTitle: 'Tiếng Việt',
+          viSub: '(Vietnam)',
+          enTitle: 'English',
+          enSub: '(International)',
+          vndSub: 'Vietnam Dong',
+          usdSub: 'US Dollar',
+          confirm: 'Confirm',
+          rateHint: 'USD conversion: 1 USD = {{rate}} VND (rounded to 2 decimals).',
+        },
         megaMenu: {
           home: {
             landing: 'TravelViet home',
@@ -945,6 +1088,9 @@ export const resources = {
             },
           },
           destinations: {
+            all: {
+              description: 'Browse every featured destination on TravelViet.',
+            },
             central: {
               title: 'Central Vietnam',
               description: 'Da Nang, Hue, Hoi An — heritage and coast.',

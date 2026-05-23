@@ -18,6 +18,7 @@ import {
 import { ErrorBlock } from "../../../components/common/ui/ErrorBlock";
 import { PageLoader } from "../../../components/common/ux/PageLoader";
 import { Footer } from "../../../components/Footer/Footer";
+import { CustomerPageHero } from "../../../components/ui/CustomerPageHero/CustomerPageHero";
 import { getStoredAuthUser } from "../../auth/api/authApi";
 import "./ScheduleChatPage.css";
 
@@ -50,29 +51,29 @@ type ScheduleChatCopy = {
 
 const copyByLocale: Record<ScheduleChatLocale, ScheduleChatCopy> = {
   vi: {
-    loading: "Dang tai nhom chat...",
-    errorTitle: "Khong the tai nhom chat",
-    missing: "Lich trinh khong hop le.",
-    backBooking: "Ve booking",
-    backHome: "Ve trang chu",
-    kicker: "Schedule group chat",
-    fallbackRoom: (scheduleId) => `Nhom chat lich trinh #${scheduleId}`,
+    loading: "Đang tải nhóm chat...",
+    errorTitle: "Không thể tải nhóm chat",
+    missing: "Lịch trình không hợp lệ.",
+    backBooking: "Về booking",
+    backHome: "Về trang chủ",
+    kicker: "Nhóm chat lịch trình",
+    fallbackRoom: (scheduleId) => `Nhóm chat lịch trình #${scheduleId}`,
     subtitle:
-      "Trao doi thong tin truoc ngay khoi hanh voi cac thanh vien trong cung lich trinh va doi ngu TravelViet.",
-    members: "Thanh vien",
-    active: "Dang mo",
-    inactive: "Tam dung",
-    conversation: "Hoi thoai",
-    noMessages: "Chua co tin nhan trong nhom nay.",
-    message: "Tin nhan",
-    attachmentUrl: "Link dinh kem",
-    send: "Gui tin nhan",
-    sending: "Dang gui...",
-    attachment: "Mo dinh kem",
-    you: "Ban",
-    guest: "Thanh vien",
-    schedule: "Lich trinh",
-    sendError: "Khong the gui tin nhan.",
+      "Trao đổi thông tin trước ngày khởi hành với các thành viên cùng lịch trình và đội ngũ TravelViet.",
+    members: "Thành viên",
+    active: "Đang mở",
+    inactive: "Tạm dừng",
+    conversation: "Hội thoại",
+    noMessages: "Chưa có tin nhắn trong nhóm này.",
+    message: "Tin nhắn",
+    attachmentUrl: "Link đính kèm",
+    send: "Gửi tin nhắn",
+    sending: "Đang gửi...",
+    attachment: "Mở đính kèm",
+    you: "Bạn",
+    guest: "Thành viên",
+    schedule: "Lịch trình",
+    sendError: "Không thể gửi tin nhắn.",
   },
   en: {
     loading: "Loading group chat...",
@@ -226,37 +227,42 @@ export default function ScheduleChatPage() {
   const memberCount = room?.memberCount ?? room?.members?.length ?? 0;
 
   return (
-    <div className="schedule-chat-page">
-      <main className="schedule-chat-shell">
-        <button
-          className="schedule-chat-back-link"
-          type="button"
-          onClick={() => navigate(-1)}
-        >
-          <ArrowLeft aria-hidden="true" />
-          {copy.backBooking}
-        </button>
+    <>
+      <CustomerPageHero
+        variant="ocean"
+        kicker={copy.kicker}
+        title={roomName}
+        lead={copy.subtitle}
+        metrics={[
+          { icon: <UsersRound size={14} />, value: memberCount, label: copy.members },
+        ]}
+      />
 
-        <section className="schedule-chat-hero">
-          <div>
-            <span>{copy.kicker}</span>
-            <h1>{roomName}</h1>
-            <p>{copy.subtitle}</p>
-          </div>
+      <div className="schedule-chat-page">
+        <main className="schedule-chat-shell">
+          <button
+            className="schedule-chat-back-link"
+            type="button"
+            onClick={() => navigate(-1)}
+          >
+            <ArrowLeft size={15} aria-hidden="true" />
+            {copy.backBooking}
+          </button>
+
+          {/* Stats bar */}
           <div className="schedule-chat-stats">
             <span>
-              <CalendarDays aria-hidden="true" />
+              <CalendarDays size={15} aria-hidden="true" />
               {room?.scheduleCode || `${copy.schedule} #${numericScheduleId}`}
             </span>
             <span>
-              <UsersRound aria-hidden="true" />
+              <UsersRound size={15} aria-hidden="true" />
               {memberCount} {copy.members}
             </span>
             <strong>{room?.active === false ? copy.inactive : copy.active}</strong>
           </div>
-        </section>
 
-        <div className="schedule-chat-layout">
+          <div className="schedule-chat-layout">
           <aside className="schedule-chat-members">
             <header>
               <UsersRound aria-hidden="true" />
@@ -343,9 +349,10 @@ export default function ScheduleChatPage() {
               {notice && <p className="schedule-chat-notice">{notice}</p>}
             </form>
           </section>
-        </div>
-      </main>
-      <Footer />
-    </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    </>
   );
 }

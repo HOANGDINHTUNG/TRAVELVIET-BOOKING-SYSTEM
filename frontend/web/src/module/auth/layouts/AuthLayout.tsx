@@ -1,7 +1,13 @@
 import { Outlet } from 'react-router-dom'
+import { AuthExperience } from '../components/AuthExperience/AuthExperience'
 
 function AuthLayout() {
-  return <Outlet />
+  return (
+    <>
+      <AuthExperience />
+      <Outlet />
+    </>
+  )
 }
 
 export default AuthLayout

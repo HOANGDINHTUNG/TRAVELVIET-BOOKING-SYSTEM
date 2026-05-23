@@ -32,6 +32,10 @@ build/
 ### VS Code ###
 .vscode/
 
+# Aiven / SSL secrets (download CA locally)
+ssl/*.pem
+ssl/*.crt
+
 # Environment and logs
 .env
 .env.*

@@ -1,30 +1,60 @@
-import { useCallback, useDeferredValue, useEffect, useMemo, useState } from 'react'
+import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
+import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useParams } from 'react-router-dom'
-import { ArrowLeft, ArrowRight, Compass, Image, MapPin, Search } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Compass, Image, MapPin, RotateCcw, Search } from 'lucide-react'
 import { destinationApi } from '../../../api/server/Destination.api'
-import { EmptyState } from '../../../components/common/ui/EmptyState'
 import { ErrorBlock } from '../../../components/common/ui/ErrorBlock'
-import { PageLoader } from '../../../components/common/ux/PageLoader'
 import { Footer } from '../../../components/Footer/Footer'
 import type { DestinationDetail } from '../database/interface/destination'
 import type { Destination } from '../../home/database/interface/publicTravel'
-import '../../catalog/styles/CatalogListPage.css'
+import '../styles/DestinationsPage.css'
 
-const ALL_FILTER = 'Tat ca'
+const HERO_DEFAULT_IMAGE =
+  'https://images.unsplash.com/photo-1528360983277-13d401cdc186?auto=format&fit=crop&w=1440&q=80'
+
+const ALL_REGION = '__all__'
+const ALL_ACTIVITY = '__all__'
+
+type ActivityTypeId = typeof ALL_ACTIVITY | 'resort' | 'adventure' | 'culture'
+
+interface ActivityType {
+  id: ActivityTypeId
+  label: string
+  keywords?: string[]
+}
+
+const ACTIVITY_TYPES: ActivityType[] = [
+  { id: ALL_ACTIVITY, label: 'Tất cả' },
+  {
+    id: 'resort',
+    label: 'Nghỉ dưỡng',
+    keywords: ['nghỉ dưỡng', 'resort', 'biển', 'đảo', 'beach', 'sea', 'spa'],
+  },
+  {
+    id: 'adventure',
+    label: 'Phiêu lưu',
+    keywords: ['phiêu lưu', 'trekking', 'leo núi', 'adventure', 'rừng', 'cắm trại'],
+  },
+  {
+    id: 'culture',
+    label: 'Văn hóa',
+    keywords: ['văn hóa', 'lịch sử', 'cổ', 'đền', 'chùa', 'di sản', 'heritage'],
+  },
+]
 
 function normalizeText(value: string) {
   return value.trim().toLowerCase()
 }
 
 function getDestinationArea(destination: Destination) {
-  return destination.region || destination.province || 'Vietnam'
+  return destination.region ?? destination.province ?? 'Vietnam'
 }
 
 function getDestinationCopy(destination: Destination) {
   return (
-    destination.shortDescription ||
-    `${destination.name} dang co ${destination.tours.toLowerCase()} san sang de kham pha.`
+    destination.shortDescription ??
+    `Khám phá ${destination.name} — điểm đến hấp dẫn với nhiều trải nghiệm đặc sắc.`
   )
 }
 
@@ -32,286 +62,415 @@ function branchLink(programSlug: string) {
   return `/destinations/branch/${encodeURIComponent(programSlug)}`
 }
 
+// keyword-based filter on shortDescription / name / region
+// TODO: replace with backend filter params when API supports it
+function matchesActivity(dest: Destination, activityId: ActivityTypeId): boolean {
+  if (activityId === ALL_ACTIVITY) return true
+  const type = ACTIVITY_TYPES.find((t) => t.id === activityId)
+  if (!type?.keywords) return true
+  const haystack = [dest.shortDescription, dest.name, dest.region, dest.province]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase()
+  return type.keywords.some((kw) => haystack.includes(kw))
+}
+
 function DestinationsPage() {
   const { programSlug: branchProgramSlug } = useParams<{ programSlug?: string }>()
   const { t, i18n } = useTranslation()
+
   const [destinations, setDestinations] = useState<Destination[]>([])
   const [anchorDetail, setAnchorDetail] = useState<DestinationDetail | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
-  const [selectedArea, setSelectedArea] = useState(ALL_FILTER)
+  const [selectedArea, setSelectedArea] = useState(ALL_REGION)
+  const [selectedActivity, setSelectedActivity] = useState<ActivityTypeId>(ALL_ACTIVITY)
 
   const deferredSearchQuery = useDeferredValue(searchQuery)
+  const mainContentRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     let isActive = true
+    setLoading(true)
+    setError(null)
 
-    async function loadDestinations() {
-      setLoading(true)
-      setError(null)
-
+    async function load() {
       try {
         if (branchProgramSlug) {
           const anchor = await destinationApi.getDestinationByProgramSlug(branchProgramSlug)
-          if (!isActive) {
-            return
-          }
+          if (!isActive) return
           setAnchorDetail(anchor)
           const children = await destinationApi.getDestinationsByParentUuid(anchor.uuid)
-          if (!isActive) {
-            return
-          }
+          if (!isActive) return
           setDestinations(children)
         } else {
           setAnchorDetail(null)
           const roots = await destinationApi.getRootDestinations()
-          if (!isActive) {
-            return
-          }
+          if (!isActive) return
           setDestinations(roots)
         }
-      } catch (loadError) {
+      } catch (err) {
         if (isActive) {
-          setError(
-            loadError instanceof Error
-              ? loadError.message
-              : 'Khong the tai danh sach diem den.',
-          )
+          setError(err instanceof Error ? err.message : 'Không thể tải danh sách điểm đến.')
         }
       } finally {
-        if (isActive) {
-          setLoading(false)
-        }
+        if (isActive) setLoading(false)
       }
     }
 
-    void loadDestinations()
-
+    void load()
     return () => {
       isActive = false
     }
   }, [branchProgramSlug])
 
-  const resolveDestinationName = useCallback((item: Destination) => {
-    const key = item.translationKey ? `data.destinations.${item.translationKey}` : ''
-    return key && i18n.exists(key) ? t(key) : item.name
-  }, [i18n, t])
+  const resolveDestinationName = useCallback(
+    (item: Destination) => {
+      const key = item.translationKey ? `data.destinations.${item.translationKey}` : ''
+      return key && i18n.exists(key) ? t(key) : item.name
+    },
+    [i18n, t],
+  )
 
   const areaOptions = useMemo(() => {
     const areas = destinations.map(getDestinationArea).filter(Boolean)
-    return [ALL_FILTER, ...Array.from(new Set(areas))]
+    return [ALL_REGION, ...Array.from(new Set(areas))]
   }, [destinations])
 
   const filteredDestinations = useMemo(() => {
     const normalizedQuery = normalizeText(deferredSearchQuery)
-
     return destinations.filter((destination) => {
       const area = getDestinationArea(destination)
-      const areaMatch = selectedArea === ALL_FILTER || area === selectedArea
-      const destinationName = resolveDestinationName(destination)
-      const searchableText = normalizeText(
-        [
-          destinationName,
-          destination.name,
-          destination.province,
-          destination.region,
-          destination.shortDescription,
-          destination.tours,
-        ]
+      const areaMatch = selectedArea === ALL_REGION || area === selectedArea
+      if (!areaMatch) return false
+      if (!matchesActivity(destination, selectedActivity)) return false
+      if (!normalizedQuery) return true
+      const name = resolveDestinationName(destination)
+      const haystack = normalizeText(
+        [name, destination.name, destination.province, destination.region, destination.shortDescription, destination.tours]
           .filter(Boolean)
           .join(' '),
       )
-
-      return areaMatch && (!normalizedQuery || searchableText.includes(normalizedQuery))
+      return haystack.includes(normalizedQuery)
     })
-  }, [destinations, deferredSearchQuery, resolveDestinationName, selectedArea])
+  }, [destinations, deferredSearchQuery, resolveDestinationName, selectedArea, selectedActivity])
+
+  const hasActiveFilters =
+    selectedArea !== ALL_REGION || selectedActivity !== ALL_ACTIVITY || searchQuery.trim() !== ''
 
   const resetFilters = () => {
     setSearchQuery('')
-    setSelectedArea(ALL_FILTER)
+    setSelectedArea(ALL_REGION)
+    setSelectedActivity(ALL_ACTIVITY)
   }
 
-  if (loading) {
-    return <PageLoader label="Dang tai danh sach diem den..." />
+  const handleHeroSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    mainContentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
-  if (error && destinations.length === 0) {
-    return (
-      <>
-        <ErrorBlock message={error} />
-        <Footer />
-      </>
-    )
-  }
+  // Derived hero values
+  const heroImage = (branchProgramSlug && anchorDetail?.coverImage) || HERO_DEFAULT_IMAGE
+  const heroTitle =
+    branchProgramSlug && anchorDetail
+      ? `Khám phá ${anchorDetail.name}`
+      : 'Bạn muốn kích hoạt hành trình tại địa điểm nào?'
+  const heroKicker =
+    !loading && destinations.length > 0
+      ? `${destinations.length} điểm đến đang chờ khám phá`
+      : 'Khám phá các điểm đến hấp dẫn nhất'
 
-  const pageTitle = branchProgramSlug && anchorDetail ? anchorDetail.name : 'Chon diem den theo cach ban muon trai nghiem'
-  const pageKicker = branchProgramSlug && anchorDetail ? 'Cap con trong cay diem den' : 'Tat ca diem den'
+  // Key for resetting card entrance animations when filters change
+  const filterKey = `${selectedArea}|${selectedActivity}|${deferredSearchQuery}`
 
   return (
     <>
-      <main className="catalog-page">
-        <div className="catalog-page-inner">
-          <Link className="catalog-back-link" to="/">
-            <ArrowLeft size={17} strokeWidth={2.1} aria-hidden="true" />
-            Ve trang chu
-          </Link>
+      <main className="dest-page">
+        {/* ── Hero ──────────────────────────────────────────── */}
+        <section className="dest-page-hero" aria-label="Tìm kiếm điểm đến">
+          <img
+            src={heroImage}
+            alt=""
+            aria-hidden="true"
+            className="dest-page-hero__img"
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore — fetchPriority is valid in React 19 / modern JSX
+            fetchpriority="high"
+            loading="eager"
+            decoding="async"
+          />
+          <div className="dest-page-hero__overlay" aria-hidden="true" />
+          <div className="dest-page-hero__content">
+            <p className="dest-page-hero__kicker">{heroKicker}</p>
+            <h1 className="dest-page-hero__title">{heroTitle}</h1>
+            <form className="dest-hero-glass-bar" onSubmit={handleHeroSearch} role="search">
+              <label className="dest-hero-glass-bar__input">
+                <Search size={18} strokeWidth={2} aria-hidden="true" />
+                <input
+                  type="search"
+                  value={searchQuery}
+                  placeholder="Tên điểm đến, tỉnh thành, vùng..."
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  aria-label="Tìm kiếm điểm đến"
+                />
+              </label>
+              <button type="submit" className="dest-hero-glass-bar__btn">
+                <Search size={15} strokeWidth={2.4} aria-hidden="true" />
+                Khám phá
+              </button>
+            </form>
+          </div>
+        </section>
 
-          {anchorDetail?.breadcrumbs?.length ? (
-            <nav className="catalog-toolbar" style={{ flexWrap: 'wrap', gap: '0.35rem' }} aria-label="Breadcrumb">
-              <Link to="/destinations">Tat ca (goc)</Link>
-              {anchorDetail.breadcrumbs.map((crumb, index) => {
-                const last = index === anchorDetail.breadcrumbs!.length - 1
-                const label = crumb.name
-                if (last) {
+        {/* ── Main content ──────────────────────────────────── */}
+        <div ref={mainContentRef} className="dest-page-main">
+          <div className="dest-page-inner">
+            <Link className="dest-back-link" to="/">
+              <ArrowLeft size={16} strokeWidth={2.2} aria-hidden="true" />
+              Về trang chủ
+            </Link>
+
+            {/* Breadcrumbs */}
+            {anchorDetail?.breadcrumbs?.length ? (
+              <nav className="dest-breadcrumb" aria-label="Đường dẫn điều hướng">
+                <Link to="/destinations">Tất cả điểm đến</Link>
+                {anchorDetail.breadcrumbs.map((crumb, idx) => {
+                  const last = idx === anchorDetail.breadcrumbs!.length - 1
+                  if (last) {
+                    return (
+                      <span key={`${crumb.uuid ?? crumb.name}-${idx}`}>
+                        {' / '}
+                        <span aria-current="page">{crumb.name}</span>
+                      </span>
+                    )
+                  }
+                  const to = crumb.programSlug ? branchLink(crumb.programSlug) : '/destinations'
                   return (
-                    <span key={`${crumb.uuid ?? label}-${index}`}>
-                      {' '}
-                      / {label}
+                    <span key={`${crumb.uuid ?? crumb.name}-${idx}`}>
+                      {' / '}
+                      <Link to={to}>{crumb.name}</Link>
                     </span>
                   )
-                }
-                const to = crumb.programSlug ? branchLink(crumb.programSlug) : '/destinations'
-                return (
-                  <span key={`${crumb.uuid ?? label}-${index}`}>
-                    {' '}
-                    /{' '}
-                    <Link to={to}>{label}</Link>
-                  </span>
-                )
-              })}
-            </nav>
-          ) : null}
+                })}
+              </nav>
+            ) : null}
 
-          <header className="catalog-header">
-            <div>
-              <p className="catalog-kicker">{pageKicker}</p>
-              <h1>{pageTitle}</h1>
-              <p>
-                {branchProgramSlug
-                  ? 'Chon cap con de tiep tuc drill-down, hoac xem tour gan khu vuc nay.'
-                  : 'Xem cac chau luc / quoc gia o cap goc, loc nhanh theo khu vuc va mo cap con bang slug chuong trinh.'}
-              </p>
-            </div>
-            <div className="catalog-summary">
-              <strong>{destinations.length}</strong>
-              <span>{branchProgramSlug ? 'Cap con' : 'Diem den goc'}</span>
-            </div>
-          </header>
-
-          <div className="catalog-toolbar" aria-label="Destination filters">
-            <label className="catalog-search">
-              <Search size={18} strokeWidth={2} aria-hidden="true" />
-              <input
-                type="search"
-                value={searchQuery}
-                placeholder="Tim ten diem den, tinh thanh, khu vuc..."
-                onChange={(event) => setSearchQuery(event.target.value)}
-              />
-            </label>
-            <div className="catalog-filter-row" aria-label="Destination areas">
-              {areaOptions.map((area) => (
-                <button
-                  className={area === selectedArea ? 'is-active' : ''}
-                  key={area}
-                  type="button"
-                  onClick={() => setSelectedArea(area)}
-                >
-                  {area}
-                </button>
-              ))}
-            </div>
-            <strong className="catalog-count">
-              {filteredDestinations.length}/{destinations.length} ket qua
-            </strong>
-          </div>
-
-          {destinations.length === 0 ? (
-            <EmptyState title="Khong co cap con hoac danh sach dang trong." />
-          ) : filteredDestinations.length === 0 ? (
-            <div className="catalog-empty">
-              <Compass size={24} strokeWidth={1.8} aria-hidden="true" />
-              <div>
-                <h2>Khong co diem den phu hop</h2>
-                <p>Thu doi tu khoa hoac chon lai khu vuc de xem du lieu khac.</p>
+            {/* Loading */}
+            {loading ? (
+              <div className="dest-loading" role="status" aria-live="polite">
+                <span className="dest-loading__spinner" aria-hidden="true" />
+                <p>Đang tải danh sách điểm đến...</p>
               </div>
-              <button type="button" onClick={resetFilters}>
-                Xoa bo loc
-              </button>
-            </div>
-          ) : (
-            <div className="catalog-grid">
-              {filteredDestinations.map((destination) => {
-                const destinationName = resolveDestinationName(destination)
-                const area = getDestinationArea(destination)
-                const toursQuery =
-                  destination.id != null
-                    ? `/tours?destinationId=${destination.id}&destinationSubtree=true`
-                    : '/tours'
-                const drillHref =
-                  destination.programSlug != null && destination.programSlug !== ''
-                    ? branchLink(destination.programSlug)
-                    : null
+            ) : error && destinations.length === 0 ? (
+              <ErrorBlock message={error} />
+            ) : (
+              <>
+                {/* Filter bar */}
+                <div className="dest-filter-bar" role="toolbar" aria-label="Bộ lọc điểm đến">
+                  {/* Vùng miền */}
+                  <div
+                    className="dest-filter-group"
+                    role="group"
+                    aria-label="Lọc theo vùng miền"
+                  >
+                    <span className="dest-filter-group__label" aria-hidden="true">
+                      Vùng
+                    </span>
+                    {areaOptions.map((area) => (
+                      <button
+                        key={area}
+                        type="button"
+                        className={`dest-chip${area === selectedArea ? ' is-active' : ''}`}
+                        onClick={() => setSelectedArea(area)}
+                        aria-pressed={area === selectedArea}
+                      >
+                        {area === ALL_REGION ? 'Tất cả' : area}
+                      </button>
+                    ))}
+                  </div>
 
-                const content = (
-                  <article className="catalog-card">
-                    <div className="catalog-card-media">
-                      {destination.image ? (
-                        <img src={destination.image} alt={destinationName} />
-                      ) : (
-                        <div className="catalog-card-empty">
-                          <Image size={30} strokeWidth={1.8} aria-hidden="true" />
-                        </div>
-                      )}
-                      <span className="catalog-card-badge">{area}</span>
-                    </div>
-                    <div className="catalog-card-body">
-                      <h2>{destinationName}</h2>
-                      <p>{getDestinationCopy(destination)}</p>
-                      <div className="catalog-card-meta">
-                        <span>
-                          <MapPin size={15} strokeWidth={1.8} aria-hidden="true" />
-                          {area}
-                        </span>
-                        <span>
-                          <Compass size={15} strokeWidth={1.8} aria-hidden="true" />
-                          {destination.tours}
-                        </span>
-                      </div>
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.35rem' }}>
-                        {drillHref ? (
-                          <span className="catalog-action-link">
-                            Vao cap con
-                            <ArrowRight size={16} strokeWidth={2.1} aria-hidden="true" />
-                          </span>
-                        ) : null}
-                        {destination.uuid ? (
-                          <Link className="catalog-action-link" style={{ fontSize: '0.9em' }} to={`/destinations/${destination.uuid}`}>
-                            Chi tiet (can dang nhap)
-                          </Link>
-                        ) : null}
-                        <Link className="catalog-action-link" style={{ fontSize: '0.9em' }} to={toursQuery}>
-                          Xem tour
-                        </Link>
-                      </div>
-                    </div>
-                  </article>
-                )
+                  <div className="dest-filter-bar__divider" aria-hidden="true" />
 
-                if (drillHref) {
-                  return (
-                    <Link className="catalog-card-link" key={destination.uuid ?? destination.programSlug} to={drillHref}>
-                      {content}
-                    </Link>
-                  )
-                }
+                  {/* Loại hình */}
+                  <div
+                    className="dest-filter-group"
+                    role="group"
+                    aria-label="Lọc theo loại hình"
+                  >
+                    <span className="dest-filter-group__label" aria-hidden="true">
+                      Loại
+                    </span>
+                    {ACTIVITY_TYPES.map((type) => (
+                      <button
+                        key={type.id}
+                        type="button"
+                        className={`dest-chip${type.id === selectedActivity ? ' is-active' : ''}`}
+                        onClick={() => setSelectedActivity(type.id)}
+                        aria-pressed={type.id === selectedActivity}
+                      >
+                        {type.label}
+                      </button>
+                    ))}
+                  </div>
 
-                return (
-                  <div key={destination.uuid ?? destination.name}>{content}</div>
-                )
-              })}
-            </div>
-          )}
+                  {/* Count + reset */}
+                  <div className="dest-filter-bar__end">
+                    <span
+                      className="dest-filter-count"
+                      aria-live="polite"
+                      aria-atomic="true"
+                    >
+                      {filteredDestinations.length} / {destinations.length}
+                    </span>
+                    {hasActiveFilters ? (
+                      <button
+                        type="button"
+                        className="dest-chip dest-chip--reset"
+                        onClick={resetFilters}
+                        aria-label="Xóa tất cả bộ lọc"
+                      >
+                        <RotateCcw size={13} strokeWidth={2.2} aria-hidden="true" />
+                        Xóa lọc
+                      </button>
+                    ) : null}
+                  </div>
+                </div>
+
+                {/* Grid */}
+                {destinations.length === 0 ? (
+                  <div className="dest-empty" role="status">
+                    <Compass size={38} strokeWidth={1.4} aria-hidden="true" />
+                    <h2 className="dest-empty__title">Chưa có điểm đến nào</h2>
+                    <p className="dest-empty__desc">
+                      Danh sách điểm đến đang được cập nhật. Vui lòng quay lại sau.
+                    </p>
+                  </div>
+                ) : filteredDestinations.length === 0 ? (
+                  <div className="dest-empty" role="status">
+                    <Compass size={38} strokeWidth={1.4} aria-hidden="true" />
+                    <h2 className="dest-empty__title">Không tìm thấy điểm đến</h2>
+                    <p className="dest-empty__desc">
+                      Thử thay đổi từ khóa hoặc chọn lại bộ lọc để xem thêm kết quả.
+                    </p>
+                    <button
+                      type="button"
+                      className="dest-empty__reset"
+                      onClick={resetFilters}
+                    >
+                      <RotateCcw size={14} strokeWidth={2.2} aria-hidden="true" />
+                      Xóa bộ lọc
+                    </button>
+                  </div>
+                ) : (
+                  <div
+                    key={filterKey}
+                    className="dest-grid"
+                    aria-label={`${filteredDestinations.length} điểm đến`}
+                  >
+                    {filteredDestinations.map((destination, index) => {
+                      const destinationName = resolveDestinationName(destination)
+                      const area = getDestinationArea(destination)
+                      const toursQuery =
+                        destination.id != null
+                          ? `/tours?destinationId=${destination.id}&destinationSubtree=true`
+                          : '/tours'
+                      const drillHref =
+                        destination.programSlug != null && destination.programSlug !== ''
+                          ? branchLink(destination.programSlug)
+                          : null
+                      const detailHref =
+                        destination.uuid != null ? `/destinations/${destination.uuid}` : null
+                      const secondaryHref = drillHref ?? detailHref
+
+                      return (
+                        <article
+                          key={destination.uuid ?? destination.programSlug ?? destination.name}
+                          className="dest-card"
+                          style={{ '--card-idx': Math.min(index, 11) } as CSSProperties}
+                        >
+                          {/* Media */}
+                          <div className="dest-card__media">
+                            {destination.image ? (
+                              <img
+                                src={destination.image}
+                                alt={destinationName}
+                                className="dest-card__img"
+                                loading={index < 3 ? 'eager' : 'lazy'}
+                                decoding="async"
+                              />
+                            ) : (
+                              <div className="dest-card__empty-media" aria-hidden="true">
+                                <Image size={30} strokeWidth={1.6} />
+                              </div>
+                            )}
+                            <div className="dest-card__media-overlay" aria-hidden="true" />
+                            {area ? (
+                              <span className="dest-card__region-badge">{area}</span>
+                            ) : null}
+                            <span
+                              className="dest-card__tour-count"
+                              aria-label={`${destination.tours} tours sẵn sàng`}
+                            >
+                              <Compass size={12} strokeWidth={2.2} aria-hidden="true" />
+                              {destination.tours}
+                            </span>
+                          </div>
+
+                          {/* Body */}
+                          <div className="dest-card__body">
+                            <h2 className="dest-card__name">
+                              {secondaryHref ? (
+                                <Link to={secondaryHref}>{destinationName}</Link>
+                              ) : (
+                                destinationName
+                              )}
+                            </h2>
+
+                            <p className="dest-card__desc">{getDestinationCopy(destination)}</p>
+
+                            <div className="dest-card__meta" aria-label="Thông tin điểm đến">
+                              {(destination.province ?? destination.region) ? (
+                                <span className="dest-card__meta-item">
+                                  <MapPin size={13} strokeWidth={2} aria-hidden="true" />
+                                  {destination.province ?? destination.region}
+                                </span>
+                              ) : null}
+                            </div>
+
+                            {/* Actions */}
+                            <div className="dest-card__actions">
+                              <Link
+                                className="dest-card__cta-primary"
+                                to={toursQuery}
+                                aria-label={`Khám phá tour tại ${destinationName}`}
+                              >
+                                Khám phá Tour
+                                <ArrowRight size={15} strokeWidth={2.2} aria-hidden="true" />
+                              </Link>
+                              {secondaryHref ? (
+                                <Link
+                                  className="dest-card__cta-secondary"
+                                  to={secondaryHref}
+                                  aria-label={
+                                    drillHref
+                                      ? `Xem các điểm đến trong ${destinationName}`
+                                      : `Chi tiết ${destinationName}`
+                                  }
+                                >
+                                  {drillHref ? 'Khám phá thêm' : 'Chi tiết'}
+                                </Link>
+                              ) : null}
+                            </div>
+                          </div>
+                        </article>
+                      )
+                    })}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
         </div>
       </main>
       <Footer />

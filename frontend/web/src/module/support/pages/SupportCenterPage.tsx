@@ -5,6 +5,7 @@ import { supportApi } from "../../../api/server/Support.api";
 import { ErrorBlock } from "../../../components/common/ui/ErrorBlock";
 import { PageLoader } from "../../../components/common/ux/PageLoader";
 import { Footer } from "../../../components/Footer/Footer";
+import { CustomerPageHero } from "../../../components/ui/CustomerPageHero/CustomerPageHero";
 import { useTranslation } from "react-i18next";
 import {
   ArrowLeft,
@@ -30,36 +31,36 @@ type ReplyForm = {
 
 const copyByLocale = {
   vi: {
-    loading: "Dang tai ho tro...",
-    errorTitle: "Khong the tai ho tro",
-    retry: "Thu lai",
-    backAccount: "Ve tai khoan",
-    kicker: "Support Center",
-    title: "Ho tro chuyen di",
-    subtitle: "Tao yeu cau, theo doi hoi thoai va gui them thong tin cho doi ngu TravelViet.",
-    newSession: "Tao yeu cau moi",
-    initialMessage: "Noi dung can ho tro",
-    attachmentUrl: "Link dinh kem",
-    createSession: "Gui yeu cau",
-    creating: "Dang gui...",
-    sessions: "Phien ho tro",
-    noSessions: "Chua co phien ho tro.",
-    messages: "Hoi thoai",
-    noMessages: "Chua co tin nhan.",
-    messageText: "Tin nhan",
-    send: "Gui",
-    sending: "Dang gui...",
-    status: "Trang thai",
-    messageCount: "Tin nhan",
-    lastMessageAt: "Cap nhat",
-    customer: "Ban",
-    staff: "Nhan vien",
-    system: "He thong",
-    rating: "Danh gia phien",
-    feedback: "Gop y",
-    submitRating: "Luu danh gia",
-    ratingSaved: "Da luu danh gia.",
-    ratingClosedOnly: "Chi danh gia duoc khi phien da resolved/closed.",
+    loading: "Đang tải trung tâm hỗ trợ...",
+    errorTitle: "Không thể tải dữ liệu hỗ trợ",
+    retry: "Thử lại",
+    backAccount: "Về tài khoản",
+    kicker: "Hỗ trợ khách hàng",
+    title: "Trung tâm hỗ trợ",
+    subtitle: "Tạo yêu cầu, theo dõi hội thoại và gửi thêm thông tin cho đội ngũ TravelViet.",
+    newSession: "Tạo yêu cầu mới",
+    initialMessage: "Nội dung cần hỗ trợ",
+    attachmentUrl: "Link đính kèm",
+    createSession: "Gửi yêu cầu",
+    creating: "Đang gửi...",
+    sessions: "Phiên hỗ trợ",
+    noSessions: "Chưa có phiên hỗ trợ.",
+    messages: "Hội thoại",
+    noMessages: "Chưa có tin nhắn.",
+    messageText: "Tin nhắn",
+    send: "Gửi",
+    sending: "Đang gửi...",
+    status: "Trạng thái",
+    messageCount: "Tin nhắn",
+    lastMessageAt: "Cập nhật",
+    customer: "Bạn",
+    staff: "Nhân viên",
+    system: "Hệ thống",
+    rating: "Đánh giá phiên",
+    feedback: "Góp ý",
+    submitRating: "Lưu đánh giá",
+    ratingSaved: "Đã lưu đánh giá.",
+    ratingClosedOnly: "Chỉ đánh giá được khi phiên đã resolved/closed.",
   },
   en: {
     loading: "Loading support...",
@@ -300,20 +301,25 @@ export default function SupportCenterPage() {
   }
 
   return (
-    <div className="support-page">
-      <main className="support-shell">
-        <Link className="support-back-link" to="/account">
-          <ArrowLeft aria-hidden="true" />
-          {copy.backAccount}
-        </Link>
+    <>
+      <CustomerPageHero
+        variant="sunset"
+        kicker={copy.kicker}
+        title={copy.title}
+        lead={copy.subtitle}
+        metrics={[
+          { icon: <LifeBuoy size={14} />, value: sessions.length, label: copy.sessions },
+        ]}
+      />
 
-        <section className="support-hero">
-          <span>{copy.kicker}</span>
-          <h1>{copy.title}</h1>
-          <p>{copy.subtitle}</p>
-        </section>
+      <div className="support-page">
+        <main className="support-shell">
+          <Link className="support-back-link" to="/account">
+            <ArrowLeft size={15} aria-hidden="true" />
+            {copy.backAccount}
+          </Link>
 
-        <div className="support-layout">
+          <div className="support-layout">
           <aside className="support-sidebar">
             <section className="support-panel">
               <header>
@@ -468,8 +474,9 @@ export default function SupportCenterPage() {
             {message && <p className="support-message">{message}</p>}
           </section>
         </div>
-      </main>
-      <Footer />
-    </div>
+        </main>
+        <Footer />
+      </div>
+    </>
   );
 }
