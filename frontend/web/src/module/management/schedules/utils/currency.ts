@@ -1,4 +1,4 @@
-import { formatDisplayMoney } from '@/lib/currencyDisplay'
+import { coerceMoneyAmount, formatDisplayMoney } from '@/lib/currencyDisplay'
 import { store } from '@/stores'
 
 const PLAIN = new Intl.NumberFormat('vi-VN', {
@@ -8,8 +8,10 @@ const PLAIN = new Intl.NumberFormat('vi-VN', {
 /**
  * Hiển thị số tiền (BE lưu VND). Theo preferences: VND hoặc USD ($, ÷ 26.300).
  */
-export function formatCurrencyVnd(value: number | null | undefined): string {
-  const amount = typeof value === 'string' ? Number(value) : value
+export function formatCurrencyVnd(
+  value: number | string | null | undefined,
+): string {
+  const amount = coerceMoneyAmount(value)
   if (amount == null || Number.isNaN(amount)) return '—'
   const { currency, language } = store.getState().preferences
   return formatDisplayMoney(amount, currency, language)

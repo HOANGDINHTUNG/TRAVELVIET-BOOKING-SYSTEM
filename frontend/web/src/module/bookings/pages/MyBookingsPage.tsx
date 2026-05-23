@@ -10,7 +10,6 @@ import {
   CreditCard,
   Eye,
   Loader2,
-  MapPin,
   PackageX,
   Users,
   XCircle,
@@ -247,12 +246,6 @@ function BookingCard(props: BookingCardProps) {
               <Users size={13} strokeWidth={2} aria-hidden="true" />
               {passengerCount} hành khách
             </span>
-            {booking.departureCity ? (
-              <span className="mybk-card__info-item">
-                <MapPin size={13} strokeWidth={2} aria-hidden="true" />
-                {booking.departureCity}
-              </span>
-            ) : null}
           </div>
         </div>
 

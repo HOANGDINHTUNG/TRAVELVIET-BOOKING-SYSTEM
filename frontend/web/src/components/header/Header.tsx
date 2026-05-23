@@ -108,7 +108,6 @@ export default function Header() {
     [t],
   );
 
-  const loginLabel = t("header.login");
   const brandTagline = t("header.brandTagline");
 
   useEffect(() => {

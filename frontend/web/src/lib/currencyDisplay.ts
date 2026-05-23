@@ -2,6 +2,20 @@ import { VND_PER_USD, type CurrencyMode } from '../constants/preferences'
 
 export { VND_PER_USD }
 
+/** BE/Jackson có thể trả số tiền dạng string (BigDecimal). */
+export function coerceMoneyAmount(
+  value: number | string | null | undefined,
+): number | null | undefined {
+  if (value == null) return undefined
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? value : undefined
+  }
+  const trimmed = value.trim()
+  if (!trimmed) return undefined
+  const parsed = Number(trimmed)
+  return Number.isFinite(parsed) ? parsed : undefined
+}
+
 /** Quy đổi VND → USD, làm tròn 2 chữ số thập phân. */
 export function convertVndToUsd(amountVnd: number): number {
   if (!Number.isFinite(amountVnd)) return 0
@@ -9,21 +23,22 @@ export function convertVndToUsd(amountVnd: number): number {
 }
 
 export function formatDisplayMoney(
-  amountVnd: number | null | undefined,
+  amountVnd: number | string | null | undefined,
   currency: CurrencyMode,
   language: 'vi' | 'en' = 'vi',
 ): string {
-  if (amountVnd == null || Number.isNaN(amountVnd)) return '—'
+  const amount = coerceMoneyAmount(amountVnd)
+  if (amount == null || Number.isNaN(amount)) return '—'
 
   if (currency === 'VND') {
     return new Intl.NumberFormat(language === 'vi' ? 'vi-VN' : 'en-US', {
       style: 'currency',
       currency: 'VND',
       maximumFractionDigits: 0,
-    }).format(amountVnd)
+    }).format(amount)
   }
 
-  const usd = convertVndToUsd(amountVnd)
+  const usd = convertVndToUsd(amount)
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
