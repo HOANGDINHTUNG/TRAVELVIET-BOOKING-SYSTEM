@@ -20,6 +20,10 @@ Trên **Aiven Console** → service **MySQL** của bạn:
 
 Không bật public access → Render **không bao giờ** nối được dù password đúng.
 
+Chi tiết từng bước: **`backend/docs/AIVEN_PUBLIC_ACCESS.md`**
+
+Log mới sau khi deploy sẽ có dòng `TCP pre-check:` — nếu **unreachable** thì ưu tiên sửa Aiven Networking, không phải sửa code.
+
 ---
 
 ## Trước khi deploy
@@ -56,6 +60,8 @@ Không bật public access → Render **không bao giờ** nối được dù pa
 | `SPRING_PROFILES_ACTIVE` | `prod` |
 | `JWT_SECRET` | Chuỗi ≥ 32 ký tự (random) |
 | `AIVEN_DB_PASSWORD` | Password MySQL Aiven |
+| `AIVEN_DB_HOST` | (tùy chọn) Host public từ Aiven Connection info |
+| `AIVEN_DB_PORT` | (tùy chọn) Port public, vd. `23132` |
 | `AIVEN_CA_CERT_PATH` | `classpath:ssl/ca.pem` (mặc định) hoặc `ca.pem` trong `/app` |
 | `AIVEN_CA_CERT_PEM` | Toàn bộ nội dung file CA (nếu không copy file) |
 

@@ -16,6 +16,7 @@ import org.springframework.util.StringUtils;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.sql.DataSource;
@@ -39,37 +40,49 @@ public class DataSourceFailoverConfig {
         AppDataSourceFailoverProperties.Remote remote = props.getRemote();
 
         if (props.isPreferRemote() && remote.isEnabled() && StringUtils.hasText(remote.getPassword())) {
-            String remoteUrl = JdbcUrlBuilder.buildRemoteUrl(remote, timeoutMs, resourceLoader, inlineCaCertPem);
             log.info("Probing remote database {}:{} / {} ...", remote.getHost(), remote.getPort(), remote.getDatabase());
+            TcpReachabilityProbe.Result tcp = TcpReachabilityProbe.probe(remote.getHost(), remote.getPort(), 8000);
+            log.info("TCP pre-check: {}", tcp.detail());
+
             if (JdbcUrlBuilder.resolveCaCert(remote.getCaCertPath(), inlineCaCertPem, resourceLoader).isEmpty()) {
                 log.warn(
-                        "Aiven CA certificate not found at '{}'. Using sslMode without VERIFY_IDENTITY. "
-                                + "Download CA from Aiven console → save as backend/ca.pem",
+                        "Aiven CA certificate not found at '{}'. Using sslMode without serverSslCert. "
+                                + "Download CA from Aiven console → classpath:ssl/ca.pem",
                         remote.getCaCertPath()
                 );
             }
-            var remoteError = DatabaseConnectivityProbe.probeFailureReason(
-                    remoteUrl, remote.getUsername(), remote.getPassword(), timeoutMs);
-            if (remoteError.isEmpty()) {
+
+            RemoteConnectOutcome outcome = tryConnectRemote(
+                    remote, timeoutMs, resourceLoader, inlineCaCertPem);
+            if (outcome.success().isPresent()) {
+                RemoteConnectResult ok = outcome.success().get();
                 logBanner(ActiveDatabaseTarget.Kind.REMOTE, remote.getHost(), remote.getPort(), remote.getDatabase());
                 ActiveDatabaseTarget.register(
                         ActiveDatabaseTarget.Kind.REMOTE,
                         remote.getHost(),
                         remote.getPort(),
                         remote.getDatabase(),
-                        remoteUrl
+                        ok.jdbcUrl()
                 );
-                return createHikari(remoteUrl, remote.getUsername(), remote.getPassword(), "TravelViet-Aiven", timeoutMs);
+                return createHikari(
+                        ok.jdbcUrl(),
+                        remote.getUsername(),
+                        remote.getPassword(),
+                        "TravelViet-Aiven",
+                        timeoutMs
+                );
             }
+
+            String remoteError = outcome.lastError() != null ? outcome.lastError() : "unknown";
             log.error(
                     "Aiven connection failed ({}:{}/{}): {}",
                     remote.getHost(),
                     remote.getPort(),
                     remote.getDatabase(),
-                    remoteError.get()
+                    remoteError
             );
             if (!local.isEnabled()) {
-                throw new IllegalStateException(buildProdAivenFailureMessage(remote, remoteError.get()));
+                throw new IllegalStateException(buildProdAivenFailureMessage(remote, remoteError, tcp));
             }
             log.warn("Falling back to local MySQL after Aiven failure.");
         } else if (remote.isEnabled() && !StringUtils.hasText(remote.getPassword())) {
@@ -148,20 +161,84 @@ public class DataSourceFailoverConfig {
         return copy;
     }
 
+    private static RemoteConnectOutcome tryConnectRemote(
+            AppDataSourceFailoverProperties.Remote remote,
+            int timeoutMs,
+            ResourceLoader resourceLoader,
+            String inlineCaCertPem
+    ) {
+        boolean hasCa = JdbcUrlBuilder.resolveCaCert(remote.getCaCertPath(), inlineCaCertPem, resourceLoader).isPresent();
+        LinkedHashSet<String> sslModes = new LinkedHashSet<>();
+        if (StringUtils.hasText(remote.getSslMode())) {
+            sslModes.add(remote.getSslMode().trim());
+        }
+        sslModes.add("REQUIRED");
+        if (hasCa) {
+            sslModes.add("VERIFY_CA");
+        }
+
+        String lastError = null;
+        for (String sslMode : sslModes) {
+            String remoteUrl = JdbcUrlBuilder.buildRemoteUrl(
+                    remote, timeoutMs, resourceLoader, inlineCaCertPem, sslMode);
+            Optional<String> err = DatabaseConnectivityProbe.probeFailureReason(
+                    remoteUrl, remote.getUsername(), remote.getPassword(), timeoutMs);
+            if (err.isEmpty()) {
+                log.info("Remote MySQL connected (sslMode={})", sslMode);
+                return new RemoteConnectOutcome(Optional.of(new RemoteConnectResult(remoteUrl, sslMode)), null);
+            }
+            lastError = err.get();
+            log.warn("Remote probe sslMode={} failed: {}", sslMode, lastError);
+        }
+        return new RemoteConnectOutcome(Optional.empty(), lastError);
+    }
+
+    private record RemoteConnectResult(String jdbcUrl, String sslMode) {
+    }
+
+    private record RemoteConnectOutcome(Optional<RemoteConnectResult> success, String lastError) {
+    }
+
     private static String buildProdAivenFailureMessage(
             AppDataSourceFailoverProperties.Remote remote,
-            String sqlError
+            String sqlError,
+            TcpReachabilityProbe.Result tcp
     ) {
-        return """
-                Cannot connect to Aiven from Render (prod). SQL error: %s
-                
-                Checklist:
-                1) Aiven Console -> your MySQL service -> enable PUBLIC internet access / allow 0.0.0.0/0
-                2) Render Environment: AIVEN_DB_PASSWORD matches Aiven (no extra spaces)
-                3) AIVEN_CA_CERT_PATH=classpath:ssl/ca.pem (mặc định trong JAR) hoặc AIVEN_CA_CERT_PEM
-                4) Service host: %s port %d database %s
+        String networkHint = tcp.reachable()
+                ? """
+                TCP OK — port is open from this host. Likely causes:
+                - Wrong AIVEN_DB_PASSWORD on Render
+                - Wrong host/port (copy from Aiven → Connection info → set AIVEN_DB_HOST / AIVEN_DB_PORT)
+                - SSL/CA mismatch (use classpath:ssl/ca.pem or refresh CA from Aiven)
                 """
-                .formatted(sqlError, remote.getHost(), remote.getPort(), remote.getDatabase())
+                : """
+                TCP FAILED — Render cannot reach Aiven host:port (firewall / no public access).
+                REQUIRED on Aiven Console:
+                1) Open your MySQL service → Networking / Public access
+                2) Enable "Public internet access" (or similar)
+                3) IP allowlist: add 0.0.0.0/0 for lab, OR Render static outbound IPs (paid plan)
+                4) Wait 1–2 minutes, then Redeploy Render
+                See: backend/docs/AIVEN_PUBLIC_ACCESS.md
+                """;
+
+        return """
+                Cannot connect to Aiven from Render (prod).
+                SQL: %s
+                %s
+                TCP check: %s
+                
+                Render env checklist:
+                - AIVEN_DB_PASSWORD = password from Aiven (Users → avnadmin)
+                - AIVEN_DB_HOST=%s  AIVEN_DB_PORT=%d  (optional overrides)
+                - AIVEN_CA_CERT_PATH=classpath:ssl/ca.pem
+                """
+                .formatted(
+                        sqlError,
+                        networkHint.trim(),
+                        tcp.detail(),
+                        remote.getHost(),
+                        remote.getPort()
+                )
                 .trim();
     }
 

@@ -33,23 +33,48 @@ final class JdbcUrlBuilder {
             ResourceLoader resourceLoader,
             String inlineCaCertPem
     ) {
+        return buildRemoteUrl(remote, connectTimeoutMs, resourceLoader, inlineCaCertPem, null);
+    }
+
+    static String buildRemoteUrl(
+            AppDataSourceFailoverProperties.Remote remote,
+            int connectTimeoutMs,
+            ResourceLoader resourceLoader,
+            String inlineCaCertPem,
+            String sslModeOverride
+    ) {
         List<String> params = new ArrayList<>();
         params.add("serverTimezone=Asia/Ho_Chi_Minh");
         params.add("connectTimeout=" + connectTimeoutMs);
         params.add("socketTimeout=30000");
+        params.add("allowPublicKeyRetrieval=true");
 
         Optional<Path> caFile = resolveCaCert(remote.getCaCertPath(), inlineCaCertPem, resourceLoader);
+        String sslMode = resolveSslMode(remote, sslModeOverride);
         if (caFile.isPresent()) {
-            // serverSslCert ổn định hơn trustCertificateKeyStoreType=PEM (tránh "PEM not found" trên Render)
-            params.add("sslMode=VERIFY_IDENTITY");
+            // Aiven khuyến nghị REQUIRED + serverSslCert (không ép VERIFY_IDENTITY — dễ lỗi handshake)
+            params.add("sslMode=" + sslMode);
             params.add("serverSslCert=" + toJdbcPath(caFile.get()));
-        } else if (StringUtils.hasText(remote.getSslMode())) {
-            params.add("sslMode=" + remote.getSslMode());
+        } else if (StringUtils.hasText(sslMode)) {
+            params.add("sslMode=" + sslMode);
         } else {
             params.add("sslMode=REQUIRED");
         }
 
         return baseUrl(remote.getHost(), remote.getPort(), remote.getDatabase(), params);
+    }
+
+    private static String resolveSslMode(
+            AppDataSourceFailoverProperties.Remote remote,
+            String sslModeOverride
+    ) {
+        if (StringUtils.hasText(sslModeOverride)) {
+            return sslModeOverride.trim();
+        }
+        if (StringUtils.hasText(remote.getSslMode())) {
+            return remote.getSslMode().trim();
+        }
+        return "REQUIRED";
     }
 
     static String maskPassword(String jdbcUrl) {

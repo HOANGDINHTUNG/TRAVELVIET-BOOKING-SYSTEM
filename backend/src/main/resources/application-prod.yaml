@@ -38,12 +38,13 @@ app:
       probe-timeout-ms: 30000
       remote:
         enabled: true
-        host: mysql-lab-mtung3365-864a.f.aivencloud.com
-        port: 23132
-        database: defaultdb
-        username: avnadmin
+        # Copy host/port từ Aiven Console → Connection information (Public)
+        host: ${AIVEN_DB_HOST:mysql-lab-mtung3365-864a.f.aivencloud.com}
+        port: ${AIVEN_DB_PORT:23132}
+        database: ${AIVEN_DB_DATABASE:defaultdb}
+        username: ${AIVEN_DB_USER:avnadmin}
         password: ${AIVEN_DB_PASSWORD}
-        ssl-mode: REQUIRED
+        ssl-mode: ${AIVEN_DB_SSL_MODE:REQUIRED}
         # CA trong JAR (classpath) — Render không phụ thuộc file ngoài image
         ca-cert-path: ${AIVEN_CA_CERT_PATH:classpath:ssl/ca.pem}
       local:

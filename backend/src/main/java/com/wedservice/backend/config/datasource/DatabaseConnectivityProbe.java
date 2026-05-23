@@ -35,7 +35,7 @@ final class DatabaseConnectivityProbe {
                 return Optional.of("Connection.isValid() returned false");
             }
         } catch (SQLException ex) {
-            String reason = ex.getMessage() != null ? ex.getMessage() : ex.getClass().getSimpleName();
+            String reason = formatSqlException(ex);
             log.warn("Database probe failed for {}: {}", sanitizeUrl(jdbcUrl), reason);
             return Optional.of(reason);
         }
@@ -43,5 +43,24 @@ final class DatabaseConnectivityProbe {
 
     private static String sanitizeUrl(String jdbcUrl) {
         return jdbcUrl.length() > 120 ? jdbcUrl.substring(0, 120) + "..." : jdbcUrl;
+    }
+
+    private static String formatSqlException(SQLException ex) {
+        StringBuilder sb = new StringBuilder();
+        SQLException current = ex;
+        int depth = 0;
+        while (current != null && depth < 4) {
+            if (depth > 0) {
+                sb.append(" | Caused by: ");
+            }
+            String msg = current.getMessage();
+            sb.append(msg != null ? msg : current.getClass().getSimpleName());
+            if (current.getSQLState() != null) {
+                sb.append(" [SQLState=").append(current.getSQLState()).append("]");
+            }
+            current = current.getNextException();
+            depth++;
+        }
+        return sb.toString();
     }
 }
