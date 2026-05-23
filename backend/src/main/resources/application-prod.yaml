@@ -35,7 +35,7 @@ app:
     failover:
       enabled: true
       prefer-remote: true
-      probe-timeout-ms: 15000
+      probe-timeout-ms: 30000
       remote:
         enabled: true
         host: mysql-lab-mtung3365-864a.f.aivencloud.com

@@ -48,7 +48,9 @@ public class DataSourceFailoverConfig {
                         remote.getCaCertPath()
                 );
             }
-            if (DatabaseConnectivityProbe.canConnect(remoteUrl, remote.getUsername(), remote.getPassword(), timeoutMs)) {
+            var remoteError = DatabaseConnectivityProbe.probeFailureReason(
+                    remoteUrl, remote.getUsername(), remote.getPassword(), timeoutMs);
+            if (remoteError.isEmpty()) {
                 logBanner(ActiveDatabaseTarget.Kind.REMOTE, remote.getHost(), remote.getPort(), remote.getDatabase());
                 ActiveDatabaseTarget.register(
                         ActiveDatabaseTarget.Kind.REMOTE,
@@ -59,11 +61,17 @@ public class DataSourceFailoverConfig {
                 );
                 return createHikari(remoteUrl, remote.getUsername(), remote.getPassword(), "TravelViet-Aiven", timeoutMs);
             }
-            log.warn(
-                    "Remote database unavailable ({}:{}). Falling back to local MySQL.",
+            log.error(
+                    "Aiven connection failed ({}:{}/{}): {}",
                     remote.getHost(),
-                    remote.getPort()
+                    remote.getPort(),
+                    remote.getDatabase(),
+                    remoteError.get()
             );
+            if (!local.isEnabled()) {
+                throw new IllegalStateException(buildProdAivenFailureMessage(remote, remoteError.get()));
+            }
+            log.warn("Falling back to local MySQL after Aiven failure.");
         } else if (remote.isEnabled() && !StringUtils.hasText(remote.getPassword())) {
             log.warn(
                     "AIVEN_DB_PASSWORD chưa có — bỏ qua DB cloud. "
@@ -73,8 +81,8 @@ public class DataSourceFailoverConfig {
 
         if (!local.isEnabled()) {
             throw new IllegalStateException(
-                    "Không kết nối được Aiven DB (prod). Kiểm tra AIVEN_DB_PASSWORD, AIVEN_CA_CERT_PATH "
-                            + "(Docker: ca.pem), và allowlist IP trên Aiven."
+                    "Prod requires Aiven DB but remote was not connected. Set AIVEN_DB_PASSWORD on Render "
+                            + "and enable Aiven public access (see backend/docs/RENDER_DEPLOY.md)."
             );
         }
 
@@ -138,6 +146,23 @@ public class DataSourceFailoverConfig {
         copy.setPassword(source.getPassword());
         copy.setUseSsl(source.isUseSsl());
         return copy;
+    }
+
+    private static String buildProdAivenFailureMessage(
+            AppDataSourceFailoverProperties.Remote remote,
+            String sqlError
+    ) {
+        return """
+                Cannot connect to Aiven from Render (prod). SQL error: %s
+                
+                Checklist:
+                1) Aiven Console -> your MySQL service -> enable PUBLIC internet access / allow 0.0.0.0/0
+                2) Render Environment: AIVEN_DB_PASSWORD matches Aiven (no extra spaces)
+                3) AIVEN_CA_CERT_PATH=ca.pem and backend/ca.pem is in the Docker image (or use AIVEN_CA_CERT_PEM)
+                4) Service host: %s port %d database %s
+                """
+                .formatted(sqlError, remote.getHost(), remote.getPort(), remote.getDatabase())
+                .trim();
     }
 
     private static String buildLocalConnectionHelp(List<String> tried, boolean remoteSkippedNoPassword) {

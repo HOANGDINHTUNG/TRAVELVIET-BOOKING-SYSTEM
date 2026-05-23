@@ -8,6 +8,20 @@
 | 2 | Thiếu file CA trong Docker | **Đúng** | `Dockerfile` copy `ca.pem` → `/app/ca.pem`; env `AIVEN_CA_CERT_PATH=ca.pem` |
 | 3 | Trùng block YAML / JWT bị đè | **Đã tách** | `application.yaml` (chung) + `application-dev.yaml` (local) + `application-prod.yaml` (Render) |
 
+## Quan trọng: Aiven phải cho phép Render kết nối vào
+
+Log kiểu `Remote database unavailable` / `Cannot connect to Aiven from Render` gần như luôn do **Aiven chặn IP**.
+
+Trên **Aiven Console** → service **MySQL** của bạn:
+
+1. Mục **Networking** / **Public access** → bật truy cập **Internet** / **Public**.
+2. Nếu có **IP allowlist**: thêm `0.0.0.0/0` (cho dev/test) hoặc [dải IP outbound của Render](https://render.com/docs/static-outbound-ip-addresses) (gói trả phí).
+3. Lưu và đợi 1–2 phút rồi **Redeploy** trên Render.
+
+Không bật public access → Render **không bao giờ** nối được dù password đúng.
+
+---
+
 ## Trước khi deploy
 
 1. Chứng chỉ Aiven (chọn **một** cách):
@@ -68,6 +82,7 @@
 | Triệu chứng | Nguyên nhân |
 |-------------|-------------|
 | Deploy failed / health 404 | Health path sai → dùng `/api/v1/actuator/health` |
+| `Aiven connection failed` / Communications link failure | **Bật public access** trên Aiven; kiểm tra password trên Render |
 | Crash khi start | Thiếu `ca.pem` hoặc sai `AIVEN_DB_PASSWORD` |
 | JWT error | Thiếu `JWT_SECRET` trên Render |
 | DB connection timeout | Aiven chặn IP → bật public hoặc allowlist |

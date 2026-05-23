@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Optional;
 
 final class DatabaseConnectivityProbe {
 
@@ -15,22 +16,32 @@ final class DatabaseConnectivityProbe {
     }
 
     static boolean canConnect(String jdbcUrl, String username, String password, int timeoutMs) {
+        return probeFailureReason(jdbcUrl, username, password, timeoutMs).isEmpty();
+    }
+
+    /** Rỗng = kết nối OK; có giá trị = lý do lỗi (để log Render / prod). */
+    static Optional<String> probeFailureReason(
+            String jdbcUrl,
+            String username,
+            String password,
+            int timeoutMs
+    ) {
         try {
             DriverManager.setLoginTimeout(Math.max(1, timeoutMs / 1000));
             try (Connection connection = DriverManager.getConnection(jdbcUrl, username, password)) {
-                return connection.isValid(Math.max(1, timeoutMs / 1000));
+                if (connection.isValid(Math.max(1, timeoutMs / 1000))) {
+                    return Optional.empty();
+                }
+                return Optional.of("Connection.isValid() returned false");
             }
         } catch (SQLException ex) {
-            log.debug("Database probe failed for {}: {}", sanitizeUrl(jdbcUrl), ex.getMessage());
-            return false;
+            String reason = ex.getMessage() != null ? ex.getMessage() : ex.getClass().getSimpleName();
+            log.warn("Database probe failed for {}: {}", sanitizeUrl(jdbcUrl), reason);
+            return Optional.of(reason);
         }
     }
 
     private static String sanitizeUrl(String jdbcUrl) {
-        int at = jdbcUrl.indexOf('@');
-        if (at > 0) {
-            return jdbcUrl.substring(0, Math.min(80, jdbcUrl.length()));
-        }
         return jdbcUrl.length() > 120 ? jdbcUrl.substring(0, 120) + "..." : jdbcUrl;
     }
 }
