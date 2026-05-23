@@ -6,7 +6,7 @@ export const homePageVi = {
   status: {
     backendOfflineTitle: "Backend chưa mở hoặc API không phản hồi",
     backendOfflineMessage:
-      "Vui lòng bật backend rồi bấm Thử lại. Mặc định web gọi http://localhost:8088/api/v1.",
+      "Không tải được dữ liệu. Kiểm tra backend (VITE_API_BASE_URL) rồi bấm Thử lại.",
     retry: "Thử lại",
     emptyImagesTitle: "Chưa có ảnh tour từ backend",
     emptyImagesMessage: "Kiểm tra trường mediaUrl trong response GET /tours.",

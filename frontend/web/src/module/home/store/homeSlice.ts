@@ -101,7 +101,7 @@ export const fetchHomePublicData = createAsyncThunk<
   if (import.meta.env.DEV) {
     if (lastMinuteDealsResult.status === 'rejected') {
       console.warn(
-        '[home] HOME_FLASH_SALE fetch FAILED — kiem tra VITE_API_URL (http://localhost:8088/api/v1) va backend.',
+        `[home] HOME_FLASH_SALE fetch FAILED — kiem tra VITE_API_BASE_URL va backend.`,
         lastMinuteDealsResult.reason,
       )
     } else {

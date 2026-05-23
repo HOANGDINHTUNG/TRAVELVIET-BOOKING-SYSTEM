@@ -2,7 +2,7 @@ export const homePageEn = {
   status: {
     backendOfflineTitle: "Backend is offline or not responding",
     backendOfflineMessage:
-      "Please start the backend then press Retry. The web app calls http://localhost:8088/api/v1 by default.",
+      "Could not load data. Check the API backend (VITE_API_BASE_URL) then press Retry.",
     retry: "Retry",
     emptyImagesTitle: "No tour images from backend",
     emptyImagesMessage: "Check the mediaUrl field in the GET /tours response.",

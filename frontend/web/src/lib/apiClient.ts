@@ -25,14 +25,9 @@ import {
   LANGUAGE_MODES,
   type LanguageMode,
 } from '../constants/preferences'
+import { resolveApiBaseUrl } from '../config/apiConfig'
 
-const rawBaseUrl = String(
-  import.meta.env.VITE_API_URL ??
-    import.meta.env.VITE_API_BASE_URL ??
-    'http://localhost:8088/api/v1',
-)
-
-export const API_BASE_URL = rawBaseUrl.replace(/\/+$/, '')
+export const API_BASE_URL = resolveApiBaseUrl()
 
 type RetryableRequestConfig = InternalAxiosRequestConfig & {
   _retry?: boolean
