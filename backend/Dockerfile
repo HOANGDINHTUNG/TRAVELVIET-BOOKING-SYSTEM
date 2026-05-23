@@ -6,7 +6,8 @@ COPY pom.xml .
 RUN mvn dependency:go-offline -B
 
 COPY src ./src
-RUN mvn clean package -DskipTests
+# -Dmaven.test.skip=true: bỏ compile test (Render); -DskipTests vẫn compile test → dễ fail CI
+RUN mvn clean package -Dmaven.test.skip=true
 
 # Run
 FROM eclipse-temurin:21-jre-jammy

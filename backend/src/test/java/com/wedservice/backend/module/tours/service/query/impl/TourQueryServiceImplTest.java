@@ -3,7 +3,9 @@ package com.wedservice.backend.module.tours.service.query.impl;
 import com.querydsl.core.types.Predicate;
 import com.wedservice.backend.common.exception.ResourceNotFoundException;
 import com.wedservice.backend.common.exception.BadRequestException;
+import com.wedservice.backend.module.commerce.repository.ComboPackageRepository;
 import com.wedservice.backend.module.destinations.entity.Destination;
+import com.wedservice.backend.module.destinations.repository.DestinationRepository;
 import com.wedservice.backend.module.tours.dto.request.TourSearchRequest;
 import com.wedservice.backend.module.tours.dto.response.TourResponse;
 import com.wedservice.backend.module.tours.entity.CancellationPolicy;
@@ -34,6 +36,9 @@ import com.wedservice.backend.module.tours.repository.TourMediaRepository;
 import com.wedservice.backend.module.tours.repository.TourSeasonalityRepository;
 import com.wedservice.backend.module.tours.repository.TourScheduleGuideRepository;
 import com.wedservice.backend.module.tours.repository.TourSchedulePickupPointRepository;
+import com.wedservice.backend.module.tours.repository.TourComboPackageLinkRepository;
+import com.wedservice.backend.module.tours.repository.TourDepartureHubRepository;
+import com.wedservice.backend.module.tours.repository.TourInclusionFlagsRepository;
 import com.wedservice.backend.module.tours.repository.TourScheduleRepository;
 import com.wedservice.backend.module.tours.repository.TourTagRepository;
 import com.wedservice.backend.module.tours.repository.TourTranslationRepository;
@@ -104,6 +109,18 @@ class TourQueryServiceImplTest {
     private TourScheduleRepository tourScheduleRepository;
 
     @Mock
+    private TourDepartureHubRepository tourDepartureHubRepository;
+
+    @Mock
+    private TourInclusionFlagsRepository tourInclusionFlagsRepository;
+
+    @Mock
+    private TourComboPackageLinkRepository tourComboPackageLinkRepository;
+
+    @Mock
+    private ComboPackageRepository comboPackageRepository;
+
+    @Mock
     private TourSchedulePickupPointRepository tourSchedulePickupPointRepository;
 
     @Mock
@@ -111,6 +128,9 @@ class TourQueryServiceImplTest {
 
     @Mock
     private TourTranslationRepository tourTranslationRepository;
+
+    @Mock
+    private DestinationRepository destinationRepository;
 
     private TourQueryServiceImpl tourQueryService;
 
@@ -130,10 +150,15 @@ class TourQueryServiceImplTest {
                 itineraryItemRepository,
                 tourChecklistItemRepository,
                 tourScheduleRepository,
+                tourDepartureHubRepository,
+                tourInclusionFlagsRepository,
+                tourComboPackageLinkRepository,
+                comboPackageRepository,
                 tourSchedulePickupPointRepository,
                 tourScheduleGuideRepository,
                 tourTranslationRepository,
-                new TourTranslationMergeHelper()
+                new TourTranslationMergeHelper(),
+                destinationRepository
         );
     }
 
