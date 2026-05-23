@@ -5,7 +5,7 @@
 | # | Vấn đề | Đúng? | Cách repo xử lý |
 |---|--------|-------|-----------------|
 | 1 | Health check sai vì `context-path: /api/v1` | **Đúng** | Render: **`/api/v1/actuator/health`** (xem `render.yaml`) |
-| 2 | Thiếu file CA trong Docker | **Đúng** | `Dockerfile` copy `ca.pem` → `/app/ca.pem`; env `AIVEN_CA_CERT_PATH=ca.pem` |
+| 2 | SSL CA / PEM not found | **Đã sửa** | CA trong `src/main/resources/ssl/ca.pem`; JDBC dùng `serverSslCert`; mặc định `classpath:ssl/ca.pem` |
 | 3 | Trùng block YAML / JWT bị đè | **Đã tách** | `application.yaml` (chung) + `application-dev.yaml` (local) + `application-prod.yaml` (Render) |
 
 ## Quan trọng: Aiven phải cho phép Render kết nối vào
@@ -26,7 +26,8 @@ Không bật public access → Render **không bao giờ** nối được dù pa
 
 1. Chứng chỉ Aiven (chọn **một** cách):
    - **Cách A:** `backend/ca.pem` trước khi build Docker (file có thể commit — CA là public).
-   - **Cách B (khuyến nghị Render):** Env `AIVEN_CA_CERT_PEM` = nội dung file `.pem` (dán nguyên block `-----BEGIN CERTIFICATE-----` …).
+   - **Mặc định:** CA đã đóng gói trong JAR (`classpath:ssl/ca.pem`) — không cần copy file nếu không đổi cert.
+   - **Cách B:** Env `AIVEN_CA_CERT_PEM` = nội dung file `.pem` (dán nguyên block `-----BEGIN CERTIFICATE-----` …).
 2. Trên Aiven: bật **public access** hoặc allowlist IP Render nếu cần.
 3. Chuẩn bị secret (không commit): `AIVEN_DB_PASSWORD`, `JWT_SECRET`, `GEMINI_API_KEY`, …
 
@@ -55,7 +56,7 @@ Không bật public access → Render **không bao giờ** nối được dù pa
 | `SPRING_PROFILES_ACTIVE` | `prod` |
 | `JWT_SECRET` | Chuỗi ≥ 32 ký tự (random) |
 | `AIVEN_DB_PASSWORD` | Password MySQL Aiven |
-| `AIVEN_CA_CERT_PATH` | `ca.pem` (mặc định trong container) |
+| `AIVEN_CA_CERT_PATH` | `classpath:ssl/ca.pem` (mặc định) hoặc `ca.pem` trong `/app` |
 | `AIVEN_CA_CERT_PEM` | Toàn bộ nội dung file CA (nếu không copy file) |
 
 ### Tùy chọn

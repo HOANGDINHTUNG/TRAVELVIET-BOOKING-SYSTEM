@@ -44,8 +44,8 @@ app:
         username: avnadmin
         password: ${AIVEN_DB_PASSWORD}
         ssl-mode: REQUIRED
-        # Docker/local: ca.pem ở thư mục backend (copy vào /app/ca.pem trong image)
-        ca-cert-path: ${AIVEN_CA_CERT_PATH:ca.pem}
+        # CA trong JAR (classpath) — Render không phụ thuộc file ngoài image
+        ca-cert-path: ${AIVEN_CA_CERT_PATH:classpath:ssl/ca.pem}
       local:
         enabled: false
   security:

@@ -158,7 +158,7 @@ public class DataSourceFailoverConfig {
                 Checklist:
                 1) Aiven Console -> your MySQL service -> enable PUBLIC internet access / allow 0.0.0.0/0
                 2) Render Environment: AIVEN_DB_PASSWORD matches Aiven (no extra spaces)
-                3) AIVEN_CA_CERT_PATH=ca.pem and backend/ca.pem is in the Docker image (or use AIVEN_CA_CERT_PEM)
+                3) AIVEN_CA_CERT_PATH=classpath:ssl/ca.pem (mặc định trong JAR) hoặc AIVEN_CA_CERT_PEM
                 4) Service host: %s port %d database %s
                 """
                 .formatted(sqlError, remote.getHost(), remote.getPort(), remote.getDatabase())

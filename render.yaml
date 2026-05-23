@@ -15,7 +15,7 @@ services:
       - key: AIVEN_DB_PASSWORD
         sync: false
       - key: AIVEN_CA_CERT_PATH
-        value: ca.pem
+        value: classpath:ssl/ca.pem
       - key: GEMINI_API_KEY
         sync: false
       - key: WEATHERAPI_KEY

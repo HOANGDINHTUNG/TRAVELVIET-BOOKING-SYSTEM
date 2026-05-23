@@ -40,9 +40,9 @@ final class JdbcUrlBuilder {
 
         Optional<Path> caFile = resolveCaCert(remote.getCaCertPath(), inlineCaCertPem, resourceLoader);
         if (caFile.isPresent()) {
+            // serverSslCert ổn định hơn trustCertificateKeyStoreType=PEM (tránh "PEM not found" trên Render)
             params.add("sslMode=VERIFY_IDENTITY");
-            params.add("trustCertificateKeyStoreUrl=file:" + caFile.get().toAbsolutePath());
-            params.add("trustCertificateKeyStoreType=PEM");
+            params.add("serverSslCert=" + toJdbcPath(caFile.get()));
         } else if (StringUtils.hasText(remote.getSslMode())) {
             params.add("sslMode=" + remote.getSslMode());
         } else {
@@ -58,6 +58,10 @@ final class JdbcUrlBuilder {
 
     private static String baseUrl(String host, int port, String database, List<String> params) {
         return "jdbc:mysql://" + host + ":" + port + "/" + database + "?" + String.join("&", params);
+    }
+
+    private static String toJdbcPath(Path path) {
+        return path.toAbsolutePath().normalize().toString().replace('\\', '/');
     }
 
     static Optional<Path> resolveCaCert(String configured, String inlinePem, ResourceLoader resourceLoader) {

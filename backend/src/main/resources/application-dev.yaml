@@ -58,7 +58,7 @@ app:
         username: avnadmin
         password: ${AIVEN_DB_PASSWORD:}
         ssl-mode: REQUIRED
-        ca-cert-path: ca.pem
+        ca-cert-path: classpath:ssl/ca.pem
       local:
         enabled: true
         host: 127.0.0.1
