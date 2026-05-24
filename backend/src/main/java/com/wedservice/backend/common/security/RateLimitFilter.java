@@ -1,42 +1,32 @@
 package com.wedservice.backend.common.security;
 
+import com.wedservice.backend.common.security.ratelimit.RateLimitBucketStore;
 import io.github.bucket4j.Bucket;
 import io.github.bucket4j.ConsumptionProbe;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.time.Duration;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 /**
  * Rate Limiting Filter for Auth endpoints using Bucket4j.
  * Protects against brute-force attacks on /register and /login.
  * Applies per-IP limiting: 10 requests per 1 minute.
- * In production, replace in-memory bucket store with Redis.
+ * Storage backend: {@code app.security.rate-limit.store} ({@code memory} | {@code redis}).
  */
 @Component
+@RequiredArgsConstructor
 public class RateLimitFilter extends OncePerRequestFilter {
 
-    private static final int CAPACITY = 10;
-    private static final Duration REFILL_PERIOD = Duration.ofMinutes(1);
-
-    // In-memory per-IP bucket store. Replace with Redis-backed store for multi-instance deployments.
-    private final Map<String, Bucket> buckets = new ConcurrentHashMap<>();
-
-    private Bucket createNewBucket() {
-        return Bucket.builder()
-                .addLimit(limit -> limit.capacity(CAPACITY).refillGreedy(CAPACITY, REFILL_PERIOD))
-                .build();
-    }
+    private final RateLimitBucketStore bucketStore;
 
     @Override
     protected void doFilterInternal(
@@ -50,7 +40,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
         // Only apply rate limit to sensitive auth and AI endpoints
         if (path.contains("/auth/login") || path.contains("/auth/register") || path.contains("/ai/chat")) {
             String clientIp = resolveClientIp(request);
-            Bucket bucket = buckets.computeIfAbsent(clientIp, k -> createNewBucket());
+            Bucket bucket = bucketStore.resolveBucket(clientIp);
 
             ConsumptionProbe probe = bucket.tryConsumeAndReturnRemaining(1);
             if (!probe.isConsumed()) {

@@ -6,6 +6,7 @@ import com.wedservice.backend.module.bookings.dto.request.BookingQuoteRequest;
 import com.wedservice.backend.module.bookings.dto.request.UpdateBookingStatusRequest;
 import com.wedservice.backend.module.bookings.dto.response.BookingQuoteResponse;
 import com.wedservice.backend.module.bookings.dto.response.BookingResponse;
+import com.wedservice.backend.module.bookings.dto.response.BookingSummaryResponse;
 import com.wedservice.backend.module.bookings.dto.response.BookingStatusHistoryResponse;
 import com.wedservice.backend.module.bookings.facade.BookingFacade;
 import jakarta.validation.Valid;
@@ -14,6 +15,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -40,8 +44,15 @@ public class BookingController {
 
     @GetMapping("/me")
     @PreAuthorize("hasAuthority('booking.view')")
-    public ApiResponse<List<BookingResponse>> getMyBookings() {
-        return ApiResponse.success(bookingFacade.getMyBookings());
+    public ApiResponse<List<BookingSummaryResponse>> getMyBookings(
+            @RequestParam(required = false) Integer size,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime cursorCreatedAt,
+            @RequestParam(required = false) Long cursorId
+    ) {
+        if (size == null && cursorCreatedAt == null && cursorId == null) {
+            return ApiResponse.success(bookingFacade.getMyBookings());
+        }
+        return ApiResponse.success(bookingFacade.getMyBookings(size, cursorCreatedAt, cursorId));
     }
 
     @GetMapping("/{id}")

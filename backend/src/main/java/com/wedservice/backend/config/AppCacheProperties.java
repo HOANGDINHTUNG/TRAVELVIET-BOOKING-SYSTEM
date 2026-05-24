@@ -14,6 +14,12 @@ import java.util.Map;
 public class AppCacheProperties {
 
     /**
+     * {@code caffeine} — single pod (default). {@code redis} — shared L2 for tour caches.
+     * {@code hybrid} — Caffeine L1 + Redis L2 + Pub/Sub L1 invalidation (Kubernetes).
+     */
+    private String mode = "caffeine";
+
+    /**
      * Keys: cache names (e.g. {@code tours}, {@code destinations}, {@code destination-details}).
      */
     private Map<String, CacheSpec> caffeine = new LinkedHashMap<>();

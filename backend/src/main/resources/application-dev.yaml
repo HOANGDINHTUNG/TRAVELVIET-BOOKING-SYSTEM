@@ -6,10 +6,19 @@
 #   2) MySQL local    — 127.0.0.1:3307 / wedservice
 #
 # API cho frontend: http://localhost:8088/api/v1  (không liên quan cổng 3307)
+#
+# Failover API (public Render → local):
+#   app.api.failover.enabled=true — probe Render lúc start; nếu down → khuyến nghị localhost
+#   GET /system/health → connectivity.api.recommendedBaseUrl
 # =============================================================================
 
 spring:
   debug: true
+  # Dev dùng cache Caffeine + rate-limit memory — không cần Redis chạy local.
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
   datasource:
     # Chỉ dùng khi tắt app.datasource.failover.enabled
     url: jdbc:mysql://127.0.0.1:3307/wedservice?useSSL=false&serverTimezone=Asia/Ho_Chi_Minh&allowPublicKeyRetrieval=true
@@ -45,10 +54,17 @@ logging:
     org.springframework.boot.autoconfigure.flyway: DEBUG
 
 app:
+  api:
+    failover:
+      enabled: ${API_FAILOVER_ENABLED:true}
+      prefer-public: ${API_PREFER_PUBLIC:true}
+      probe-timeout-ms: ${API_PROBE_TIMEOUT_MS:8000}
+      public-base-url: ${APP_API_PUBLIC_BASE_URL:https://travelviet-booking-system.onrender.com/api/v1}
+      local-base-url: ${APP_API_LOCAL_BASE_URL:http://localhost:8088/api/v1}
   datasource:
     failover:
-      enabled: true
-      prefer-remote: true
+      enabled: ${DB_FAILOVER_ENABLED:true}
+      prefer-remote: ${DB_PREFER_REMOTE:true}
       probe-timeout-ms: 8000
       remote:
         enabled: true

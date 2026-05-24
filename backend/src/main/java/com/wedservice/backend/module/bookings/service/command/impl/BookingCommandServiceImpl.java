@@ -35,7 +35,7 @@ import com.wedservice.backend.module.orders.repository.OrderRepository;
 import com.wedservice.backend.module.commerce.repository.ProductRepository;
 import com.wedservice.backend.module.tours.entity.Tour;
 import com.wedservice.backend.module.tours.repository.TourRepository;
-import com.wedservice.backend.module.tours.service.TourRuntimeStatsSyncService;
+import com.wedservice.backend.module.tours.event.TourStatsSyncPublisher;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -44,6 +44,7 @@ import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -60,7 +61,7 @@ public class BookingCommandServiceImpl implements BookingCommandService {
     private final BookingValidator bookingValidator;
     private final BookingPricingService bookingPricingService;
     private final BookingStatusHistoryRecorder bookingStatusHistoryRecorder;
-    private final TourRuntimeStatsSyncService tourRuntimeStatsSyncService;
+    private final TourStatsSyncPublisher tourStatsSyncPublisher;
     private final UserPassportService userPassportService;
     private final MissionTrackerService missionTrackerService;
     private final OrderRepository orderRepository;
@@ -145,8 +146,7 @@ public class BookingCommandServiceImpl implements BookingCommandService {
 
         saveComboSnapshotIfPresent(booking, quote);
         saveProductLinesAndDecrementStock(booking, quote);
-        tourRuntimeStatsSyncService.syncScheduleState(booking.getScheduleId());
-        tourRuntimeStatsSyncService.syncTourBookingStats(booking.getTourId());
+        tourStatsSyncPublisher.requestSync(booking.getScheduleId(), booking.getTourId());
         bookingStatusHistoryRecorder.record(
                 booking.getId(),
                 null,
@@ -155,9 +155,10 @@ public class BookingCommandServiceImpl implements BookingCommandService {
                 "Booking created"
         );
 
-        if (request.getPassengers() != null) {
+        if (request.getPassengers() != null && !request.getPassengers().isEmpty()) {
+            List<BookingPassenger> passengers = new ArrayList<>(request.getPassengers().size());
             for (CreatePassengerRequest p : request.getPassengers()) {
-                BookingPassenger bp = BookingPassenger.builder()
+                passengers.add(BookingPassenger.builder()
                         .bookingId(booking.getId())
                         .fullName(DataNormalizer.normalize(p.getFullName()))
                         .passengerType(bookingValidator.normalizePassengerType(p.getPassengerType()))
@@ -167,10 +168,9 @@ public class BookingCommandServiceImpl implements BookingCommandService {
                         .passportNo(DataNormalizer.normalize(p.getPassportNo()))
                         .phone(DataNormalizer.normalizePhone(p.getPhone()))
                         .email(DataNormalizer.normalizeEmail(p.getEmail()))
-                        .build();
-
-                passengerRepository.save(bp);
+                        .build());
             }
+            passengerRepository.saveAll(passengers);
         }
 
         return toResponse(booking);
@@ -263,8 +263,7 @@ public class BookingCommandServiceImpl implements BookingCommandService {
         }
         bookingRepository.save(booking);
         syncLinkedOrder(booking, newStatus);
-        tourRuntimeStatsSyncService.syncScheduleState(booking.getScheduleId());
-        tourRuntimeStatsSyncService.syncTourBookingStats(booking.getTourId());
+        tourStatsSyncPublisher.requestSync(booking.getScheduleId(), booking.getTourId());
         bookingStatusHistoryRecorder.record(
                 booking.getId(),
                 oldStatus,
@@ -361,8 +360,9 @@ public class BookingCommandServiceImpl implements BookingCommandService {
             return;
         }
 
+        List<BookingProduct> products = new ArrayList<>(lines.size());
         for (AppliedProductQuoteResponse line : lines) {
-            bookingProductRepository.save(BookingProduct.builder()
+            products.add(BookingProduct.builder()
                     .bookingId(booking.getId())
                     .productId(line.getProductId())
                     .quantity(line.getQuantity())
@@ -376,6 +376,7 @@ public class BookingCommandServiceImpl implements BookingCommandService {
                 throw BadRequestException.i18n("api.error.product.out_of_stock");
             }
         }
+        bookingProductRepository.saveAll(products);
     }
 
     private BookingQuoteRequest toQuoteRequest(CreateBookingRequest request) {

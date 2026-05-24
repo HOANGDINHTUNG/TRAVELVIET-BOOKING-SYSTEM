@@ -1,8 +1,8 @@
-import { API_BASE_URL } from './axiosInstance'
+import { getApiBaseUrl } from '../config/apiBaseUrl'
 
 const assetBaseUrl = String(
   import.meta.env.VITE_ASSET_URL ??
-    API_BASE_URL.replace(/\/api\/v\d+$/i, ''),
+    getApiBaseUrl().replace(/\/api\/v\d+$/i, ''),
 ).replace(/\/+$/, '')
 
 export function buildAssetUrl(path?: string | null) {

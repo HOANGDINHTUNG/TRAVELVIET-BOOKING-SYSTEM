@@ -56,6 +56,7 @@ import com.wedservice.backend.module.tours.repository.TourScheduleGuideRepositor
 import com.wedservice.backend.module.tours.repository.TourSchedulePickupPointRepository;
 import com.wedservice.backend.module.tours.repository.TourScheduleRepository;
 import com.wedservice.backend.module.tours.repository.TourTagRepository;
+import com.wedservice.backend.module.tours.cache.TourCacheEvictor;
 import com.wedservice.backend.module.tours.service.command.TourCommandService;
 import com.wedservice.backend.module.tours.validator.TourValidator;
 import lombok.RequiredArgsConstructor;
@@ -91,6 +92,7 @@ public class TourCommandServiceImpl implements TourCommandService {
     private final TourSchedulePickupPointRepository tourSchedulePickupPointRepository;
     private final TourScheduleGuideRepository tourScheduleGuideRepository;
     private final TourValidator tourValidator;
+    private final TourCacheEvictor tourCacheEvictor;
 
     @Override
     @Transactional
@@ -126,6 +128,7 @@ public class TourCommandServiceImpl implements TourCommandService {
 
         t = tourRepository.save(t);
         syncTourContent(t.getId(), request);
+        tourCacheEvictor.evictAfterTourCreated();
         return toResponse(t, true);
     }
 
@@ -163,12 +166,14 @@ public class TourCommandServiceImpl implements TourCommandService {
 
         t = tourRepository.save(t);
         syncTourContent(t.getId(), request);
+        tourCacheEvictor.evictAfterTourMutation(id);
         return toResponse(t, true);
     }
 
     @Override
     public void deleteTour(Long id) {
         tourRepository.deleteById(id);
+        tourCacheEvictor.evictAfterTourMutation(id);
     }
 
     @Override
@@ -203,6 +208,7 @@ public class TourCommandServiceImpl implements TourCommandService {
 
         schedule = tourScheduleRepository.save(schedule);
         syncScheduleChildren(schedule.getId(), request.getPickupPoints(), request.getGuideAssignments());
+        tourCacheEvictor.evictAfterTourMutation(tourId);
         return buildScheduleResponse(schedule);
     }
 
@@ -241,6 +247,7 @@ public class TourCommandServiceImpl implements TourCommandService {
 
         schedule = tourScheduleRepository.save(schedule);
         syncScheduleChildren(schedule.getId(), request.getPickupPoints(), request.getGuideAssignments());
+        tourCacheEvictor.evictAfterTourMutation(tourId);
         return buildScheduleResponse(schedule);
     }
 
@@ -259,6 +266,7 @@ public class TourCommandServiceImpl implements TourCommandService {
         }
         schedule.setStatus(targetStatus);
         schedule = tourScheduleRepository.save(schedule);
+        tourCacheEvictor.evictAfterTourMutation(tourId);
         return buildScheduleResponse(schedule);
     }
 

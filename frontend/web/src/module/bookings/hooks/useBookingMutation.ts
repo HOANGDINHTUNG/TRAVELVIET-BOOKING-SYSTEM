@@ -14,6 +14,7 @@ import type {
   BookingQuotePayload,
   BookingQuoteResult,
   BookingResponse,
+  BookingSummaryResponse,
   CreateBookingPayload,
 } from '../types/publicBooking'
 
@@ -111,11 +112,11 @@ export function useBookingDetail(id: number | null | undefined) {
 /** `GET /bookings/me` — danh sách booking của user hiện tại. */
 export function useMyBookingsQuery(
   options: Omit<
-    UseQueryOptions<BookingResponse[]>,
+    UseQueryOptions<BookingSummaryResponse[]>,
     'queryKey' | 'queryFn'
   > = {},
 ) {
-  return useQuery<BookingResponse[]>({
+  return useQuery<BookingSummaryResponse[]>({
     queryKey: publicBookingKeys.myList(),
     queryFn: () => PublicBookingsApi.listMine(),
     staleTime: 30_000,

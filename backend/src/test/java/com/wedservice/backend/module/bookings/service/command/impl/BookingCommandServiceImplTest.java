@@ -30,7 +30,7 @@ import com.wedservice.backend.module.tours.entity.Tour;
 import com.wedservice.backend.module.tours.repository.TourRepository;
 import com.wedservice.backend.module.loyalty.service.MissionTrackerService;
 import com.wedservice.backend.module.loyalty.service.UserPassportService;
-import com.wedservice.backend.module.tours.service.TourRuntimeStatsSyncService;
+import com.wedservice.backend.module.tours.event.TourStatsSyncPublisher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -81,7 +81,7 @@ class BookingCommandServiceImplTest {
     private BookingStatusHistoryRecorder bookingStatusHistoryRecorder;
 
     @Mock
-    private TourRuntimeStatsSyncService tourRuntimeStatsSyncService;
+    private TourStatsSyncPublisher tourStatsSyncPublisher;
 
     @Mock
     private UserPassportService userPassportService;
@@ -112,7 +112,7 @@ class BookingCommandServiceImplTest {
                 new BookingValidator(bookingRepository),
                 bookingPricingService,
                 bookingStatusHistoryRecorder,
-                tourRuntimeStatsSyncService,
+                tourStatsSyncPublisher,
                 userPassportService,
                 missionTrackerService,
                 orderRepository,
@@ -361,8 +361,7 @@ class BookingCommandServiceImplTest {
                 currentUserId,
                 "Booking created"
         );
-        verify(tourRuntimeStatsSyncService).syncScheduleState(22L);
-        verify(tourRuntimeStatsSyncService).syncTourBookingStats(10L);
+        verify(tourStatsSyncPublisher).requestSync(22L, 10L);
         verify(orderRepository).save(any(Order.class));
         verify(orderItemRepository).save(any());
     }
@@ -402,6 +401,8 @@ class BookingCommandServiceImplTest {
                 .id(44L)
                 .bookingCode("BK44")
                 .userId(userId)
+                .tourId(10L)
+                .scheduleId(22L)
                 .status(BookingStatus.CONFIRMED)
                 .paymentStatus(BookingPaymentStatus.PAID)
                 .finalAmount(new BigDecimal("1000"))
@@ -422,8 +423,7 @@ class BookingCommandServiceImplTest {
                 userId,
                 "Customer requested cancellation"
         );
-        verify(tourRuntimeStatsSyncService).syncScheduleState(null);
-        verify(tourRuntimeStatsSyncService).syncTourBookingStats(null);
+        verify(tourStatsSyncPublisher).requestSync(22L, 10L);
     }
 
     @Test

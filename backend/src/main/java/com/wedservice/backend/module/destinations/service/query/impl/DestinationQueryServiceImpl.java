@@ -99,11 +99,17 @@ public class DestinationQueryServiceImpl implements DestinationQueryService {
 
         Page<Destination> page = destinationRepository.findAll(builder, pageable);
         String lang = LocaleTagUtil.currentLanguageTag();
+        List<Destination> destinations = page.getContent();
         Map<Long, DestinationTranslation> byDestId = loadDestinationTranslations(
-                page.getContent().stream().map(Destination::getId).toList(),
+                destinations.stream().map(Destination::getId).toList(),
                 lang
         );
-        return PageResponse.of(page.map(d -> toPublicResponse(d, byDestId.get(d.getId()))));
+        Map<Long, Long> activeTourCountByDestId = batchCountActiveTours(destinations);
+        return PageResponse.of(page.map(d -> toPublicResponse(
+                d,
+                byDestId.get(d.getId()),
+                activeTourCountByDestId.getOrDefault(d.getId(), 0L)
+        )));
     }
 
     @Override
@@ -169,7 +175,38 @@ public class DestinationQueryServiceImpl implements DestinationQueryService {
         return org.springframework.util.StringUtils.hasText(translated) ? translated : base;
     }
 
-    private DestinationPublicResponse toPublicResponse(Destination destination, DestinationTranslation tr) {
+    private Map<Long, Long> batchCountActiveTours(List<Destination> destinations) {
+        if (destinations == null || destinations.isEmpty()) {
+            return Map.of();
+        }
+        List<Long> rootIds = destinations.stream().map(Destination::getId).filter(Objects::nonNull).toList();
+        if (rootIds.isEmpty()) {
+            return Map.of();
+        }
+        try {
+            Map<Long, Long> counts = new HashMap<>();
+            for (Object[] row : tourRepository.countActiveToursByDestinationRootIds(
+                    rootIds,
+                    TourStatus.ACTIVE.getValue()
+            )) {
+                if (row == null || row.length < 2 || row[0] == null) {
+                    continue;
+                }
+                long rootId = row[0] instanceof Number n ? n.longValue() : Long.parseLong(row[0].toString());
+                long cnt = row[1] instanceof Number num ? num.longValue() : Long.parseLong(row[1].toString());
+                counts.put(rootId, cnt);
+            }
+            return counts;
+        } catch (Exception e) {
+            return Map.of();
+        }
+    }
+
+    private DestinationPublicResponse toPublicResponse(
+            Destination destination,
+            DestinationTranslation tr,
+            long activeTourCount
+    ) {
         return DestinationPublicResponse.builder()
                 .id(destination.getId())
                 .uuid(destination.getUuid())
@@ -188,7 +225,7 @@ public class DestinationQueryServiceImpl implements DestinationQueryService {
                 .crowdLevelDefault(destination.getCrowdLevelDefault())
                 .isFeatured(destination.getIsFeatured())
                 .coverImageUrl(resolveCoverImage(destination))
-                .activeTourCount(countActiveTours(destination))
+                .activeTourCount(activeTourCount)
                 .translationKey(destination.getSlug())
                 .parentUuid(destination.getParent() != null ? destination.getParent().getUuid() : null)
                 .level(destination.getLevel())

@@ -28,6 +28,6 @@ public class AdminBookingController {
     public ApiResponse<PageResponse<BookingResponse>> searchBookings(
             @Validated BookingAdminSearchRequest request
     ) {
-        return ApiResponse.success(PageResponse.of(bookingFacade.searchAdminBookings(request)));
+        return ApiResponse.success(bookingFacade.searchAdminBookings(request));
     }
 }

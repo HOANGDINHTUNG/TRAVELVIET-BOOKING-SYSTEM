@@ -11,7 +11,6 @@ import {
   Eye,
   Loader2,
   PackageX,
-  Users,
   XCircle,
 } from 'lucide-react'
 import { handleApiError } from '../../../lib/handleApiError'
@@ -21,7 +20,7 @@ import { formatCurrencyVnd, formatDateTime } from '../../management/schedules/ut
 import BookingStatusBadge from '../components/BookingStatusBadge'
 import PaymentStatusBadge from '../components/PaymentStatusBadge'
 import { isPayable } from '../constants/bookingStatus'
-import type { BookingResponse } from '../types/publicBooking'
+import type { BookingSummaryResponse } from '../types/publicBooking'
 import { CustomerPageHero } from '../../../components/ui/CustomerPageHero/CustomerPageHero'
 import { Footer } from '../../../components/Footer/Footer'
 import './MyBookings.css'
@@ -38,7 +37,7 @@ const FILTER_LABELS: Record<StatusFilter, string> = {
   completed: 'Hoàn thành',
 }
 
-function matchesFilter(booking: BookingResponse, filter: StatusFilter): boolean {
+function matchesFilter(booking: BookingSummaryResponse, filter: StatusFilter): boolean {
   if (filter === 'all') return true
   if (filter === 'pending') {
     return (
@@ -89,12 +88,12 @@ function MyBookingsPage() {
     ]
   }, [allBookings])
 
-  function handlePay(booking: BookingResponse) {
-    if (booking.finalAmount == null) return
-    vnpayMutation.mutate({ bookingId: booking.id, amount: booking.finalAmount })
+  function handlePay(booking: BookingSummaryResponse) {
+    if (booking.totalPrice == null) return
+    vnpayMutation.mutate({ bookingId: booking.id, amount: booking.totalPrice })
   }
 
-  function handleConfirmCancel(booking: BookingResponse) {
+  function handleConfirmCancel(booking: BookingSummaryResponse) {
     cancelMutation.mutate({ id: booking.id }, { onSettled: () => setConfirmingCancelId(null) })
   }
 
@@ -196,7 +195,7 @@ function MyBookingsPage() {
 /* ─────────────────────────────────────────────────────────── */
 
 type BookingCardProps = {
-  booking: BookingResponse
+  booking: BookingSummaryResponse
   isConfirmingCancel: boolean
   isCancelling: boolean
   isPaying: boolean
@@ -212,12 +211,6 @@ function BookingCard(props: BookingCardProps) {
   const canPay = isPayable(booking.status, booking.paymentStatus)
   const canCancel = booking.status === 'pending' || booking.status === 'confirmed'
 
-  const passengerCount =
-    (booking.adults ?? 0) +
-    (booking.children ?? 0) +
-    (booking.infants ?? 0) +
-    (booking.seniors ?? 0)
-
   return (
     <article className="mybk-card">
       <div className="mybk-card__body">
@@ -230,21 +223,15 @@ function BookingCard(props: BookingCardProps) {
           </div>
 
           {/* Title */}
-          <p className="mybk-card__title">
-            {String(t('myBookings.tourLabel'))} #{booking.tourId}
-            {' · '}
-            {String(t('myBookings.scheduleLabel'))} #{booking.scheduleId}
-          </p>
+          <p className="mybk-card__title">{booking.tourTitle ?? String(t('myBookings.tourLabel'))}</p>
 
           {/* Meta */}
           <div className="mybk-card__info">
             <span className="mybk-card__info-item">
               <CalendarDays size={13} strokeWidth={2} aria-hidden="true" />
-              {formatDateTime(booking.createdAt)}
-            </span>
-            <span className="mybk-card__info-item">
-              <Users size={13} strokeWidth={2} aria-hidden="true" />
-              {passengerCount} hành khách
+              {booking.travelDate
+                ? formatDateTime(booking.travelDate)
+                : formatDateTime(booking.createdAt)}
             </span>
           </div>
         </div>
@@ -252,7 +239,7 @@ function BookingCard(props: BookingCardProps) {
         {/* Amount */}
         <div className="mybk-card__amount">
           <div className="mybk-card__amount-label">Tổng tiền</div>
-          <div className="mybk-card__amount-value">{formatCurrencyVnd(booking.finalAmount)}</div>
+          <div className="mybk-card__amount-value">{formatCurrencyVnd(booking.totalPrice)}</div>
         </div>
       </div>
 
