@@ -16,12 +16,18 @@ mysql://avnadmin:YOUR_PASSWORD@mysql-xxxxx-xxxxx.a.aivencloud.com:12345/defaultd
 
 ## Bước 2 — Render → Environment
 
+Mẫu trên Git: `backend/.env.render.example` → copy thành `.env.render` → điền secret → Render **Add from .env**.
+
 | Biến | Bắt buộc | Giá trị |
 |------|----------|---------|
 | `SPRING_PROFILES_ACTIVE` | Có | `prod` |
 | `JWT_SECRET` | Có | Chuỗi random ≥ 32 ký tự |
 | `MYSQL_SERVICE_URI` | **Có (khuyến nghị)** | Dán nguyên URI Public từ Aiven |
 | `AIVEN_DB_PASSWORD` | Có* | Password `avnadmin` (*nếu URI đã có password có thể bỏ) |
+| `AIVEN_CA_CERT_PATH` | Có | `classpath:ssl/ca.pem` |
+| `FLYWAY_ENABLED` | Khuyến nghị | `false` (sau khi đã migrate) |
+| `MINIO_ENABLED` | Khuyến nghị | `false` |
+| Health Check Path | Có | `/api/v1/live` |
 
 **Xóa** nếu còn:
 
