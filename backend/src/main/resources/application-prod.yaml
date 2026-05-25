@@ -2,7 +2,10 @@
 # Profile PROD — Render / Docker (SPRING_PROFILES_ACTIVE=prod)
 #
 # Health check Render: /api/v1/actuator/health  (KHÔNG dùng /actuator/health)
-# Biến bắt buộc trên Render: JWT_SECRET, AIVEN_DB_PASSWORD
+# Biến bắt buộc trên Render:
+#   JWT_SECRET, AIVEN_DB_PASSWORD
+#   MYSQL_SERVICE_URI (khuyến nghị) HOẶC AIVEN_DB_HOST + AIVEN_DB_PORT từ Aiven Public
+# Không có host mặc định — hostname cũ trong repo không còn trên DNS.
 # Tùy chọn: GEMINI_API_KEY, WEATHERAPI_KEY, MINIO_*, VNPAY_*, AIVEN_CA_CERT_PATH
 # =============================================================================
 
@@ -38,9 +41,9 @@ app:
       probe-timeout-ms: 30000
       remote:
         enabled: true
-        # Copy host/port từ Aiven Console → Connection information (Public)
-        host: ${AIVEN_DB_HOST:mysql-lab-mtung3365-864a.f.aivencloud.com}
-        port: ${AIVEN_DB_PORT:23132}
+        # Bắt buộc qua env — copy Public host/port hoặc dùng MYSQL_SERVICE_URI
+        host: ${AIVEN_DB_HOST:}
+        port: ${AIVEN_DB_PORT:3306}
         database: ${AIVEN_DB_DATABASE:defaultdb}
         username: ${AIVEN_DB_USER:avnadmin}
         password: ${AIVEN_DB_PASSWORD}

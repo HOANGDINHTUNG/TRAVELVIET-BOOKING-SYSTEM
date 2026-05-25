@@ -68,8 +68,8 @@ app:
       probe-timeout-ms: 8000
       remote:
         enabled: true
-        host: mysql-lab-mtung3365-864a.f.aivencloud.com
-        port: 23132
+        host: ${AIVEN_DB_HOST:}
+        port: ${AIVEN_DB_PORT:3306}
         database: defaultdb
         username: avnadmin
         password: ${AIVEN_DB_PASSWORD:}

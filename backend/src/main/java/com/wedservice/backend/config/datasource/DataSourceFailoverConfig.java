@@ -49,6 +49,12 @@ public class DataSourceFailoverConfig {
             );
         }
 
+        if (props.isPreferRemote() && remote.isEnabled()) {
+            if (!local.isEnabled()) {
+                RemoteDataSourceRequirements.requireConfiguredForProd(remote);
+            }
+        }
+
         if (props.isPreferRemote() && remote.isEnabled() && StringUtils.hasText(remote.getPassword())) {
             log.info("Probing remote database {}:{} / {} ...", remote.getHost(), remote.getPort(), remote.getDatabase());
             TcpReachabilityProbe.Result tcp = TcpReachabilityProbe.probe(remote.getHost(), remote.getPort(), 8000);
@@ -224,22 +230,36 @@ public class DataSourceFailoverConfig {
             String sqlError,
             TcpReachabilityProbe.Result tcp
     ) {
-        String networkHint = tcp.reachable()
-                ? """
-                TCP OK — port is open from this host. Likely causes:
-                - Wrong AIVEN_DB_PASSWORD on Render
-                - Wrong host/port (copy from Aiven → Connection info → set AIVEN_DB_HOST / AIVEN_DB_PORT)
-                - SSL/CA mismatch (use classpath:ssl/ca.pem or refresh CA from Aiven)
-                """
-                : """
-                TCP FAILED — Render cannot reach Aiven host:port (firewall / no public access).
-                REQUIRED on Aiven Console:
-                1) Open your MySQL service → Networking / Public access
-                2) Enable "Public internet access" (or similar)
-                3) IP allowlist: add 0.0.0.0/0 for lab, OR Render static outbound IPs (paid plan)
-                4) Wait 1–2 minutes, then Redeploy Render
-                See: backend/docs/AIVEN_PUBLIC_ACCESS.md
-                """;
+        String networkHint;
+        if (tcp.reachable()) {
+            networkHint = """
+                    TCP OK — port is open from this host. Likely causes:
+                    - Wrong AIVEN_DB_PASSWORD on Render
+                    - Wrong host/port (copy from Aiven → Connection info → set AIVEN_DB_HOST / AIVEN_DB_PORT)
+                    - SSL/CA mismatch (use classpath:ssl/ca.pem or refresh CA from Aiven)
+                    """;
+        } else if (RemoteDataSourceRequirements.isDnsFailure(tcp)) {
+            networkHint = """
+                    DNS FAILED — hostname does not resolve on Render (Name or service not known).
+                    The example host mysql-lab-mtung3365-864a.f.aivencloud.com in old docs is NOT valid in public DNS.
+                    REQUIRED:
+                    1) Aiven Console → your MySQL service → Connection information → Public
+                    2) Copy Service URI → Render env MYSQL_SERVICE_URI (best), OR Host → AIVEN_DB_HOST, Port → AIVEN_DB_PORT
+                    3) Enable Public access if the Public host only appears after enabling it
+                    4) Redeploy Render
+                    See: backend/docs/AIVEN_PUBLIC_ACCESS.md
+                    """;
+        } else {
+            networkHint = """
+                    TCP FAILED — Render cannot reach Aiven host:port (firewall / no public access).
+                    REQUIRED on Aiven Console:
+                    1) Open your MySQL service → Networking / Public access
+                    2) Enable "Public internet access" (or similar)
+                    3) IP allowlist: add 0.0.0.0/0 for lab, OR Render static outbound IPs (paid plan)
+                    4) Wait 1–2 minutes, then Redeploy Render
+                    See: backend/docs/AIVEN_PUBLIC_ACCESS.md
+                    """;
+        }
 
         return """
                 Cannot connect to Aiven from Render (prod).
@@ -248,8 +268,9 @@ public class DataSourceFailoverConfig {
                 TCP check: %s
                 
                 Render env checklist:
+                - MYSQL_SERVICE_URI = Public Service URI from Aiven (recommended)
                 - AIVEN_DB_PASSWORD = password from Aiven (Users → avnadmin)
-                - AIVEN_DB_HOST=%s  AIVEN_DB_PORT=%d  (optional overrides)
+                - AIVEN_DB_HOST=%s  AIVEN_DB_PORT=%d  (if not using MYSQL_SERVICE_URI)
                 - AIVEN_CA_CERT_PATH=classpath:ssl/ca.pem
                 """
                 .formatted(

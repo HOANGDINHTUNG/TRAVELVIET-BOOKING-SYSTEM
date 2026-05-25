@@ -9,6 +9,14 @@ The driver has not received any packets from the server.
 
 → **Render không mở được cổng TCP tới Aiven** (gần như luôn do chưa bật public access).
 
+Log kiểu:
+
+```text
+unreachable (DNS): ... Name or service not known
+```
+
+→ **Hostname sai hoặc service Aiven đã đổi/xóa.** Host mẫu `mysql-lab-mtung3365-864a.f.aivencloud.com` trong repo **không còn trên DNS** — phải copy host/URI **mới** từ Aiven Console (Public).
+
 ## Các bước trên Aiven Console
 
 1. Đăng nhập [Aiven Console](https://console.aiven.io/).
