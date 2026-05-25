@@ -39,15 +39,18 @@ spring:
       maximum-pool-size: 3
       minimum-idle: 1
   jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
       ddl-auto: none
     show-sql: false
     open-in-view: false
     properties:
       hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
         query:
           startup_check: false
         boot:
+          # false cần dialect tường minh ở trên — tránh query metadata lúc boot
           allow_jdbc_metadata_access: false
   # Flyway: bật bằng FLYWAY_ENABLED=true + xóa FlywayAutoConfiguration khỏi exclude ở trên
   flyway:
