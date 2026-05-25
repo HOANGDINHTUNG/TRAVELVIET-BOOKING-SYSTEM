@@ -1,12 +1,12 @@
 # Blueprint Render — backend API (Docker)
+# Service đang chạy: travelviet-booking-system — Dashboard → Settings → Health Check Path = /api/v1/live
 services:
   - type: web
-    name: travelviet-backend
+    name: travelviet-booking-system
     runtime: docker
     rootDir: backend
     dockerfilePath: Dockerfile
     plan: free
-    # Endpoint nhẹ (/live) — actuator/health có thể >5s hoặc DOWN khi DB chậm
     healthCheckPath: /api/v1/live
     envVars:
       - key: SPRING_PROFILES_ACTIVE

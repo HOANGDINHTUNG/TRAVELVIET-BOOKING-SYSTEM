@@ -27,7 +27,9 @@ Mẫu trên Git: `backend/.env.render.example` → copy thành `.env.render` →
 | `AIVEN_CA_CERT_PATH` | Có | `classpath:ssl/ca.pem` |
 | `FLYWAY_ENABLED` | Khuyến nghị | `false` (sau khi đã migrate) |
 | `MINIO_ENABLED` | Khuyến nghị | `false` |
-| Health Check Path | Có | `/api/v1/live` |
+| Health Check Path | Có | `/api/v1/live` (không dùng `/api/v1/actuator/health` — dễ timeout) |
+
+**Lỗi:** `Timed out ... /api/v1/actuator/health` → Settings đổi Health Check Path thành `/api/v1/live` → Save → Manual Deploy.
 
 **Xóa** nếu còn:
 

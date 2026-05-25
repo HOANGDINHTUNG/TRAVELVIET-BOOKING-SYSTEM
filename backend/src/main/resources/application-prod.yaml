@@ -1,7 +1,7 @@
 # =============================================================================
 # Profile PROD — Render / Docker (SPRING_PROFILES_ACTIVE=prod)
 #
-# Health check Render: /api/v1/live (nhe, duoi 5 giay). Actuator day du: /api/v1/actuator/health
+# Health check Render: /api/v1/live (khuyến nghị). /actuator/health prod chỉ ping (tránh timeout DB)
 # Bắt buộc: JWT_SECRET, AIVEN_DB_PASSWORD, MYSQL_SERVICE_URI (hoặc AIVEN_DB_HOST+PORT)
 # Render free 512MB — start <3 phút (lazy repo + lazy bean). Health: /api/v1/live
 # =============================================================================
@@ -121,13 +121,21 @@ management:
     web:
       exposure:
         include: health, info
+      base-path: /actuator
   endpoint:
     health:
-      show-details: when_authorized
+      show-details: never
+      show-components: never
       probes:
         enabled: true
       group:
+        # Render mặc định hay probe /actuator/health — không gồm DB (tránh Timed out)
+        default:
+          include: ping
         liveness:
           include: ping
         readiness:
-          include: readinessState, db
+          include: readinessState
+  health:
+    db:
+      enabled: false
