@@ -50,5 +50,7 @@ Active database: REMOTE (Aiven cloud)
 |-----|----------|
 | `MYSQL_SERVICE_URI=missing` | Thêm URI từ Aiven Public |
 | `DNS` / không resolve | Bật Public access trên Aiven; service phải **Running** |
+| Exit 1, không có ERROR, dừng ở Hibernate | OOM trên free 512MB — dùng commit mới (heap 256MB), hoặc nâng plan Render |
+| `No open ports detected` | App chưa start xong (Tomcat chưa listen) — thường đi kèm OOM hoặc crash trước `Started BackendApplication` |
 | `DNS` / `Name or service not known` | Host sai hoặc service Aiven đã xóa — copy lại Public host |
 | `JWT_SECRET thiếu` | Thêm `JWT_SECRET` trên Render |

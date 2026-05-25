@@ -15,6 +15,10 @@ import org.springframework.scheduling.annotation.EnableAsync;
 public class BackendApplication {
 
     public static void main(String[] args) {
+        Thread.setDefaultUncaughtExceptionHandler((thread, ex) -> {
+            System.err.println("UNCAUGHT on " + thread.getName() + ": " + ex);
+            ex.printStackTrace(System.err);
+        });
         SpringApplication.run(BackendApplication.class, args);
     }
 }

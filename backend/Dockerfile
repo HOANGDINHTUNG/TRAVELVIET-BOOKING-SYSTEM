@@ -18,7 +18,7 @@ COPY --from=build /app/target/*.jar app.jar
 COPY ca.pem ./ca.pem
 
 ENV SPRING_PROFILES_ACTIVE=prod
-# Render free tier (~512MB): giới hạn heap, thoát rõ khi OOM
-ENV JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=75.0 -XX:+ExitOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom"
+# Render free tier 512MB: heap+metaspace+native phải < 512MB (MaxRAMPercentage=75% từng gây OOM kill im lặng)
+ENV JAVA_TOOL_OPTIONS="-Xmx256m -Xms128m -XX:MaxMetaspaceSize=128m -XX:+UseSerialGC -XX:+ExitOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom"
 
 CMD ["java", "-jar", "app.jar"]
