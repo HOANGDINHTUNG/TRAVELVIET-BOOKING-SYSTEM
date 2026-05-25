@@ -18,7 +18,7 @@ COPY --from=build /app/target/*.jar app.jar
 COPY ca.pem ./ca.pem
 
 ENV SPRING_PROFILES_ACTIVE=prod
-# Render free 512MB: ~256m heap + ~140m metaspace (96m metaspace → OOM khi load Hibernate/QueryDSL)
-ENV JAVA_TOOL_OPTIONS="-Xmx256m -Xms128m -XX:MaxMetaspaceSize=140m -XX:ReservedCodeCacheSize=48m -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -XX:+ExitOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom"
+# Render free 512MB: heap 240m + metaspace 160m (lazy JPA repo giảm peak Metaspace)
+ENV JAVA_TOOL_OPTIONS="-Xmx240m -Xms128m -XX:MaxMetaspaceSize=160m -XX:ReservedCodeCacheSize=48m -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -XX:+ExitOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom"
 
 CMD ["java", "-jar", "app.jar"]

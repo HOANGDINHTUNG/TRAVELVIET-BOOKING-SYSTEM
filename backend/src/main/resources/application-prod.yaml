@@ -3,7 +3,7 @@
 #
 # Health check Render: /api/v1/live (nhe, duoi 5 giay). Actuator day du: /api/v1/actuator/health
 # Bắt buộc: JWT_SECRET, AIVEN_DB_PASSWORD, MYSQL_SERVICE_URI (hoặc AIVEN_DB_HOST+PORT)
-# Render free tier 512MB RAM — heap 256m + metaspace 140m (Dockerfile JAVA_TOOL_OPTIONS)
+# Render free 512MB — start <3 phút (lazy repo + lazy bean). Health: /api/v1/live
 # =============================================================================
 
 server:
@@ -11,11 +11,17 @@ server:
   port: ${PORT}
 
 spring:
+  main:
+    lazy-initialization: true
+  jmx:
+    enabled: false
   autoconfigure:
     exclude:
       - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
       - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
       - org.springframework.boot.actuate.autoconfigure.metrics.export.prometheus.PrometheusMetricsExportAutoConfiguration
+      - org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration
+      - io.github.resilience4j.springboot3.autoconfigure.Resilience4jAutoConfiguration
   data:
     redis:
       # Tránh placeholder thiếu từ application.yaml khi Redis autoconfig tắt
@@ -24,6 +30,9 @@ spring:
       password: ${REDIS_PASSWORD:}
       repositories:
         enabled: false
+    jpa:
+      repositories:
+        bootstrap-mode: lazy
   datasource:
     hikari:
       maximum-pool-size: 3
@@ -37,13 +46,9 @@ spring:
       hibernate:
         query:
           startup_check: false
+  # Flyway: bật bằng FLYWAY_ENABLED=true + xóa FlywayAutoConfiguration khỏi exclude ở trên
   flyway:
-    # DB Aiven đã migrate → false để start nhanh (~1–2 phút). Lần đầu hoặc đổi schema: FLYWAY_ENABLED=true
     enabled: ${FLYWAY_ENABLED:false}
-    locations: classpath:db/migration
-    baseline-on-migrate: true
-    validate-on-migrate: false
-    repair-on-migrate: false
   jackson:
     time-zone: Asia/Ho_Chi_Minh
 

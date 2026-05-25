@@ -51,7 +51,8 @@ Active database: REMOTE (Aiven cloud)
 | `MYSQL_SERVICE_URI=missing` | Thêm URI từ Aiven Public |
 | `DNS` / không resolve | Bật Public access trên Aiven; service phải **Running** |
 | Exit 1, không có ERROR, dừng ở Hibernate | OOM heap — giảm/tăng Xmx trong Dockerfile |
-| `OutOfMemoryError: Metaspace` | MaxMetaspaceSize quá thấp (cần ~140m cho app lớn), xem Dockerfile |
+| `OutOfMemoryError: Metaspace` | Tăng MaxMetaspaceSize trong Dockerfile (hiện ~160m) |
+| `Port scan timeout` / `Timed Out` | App start > vài phút — dùng commit mới (lazy repo); Health Path `/api/v1/live`; hoặc nâng plan Render |
 | `No open ports detected` | App chưa start xong (Tomcat chưa listen) — thường đi kèm OOM hoặc crash trước `Started BackendApplication` |
 | `DNS` / `Name or service not known` | Host sai hoặc service Aiven đã xóa — copy lại Public host |
 | `JWT_SECRET thiếu` | Thêm `JWT_SECRET` trên Render |

@@ -7,12 +7,14 @@ import io.github.resilience4j.timelimiter.TimeLimiter;
 import io.github.resilience4j.timelimiter.TimeLimiterConfig;
 import io.github.resilience4j.timelimiter.TimeLimiterRegistry;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.time.Duration;
 
 @Configuration
+@ConditionalOnProperty(prefix = "app.api.failover", name = "enabled", havingValue = "true")
 public class ApiProbeResilienceConfig {
 
     public static final String CB_API_PROBE = "apiReachabilityProbe";

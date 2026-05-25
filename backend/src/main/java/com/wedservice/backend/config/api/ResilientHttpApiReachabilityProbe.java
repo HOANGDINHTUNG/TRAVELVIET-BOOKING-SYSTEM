@@ -4,6 +4,7 @@ import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.timelimiter.TimeLimiter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.Callable;
@@ -17,6 +18,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Component
 @Slf4j
+@ConditionalOnProperty(prefix = "app.api.failover", name = "enabled", havingValue = "true")
 public class ResilientHttpApiReachabilityProbe {
 
     private final CircuitBreaker circuitBreaker;
