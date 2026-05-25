@@ -1,4 +1,12 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  useCallback,
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useTransition,
+} from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import {
@@ -64,6 +72,8 @@ import '../styles/ToursCatalogCards.css'
 import '../styles/ToursCatalogLayout.css'
 
 import { formatCurrencyVnd } from '../../management/schedules/utils/currency'
+import { OptimizedImage } from '../../../components/common/media/OptimizedImage'
+import { useProgressiveList } from '../../../hooks/useProgressiveList'
 
 function tourListingBadge(tour: Tour): { kind: 'deal' | 'standard' | 'esg'; label: string } {
   const esg = resolveEsgScore(tour)
@@ -98,6 +108,9 @@ function ToursPage() {
     () => parseTourCatalogFilters(searchParams),
     [searchParams],
   )
+  const deferredAppliedFilters = useDeferredValue(appliedFilters)
+  const [isNavigatingFilters, startFilterTransition] = useTransition()
+  const isFilterStale = deferredAppliedFilters !== appliedFilters
 
   useEffect(() => {
     const dock = searchDockRef.current
@@ -187,31 +200,57 @@ function ToursPage() {
 
   const filteredTours = useMemo(() => {
     const matched = tours.filter((tour) => {
-      if (!tourMatchesDeparture(tour, appliedFilters.departure)) return false
-      if (!tourMatchesTransport(tour, appliedFilters.transportTypes)) return false
+      if (!tourMatchesDeparture(tour, deferredAppliedFilters.departure)) return false
+      if (!tourMatchesTransport(tour, deferredAppliedFilters.transportTypes)) return false
       /* esgOnly đã lọc phía server khi bật toggle */
-      if (appliedFilters.tourLines.length > 0) {
-        const ok = appliedFilters.tourLines.some((line) => tourMatchesLine(tour, line))
+      if (deferredAppliedFilters.tourLines.length > 0) {
+        const ok = deferredAppliedFilters.tourLines.some((line) =>
+          tourMatchesLine(tour, line),
+        )
         if (!ok) return false
       }
-      if (!tourMatchesPrice(tour, appliedFilters.minPrice, appliedFilters.maxPrice)) {
+      if (
+        !tourMatchesPrice(
+          tour,
+          deferredAppliedFilters.minPrice,
+          deferredAppliedFilters.maxPrice,
+        )
+      ) {
         return false
       }
       return true
     })
     return sortCatalogTours(
       matched,
-      appliedFilters.sortBy,
-      appliedFilters.sortDir,
+      deferredAppliedFilters.sortBy,
+      deferredAppliedFilters.sortDir,
     )
-  }, [appliedFilters, tours])
+  }, [deferredAppliedFilters, tours])
 
   const applyFilters = useCallback(
     (next: TourCatalogUiFilters) => {
-      navigate(buildTourCatalogUrl(next))
+      startFilterTransition(() => {
+        navigate(buildTourCatalogUrl(next))
+      })
     },
     [navigate],
   )
+
+  const applySidebarFilters = useCallback(
+    (patch: Partial<TourCatalogUiFilters>) => {
+      const next = { ...draftFilters, ...patch }
+      setDraftFilters(next)
+      applyFilters(next)
+    },
+    [applyFilters, draftFilters],
+  )
+
+  const { visibleItems: visibleTours, sentinelRef: catalogSentinelRef } =
+    useProgressiveList(filteredTours, {
+      initial: 12,
+      step: 12,
+      rootMargin: '400px',
+    })
 
   const resetFilters = () => {
     applyFilters({
@@ -291,18 +330,17 @@ function ToursPage() {
             filters={draftFilters}
             tourLines={lineFacets}
             priceBounds={bounds}
-            onChange={(patch) => {
-              const next = { ...draftFilters, ...patch }
-              setDraftFilters(next)
-              applyFilters(next)
-            }}
+            onChange={applySidebarFilters}
             onReset={resetFilters}
           />
 
           <section aria-label="Kết quả tour">
             <div className="tours-vt-main-toolbar">
-              <p className="tours-vt-results-count">
+              <p
+                className={`tours-vt-results-count${isFilterStale || isNavigatingFilters ? ' is-pending' : ''}`}
+              >
                 Kết quả: <strong>{filteredTours.length}</strong> chương trình tour
+                {isFilterStale || isNavigatingFilters ? ' …' : ''}
               </p>
               <div className="tours-vt-toolbar-actions">
                 <label className="tours-vt-sort">
@@ -365,7 +403,7 @@ function ToursPage() {
                   appliedFilters.view === 'list' ? 'is-list' : 'is-grid'
                 }`}
               >
-                {filteredTours.map((tour) => {
+                {visibleTours.map((tour) => {
                   const title = translateTourField(tour, 'title', tour.title)
                   const days = translateTourField(tour, 'days', tour.days)
                   const location = translateTourField(tour, 'location', tour.location)
@@ -386,7 +424,14 @@ function ToursPage() {
                     <article className="tours-catalog-card" key={tour.id}>
                       <div className="tours-catalog-card__media">
                           {tour.image ? (
-                            <img src={tour.image} alt={title} loading="lazy" />
+                            <OptimizedImage
+                              src={tour.image}
+                              alt={title}
+                              width={480}
+                              height={640}
+                              cloudinaryWidth={640}
+                              className="tours-catalog-card__cover"
+                            />
                           ) : (
                             <div className="tours-catalog-card__empty">
                               <Image size={30} strokeWidth={1.8} aria-hidden />
@@ -491,6 +536,13 @@ function ToursPage() {
                 })}
               </div>
             )}
+            {filteredTours.length > visibleTours.length ? (
+              <div
+                ref={catalogSentinelRef}
+                className="tours-vt-catalog-sentinel"
+                aria-hidden
+              />
+            ) : null}
           </section>
         </div>
 

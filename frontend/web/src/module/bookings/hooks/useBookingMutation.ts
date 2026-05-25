@@ -119,7 +119,7 @@ export function useMyBookingsQuery(
   return useQuery<BookingSummaryResponse[]>({
     queryKey: publicBookingKeys.myList(),
     queryFn: () => PublicBookingsApi.listMine(),
-    staleTime: 30_000,
+    staleTime: 5 * 60_000,
     ...options,
   })
 }

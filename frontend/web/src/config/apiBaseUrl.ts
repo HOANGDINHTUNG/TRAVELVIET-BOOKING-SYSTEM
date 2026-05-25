@@ -7,7 +7,8 @@ import {
 } from './apiConfig'
 
 const API_HEALTH_PATH = '/system/health'
-const DEFAULT_PROBE_MS = 8_000
+/** Probe startup — ngắn hơn để không kéo dài TTI khi public API chậm. */
+const DEFAULT_PROBE_MS = 3_000
 
 let activeBaseUrl: string | null = null
 

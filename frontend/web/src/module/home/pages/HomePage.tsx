@@ -20,6 +20,7 @@ import {
   fetchHomePublicData,
   selectHome,
 } from "../store/homeSlice";
+import { LazyWhenVisible } from "../../../components/common/ux/LazyWhenVisible";
 
 function HomePage() {
   const { t } = useTranslation();
@@ -90,6 +91,20 @@ function HomePage() {
     () => tours.filter((item) => Boolean(item.image)),
     [tours],
   );
+
+  const firstHeroImage = heroTours[0]?.image;
+
+  useEffect(() => {
+    if (!firstHeroImage) return undefined;
+    const link = document.createElement("link");
+    link.rel = "preload";
+    link.as = "image";
+    link.href = firstHeroImage;
+    document.head.appendChild(link);
+    return () => {
+      document.head.removeChild(link);
+    };
+  }, [firstHeroImage]);
 
   const bannerSlides = useMemo<BannerSlide[]>(() => {
     return heroTours.slice(0, 6).map((tour) => {
@@ -186,7 +201,9 @@ function HomePage() {
         internationalTours={toursInternationalHot}
         loading={loading}
       />
-      <HomeLowerSections destinations={destinations} />
+      <LazyWhenVisible minHeight={420}>
+        <HomeLowerSections destinations={destinations} />
+      </LazyWhenVisible>
       <Footer />
     </>
   );

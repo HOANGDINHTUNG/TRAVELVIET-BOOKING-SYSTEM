@@ -37,7 +37,7 @@ export function useManagementBookingsQuery(
   return useQuery<ManagementBookingsListResult>({
     queryKey: managementBookingKeys.list(params),
     queryFn: () => ManagementBookingsApi.search(params),
-    staleTime: 30_000,
+    staleTime: 5 * 60_000,
     placeholderData: keepPreviousData,
   })
 }

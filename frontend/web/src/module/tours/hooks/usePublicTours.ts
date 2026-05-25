@@ -48,7 +48,7 @@ export function useTourListQuery(
   return useQuery<PageResponse<TourResponse>>({
     queryKey: publicTourKeys.list(merged),
     queryFn: () => PublicToursApi.search(merged),
-    staleTime: 60_000,
+    staleTime: 5 * 60_000,
     placeholderData: keepPreviousData,
     ...options,
   })
@@ -95,7 +95,7 @@ export function usePublicTourSchedulesQuery(
         : [...publicTourKeys.all, 'schedules', 'disabled'],
     queryFn: () => PublicToursApi.getSchedules(tourId as number),
     enabled: tourId != null,
-    staleTime: 30_000,
+    staleTime: 5 * 60_000,
     ...options,
   })
 }

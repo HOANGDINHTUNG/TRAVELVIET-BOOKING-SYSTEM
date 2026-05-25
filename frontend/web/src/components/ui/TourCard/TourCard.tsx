@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Clock, MapPin, PlayCircle } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
+import { OptimizedImage } from '@/components/common/media/OptimizedImage'
 import { showInfo } from '@/lib/toast'
 import { TruncatedTextTooltip } from '@/components/ui/TruncatedTextTooltip'
 import { useDisplayMoney } from '@/hooks/useDisplayMoney'
@@ -125,12 +126,13 @@ export function TourCard({
       >
         <div className="tv-tour-card__image-wrap absolute inset-x-0 top-0 h-3/4 bg-neutral-200">
           {imageUrl ? (
-            <img
+            <OptimizedImage
               src={imageUrl}
               alt=""
-              loading={priorityImage ? 'eager' : 'lazy'}
-              fetchPriority={priorityImage ? 'high' : 'low'}
-              decoding="async"
+              priority={priorityImage}
+              width={300}
+              height={300}
+              cloudinaryWidth={600}
               className="tv-tour-card__image absolute inset-0 h-full w-full"
             />
           ) : (

@@ -10,6 +10,8 @@ const UUID_SEGMENT =
 export function resolveHeaderVariant(pathname: string): HeaderVariant {
   if (pathname === '/') return 'over-hero'
   if (pathname === '/tours') return 'over-hero'
+  if (pathname === '/flights') return 'over-hero'
+  if (pathname === '/flights/search') return 'solid'
 
   if (pathname.startsWith('/tour/')) return 'solid'
 

@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState, type ComponentType } from 'react'
+import { useEffect, useMemo, useRef, useState, type ComponentType } from 'react'
+import { useVirtualizer } from '@tanstack/react-virtual'
 import { useTranslation } from 'react-i18next'
 import {
   createColumnHelper,
@@ -26,6 +27,10 @@ import { formatCurrencyVnd, formatDateTime } from '../../schedules/utils/currenc
 import type { ManagementBookingResponse } from '../types/managementBooking'
 
 const columnHelper = createColumnHelper<ManagementBookingResponse>()
+
+const ADMIN_VIRTUAL_MIN_ROWS = 20
+const ADMIN_ROW_ESTIMATE_PX = 52
+const ADMIN_ROW_OVERSCAN = 8
 
 export type BookingsDataTableProps = {
   rows: ManagementBookingResponse[]
@@ -201,6 +206,17 @@ export default function BookingsDataTable({
   })
 
   const colSpan = table.getAllLeafColumns().length + 1
+  const tableRows = table.getRowModel().rows
+  const useVirtualRows = tableRows.length >= ADMIN_VIRTUAL_MIN_ROWS
+  const scrollRef = useRef<HTMLDivElement>(null)
+
+  const rowVirtualizer = useVirtualizer({
+    count: tableRows.length,
+    getScrollElement: () => scrollRef.current,
+    estimateSize: () => ADMIN_ROW_ESTIMATE_PX,
+    overscan: ADMIN_ROW_OVERSCAN,
+    enabled: useVirtualRows && !isPending && tableRows.length > 0,
+  })
 
   const selectedBookings = useMemo(() => {
     if (!bulkSelectionEnabled) return []
@@ -346,9 +362,15 @@ export default function BookingsDataTable({
         </div>
       ) : null}
 
-      <div className="overflow-x-auto rounded-[var(--admin-radius)] border border-[var(--admin-border)] bg-[var(--admin-surface)]">
+      <div
+        ref={useVirtualRows ? scrollRef : undefined}
+        className={`overflow-x-auto rounded-[var(--admin-radius)] border border-[var(--admin-border)] bg-[var(--admin-surface)]${
+          useVirtualRows ? ' max-h-[min(70vh,640px)] overflow-y-auto' : ''
+        }`}
+        style={useVirtualRows ? { contain: 'strict' } : undefined}
+      >
         <table className="min-w-full divide-y divide-[var(--admin-border)] text-sm">
-          <thead className="bg-[color-mix(in_srgb,var(--admin-muted)_8%,var(--admin-surface))] text-[10px] uppercase tracking-wide text-[var(--admin-muted)]">
+          <thead className="sticky top-0 z-10 bg-[color-mix(in_srgb,var(--admin-muted)_8%,var(--admin-surface))] text-[10px] uppercase tracking-wide text-[var(--admin-muted)]">
             {table.getHeaderGroups().map((hg) => (
               <tr key={hg.id}>
                 {hg.headers.map((h) => (
@@ -362,7 +384,14 @@ export default function BookingsDataTable({
               </tr>
             ))}
           </thead>
-          <tbody className="divide-y divide-[var(--admin-border)]">
+          <tbody
+            className="divide-y divide-[var(--admin-border)]"
+            style={
+              useVirtualRows
+                ? { height: rowVirtualizer.getTotalSize(), position: 'relative' }
+                : undefined
+            }
+          >
             {isPending ? (
               <tr>
                 <td colSpan={colSpan} className="px-3 py-12 text-center text-[var(--admin-muted)]">
@@ -376,72 +405,143 @@ export default function BookingsDataTable({
                   {String(t('bookings.page.empty'))}
                 </td>
               </tr>
-            ) : (
-              table.getRowModel().rows.map((row) => {
-                const b = row.original
-                const canCheckIn = b.status === 'paid' || b.status === 'confirmed'
-                const canComplete = b.status === 'checked_in'
-                const canCancel = b.status === 'pending' || b.status === 'confirmed'
-                const canRefund =
-                  b.paymentStatus === 'paid' || b.paymentStatus === 'partially_refunded'
+            ) : useVirtualRows ? (
+              rowVirtualizer.getVirtualItems().map((virtualRow) => {
+                const row = tableRows[virtualRow.index]!
                 return (
-                  <tr
+                  <AdminBookingRow
                     key={row.id}
-                    className="group relative hover:bg-[color-mix(in_srgb,var(--admin-muted)_8%,var(--admin-surface))]"
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <td key={cell.id} className="px-3 py-2 align-top">
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </td>
-                    ))}
-                    <td className="relative px-3 py-2 text-right align-top">
-                      <div className="flex justify-end gap-1 opacity-100 transition md:opacity-0 md:group-hover:opacity-100">
-                        {canCheckIn ? (
-                          <IconAction
-                            icon={UserCheck}
-                            label={String(t('bookings.page.actions.checkIn'))}
-                            onClick={() => onCheckIn(b)}
-                            disabled={busy}
-                            tone="indigo"
-                          />
-                        ) : null}
-                        {canComplete ? (
-                          <IconAction
-                            icon={CheckCheck}
-                            label={String(t('bookings.page.actions.complete'))}
-                            onClick={() => onComplete(b)}
-                            disabled={busy}
-                            tone="emerald"
-                          />
-                        ) : null}
-                        {canRefund ? (
-                          <IconAction
-                            icon={Undo2}
-                            label={String(t('bookings.page.actions.refund'))}
-                            onClick={() => onRefund(b)}
-                            disabled={busy}
-                            tone="violet"
-                          />
-                        ) : null}
-                        {canCancel ? (
-                          <IconAction
-                            icon={XCircle}
-                            label={String(t('bookings.page.actions.cancel'))}
-                            onClick={() => onCancel(b)}
-                            disabled={busy}
-                            tone="rose"
-                          />
-                        ) : null}
-                      </div>
-                    </td>
-                  </tr>
+                    row={row}
+                    virtualStart={virtualRow.start}
+                    measureRef={rowVirtualizer.measureElement}
+                    dataIndex={virtualRow.index}
+                    busy={busy}
+                    onCheckIn={onCheckIn}
+                    onComplete={onComplete}
+                    onRefund={onRefund}
+                    onCancel={onCancel}
+                    t={t}
+                  />
                 )
               })
+            ) : (
+              tableRows.map((row) => (
+                <AdminBookingRow
+                  key={row.id}
+                  row={row}
+                  busy={busy}
+                  onCheckIn={onCheckIn}
+                  onComplete={onComplete}
+                  onRefund={onRefund}
+                  onCancel={onCancel}
+                  t={t}
+                />
+              ))
             )}
           </tbody>
         </table>
       </div>
     </div>
+  )
+}
+
+type AdminBookingRowProps = {
+  row: Row<ManagementBookingResponse>
+  busy: boolean
+  virtualStart?: number
+  dataIndex?: number
+  measureRef?: (element: Element | null) => void
+  onCheckIn: (booking: ManagementBookingResponse) => void
+  onComplete: (booking: ManagementBookingResponse) => void
+  onRefund: (booking: ManagementBookingResponse) => void
+  onCancel: (booking: ManagementBookingResponse) => void
+  t: ReturnType<typeof useTranslation>['t']
+}
+
+function AdminBookingRow({
+  row,
+  busy,
+  virtualStart,
+  dataIndex,
+  measureRef,
+  onCheckIn,
+  onComplete,
+  onRefund,
+  onCancel,
+  t,
+}: AdminBookingRowProps) {
+  const b = row.original
+  const canCheckIn = b.status === 'paid' || b.status === 'confirmed'
+  const canComplete = b.status === 'checked_in'
+  const canCancel = b.status === 'pending' || b.status === 'confirmed'
+  const canRefund =
+    b.paymentStatus === 'paid' || b.paymentStatus === 'partially_refunded'
+
+  return (
+    <tr
+      data-index={dataIndex}
+      ref={measureRef}
+      className="group relative hover:bg-[color-mix(in_srgb,var(--admin-muted)_8%,var(--admin-surface))]"
+      style={
+        virtualStart != null
+          ? {
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              transform: `translateY(${virtualStart}px)`,
+              display: 'table',
+              tableLayout: 'fixed',
+            }
+          : undefined
+      }
+    >
+      {row.getVisibleCells().map((cell) => (
+        <td key={cell.id} className="px-3 py-2 align-top">
+          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+        </td>
+      ))}
+      <td className="relative px-3 py-2 text-right align-top">
+        <div className="flex justify-end gap-1 opacity-100 transition md:opacity-0 md:group-hover:opacity-100">
+          {canCheckIn ? (
+            <IconAction
+              icon={UserCheck}
+              label={String(t('bookings.page.actions.checkIn'))}
+              onClick={() => onCheckIn(b)}
+              disabled={busy}
+              tone="indigo"
+            />
+          ) : null}
+          {canComplete ? (
+            <IconAction
+              icon={CheckCheck}
+              label={String(t('bookings.page.actions.complete'))}
+              onClick={() => onComplete(b)}
+              disabled={busy}
+              tone="emerald"
+            />
+          ) : null}
+          {canRefund ? (
+            <IconAction
+              icon={Undo2}
+              label={String(t('bookings.page.actions.refund'))}
+              onClick={() => onRefund(b)}
+              disabled={busy}
+              tone="violet"
+            />
+          ) : null}
+          {canCancel ? (
+            <IconAction
+              icon={XCircle}
+              label={String(t('bookings.page.actions.cancel'))}
+              onClick={() => onCancel(b)}
+              disabled={busy}
+              tone="rose"
+            />
+          ) : null}
+        </div>
+      </td>
+    </tr>
   )
 }
 

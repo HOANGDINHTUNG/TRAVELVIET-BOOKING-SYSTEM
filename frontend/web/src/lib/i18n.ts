@@ -7,6 +7,8 @@ import { homeLowerVi } from '../module/home/locales/homeLower.vi'
 import { homeLowerEn } from '../module/home/locales/homeLower.en'
 import { homePageVi } from '../module/home/locales/homePage.vi'
 import { homePageEn } from '../module/home/locales/homePage.en'
+import { flightsPageVi } from '../module/flights/locales/flightsPage.vi'
+import { flightsPageEn } from '../module/flights/locales/flightsPage.en'
 
 export const resources = {
   vi: {
@@ -576,6 +578,7 @@ export const resources = {
       },
       homePage: homePageVi,
       homeLower: homeLowerVi,
+      flightsPage: flightsPageVi,
     },
   },
   en: {
@@ -1145,6 +1148,7 @@ export const resources = {
       },
       homePage: homePageEn,
       homeLower: homeLowerEn,
+      flightsPage: flightsPageEn,
     },
   },
 } as const
