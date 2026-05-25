@@ -7,9 +7,6 @@ import org.springframework.util.StringUtils;
  */
 final class RemoteDataSourceRequirements {
 
-    /** Host mẫu cũ trong repo — không còn tồn tại trên DNS công cộng. */
-    static final String STALE_EXAMPLE_HOST = "mysql-lab-mtung3365-864a.f.aivencloud.com";
-
     private RemoteDataSourceRequirements() {
     }
 
@@ -39,7 +36,6 @@ final class RemoteDataSourceRequirements {
                             Cách A (khuyến nghị): MYSQL_SERVICE_URI = dán nguyên URI Public từ Aiven
                             Cách B: AIVEN_DB_HOST = Host Public, AIVEN_DB_PORT = Port Public (giữ AIVEN_DB_PASSWORD)
 
-                            Không dùng host cũ mysql-lab-mtung3365-864a.f.aivencloud.com (không còn trên DNS).
                             Xem: backend/docs/RENDER_ENV_CHECKLIST.md
                             """
                             : """
@@ -48,19 +44,6 @@ final class RemoteDataSourceRequirements {
                             Xem: backend/docs/RENDER_ENV_CHECKLIST.md
                             """
                     ).trim()
-            );
-        }
-        if (STALE_EXAMPLE_HOST.equalsIgnoreCase(remote.getHost().trim())) {
-            throw new IllegalStateException(
-                    """
-                    Prod (Render): AIVEN_DB_HOST vẫn là hostname mẫu cũ (%s) — domain này không tồn tại trên DNS.
-                    Mở Aiven Console → MySQL service hiện tại → Connection information → Public:
-                    - Dán MYSQL_SERVICE_URI, hoặc
-                    - Copy Host → AIVEN_DB_HOST, Port → AIVEN_DB_PORT
-                    Bật Public access nếu chưa có. Sau đó Redeploy Render.
-                    """
-                            .formatted(STALE_EXAMPLE_HOST)
-                            .trim()
             );
         }
         if (remote.getPort() <= 0 || remote.getPort() > 65535) {

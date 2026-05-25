@@ -258,12 +258,8 @@ public class DataSourceFailoverConfig {
         } else if (RemoteDataSourceRequirements.isDnsFailure(tcp)) {
             networkHint = """
                     DNS FAILED — hostname does not resolve on Render (Name or service not known).
-                    The example host mysql-lab-mtung3365-864a.f.aivencloud.com in old docs is NOT valid in public DNS.
-                    REQUIRED:
-                    1) Aiven Console → your MySQL service → Connection information → Public
-                    2) Copy Service URI → Render env MYSQL_SERVICE_URI (best), OR Host → AIVEN_DB_HOST, Port → AIVEN_DB_PORT
-                    3) Enable Public access if the Public host only appears after enabling it
-                    4) Redeploy Render
+                    Copy host/URI from Aiven Console → Connection information → Public (service must be Running).
+                    Set MYSQL_SERVICE_URI or AIVEN_DB_HOST + AIVEN_DB_PORT on Render, then redeploy.
                     See: backend/docs/AIVEN_PUBLIC_ACCESS.md
                     """;
         } else {

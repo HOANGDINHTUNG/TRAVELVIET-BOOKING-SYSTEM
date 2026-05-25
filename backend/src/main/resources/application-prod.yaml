@@ -5,7 +5,7 @@
 # Biến bắt buộc trên Render:
 #   JWT_SECRET, AIVEN_DB_PASSWORD
 #   MYSQL_SERVICE_URI (khuyến nghị) HOẶC AIVEN_DB_HOST + AIVEN_DB_PORT từ Aiven Public
-# Không có host mặc định — hostname cũ trong repo không còn trên DNS.
+# Host/URI lấy từ biến môi trường Render (Aiven Connection information → Public).
 # Tùy chọn: GEMINI_API_KEY, WEATHERAPI_KEY, MINIO_*, VNPAY_*, AIVEN_CA_CERT_PATH
 # =============================================================================
 

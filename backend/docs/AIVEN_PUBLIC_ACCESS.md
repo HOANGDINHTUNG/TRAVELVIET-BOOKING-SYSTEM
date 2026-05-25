@@ -15,7 +15,7 @@ Log kiểu:
 unreachable (DNS): ... Name or service not known
 ```
 
-→ **Hostname sai hoặc service Aiven đã đổi/xóa.** Host mẫu `mysql-lab-mtung3365-864a.f.aivencloud.com` trong repo **không còn trên DNS** — phải copy host/URI **mới** từ Aiven Console (Public).
+→ **Hostname sai hoặc service Aiven chưa Running.** Copy host/URI từ Aiven Console → Connection information → **Public**.
 
 ## Các bước trên Aiven Console
 

@@ -49,6 +49,6 @@ Active database: REMOTE (Aiven cloud)
 | Log | Cách sửa |
 |-----|----------|
 | `MYSQL_SERVICE_URI=missing` | Thêm URI từ Aiven Public |
-| `hostname mẫu cũ` | Xóa `AIVEN_DB_HOST` cũ, dùng URI mới |
+| `DNS` / không resolve | Bật Public access trên Aiven; service phải **Running** |
 | `DNS` / `Name or service not known` | Host sai hoặc service Aiven đã xóa — copy lại Public host |
 | `JWT_SECRET thiếu` | Thêm `JWT_SECRET` trên Render |
