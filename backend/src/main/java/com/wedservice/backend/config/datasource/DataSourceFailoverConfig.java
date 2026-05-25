@@ -40,6 +40,15 @@ public class DataSourceFailoverConfig {
         AppDataSourceFailoverProperties.Local local = props.getLocal();
         AppDataSourceFailoverProperties.Remote remote = props.getRemote();
 
+        if (MysqlServiceUriResolver.applyFromEnvironment(remote)) {
+            log.info(
+                    "Remote DB settings from MYSQL_SERVICE_URI / DATABASE_URL → {}:{} / {}",
+                    remote.getHost(),
+                    remote.getPort(),
+                    remote.getDatabase()
+            );
+        }
+
         if (props.isPreferRemote() && remote.isEnabled() && StringUtils.hasText(remote.getPassword())) {
             log.info("Probing remote database {}:{} / {} ...", remote.getHost(), remote.getPort(), remote.getDatabase());
             TcpReachabilityProbe.Result tcp = TcpReachabilityProbe.probe(remote.getHost(), remote.getPort(), 8000);

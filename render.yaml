@@ -14,6 +14,13 @@ services:
         generateValue: true
       - key: AIVEN_DB_PASSWORD
         sync: false
+      # Khuyến nghị: dán URI Public từ Aiven Console (ưu tiên hơn host/port mặc định trong yaml)
+      - key: MYSQL_SERVICE_URI
+        sync: false
+      - key: AIVEN_DB_HOST
+        sync: false
+      - key: AIVEN_DB_PORT
+        sync: false
       - key: AIVEN_CA_CERT_PATH
         value: classpath:ssl/ca.pem
       - key: GEMINI_API_KEY

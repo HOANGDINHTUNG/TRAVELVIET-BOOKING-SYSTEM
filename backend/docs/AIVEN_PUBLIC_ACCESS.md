@@ -40,7 +40,13 @@ The driver has not received any packets from the server.
 | `AIVEN_DB_PASSWORD` | password từ Aiven |
 | `AIVEN_CA_CERT_PATH` | `classpath:ssl/ca.pem` (mặc định) |
 
-Tùy chọn khi host/port đổi:
+**Khuyến nghị:** trên Aiven → **Connection information** → chọn **Public** → copy **Service URI** → dán vào Render:
+
+| Biến | Mô tả |
+|------|--------|
+| `MYSQL_SERVICE_URI` | URI dạng `mysql://avnadmin:...@host:port/defaultdb?ssl-mode=REQUIRED` (ghi đè host/port trong code) |
+
+Tùy chọn khi host/port đổi (nếu không dùng `MYSQL_SERVICE_URI`):
 
 | Biến | Mô tả |
 |------|--------|

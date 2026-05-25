@@ -18,7 +18,7 @@ COPY --from=build /app/target/*.jar app.jar
 COPY ca.pem ./ca.pem
 
 ENV SPRING_PROFILES_ACTIVE=prod
-# Tránh lỗi kết nối IPv6 trên một số PaaS
+# Tránh lỗi kết nối IPv6 trên một số PaaS (Render). Nếu TCP/DNS lỗi, thử bỏ biến này trên Render.
 ENV JAVA_TOOL_OPTIONS="-Djava.net.preferIPv4Stack=true"
 
 CMD ["java", "-jar", "app.jar"]
