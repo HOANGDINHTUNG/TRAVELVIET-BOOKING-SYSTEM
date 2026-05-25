@@ -43,6 +43,7 @@ import com.wedservice.backend.module.tours.repository.TourScheduleGuideRepositor
 import com.wedservice.backend.module.tours.repository.TourSchedulePickupPointRepository;
 import com.wedservice.backend.module.tours.repository.TourScheduleRepository;
 import com.wedservice.backend.module.tours.repository.TourTagRepository;
+import com.wedservice.backend.module.tours.cache.TourCacheEvictor;
 import com.wedservice.backend.module.tours.validator.TourValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -109,6 +110,9 @@ class TourCommandServiceImplTest {
     @Mock
     private TourScheduleGuideRepository tourScheduleGuideRepository;
 
+    @Mock
+    private TourCacheEvictor tourCacheEvictor;
+
     private TourCommandServiceImpl tourCommandService;
 
     @BeforeEach
@@ -129,7 +133,8 @@ class TourCommandServiceImplTest {
                 tourScheduleRepository,
                 tourSchedulePickupPointRepository,
                 tourScheduleGuideRepository,
-                new TourValidator()
+                new TourValidator(),
+                tourCacheEvictor
         );
     }
 

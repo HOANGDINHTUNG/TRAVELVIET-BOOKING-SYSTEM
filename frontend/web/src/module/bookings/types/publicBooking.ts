@@ -76,6 +76,19 @@ export type CreateBookingPayload = BookingQuotePayload & {
   specialRequests?: string
 }
 
+/** Slim list row from `GET /bookings/me` (Phase 2). */
+export type BookingSummaryResponse = {
+  id: number
+  bookingCode: string | null
+  tourTitle: string | null
+  totalPrice: number | null
+  currency: string | null
+  status: string | null
+  paymentStatus: string | null
+  createdAt: string | null
+  travelDate: string | null
+}
+
 export type BookingResponse = {
   id: number
   bookingCode: string | null

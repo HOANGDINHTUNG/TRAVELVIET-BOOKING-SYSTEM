@@ -23,7 +23,7 @@ import javax.sql.DataSource;
 
 @Configuration
 @ConditionalOnProperty(prefix = "app.datasource.failover", name = "enabled", havingValue = "true")
-@EnableConfigurationProperties(AppDataSourceFailoverProperties.class)
+@EnableConfigurationProperties({AppDataSourceFailoverProperties.class, HikariPoolProperties.class})
 public class DataSourceFailoverConfig {
 
     private static final Logger log = LoggerFactory.getLogger(DataSourceFailoverConfig.class);
@@ -32,6 +32,7 @@ public class DataSourceFailoverConfig {
     @Primary
     public DataSource dataSource(
             AppDataSourceFailoverProperties props,
+            HikariPoolProperties hikariPoolProperties,
             ResourceLoader resourceLoader,
             @Value("${AIVEN_CA_CERT_PEM:}") String inlineCaCertPem
     ) {
@@ -69,7 +70,8 @@ public class DataSourceFailoverConfig {
                         remote.getUsername(),
                         remote.getPassword(),
                         "TravelViet-Aiven",
-                        timeoutMs
+                        timeoutMs,
+                        hikariPoolProperties
                 );
             }
 
@@ -99,13 +101,15 @@ public class DataSourceFailoverConfig {
             );
         }
 
-        return connectLocalWithPortFallback(local, timeoutMs, remote.isEnabled() && !StringUtils.hasText(remote.getPassword()));
+        return connectLocalWithPortFallback(
+                local, timeoutMs, remote.isEnabled() && !StringUtils.hasText(remote.getPassword()), hikariPoolProperties);
     }
 
     private DataSource connectLocalWithPortFallback(
             AppDataSourceFailoverProperties.Local local,
             int timeoutMs,
-            boolean remoteSkippedNoPassword
+            boolean remoteSkippedNoPassword,
+            HikariPoolProperties hikariPoolProperties
     ) {
         List<String> tried = new ArrayList<>();
         for (int port : localPortCandidates(local.getPort())) {
@@ -131,7 +135,14 @@ public class DataSourceFailoverConfig {
                         local.getDatabase(),
                         localUrl
                 );
-                return createHikari(localUrl, local.getUsername(), local.getPassword(), "TravelViet-Local", timeoutMs);
+                return createHikari(
+                        localUrl,
+                        local.getUsername(),
+                        local.getPassword(),
+                        "TravelViet-Local",
+                        timeoutMs,
+                        hikariPoolProperties
+                );
             }
         }
         throw new IllegalStateException(buildLocalConnectionHelp(tried, remoteSkippedNoPassword));
@@ -260,7 +271,8 @@ public class DataSourceFailoverConfig {
             String username,
             String password,
             String poolName,
-            int connectionTimeoutMs
+            int connectionTimeoutMs,
+            HikariPoolProperties pool
     ) {
         HikariConfig config = new HikariConfig();
         config.setJdbcUrl(jdbcUrl);
@@ -268,8 +280,13 @@ public class DataSourceFailoverConfig {
         config.setPassword(password);
         config.setPoolName(poolName);
         config.setConnectionTimeout(connectionTimeoutMs);
-        config.setMaximumPoolSize(10);
-        config.setMinimumIdle(2);
+        config.setMaximumPoolSize(pool.getMaximumPoolSize());
+        config.setMinimumIdle(pool.getMinimumIdle());
+        config.setMaxLifetime(pool.getMaxLifetime());
+        config.setIdleTimeout(pool.getIdleTimeout());
+        if (pool.getLeakDetectionThreshold() > 0) {
+            config.setLeakDetectionThreshold(pool.getLeakDetectionThreshold());
+        }
         return new HikariDataSource(config);
     }
 

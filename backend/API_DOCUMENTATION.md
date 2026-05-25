@@ -222,10 +222,31 @@ GET http://localhost:8088/api/v1/system/health
   "data": {
     "service": "wedservice-backend",
     "status": "OK",
-    "time": "2026-04-14T23:00:00"
+    "time": "2026-04-14T23:00:00",
+    "pong": true,
+    "connectivity": {
+      "database": {
+        "target": "LOCAL",
+        "displayName": "Local MySQL",
+        "host": "127.0.0.1",
+        "port": 3307,
+        "database": "wedservice"
+      },
+      "api": {
+        "target": "LOCAL",
+        "displayName": "Local API (localhost)",
+        "recommendedBaseUrl": "http://localhost:8088/api/v1",
+        "publicBaseUrl": "https://travelviet-booking-system.onrender.com/api/v1",
+        "localBaseUrl": "http://localhost:8088/api/v1",
+        "publicReachable": false
+      }
+    }
   }
 }
 ```
+
+- `connectivity` chỉ có khi bật failover DB/API (profile `dev`). `api.recommendedBaseUrl` = URL nên dùng khi Render/public không phản hồi.
+- Chi tiết: `backend/docs/API_FAILOVER.md`, `backend/docs/DATABASE_FAILOVER.md`.
 
 ---
 

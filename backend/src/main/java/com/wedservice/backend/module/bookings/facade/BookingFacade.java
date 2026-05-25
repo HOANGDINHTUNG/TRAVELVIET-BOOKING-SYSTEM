@@ -5,14 +5,16 @@ import com.wedservice.backend.module.bookings.dto.request.CreateBookingRequest;
 import com.wedservice.backend.module.bookings.dto.request.BookingQuoteRequest;
 import com.wedservice.backend.module.bookings.dto.response.BookingQuoteResponse;
 import com.wedservice.backend.module.bookings.dto.response.BookingResponse;
+import com.wedservice.backend.module.bookings.dto.response.BookingSummaryResponse;
 import com.wedservice.backend.module.bookings.dto.response.BookingStatusHistoryResponse;
 import com.wedservice.backend.module.bookings.service.command.BookingCommandService;
 import com.wedservice.backend.module.bookings.service.BookingPricingService;
 import com.wedservice.backend.module.bookings.service.query.BookingQueryService;
+import com.wedservice.backend.common.response.PageResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Component
@@ -36,11 +38,15 @@ public class BookingFacade {
         return bookingQueryService.getBooking(id);
     }
 
-    public List<BookingResponse> getMyBookings() {
+    public List<BookingSummaryResponse> getMyBookings() {
         return bookingQueryService.getMyBookings();
     }
 
-    public Page<BookingResponse> searchAdminBookings(BookingAdminSearchRequest request) {
+    public List<BookingSummaryResponse> getMyBookings(Integer size, LocalDateTime cursorCreatedAt, Long cursorId) {
+        return bookingQueryService.getMyBookings(size, cursorCreatedAt, cursorId);
+    }
+
+    public PageResponse<BookingResponse> searchAdminBookings(BookingAdminSearchRequest request) {
         return bookingQueryService.searchAdminBookings(request);
     }
 

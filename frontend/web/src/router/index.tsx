@@ -95,6 +95,12 @@ const lazyMyBookingsPage = lazy(
 const lazyServiceHubPage = lazy(
   () => import("../module/services/pages/ServiceHubPage"),
 );
+const lazyFlightsPage = lazy(
+  () => import("../module/flights/pages/FlightsPage"),
+);
+const lazyFlightSearchResultsPage = lazy(
+  () => import("../module/flights/pages/FlightSearchResultsPage"),
+);
 const lazyManagementBookingsPage = lazy(
   () => import("../module/management/bookings/pages/ManagementBookingsPage"),
 );
@@ -130,7 +136,11 @@ const router = createBrowserRouter([
       },
       {
         path: "flights",
-        element: withSuspense(createElement(lazyServiceHubPage)),
+        element: withSuspense(createElement(lazyFlightsPage)),
+      },
+      {
+        path: "flights/search",
+        element: withSuspense(createElement(lazyFlightSearchResultsPage)),
       },
       {
         path: "hotels",

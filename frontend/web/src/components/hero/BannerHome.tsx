@@ -1,8 +1,9 @@
-import { useRef, useLayoutEffect, type FC } from "react";
+import { useRef, useEffect, type FC } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { scheduleIdleTask } from "@/utils/scheduleIdle";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -54,9 +55,10 @@ const BannerHome: FC<BannerHomeProps> = ({
 
   const slides = rawSlides.slice(0, maxSlides).filter((s) => !!s.image);
 
-  useLayoutEffect(() => {
-    if (!slides.length) return;
+  useEffect(() => {
+    if (!slides.length) return undefined;
 
+    return scheduleIdleTask(() => {
     const demoEl = demoRef.current;
     const demoCardsEl = demoCardsRef.current;
     const slideNumbersEl = slideNumbersRef.current;
@@ -571,6 +573,7 @@ const BannerHome: FC<BannerHomeProps> = ({
       isCancelled = true;
       ctx.revert();
     };
+    }, { timeout: 2_000 });
   }, [slides, navigate, resolvedCtaLabel]);
 
   return (

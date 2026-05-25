@@ -7,6 +7,7 @@ import com.wedservice.backend.module.ai.dto.AiDataResult;
 import com.wedservice.backend.module.ai.dto.IntentResult;
 import com.wedservice.backend.module.ai.enums.ChatIntent;
 import com.wedservice.backend.module.bookings.dto.response.BookingResponse;
+import com.wedservice.backend.module.bookings.dto.response.BookingSummaryResponse;
 import com.wedservice.backend.module.bookings.service.query.BookingQueryService;
 import com.wedservice.backend.module.destinations.dto.request.DestinationSearchRequest;
 import com.wedservice.backend.module.destinations.dto.response.DestinationPublicResponse;
@@ -157,17 +158,23 @@ public class AiDataProvider {
         }
 
         try {
-            List<BookingResponse> bookings;
             if (intentResult.getId() != null) {
-                bookings = List.of(bookingQueryService.getBooking(intentResult.getId()));
-            } else {
-                bookings = bookingQueryService.getMyBookings();
-                if (StringUtils.hasText(intentResult.getTrackingCode())) {
-                    String code = intentResult.getTrackingCode();
-                    bookings = bookings.stream()
-                            .filter(booking -> code.equalsIgnoreCase(booking.getBookingCode()))
-                            .toList();
-                }
+                BookingResponse booking = bookingQueryService.getBooking(intentResult.getId());
+                String context = formatBooking(booking);
+                return AiDataResult.found(
+                        context,
+                        suggestionsFor(ChatIntent.BOOKING_LOOKUP),
+                        List.of(bookingRelatedItem(booking)),
+                        bookingFallback(List.of(booking))
+                );
+            }
+
+            List<BookingSummaryResponse> bookings = bookingQueryService.getMyBookings();
+            if (StringUtils.hasText(intentResult.getTrackingCode())) {
+                String code = intentResult.getTrackingCode();
+                bookings = bookings.stream()
+                        .filter(booking -> code.equalsIgnoreCase(booking.getBookingCode()))
+                        .toList();
             }
 
             bookings = bookings.stream()
@@ -183,14 +190,14 @@ public class AiDataProvider {
             }
 
             String context = bookings.stream()
-                    .map(this::formatBooking)
+                    .map(this::formatBookingSummary)
                     .reduce((left, right) -> left + "\n-------------------------\n" + right)
                     .orElse("");
             return AiDataResult.found(
                     context,
                     suggestionsFor(ChatIntent.BOOKING_LOOKUP),
-                    bookings.stream().limit(AI_CARD_LIMIT).map(this::bookingRelatedItem).toList(),
-                    bookingFallback(bookings)
+                    bookings.stream().limit(AI_CARD_LIMIT).map(this::bookingSummaryRelatedItem).toList(),
+                    bookingSummaryFallback(bookings)
             );
         } catch (UnauthorizedException e) {
             return AiDataResult.noData(AiChatMessages.LOGIN_REQUIRED, suggestionsFor(ChatIntent.BOOKING_LOOKUP));
@@ -267,6 +274,19 @@ public class AiDataProvider {
                 .build();
     }
 
+    private AiRelatedItem bookingSummaryRelatedItem(BookingSummaryResponse booking) {
+        String id = booking.getId() == null ? null : booking.getId().toString();
+        return AiRelatedItem.builder()
+                .type("BOOKING")
+                .id(id)
+                .title("Booking " + safe(booking.getBookingCode()))
+                .subtitle(safe(booking.getTourTitle()))
+                .description("Trạng thái: " + safe(booking.getStatus()))
+                .detailUrl(id == null ? null : "/bookings/" + id)
+                .meta(money(booking.getTotalPrice(), booking.getCurrency()))
+                .build();
+    }
+
     private String tourFallback(List<TourResponse> tours) {
         TourResponse first = tours.get(0);
         String opening = tours.size() == 1
@@ -286,6 +306,17 @@ public class AiDataProvider {
         return opening + " Gợi ý đầu tiên là " + safe(first.getName())
                 + joinPrefix(", ", joinNonBlank(first.getProvince(), first.getRegion()))
                 + ". Bạn có thể mở thẻ bên dưới để xem ảnh và thông tin chi tiết.";
+    }
+
+    private String bookingSummaryFallback(List<BookingSummaryResponse> bookings) {
+        BookingSummaryResponse first = bookings.get(0);
+        String opening = bookings.size() == 1
+                ? "Mình tìm thấy booking của bạn."
+                : "Mình tìm thấy " + bookings.size() + " booking của bạn.";
+        return opening + " Booking gần nhất là " + safe(first.getBookingCode())
+                + ", tour " + safe(first.getTourTitle())
+                + ", trạng thái " + safe(first.getStatus())
+                + ", tổng " + money(first.getTotalPrice(), first.getCurrency()) + ".";
     }
 
     private String bookingFallback(List<BookingResponse> bookings) {
@@ -367,6 +398,28 @@ public class AiDataProvider {
                 destination.getCrowdLevelDefault() == null ? AiChatMessages.UNKNOWN_VALUE : destination.getCrowdLevelDefault(),
                 Boolean.TRUE.equals(destination.getIsFeatured()) ? "Có" : "Không",
                 destination.getActiveTourCount() == null ? AiChatMessages.UNKNOWN_VALUE : destination.getActiveTourCount()
+        );
+    }
+
+    private String formatBookingSummary(BookingSummaryResponse booking) {
+        return """
+                Mã booking: %s
+                Tour: %s
+                Trạng thái: %s
+                Tổng tiền: %s
+                Ngày đi: %s
+                Ngày tạo: %s
+                """.formatted(
+                safe(booking.getBookingCode()),
+                safe(booking.getTourTitle()),
+                safe(booking.getStatus()),
+                money(booking.getTotalPrice(), booking.getCurrency()),
+                booking.getTravelDate() == null
+                        ? AiChatMessages.UNKNOWN_VALUE
+                        : booking.getTravelDate().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+                booking.getCreatedAt() == null
+                        ? AiChatMessages.UNKNOWN_VALUE
+                        : booking.getCreatedAt().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
         );
     }
 

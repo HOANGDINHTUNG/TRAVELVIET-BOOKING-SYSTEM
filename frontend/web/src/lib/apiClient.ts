@@ -25,15 +25,25 @@ import {
   LANGUAGE_MODES,
   type LanguageMode,
 } from '../constants/preferences'
-import { resolveApiBaseUrl } from '../config/apiConfig'
+import {
+  getApiBaseUrl,
+  shouldUseApiFailover,
+  switchToLocalApiBaseUrl,
+} from '../config/apiBaseUrl'
+import { isLocalApiBaseUrl } from '../config/apiConfig'
 
-export const API_BASE_URL = resolveApiBaseUrl()
+export { getApiBaseUrl } from '../config/apiBaseUrl'
 
 type RetryableRequestConfig = InternalAxiosRequestConfig & {
   _retry?: boolean
+  _failoverRetry?: boolean
 }
 
 let refreshPromise: Promise<AuthResponse> | null = null
+
+function syncClientBaseUrl(): void {
+  apiClient.defaults.baseURL = `${getApiBaseUrl()}/`
+}
 
 function readAccessTokenPreferLocalStorage(): string | null {
   if (typeof window === 'undefined') return null
@@ -69,14 +79,19 @@ export function getAcceptLanguageHeaderValue(): string {
 }
 
 export const apiClient = axios.create({
-  baseURL: `${API_BASE_URL}/`,
+  baseURL: `${getApiBaseUrl()}/`,
   timeout: 15_000,
   headers: {
     'Content-Type': 'application/json',
   },
 })
 
+export function applyApiClientBaseUrl(): void {
+  syncClientBaseUrl()
+}
+
 apiClient.interceptors.request.use((config) => {
+  config.baseURL = `${getApiBaseUrl()}/`
   const token = readAccessTokenPreferLocalStorage()
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
@@ -99,7 +114,7 @@ async function refreshAccessToken(): Promise<AuthResponse> {
   }
 
   const response = await axios.post<ApiResponse<AuthResponse>>(
-    `${API_BASE_URL}/auth/refresh`,
+    `${getApiBaseUrl()}/auth/refresh`,
     { refreshToken },
     {
       headers: { 'Content-Type': 'application/json' },
@@ -144,9 +159,39 @@ function unwrapSuccessResponseData<T>(response: AxiosResponse<T>): AxiosResponse
   }
 }
 
+function isNetworkFailoverCandidate(error: unknown): boolean {
+  if (!isAxiosError(error)) return false
+  if (error.response) return false
+  const code = error.code
+  return (
+    code === 'ERR_NETWORK' ||
+    code === 'ECONNABORTED' ||
+    code === 'ETIMEDOUT' ||
+    error.message === 'Network Error'
+  )
+}
+
 apiClient.interceptors.response.use(
   (response) => unwrapSuccessResponseData(response),
   async (error: unknown) => {
+    const originalRequest = isAxiosError(error)
+      ? (error.config as RetryableRequestConfig | undefined)
+      : undefined
+
+    if (
+      shouldUseApiFailover() &&
+      isNetworkFailoverCandidate(error) &&
+      originalRequest &&
+      !originalRequest._failoverRetry &&
+      !isLocalApiBaseUrl(getApiBaseUrl())
+    ) {
+      originalRequest._failoverRetry = true
+      switchToLocalApiBaseUrl()
+      syncClientBaseUrl()
+      const retryResponse = await apiClient(originalRequest)
+      return unwrapSuccessResponseData(retryResponse)
+    }
+
     if (!isAxiosError(error) || error.response?.status !== 401) {
       if (isAxiosError(error)) {
         return Promise.reject(ApiClientError.fromAxiosError(error))
@@ -154,7 +199,6 @@ apiClient.interceptors.response.use(
       return Promise.reject(error)
     }
 
-    const originalRequest = error.config as RetryableRequestConfig | undefined
     const requestUrl = originalRequest?.url ?? ''
 
     if (

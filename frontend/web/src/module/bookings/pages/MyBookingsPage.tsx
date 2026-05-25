@@ -1,8 +1,6 @@
-import { useMemo, useState } from 'react'
-import type { CSSProperties } from 'react'
+import { useDeferredValue, useMemo, useState, useTransition } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { AnimatePresence, motion } from 'motion/react'
 import {
   Bookmark,
   CalendarDays,
@@ -11,7 +9,6 @@ import {
   Eye,
   Loader2,
   PackageX,
-  Users,
   XCircle,
 } from 'lucide-react'
 import { handleApiError } from '../../../lib/handleApiError'
@@ -21,9 +18,10 @@ import { formatCurrencyVnd, formatDateTime } from '../../management/schedules/ut
 import BookingStatusBadge from '../components/BookingStatusBadge'
 import PaymentStatusBadge from '../components/PaymentStatusBadge'
 import { isPayable } from '../constants/bookingStatus'
-import type { BookingResponse } from '../types/publicBooking'
+import type { BookingSummaryResponse } from '../types/publicBooking'
 import { CustomerPageHero } from '../../../components/ui/CustomerPageHero/CustomerPageHero'
 import { Footer } from '../../../components/Footer/Footer'
+import { VirtualScrollList } from '../../../components/common/virtual/VirtualScrollList'
 import './MyBookings.css'
 
 type StatusFilter = 'all' | 'pending' | 'paid' | 'cancelled' | 'completed'
@@ -38,7 +36,10 @@ const FILTER_LABELS: Record<StatusFilter, string> = {
   completed: 'Hoàn thành',
 }
 
-function matchesFilter(booking: BookingResponse, filter: StatusFilter): boolean {
+/** Chiều cao ước lượng mỗi thẻ booking (px) cho virtualizer. */
+const BOOKING_CARD_ESTIMATE_PX = 196
+
+function matchesFilter(booking: BookingSummaryResponse, filter: StatusFilter): boolean {
   if (filter === 'all') return true
   if (filter === 'pending') {
     return (
@@ -60,6 +61,8 @@ function MyBookingsPage() {
   const vnpayMutation = useVnpayCheckout()
 
   const [filter, setFilter] = useState<StatusFilter>('all')
+  const deferredFilter = useDeferredValue(filter)
+  const [isFilterPending, startFilterTransition] = useTransition()
   const [confirmingCancelId, setConfirmingCancelId] = useState<number | null>(null)
 
   const allBookings = useMemo(() => query.data ?? [], [query.data])
@@ -71,8 +74,10 @@ function MyBookingsPage() {
         const bd = b.createdAt ? new Date(b.createdAt).getTime() : 0
         return bd - ad
       })
-      .filter((b) => matchesFilter(b, filter))
-  }, [allBookings, filter])
+      .filter((b) => matchesFilter(b, deferredFilter))
+  }, [allBookings, deferredFilter])
+
+  const isStaleFilter = filter !== deferredFilter
 
   const heroMetrics = useMemo(() => {
     const total = allBookings.length
@@ -89,13 +94,17 @@ function MyBookingsPage() {
     ]
   }, [allBookings])
 
-  function handlePay(booking: BookingResponse) {
-    if (booking.finalAmount == null) return
-    vnpayMutation.mutate({ bookingId: booking.id, amount: booking.finalAmount })
+  function handlePay(booking: BookingSummaryResponse) {
+    if (booking.totalPrice == null) return
+    vnpayMutation.mutate({ bookingId: booking.id, amount: booking.totalPrice })
   }
 
-  function handleConfirmCancel(booking: BookingResponse) {
+  function handleConfirmCancel(booking: BookingSummaryResponse) {
     cancelMutation.mutate({ id: booking.id }, { onSettled: () => setConfirmingCancelId(null) })
+  }
+
+  function handleFilterChange(next: StatusFilter) {
+    startFilterTransition(() => setFilter(next))
   }
 
   return (
@@ -110,25 +119,27 @@ function MyBookingsPage() {
 
       <div className="mybk-page">
         <div className="mybk-inner">
-          {/* Filter bar */}
           <div className="mybk-filters" role="toolbar" aria-label="Lọc theo trạng thái">
             {FILTER_OPTIONS.map((option) => (
               <button
                 key={option}
                 type="button"
                 className={`mybk-filter-chip${option === filter ? ' is-active' : ''}`}
-                onClick={() => setFilter(option)}
+                onClick={() => handleFilterChange(option)}
                 aria-pressed={option === filter}
               >
                 {FILTER_LABELS[option]}
               </button>
             ))}
-            <span className="mybk-filter-count" aria-live="polite">
+            <span
+              className={`mybk-filter-count${isStaleFilter || isFilterPending ? ' is-pending' : ''}`}
+              aria-live="polite"
+            >
               {bookings.length} kết quả
+              {isStaleFilter || isFilterPending ? ' …' : ''}
             </span>
           </div>
 
-          {/* Content */}
           {query.isPending ? (
             <div className="mybk-state" role="status" aria-live="polite">
               <span className="mybk-spinner" aria-hidden="true" />
@@ -149,41 +160,36 @@ function MyBookingsPage() {
               <p className="mybk-state__desc">{String(t('myBookings.empty'))}</p>
             </div>
           ) : (
-            <ul className="flex flex-col gap-3" aria-label="Danh sách chuyến đi">
-              <AnimatePresence initial={false}>
-                {bookings.map((booking, index) => (
-                  <motion.li
-                    key={booking.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -6 }}
-                    transition={{
-                      duration: 0.28,
-                      delay: Math.min(index, 8) * 0.04,
-                      ease: [0.16, 1, 0.3, 1],
-                    }}
-                    style={{ '--card-idx': index } as CSSProperties}
-                  >
-                    <BookingCard
-                      booking={booking}
-                      isConfirmingCancel={confirmingCancelId === booking.id}
-                      onRequestCancel={() => setConfirmingCancelId(booking.id)}
-                      onCancelCancel={() => setConfirmingCancelId(null)}
-                      onConfirmCancel={() => handleConfirmCancel(booking)}
-                      isCancelling={
-                        cancelMutation.isPending &&
-                        cancelMutation.variables?.id === booking.id
-                      }
-                      onPay={() => handlePay(booking)}
-                      isPaying={
-                        vnpayMutation.isPending &&
-                        vnpayMutation.variables?.bookingId === booking.id
-                      }
-                    />
-                  </motion.li>
-                ))}
-              </AnimatePresence>
-            </ul>
+            <VirtualScrollList
+              items={bookings}
+              estimateSize={BOOKING_CARD_ESTIMATE_PX}
+              overscan={4}
+              getItemKey={(booking) => booking.id}
+              className="mybk-virtual-list"
+              style={{ maxHeight: 'min(72vh, 720px)' }}
+              role="list"
+              aria-label="Danh sách chuyến đi"
+              renderItem={(booking) => (
+                <div className="mybk-virtual-item" role="listitem">
+                  <BookingCard
+                    booking={booking}
+                    isConfirmingCancel={confirmingCancelId === booking.id}
+                    onRequestCancel={() => setConfirmingCancelId(booking.id)}
+                    onCancelCancel={() => setConfirmingCancelId(null)}
+                    onConfirmCancel={() => handleConfirmCancel(booking)}
+                    isCancelling={
+                      cancelMutation.isPending &&
+                      cancelMutation.variables?.id === booking.id
+                    }
+                    onPay={() => handlePay(booking)}
+                    isPaying={
+                      vnpayMutation.isPending &&
+                      vnpayMutation.variables?.bookingId === booking.id
+                    }
+                  />
+                </div>
+              )}
+            />
           )}
         </div>
       </div>
@@ -193,10 +199,8 @@ function MyBookingsPage() {
   )
 }
 
-/* ─────────────────────────────────────────────────────────── */
-
 type BookingCardProps = {
-  booking: BookingResponse
+  booking: BookingSummaryResponse
   isConfirmingCancel: boolean
   isCancelling: boolean
   isPaying: boolean
@@ -212,51 +216,34 @@ function BookingCard(props: BookingCardProps) {
   const canPay = isPayable(booking.status, booking.paymentStatus)
   const canCancel = booking.status === 'pending' || booking.status === 'confirmed'
 
-  const passengerCount =
-    (booking.adults ?? 0) +
-    (booking.children ?? 0) +
-    (booking.infants ?? 0) +
-    (booking.seniors ?? 0)
-
   return (
     <article className="mybk-card">
       <div className="mybk-card__body">
         <div className="mybk-card__left">
-          {/* Code + badges */}
           <div className="mybk-card__meta-row">
             <span className="mybk-card__code">{booking.bookingCode ?? `#${booking.id}`}</span>
             <BookingStatusBadge status={booking.status} />
             <PaymentStatusBadge status={booking.paymentStatus} />
           </div>
 
-          {/* Title */}
-          <p className="mybk-card__title">
-            {String(t('myBookings.tourLabel'))} #{booking.tourId}
-            {' · '}
-            {String(t('myBookings.scheduleLabel'))} #{booking.scheduleId}
-          </p>
+          <p className="mybk-card__title">{booking.tourTitle ?? String(t('myBookings.tourLabel'))}</p>
 
-          {/* Meta */}
           <div className="mybk-card__info">
             <span className="mybk-card__info-item">
               <CalendarDays size={13} strokeWidth={2} aria-hidden="true" />
-              {formatDateTime(booking.createdAt)}
-            </span>
-            <span className="mybk-card__info-item">
-              <Users size={13} strokeWidth={2} aria-hidden="true" />
-              {passengerCount} hành khách
+              {booking.travelDate
+                ? formatDateTime(booking.travelDate)
+                : formatDateTime(booking.createdAt)}
             </span>
           </div>
         </div>
 
-        {/* Amount */}
         <div className="mybk-card__amount">
           <div className="mybk-card__amount-label">Tổng tiền</div>
-          <div className="mybk-card__amount-value">{formatCurrencyVnd(booking.finalAmount)}</div>
+          <div className="mybk-card__amount-value">{formatCurrencyVnd(booking.totalPrice)}</div>
         </div>
       </div>
 
-      {/* Footer actions */}
       <div className="mybk-card__footer">
         <Link
           to={`/booking-confirmation/${booking.id}`}

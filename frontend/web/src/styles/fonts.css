@@ -1,0 +1,18 @@
+/**
+ * Self-hosted fonts (font-display: swap trong gói @fontface).
+ * Thay thế Google Fonts CDN — giảm chuỗi phụ thuộc CRP.
+ */
+@import '@fontsource/oswald/400.css';
+@import '@fontsource/oswald/500.css';
+@import '@fontsource/oswald/600.css';
+@import '@fontsource/oswald/700.css';
+@import '@fontsource/nunito-sans/300.css';
+@import '@fontsource/nunito-sans/400.css';
+@import '@fontsource/nunito-sans/600.css';
+@import '@fontsource/nunito-sans/700.css';
+@import '@fontsource/nunito-sans/800.css';
+
+:root {
+  --font-display: 'Oswald', system-ui, sans-serif;
+  --font-body: 'Nunito Sans', system-ui, sans-serif;
+}

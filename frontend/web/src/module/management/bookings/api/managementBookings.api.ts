@@ -1,7 +1,10 @@
 import { apiClient } from '../../../../lib/apiClient'
 import { ApiClientError, type PageResponse } from '../../../../types/api'
 import { PublicBookingsApi } from '../../../bookings/api/publicBookings.api'
-import type { BookingResponse } from '../../../bookings/types/publicBooking'
+import type {
+  BookingResponse,
+  BookingSummaryResponse,
+} from '../../../bookings/types/publicBooking'
 import type {
   CreateRefundPayload,
   ManagementBookingResponse,
@@ -26,6 +29,45 @@ function toQueryParams(
 /**
  * Quy ước hợp nhất kết quả list giữa "page" và "array".
  */
+/** Fallback `GET /bookings/me` trả summary — map tối thiểu cho bảng admin. */
+function summaryAsManagementRow(
+  row: BookingSummaryResponse,
+): ManagementBookingResponse {
+  return {
+    id: row.id,
+    bookingCode: row.bookingCode,
+    orderId: null,
+    tourId: 0,
+    scheduleId: 0,
+    status: row.status,
+    paymentStatus: row.paymentStatus,
+    contactName: null,
+    contactPhone: null,
+    contactEmail: null,
+    adults: null,
+    children: null,
+    infants: null,
+    seniors: null,
+    subtotalAmount: null,
+    discountAmount: null,
+    voucherDiscountAmount: null,
+    loyaltyDiscountAmount: null,
+    addonAmount: null,
+    taxAmount: null,
+    finalAmount: row.totalPrice,
+    voucherId: null,
+    comboId: null,
+    currency: row.currency,
+    bookingSource: null,
+    specialRequests: null,
+    cancelReason: null,
+    cancelledAt: null,
+    completedAt: null,
+    createdAt: row.createdAt,
+    updatedAt: null,
+  }
+}
+
 function toPage<T>(input: PageResponse<T> | T[]): PageResponse<T> {
   if (Array.isArray(input)) {
     return {
@@ -71,7 +113,8 @@ export const ManagementBookingsApi = {
         (error.httpStatus === 404 || error.httpStatus === 405)
       if (!isNotFound) throw error
       const fallbackList = await PublicBookingsApi.listMine()
-      return { page: toPage(fallbackList), fallback: true }
+      const mapped = fallbackList.map(summaryAsManagementRow)
+      return { page: toPage(mapped), fallback: true }
     }
   },
 

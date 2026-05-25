@@ -88,7 +88,17 @@ Active database: LOCAL (fallback) — ...
 DB_FAILOVER_ENABLED=false
 ```
 
+Hoặc:
+
+```properties
+DB_PREFER_REMOTE=false
+```
+
 Hoặc không set `AIVEN_DB_PASSWORD` (backend bỏ qua remote và chỉ dùng local).
+
+## API public (Render) ↔ localhost
+
+Xem **`API_FAILOVER.md`** — probe API Render lúc start; `GET /system/health` trả `connectivity.api.recommendedBaseUrl`.
 
 ## Chỉ dùng cloud (không fallback)
 

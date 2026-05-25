@@ -33,12 +33,15 @@ import com.wedservice.backend.module.tours.entity.GuideTranslation;
 import com.wedservice.backend.module.tours.entity.Tag;
 import com.wedservice.backend.module.tours.entity.TourChecklistItem;
 import com.wedservice.backend.module.tours.entity.Tour;
+import com.wedservice.backend.module.tours.entity.TourMedia;
 import com.wedservice.backend.module.tours.entity.TourSeasonality;
+import com.wedservice.backend.module.tours.entity.TourTag;
 import com.wedservice.backend.module.tours.entity.TourComboPackageLink;
 import com.wedservice.backend.module.tours.entity.TourDepartureHub;
 import com.wedservice.backend.module.tours.entity.TourInclusionFlags;
 import com.wedservice.backend.module.tours.entity.TourSchedule;
 import com.wedservice.backend.module.tours.entity.TourScheduleGuide;
+import com.wedservice.backend.module.tours.entity.TourSchedulePickupPoint;
 import com.wedservice.backend.module.tours.entity.TourScheduleStatus;
 import com.wedservice.backend.module.tours.entity.TourStatus;
 import com.wedservice.backend.module.tours.entity.TourTranslation;
@@ -84,6 +87,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 @Slf4j
@@ -107,6 +111,9 @@ public class TourQueryServiceImpl implements TourQueryService {
             TourScheduleStatus.DEPARTED,
             TourScheduleStatus.COMPLETED
     );
+    /** List cards: cap gallery payload without changing detail API shape. */
+    private static final int LIST_MEDIA_CAP = 3;
+    private static final int LIST_TAGS_CAP = 8;
 
     private final TourRepository tourRepository;
     private final CancellationPolicyRepository cancellationPolicyRepository;
@@ -265,28 +272,45 @@ public class TourQueryServiceImpl implements TourQueryService {
 
         Page<Tour> page = tourRepository.findAll(builder, pr);
 
+        List<Tour> content = page.getContent();
+        List<Long> tourIds = content.stream().map(Tour::getId).toList();
+        Map<Long, List<TourMediaResponse>> mediaByTour = batchLoadListMediaByTourIds(tourIds);
+        Map<Long, List<TagResponse>> tagsByTour = batchLoadTagsByTourIds(tourIds);
+
         if (publicOnly) {
             String lang = LocaleTagUtil.currentLanguageTag();
-            List<Long> tourIds = page.getContent().stream().map(Tour::getId).toList();
             Map<Long, TourTranslation> primaryMap = loadTourTranslationsMap(tourIds, lang);
             Map<Long, TourTranslation> viMap =
                     "vi".equals(lang) ? primaryMap : loadTourTranslationsMap(tourIds, "vi");
-            List<TourResponse> rows = page.getContent().stream()
+            List<TourResponse> rows = content.stream()
                     .map(t -> buildSearchListRow(
                             t,
                             tourTranslationMergeHelper.merge(
                                     primaryMap.get(t.getId()),
                                     viMap.get(t.getId()),
-                                    t)))
+                                    t),
+                            mediaByTour.getOrDefault(t.getId(), List.of()),
+                            tagsByTour.getOrDefault(t.getId(), List.of())))
                     .toList();
             enrichPublicListRows(rows);
             return new PageImpl<>(rows, pr, page.getTotalElements());
         }
 
-        return page.map(t -> buildSearchListRow(t, tourTranslationMergeHelper.merge(null, null, t)));
+        List<TourResponse> adminRows = content.stream()
+                .map(t -> buildSearchListRow(
+                        t,
+                        tourTranslationMergeHelper.merge(null, null, t),
+                        mediaByTour.getOrDefault(t.getId(), List.of()),
+                        tagsByTour.getOrDefault(t.getId(), List.of())))
+                .toList();
+        return new PageImpl<>(adminRows, pr, page.getTotalElements());
     }
 
     @Override
+    @Cacheable(
+            value = "tour-details",
+            key = "#id + '_' + T(org.springframework.context.i18n.LocaleContextHolder).getLocale().toLanguageTag()"
+    )
     @Transactional(readOnly = true)
     public TourResponse getTour(Long id) {
         try {
@@ -325,11 +349,11 @@ public class TourQueryServiceImpl implements TourQueryService {
     public List<TourScheduleResponse> getTourSchedules(Long tourId) {
         try {
             findActiveTour(tourId);
-            return tourScheduleRepository.findByTourId(tourId).stream()
+            List<TourSchedule> schedules = tourScheduleRepository.findByTourId(tourId).stream()
                     .filter(schedule -> schedule != null && schedule.getDeletedAt() == null)
                     .filter(schedule -> schedule.getStatus() != null && PUBLIC_SCHEDULE_STATUSES.contains(schedule.getStatus()))
-                    .map(this::toScheduleResponse)
                     .toList();
+            return mapSchedulesToResponses(schedules);
         } catch (Exception e) {
             log.error("Error fetching schedules for tour {}: {}", tourId, e.getMessage(), e);
             throw new RuntimeException("Error processing tour schedules: " + e.getMessage());
@@ -339,10 +363,10 @@ public class TourQueryServiceImpl implements TourQueryService {
     @Override
     public List<TourScheduleResponse> getAdminTourSchedules(Long tourId) {
         findActiveTour(tourId);
-        return tourScheduleRepository.findByTourId(tourId).stream()
+        List<TourSchedule> schedules = tourScheduleRepository.findByTourId(tourId).stream()
                 .filter(schedule -> schedule.getDeletedAt() == null)
-                .map(this::toScheduleResponse)
                 .toList();
+        return mapSchedulesToResponses(schedules);
     }
 
     @Override
@@ -353,7 +377,8 @@ public class TourQueryServiceImpl implements TourQueryService {
         if (schedule.getDeletedAt() != null) {
             throw new ResourceNotFoundException("Tour schedule has been deleted");
         }
-        return toScheduleResponse(schedule);
+        List<TourScheduleResponse> mapped = mapSchedulesToResponses(List.of(schedule));
+        return mapped.isEmpty() ? toScheduleResponse(schedule, List.of(), List.of()) : mapped.get(0);
     }
 
     private Tour findActiveTour(Long id) {
@@ -547,7 +572,12 @@ public class TourQueryServiceImpl implements TourQueryService {
     /**
      * Search/list card: merged localized title and teaser; media and tags included for gallery-style lists.
      */
-    private TourResponse buildSearchListRow(Tour t, MergedTourTexts m) {
+    private TourResponse buildSearchListRow(
+            Tour t,
+            MergedTourTexts m,
+            List<TourMediaResponse> media,
+            List<TagResponse> tags
+    ) {
         Long destinationId = null;
         String destinationCountryCode = null;
         String destinationName = null;
@@ -583,10 +613,73 @@ public class TourQueryServiceImpl implements TourQueryService {
                 .averageRating(t.getAverageRating())
                 .totalReviews(t.getTotalReviews())
                 .totalBookings(t.getTotalBookings())
-                .media(loadMediaResponses(t.getId()))
-                .tags(loadTagResponses(t.getId()))
+                .media(media != null ? media : List.of())
+                .tags(tags != null ? tags : List.of())
                 .translationKey(t.getSlug())
                 .itinerarySummary(m.itinerarySummary())
+                .build();
+    }
+
+    /**
+     * One query for all tour media on the page instead of 2N round-trips (media + tags per row).
+     */
+    private Map<Long, List<TourMediaResponse>> batchLoadListMediaByTourIds(List<Long> tourIds) {
+        if (tourIds == null || tourIds.isEmpty()) {
+            return Map.of();
+        }
+        Map<Long, List<TourMediaResponse>> grouped = new HashMap<>();
+        for (TourMedia media :
+                tourMediaRepository.findByTourIdInAndDeletedAtIsNullOrderByTourIdAscSortOrderAsc(tourIds)) {
+            List<TourMediaResponse> bucket =
+                    grouped.computeIfAbsent(media.getTourId(), ignored -> new ArrayList<>());
+            if (bucket.size() < LIST_MEDIA_CAP) {
+                bucket.add(toMediaResponse(media));
+            }
+        }
+        return grouped;
+    }
+
+    private Map<Long, List<TagResponse>> batchLoadTagsByTourIds(List<Long> tourIds) {
+        if (tourIds == null || tourIds.isEmpty()) {
+            return Map.of();
+        }
+        List<TourTag> links = tourTagRepository.findByIdTourIdIn(tourIds);
+        if (links.isEmpty()) {
+            return Map.of();
+        }
+        Set<Long> tagIds = new LinkedHashSet<>();
+        for (TourTag link : links) {
+            tagIds.add(link.getId().getTagId());
+        }
+        Map<Long, Tag> activeTags = new HashMap<>();
+        for (Tag tag : tagRepository.findAllById(tagIds)) {
+            if (Boolean.TRUE.equals(tag.getIsActive())) {
+                activeTags.put(tag.getId(), tag);
+            }
+        }
+        Map<Long, List<TagResponse>> grouped = new HashMap<>();
+        for (TourTag link : links) {
+            Tag tag = activeTags.get(link.getId().getTagId());
+            if (tag == null) {
+                continue;
+            }
+            Long tourId = link.getId().getTourId();
+            List<TagResponse> bucket = grouped.computeIfAbsent(tourId, ignored -> new ArrayList<>());
+            if (bucket.size() < LIST_TAGS_CAP) {
+                bucket.add(toTagResponse(tag));
+            }
+        }
+        return grouped;
+    }
+
+    private TourMediaResponse toMediaResponse(TourMedia media) {
+        return TourMediaResponse.builder()
+                .id(media.getId())
+                .mediaType(media.getMediaType())
+                .mediaUrl(media.getMediaUrl())
+                .altText(media.getAltText())
+                .sortOrder(media.getSortOrder())
+                .isActive(media.getIsActive())
                 .build();
     }
 
@@ -697,12 +790,13 @@ public class TourQueryServiceImpl implements TourQueryService {
         response.setDepartureHubs(hubs);
 
         List<TourComboPackageOfferResponse> combos = new ArrayList<>();
-        for (TourComboPackageLink link :
-                tourComboPackageLinkRepository.findByTourIdOrderBySortOrderAsc(tourId)) {
-            comboPackageRepository
-                    .findById(link.getComboId())
-                    .filter(combo -> Boolean.TRUE.equals(combo.getIsActive()))
-                    .ifPresent(combo -> combos.add(toComboOfferResponse(link, combo)));
+        for (Object[] row : tourComboPackageLinkRepository.findActiveComboLinksWithPackageByTourId(tourId)) {
+            if (row == null || row.length < 2) {
+                continue;
+            }
+            TourComboPackageLink link = (TourComboPackageLink) row[0];
+            ComboPackage combo = (ComboPackage) row[1];
+            combos.add(toComboOfferResponse(link, combo));
         }
         response.setComboPackages(combos);
     }
@@ -735,9 +829,86 @@ public class TourQueryServiceImpl implements TourQueryService {
                 .build();
     }
 
-    private TourScheduleResponse toScheduleResponse(TourSchedule schedule) {
-        List<TourSchedulePickupPointResponse> pickupPoints = loadSchedulePickupPoints(schedule.getId());
-        List<TourScheduleGuideResponse> guideAssignments = loadScheduleGuides(schedule.getId());
+    private List<TourScheduleResponse> mapSchedulesToResponses(List<TourSchedule> schedules) {
+        if (schedules == null || schedules.isEmpty()) {
+            return List.of();
+        }
+        List<Long> scheduleIds = schedules.stream().map(TourSchedule::getId).filter(Objects::nonNull).toList();
+        Map<Long, List<TourSchedulePickupPointResponse>> pickupsBySchedule = batchLoadSchedulePickupPoints(scheduleIds);
+        Map<Long, List<TourScheduleGuideResponse>> guidesBySchedule = batchLoadScheduleGuides(scheduleIds);
+        return schedules.stream()
+                .map(schedule -> toScheduleResponse(
+                        schedule,
+                        pickupsBySchedule.getOrDefault(schedule.getId(), List.of()),
+                        guidesBySchedule.getOrDefault(schedule.getId(), List.of())
+                ))
+                .toList();
+    }
+
+    private Map<Long, List<TourSchedulePickupPointResponse>> batchLoadSchedulePickupPoints(List<Long> scheduleIds) {
+        if (scheduleIds.isEmpty()) {
+            return Map.of();
+        }
+        Map<Long, List<TourSchedulePickupPointResponse>> grouped = new HashMap<>();
+        for (TourSchedulePickupPoint pickupPoint :
+                tourSchedulePickupPointRepository.findByScheduleIdInAndDeletedAtIsNullOrderByScheduleIdAscSortOrderAsc(
+                        scheduleIds)) {
+            grouped.computeIfAbsent(pickupPoint.getScheduleId(), ignored -> new ArrayList<>())
+                    .add(TourSchedulePickupPointResponse.builder()
+                            .id(pickupPoint.getId())
+                            .pointName(pickupPoint.getPointName())
+                            .address(pickupPoint.getAddress())
+                            .latitude(pickupPoint.getLatitude())
+                            .longitude(pickupPoint.getLongitude())
+                            .pickupAt(pickupPoint.getPickupAt())
+                            .sortOrder(pickupPoint.getSortOrder())
+                            .build());
+        }
+        return grouped;
+    }
+
+    private Map<Long, List<TourScheduleGuideResponse>> batchLoadScheduleGuides(List<Long> scheduleIds) {
+        if (scheduleIds.isEmpty()) {
+            return Map.of();
+        }
+        try {
+            List<TourScheduleGuide> assignedGuides =
+                    tourScheduleGuideRepository.findByScheduleIdInAndDeletedAtIsNull(scheduleIds);
+            Map<Long, Guide> guideMap = loadGuideMap(
+                    assignedGuides.stream().map(TourScheduleGuide::getGuideId).filter(Objects::nonNull).distinct().toList());
+            String lang = LocaleTagUtil.currentLanguageTag();
+            Map<Long, GuideTranslation> guideTr = loadGuideTranslations(guideMap.keySet(), lang);
+
+            Map<Long, List<TourScheduleGuideResponse>> grouped = new HashMap<>();
+            for (TourScheduleGuide guide : assignedGuides) {
+                Guide guideProfile = guideMap.get(guide.getGuideId());
+                GuideTranslation tr = guide.getGuideId() != null ? guideTr.get(guide.getGuideId()) : null;
+                grouped.computeIfAbsent(guide.getScheduleId(), ignored -> new ArrayList<>())
+                        .add(TourScheduleGuideResponse.builder()
+                                .id(guide.getId())
+                                .guideId(guide.getGuideId())
+                                .guideCode(guideProfile != null ? guideProfile.getCode() : null)
+                                .guideFullName(resolveGuideFullName(guideProfile, tr))
+                                .guidePhone(guideProfile != null ? guideProfile.getPhone() : null)
+                                .guideEmail(guideProfile != null ? guideProfile.getEmail() : null)
+                                .guideStatus(guideProfile != null ? guideProfile.getStatus() : null)
+                                .isLocalGuide(guideProfile != null ? guideProfile.getIsLocalGuide() : null)
+                                .guideRole(guide.getGuideRole())
+                                .assignedAt(guide.getAssignedAt())
+                                .build());
+            }
+            return grouped;
+        } catch (Exception e) {
+            log.warn("Could not batch-load guide assignments: {}", e.getMessage());
+            return Map.of();
+        }
+    }
+
+    private TourScheduleResponse toScheduleResponse(
+            TourSchedule schedule,
+            List<TourSchedulePickupPointResponse> pickupPoints,
+            List<TourScheduleGuideResponse> guideAssignments
+    ) {
         int remainingSeats = resolveRemainingSeats(schedule);
 
         return TourScheduleResponse.builder()
@@ -828,14 +999,7 @@ public class TourQueryServiceImpl implements TourQueryService {
     private List<TourMediaResponse> loadMediaResponses(Long tourId) {
         return tourMediaRepository.findByTourIdOrderBySortOrder(tourId).stream()
                 .filter(media -> media.getDeletedAt() == null)
-                .map(media -> TourMediaResponse.builder()
-                        .id(media.getId())
-                        .mediaType(media.getMediaType())
-                        .mediaUrl(media.getMediaUrl())
-                        .altText(media.getAltText())
-                        .sortOrder(media.getSortOrder())
-                        .isActive(media.getIsActive())
-                        .build())
+                .map(this::toMediaResponse)
                 .toList();
     }
 

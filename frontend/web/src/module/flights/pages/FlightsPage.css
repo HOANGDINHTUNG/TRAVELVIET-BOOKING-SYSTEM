@@ -1,0 +1,12 @@
+.flights-page {
+  --flight-page-bg: var(--color-page);
+  background: var(--flight-page-bg);
+  color: var(--color-text);
+  overflow-x: clip;
+}
+
+/* Trang hero full-bleed — bù padding header overlay */
+.flights-page .flight-hero {
+  margin-top: calc(-1 * var(--site-header-height, 72px));
+  padding-top: var(--site-header-height, 72px);
+}

@@ -14,6 +14,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="application-name" content="Travel Viet" />
     <title>Travel Viet</title>
+
+    <!-- CRP: DNS + TLS sớm cho CDN ảnh & API (font self-host trong bundle) -->
+    <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+    <link rel="preconnect" href="https://res.cloudinary.com" crossorigin />
+    <link rel="dns-prefetch" href="https://travelviet-booking-system.onrender.com" />
+    <link rel="preconnect" href="https://travelviet-booking-system.onrender.com" crossorigin />
   </head>
   <body>
     <div id="root"></div>

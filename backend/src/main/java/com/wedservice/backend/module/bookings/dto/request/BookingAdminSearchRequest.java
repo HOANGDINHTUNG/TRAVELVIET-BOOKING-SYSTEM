@@ -10,6 +10,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -49,4 +51,10 @@ public class BookingAdminSearchRequest {
     @Max(value = 150, message = "size must be less than or equal to 150")
     @Builder.Default
     private Integer size = 20;
+
+    /**
+     * When both cursor fields are set, admin search uses keyset pagination (O(page size)) instead of OFFSET.
+     */
+    private LocalDateTime cursorCreatedAt;
+    private Long cursorId;
 }

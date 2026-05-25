@@ -1,0 +1,38 @@
+# =============================================================================
+# Profile k8s — multi-pod: shared Redis cache, distributed rate limit, hybrid L1/L2.
+# Activate: spring.profiles.active=dev,k8s  (or prod,k8s)
+# =============================================================================
+
+app:
+  cache:
+    mode: hybrid
+  security:
+    rate-limit:
+      store: redis
+
+spring:
+  data:
+    redis:
+      host: ${REDIS_HOST:redis}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 2s
+      lettuce:
+        pool:
+          max-active: 16
+          max-idle: 8
+          min-idle: 2
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      apiReachabilityProbe:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
+        permitted-number-of-calls-in-half-open-state: 3
+  timelimiter:
+    instances:
+      apiReachabilityProbe:
+        timeout-duration: 3s
+        cancel-running-future: true

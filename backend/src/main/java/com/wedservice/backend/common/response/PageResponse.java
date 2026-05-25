@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.domain.Page;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -15,6 +16,10 @@ public class PageResponse<T> {
     private long totalElements;
     private int totalPages;
     private boolean last;
+
+    /** Keyset cursor for next page (null when using offset pagination). */
+    private LocalDateTime nextCursorCreatedAt;
+    private Long nextCursorId;
 
     public static <T> PageResponse<T> of(Page<T> page) {
         return PageResponse.<T>builder()

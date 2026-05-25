@@ -50,6 +50,7 @@
   background: var(--color-surface-soft);
 }
 
+.tours-catalog-card__cover,
 .tours-catalog-card__media img {
   width: 100%;
   height: 100%;

@@ -3,6 +3,7 @@ import type {
   BookingQuotePayload,
   BookingQuoteResult,
   BookingResponse,
+  BookingSummaryResponse,
   CreateBookingPayload,
 } from '../types/publicBooking'
 
@@ -76,10 +77,10 @@ export const PublicBookingsApi = {
    * `GET /bookings/me` — danh sách booking của user hiện tại (auth required,
    * perm `booking.view`).
    *
-   * BE trả về `List<BookingResponse>` — không phân trang.
+   * BE trả về `List<BookingSummaryResponse>` — không phân trang.
    */
-  async listMine(): Promise<BookingResponse[]> {
-    const response = await apiClient.get<BookingResponse[]>('bookings/me')
+  async listMine(): Promise<BookingSummaryResponse[]> {
+    const response = await apiClient.get<BookingSummaryResponse[]>('bookings/me')
     return response.data
   },
 

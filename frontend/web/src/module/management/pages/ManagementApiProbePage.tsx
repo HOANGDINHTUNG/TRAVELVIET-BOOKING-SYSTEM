@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { isAxiosError } from 'axios'
 import { Activity, Loader2, Play, RotateCcw } from 'lucide-react'
-import { apiClient, API_BASE_URL } from '../../../lib/apiClient'
+import { apiClient, getApiBaseUrl } from '../../../lib/apiClient'
 import { API_PROBE_PRESETS, type ApiProbePreset } from '../config/apiProbePresets'
 
 type RowStatus = 'idle' | 'loading' | 'done'
@@ -120,7 +120,7 @@ export default function ManagementApiProbePage() {
           <span className="font-sans font-medium text-[var(--admin-text)]">
             {String(t('apiProbe.baseUrlLabel'))}
           </span>{' '}
-          {API_BASE_URL}
+          {getApiBaseUrl()}
         </p>
       </header>
 
