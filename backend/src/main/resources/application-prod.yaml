@@ -3,7 +3,7 @@
 #
 # Health check Render: /api/v1/live (nhe, duoi 5 giay). Actuator day du: /api/v1/actuator/health
 # Bắt buộc: JWT_SECRET, AIVEN_DB_PASSWORD, MYSQL_SERVICE_URI (hoặc AIVEN_DB_HOST+PORT)
-# Render free tier 512MB RAM — heap ~256MB (xem Dockerfile JAVA_TOOL_OPTIONS)
+# Render free tier 512MB RAM — heap 256m + metaspace 140m (Dockerfile JAVA_TOOL_OPTIONS)
 # =============================================================================
 
 server:
