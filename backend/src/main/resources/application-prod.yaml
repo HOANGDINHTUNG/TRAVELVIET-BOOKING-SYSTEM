@@ -1,7 +1,7 @@
 # =============================================================================
 # Profile PROD — Render / Docker (SPRING_PROFILES_ACTIVE=prod)
 #
-# Health check Render: /api/v1/actuator/health  (KHÔNG dùng /actuator/health)
+# Health check Render: /api/v1/live (nhe, duoi 5 giay). Actuator day du: /api/v1/actuator/health
 # Bắt buộc: JWT_SECRET, AIVEN_DB_PASSWORD, MYSQL_SERVICE_URI (hoặc AIVEN_DB_HOST+PORT)
 # Render free tier 512MB RAM — heap ~256MB (xem Dockerfile JAVA_TOOL_OPTIONS)
 # =============================================================================
@@ -15,6 +15,7 @@ spring:
     exclude:
       - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
       - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
+      - org.springframework.boot.actuate.autoconfigure.metrics.export.prometheus.PrometheusMetricsExportAutoConfiguration
   data:
     redis:
       # Tránh placeholder thiếu từ application.yaml khi Redis autoconfig tắt
@@ -37,7 +38,8 @@ spring:
         query:
           startup_check: false
   flyway:
-    enabled: ${FLYWAY_ENABLED:true}
+    # DB Aiven đã migrate → false để start nhanh (~1–2 phút). Lần đầu hoặc đổi schema: FLYWAY_ENABLED=true
+    enabled: ${FLYWAY_ENABLED:false}
     locations: classpath:db/migration
     baseline-on-migrate: true
     validate-on-migrate: false
@@ -78,6 +80,7 @@ app:
         enabled: false
   security:
     whitelist:
+      - "/live"
       - "/auth/register"
       - "/auth/login"
       - "/auth/refresh"
@@ -118,3 +121,8 @@ management:
       show-details: when_authorized
       probes:
         enabled: true
+      group:
+        liveness:
+          include: ping
+        readiness:
+          include: readinessState, db

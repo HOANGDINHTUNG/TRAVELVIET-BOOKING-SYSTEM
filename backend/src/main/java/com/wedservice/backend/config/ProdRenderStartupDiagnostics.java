@@ -19,7 +19,7 @@ public class ProdRenderStartupDiagnostics {
 
     @EventListener
     public void onReady(ApplicationReadyEvent event) {
-        log.info("Render/prod: application READY — Tomcat đang lắng nghe PORT, health: /api/v1/actuator/health");
+        log.info("Render/prod: application READY — Tomcat listen PORT; Render health: GET /api/v1/live");
     }
 
     @EventListener

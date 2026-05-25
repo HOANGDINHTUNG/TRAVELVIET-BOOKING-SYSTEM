@@ -6,7 +6,8 @@ services:
     rootDir: backend
     dockerfilePath: Dockerfile
     plan: free
-    healthCheckPath: /api/v1/actuator/health
+    # Endpoint nhẹ (/live) — actuator/health có thể >5s hoặc DOWN khi DB chậm
+    healthCheckPath: /api/v1/live
     envVars:
       - key: SPRING_PROFILES_ACTIVE
         value: prod

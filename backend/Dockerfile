@@ -19,6 +19,6 @@ COPY ca.pem ./ca.pem
 
 ENV SPRING_PROFILES_ACTIVE=prod
 # Render free tier 512MB: heap+metaspace+native phải < 512MB (MaxRAMPercentage=75% từng gây OOM kill im lặng)
-ENV JAVA_TOOL_OPTIONS="-Xmx256m -Xms128m -XX:MaxMetaspaceSize=128m -XX:+UseSerialGC -XX:+ExitOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom"
+ENV JAVA_TOOL_OPTIONS="-Xmx300m -Xms128m -XX:MaxMetaspaceSize=96m -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -XX:+ExitOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom"
 
 CMD ["java", "-jar", "app.jar"]
