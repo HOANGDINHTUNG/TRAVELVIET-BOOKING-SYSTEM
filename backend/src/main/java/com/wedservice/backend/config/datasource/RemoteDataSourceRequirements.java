@@ -24,15 +24,30 @@ final class RemoteDataSourceRequirements {
             );
         }
         if (!StringUtils.hasText(remote.getHost())) {
+            boolean passwordOnly = StringUtils.hasText(remote.getPassword());
             throw new IllegalStateException(
-                    """
-                    Prod (Render): chưa có host MySQL Aiven.
-                    Cách 1 (khuyến nghị): MYSQL_SERVICE_URI = Service URI (Public) từ Aiven Console.
-                    Cách 2: AIVEN_DB_HOST + AIVEN_DB_PORT + AIVEN_DB_PASSWORD.
-                    Không dùng host mặc định trong code — mỗi service Aiven có hostname riêng.
-                    Xem backend/docs/AIVEN_PUBLIC_ACCESS.md
-                    """
-                            .trim()
+                    (passwordOnly
+                            ? """
+                            Prod (Render): bạn đã đặt AIVEN_DB_PASSWORD nhưng THIẾU địa chỉ server MySQL.
+                            Log thường thấy: MYSQL_SERVICE_URI=missing, AIVEN_DB_HOST=missing, AIVEN_DB_PASSWORD=set
+
+                            Làm trên Aiven Console (service MySQL đang chạy, không phải service đã xóa):
+                            1) Networking → bật Public access (allowlist 0.0.0.0/0 cho lab)
+                            2) Connection information → Public → copy Service URI
+
+                            Làm trên Render → Environment → thêm MỘT trong hai cách:
+                            Cách A (khuyến nghị): MYSQL_SERVICE_URI = dán nguyên URI Public từ Aiven
+                            Cách B: AIVEN_DB_HOST = Host Public, AIVEN_DB_PORT = Port Public (giữ AIVEN_DB_PASSWORD)
+
+                            Không dùng host cũ mysql-lab-mtung3365-864a.f.aivencloud.com (không còn trên DNS).
+                            Xem: backend/docs/RENDER_ENV_CHECKLIST.md
+                            """
+                            : """
+                            Prod (Render): thiếu cấu hình database Aiven.
+                            Thêm trên Render: MYSQL_SERVICE_URI (URI Public từ Aiven) và AIVEN_DB_PASSWORD.
+                            Xem: backend/docs/RENDER_ENV_CHECKLIST.md
+                            """
+                    ).trim()
             );
         }
         if (STALE_EXAMPLE_HOST.equalsIgnoreCase(remote.getHost().trim())) {

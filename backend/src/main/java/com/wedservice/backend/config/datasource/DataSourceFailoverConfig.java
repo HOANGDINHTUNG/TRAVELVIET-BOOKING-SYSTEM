@@ -42,6 +42,7 @@ public class DataSourceFailoverConfig {
 
         boolean fromYamlUri = MysqlServiceUriResolver.applyFromConfiguredProperties(remote);
         boolean fromEnvUri = MysqlServiceUriResolver.applyFromEnvironment(remote);
+        RemoteDiscreteEnvAssembler.applyMissingFieldsFromEnvironment(remote);
         if (fromYamlUri || fromEnvUri) {
             log.info(
                     "Remote DB from {} → {}:{} / {}",

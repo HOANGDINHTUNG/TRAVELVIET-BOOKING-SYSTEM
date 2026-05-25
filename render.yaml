@@ -12,14 +12,14 @@ services:
         value: prod
       - key: JWT_SECRET
         generateValue: true
-      - key: AIVEN_DB_PASSWORD
-        sync: false
-      # Khuyến nghị: dán URI Public từ Aiven Console (ưu tiên hơn host/port mặc định trong yaml)
+      # BẮT BUỘC — chỉ AIVEN_DB_PASSWORD không đủ; cần URI hoặc HOST (xem backend/render.env.example)
       - key: MYSQL_SERVICE_URI
         sync: false
       - key: AIVEN_DB_HOST
         sync: false
       - key: AIVEN_DB_PORT
+        sync: false
+      - key: AIVEN_DB_PASSWORD
         sync: false
       - key: AIVEN_CA_CERT_PATH
         value: classpath:ssl/ca.pem

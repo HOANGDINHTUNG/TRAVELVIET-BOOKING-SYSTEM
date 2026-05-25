@@ -45,6 +45,8 @@ final class MysqlServiceUriResolver {
         Set<String> keys = new LinkedHashSet<>(Arrays.asList(
                 "MYSQL_SERVICE_URI",
                 "DATABASE_URL",
+                "SPRING_DATASOURCE_URL",
+                "JDBC_DATABASE_URL",
                 "AIVEN_MYSQL_URI",
                 "AIVEN_SERVICE_URI"
         ));

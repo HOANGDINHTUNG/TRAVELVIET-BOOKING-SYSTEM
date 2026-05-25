@@ -16,10 +16,10 @@ final class RemoteDataSourceEnvDiagnostics {
 
     static void logRenderDatabaseEnv(AppDataSourceFailoverProperties.Remote remote) {
         log.info(
-                "Render DB env: MYSQL_SERVICE_URI={} DATABASE_URL={} AIVEN_DB_HOST={} AIVEN_DB_PORT={} "
-                        + "AIVEN_DB_PASSWORD={} resolvedHost={} resolvedPort={}",
+                "Render DB env: MYSQL_SERVICE_URI={} SPRING_DATASOURCE_URL={} AIVEN_DB_HOST={} "
+                        + "AIVEN_DB_PORT={} AIVEN_DB_PASSWORD={} → resolvedHost={} resolvedPort={}",
                 present("MYSQL_SERVICE_URI"),
-                present("DATABASE_URL"),
+                present("SPRING_DATASOURCE_URL"),
                 present("AIVEN_DB_HOST"),
                 valueOrDash("AIVEN_DB_PORT"),
                 present("AIVEN_DB_PASSWORD"),
