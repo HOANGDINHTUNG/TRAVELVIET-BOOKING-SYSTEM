@@ -9,6 +9,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.StringUtils;
@@ -21,6 +22,7 @@ import java.util.Set;
 
 import javax.sql.DataSource;
 
+@Lazy
 @Configuration
 @ConditionalOnProperty(prefix = "app.datasource.failover", name = "enabled", havingValue = "true")
 @EnableConfigurationProperties({AppDataSourceFailoverProperties.class, HikariPoolProperties.class})
@@ -61,6 +63,11 @@ public class DataSourceFailoverConfig {
         }
 
         if (props.isPreferRemote() && remote.isEnabled() && StringUtils.hasText(remote.getPassword())) {
+            if (props.isSkipStartupProbe()) {
+                return connectRemoteWithoutProbe(
+                        remote, timeoutMs, resourceLoader, inlineCaCertPem, hikariPoolProperties);
+            }
+
             log.info("Probing remote database {}:{} / {} ...", remote.getHost(), remote.getPort(), remote.getDatabase());
             TcpReachabilityProbe.Result tcp = TcpReachabilityProbe.probe(remote.getHost(), remote.getPort(), 5000);
             log.info("TCP pre-check: {}", tcp.detail());
@@ -202,6 +209,38 @@ public class DataSourceFailoverConfig {
         copy.setPassword(source.getPassword());
         copy.setUseSsl(source.isUseSsl());
         return copy;
+    }
+
+    private static DataSource connectRemoteWithoutProbe(
+            AppDataSourceFailoverProperties.Remote remote,
+            int timeoutMs,
+            ResourceLoader resourceLoader,
+            String inlineCaCertPem,
+            HikariPoolProperties hikariPoolProperties
+    ) {
+        log.info(
+                "Skip startup DB probe (Render fast-start) → {}:{} / {}",
+                remote.getHost(),
+                remote.getPort(),
+                remote.getDatabase()
+        );
+        String jdbcUrl = JdbcUrlBuilder.buildRemoteUrl(remote, timeoutMs, resourceLoader, inlineCaCertPem);
+        logBanner(ActiveDatabaseTarget.Kind.REMOTE, remote.getHost(), remote.getPort(), remote.getDatabase());
+        ActiveDatabaseTarget.register(
+                ActiveDatabaseTarget.Kind.REMOTE,
+                remote.getHost(),
+                remote.getPort(),
+                remote.getDatabase(),
+                jdbcUrl
+        );
+        return createHikari(
+                jdbcUrl,
+                remote.getUsername(),
+                remote.getPassword(),
+                "TravelViet-Aiven",
+                timeoutMs,
+                hikariPoolProperties
+        );
     }
 
     private static RemoteConnectOutcome tryConnectRemote(

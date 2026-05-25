@@ -19,6 +19,11 @@ public class AppDataSourceFailoverProperties {
     /** Timeout khi probe kết nối (ms). */
     private int probeTimeoutMs = 5000;
 
+    /**
+     * Render prod: bỏ TCP/JDBC probe lúc boot — tạo pool ngay (Tomcat mở port sớm hơn).
+     */
+    private boolean skipStartupProbe = false;
+
     private Remote remote = new Remote();
     private Local local = new Local();
 

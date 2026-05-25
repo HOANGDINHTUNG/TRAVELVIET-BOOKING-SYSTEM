@@ -13,6 +13,7 @@ server:
 spring:
   main:
     lazy-initialization: true
+    concurrent-initialization: true
   jmx:
     enabled: false
   autoconfigure:
@@ -32,7 +33,7 @@ spring:
         enabled: false
     jpa:
       repositories:
-        bootstrap-mode: lazy
+        bootstrap-mode: deferred
   datasource:
     hikari:
       maximum-pool-size: 3
@@ -46,6 +47,8 @@ spring:
       hibernate:
         query:
           startup_check: false
+        boot:
+          allow_jdbc_metadata_access: false
   # Flyway: bật bằng FLYWAY_ENABLED=true + xóa FlywayAutoConfiguration khỏi exclude ở trên
   flyway:
     enabled: ${FLYWAY_ENABLED:false}
@@ -71,6 +74,7 @@ app:
       enabled: true
       prefer-remote: true
       probe-timeout-ms: 8000
+      skip-startup-probe: true
       remote:
         enabled: true
         service-uri: ${MYSQL_SERVICE_URI}
@@ -90,6 +94,7 @@ app:
       - "/auth/login"
       - "/auth/refresh"
       - "/ai/chat"
+      - "/actuator/health"
       - "/actuator/health/**"
       - "/actuator/info"
       - "/payments/vnpay/ipn"
@@ -124,10 +129,11 @@ management:
       base-path: /actuator
   endpoint:
     health:
+      enabled: false
       show-details: never
       show-components: never
       probes:
-        enabled: true
+        enabled: false
       group:
         # Render mặc định hay probe /actuator/health — không gồm DB (tránh Timed out)
         default:

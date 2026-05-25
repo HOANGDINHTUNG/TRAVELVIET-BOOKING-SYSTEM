@@ -8,13 +8,14 @@ import java.util.Map;
 
 /**
  * Health check nhẹ cho Render (&lt; 5s, không probe DB).
- * Path đầy đủ: /api/v1/live — cấu hình healthCheckPath trên Render.
+ * /api/v1/live — khuyến nghị trên Dashboard.
+ * /api/v1/actuator/health — tương thích khi Render vẫn probe path mặc định.
  */
 @RestController
 @Profile("prod")
 public class RenderLivenessController {
 
-    @GetMapping("/live")
+    @GetMapping({"/live", "/actuator/health"})
     public Map<String, String> live() {
         return Map.of("status", "UP");
     }
