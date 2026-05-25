@@ -3,7 +3,7 @@
 #
 # Health check Render: /api/v1/live (khuyến nghị). /actuator/health prod chỉ ping (tránh timeout DB)
 # Bắt buộc: JWT_SECRET, AIVEN_DB_PASSWORD, MYSQL_SERVICE_URI (hoặc AIVEN_DB_HOST+PORT)
-# Render free 512MB — start <3 phút (lazy repo + lazy bean). Health: /api/v1/live
+# Render free 512MB — Health: /api/v1/live (endpoint phải eager, không lazy bean)
 # =============================================================================
 
 server:
@@ -12,8 +12,8 @@ server:
 
 spring:
   main:
-    lazy-initialization: true
-    concurrent-initialization: true
+    # false: /live và /actuator/health phải có ngay khi Tomcat listen (Render probe HTTP)
+    lazy-initialization: false
   jmx:
     enabled: false
   autoconfigure:
@@ -33,7 +33,7 @@ spring:
         enabled: false
     jpa:
       repositories:
-        bootstrap-mode: deferred
+        bootstrap-mode: lazy
   datasource:
     hikari:
       maximum-pool-size: 3

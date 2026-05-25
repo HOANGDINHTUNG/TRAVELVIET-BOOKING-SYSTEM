@@ -19,6 +19,6 @@ COPY ca.pem ./ca.pem
 
 ENV SPRING_PROFILES_ACTIVE=prod
 # Render free 512MB: heap 240m + metaspace 160m (lazy JPA repo giảm peak Metaspace)
-ENV JAVA_TOOL_OPTIONS="-Xmx240m -Xms128m -XX:MaxMetaspaceSize=160m -XX:ReservedCodeCacheSize=48m -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -XX:+ExitOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom"
+ENV JAVA_TOOL_OPTIONS="-Xmx240m -Xms128m -XX:MaxMetaspaceSize=160m -XX:ReservedCodeCacheSize=48m -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -XX:+ExitOnOutOfMemoryError -Djava.net.preferIPv4Stack=true -Djava.security.egd=file:/dev/./urandom"
 
 CMD ["java", "-jar", "app.jar"]

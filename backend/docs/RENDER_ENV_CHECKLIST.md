@@ -1,5 +1,7 @@
 # Render — checklist env (bắt buộc để deploy BE)
 
+**Hướng dẫn deploy từng bước:** [RENDER_DEPLOY_STABLE.md](./RENDER_DEPLOY_STABLE.md)
+
 Deploy **không thể thành công** nếu thiếu database Aiven hợp lệ. Host mẫu cũ `mysql-lab-mtung3365-864a.f.aivencloud.com` **không tồn tại trên DNS**.
 
 ## Bước 1 — Aiven Console

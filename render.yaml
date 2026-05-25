@@ -24,6 +24,10 @@ services:
         sync: false
       - key: AIVEN_CA_CERT_PATH
         value: classpath:ssl/ca.pem
+      - key: FLYWAY_ENABLED
+        value: "false"
+      - key: MINIO_ENABLED
+        value: "false"
       - key: GEMINI_API_KEY
         sync: false
       - key: WEATHERAPI_KEY

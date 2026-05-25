@@ -9,7 +9,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.StringUtils;
@@ -22,7 +21,6 @@ import java.util.Set;
 
 import javax.sql.DataSource;
 
-@Lazy
 @Configuration
 @ConditionalOnProperty(prefix = "app.datasource.failover", name = "enabled", havingValue = "true")
 @EnableConfigurationProperties({AppDataSourceFailoverProperties.class, HikariPoolProperties.class})
