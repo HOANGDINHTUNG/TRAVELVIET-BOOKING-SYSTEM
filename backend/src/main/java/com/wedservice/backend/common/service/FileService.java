@@ -5,7 +5,7 @@ import io.minio.BucketExistsArgs;
 import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -14,7 +14,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.UUID;
 
 @Service
-@RequiredArgsConstructor
 public class FileService {
 
     private final MinioClient minioClient;
@@ -25,7 +24,14 @@ public class FileService {
     @Value("${minio.url}")
     private String minioUrl;
 
+    public FileService(@Autowired(required = false) MinioClient minioClient) {
+        this.minioClient = minioClient;
+    }
+
     public String uploadFile(MultipartFile file) throws Exception {
+        if (minioClient == null) {
+            throw BadRequestException.i18n("api.error.file.storageNotConfigured");
+        }
         if (file == null || file.isEmpty()) {
             throw BadRequestException.i18n("api.error.file.uploadEmpty");
         }

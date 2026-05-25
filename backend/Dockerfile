@@ -18,5 +18,7 @@ COPY --from=build /app/target/*.jar app.jar
 COPY ca.pem ./ca.pem
 
 ENV SPRING_PROFILES_ACTIVE=prod
+# Render free tier (~512MB): giới hạn heap, thoát rõ khi OOM
+ENV JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=75.0 -XX:+ExitOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom"
 
 CMD ["java", "-jar", "app.jar"]

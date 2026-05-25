@@ -13,6 +13,9 @@ server:
   port: ${PORT}
 
 spring:
+  main:
+    # Render: mở port sớm hơn — bean phụ (facade, AI, …) khởi tạo khi có request
+    lazy-initialization: true
   # Prod trên Render: không cần Redis local — tránh scan repo + kết nối localhost:6379
   autoconfigure:
     exclude:
@@ -27,11 +30,16 @@ spring:
       ddl-auto: none
     show-sql: false
     open-in-view: false
+    properties:
+      hibernate:
+        boot:
+          # Schema do Flyway quản lý — bỏ quét JDBC metadata (giảm RAM/thời gian start trên free tier)
+          allow_jdbc_metadata_access: false
   flyway:
     enabled: true
     locations: classpath:db/migration
     baseline-on-migrate: true
-    validate-on-migrate: true
+    validate-on-migrate: false
     repair-on-migrate: false
   jackson:
     time-zone: Asia/Ho_Chi_Minh
@@ -56,11 +64,11 @@ app:
         service-uri: ${MYSQL_SERVICE_URI}
         host: ${AIVEN_DB_HOST}
         port: ${AIVEN_DB_PORT}
-        database: ${AIVEN_DB_DATABASE}
-        username: ${AIVEN_DB_USER}
+        database: ${AIVEN_DB_DATABASE:defaultdb}
+        username: ${AIVEN_DB_USER:avnadmin}
         password: ${AIVEN_DB_PASSWORD}
-        ssl-mode: ${AIVEN_DB_SSL_MODE}
-        ca-cert-path: ${AIVEN_CA_CERT_PATH}
+        ssl-mode: ${AIVEN_DB_SSL_MODE:REQUIRED}
+        ca-cert-path: ${AIVEN_CA_CERT_PATH:classpath:ssl/ca.pem}
       local:
         enabled: false
   security:
@@ -76,9 +84,28 @@ app:
       secret: ${JWT_SECRET}
       expiration: 3600000
       refresh-expiration: 2592000000
+  vnpay:
+    tmn-code: ${VNPAY_TMN_CODE:}
+    hash-secret: ${VNPAY_HASH_SECRET:}
+    return-url: ${VNPAY_RETURN_URL:}
+    ipn-url: ${VNPAY_IPN_URL:}
 
 minio:
-  url: ${MINIO_URL}
-  accessKey: ${MINIO_ACCESS_KEY}
-  secretKey: ${MINIO_SECRET_KEY}
-  bucketName: ${MINIO_BUCKET_NAME}
+  # false = không tạo MinioClient (upload admin tạm tắt); bật khi đã có MinIO/S3 trên Render
+  enabled: ${MINIO_ENABLED:false}
+  url: ${MINIO_URL:http://127.0.0.1:9000}
+  accessKey: ${MINIO_ACCESS_KEY:minioadmin}
+  secretKey: ${MINIO_SECRET_KEY:minioadmin}
+  bucketName: ${MINIO_BUCKET_NAME:tour-images}
+
+gemini:
+  api-key: ${GEMINI_API_KEY:}
+
+weatherapi:
+  api-key: ${WEATHERAPI_KEY:}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info
