@@ -56,25 +56,26 @@ logging:
 app:
   api:
     failover:
-      enabled: ${API_FAILOVER_ENABLED:true}
-      prefer-public: ${API_PREFER_PUBLIC:true}
-      probe-timeout-ms: ${API_PROBE_TIMEOUT_MS:8000}
+      enabled: ${API_FAILOVER_ENABLED}
+      prefer-public: ${API_PREFER_PUBLIC}
+      probe-timeout-ms: 8000
+      # Hai URL: public (Render) | local (máy dev) — giữ default vì là 2 trường hợp failover
       public-base-url: ${APP_API_PUBLIC_BASE_URL:https://travelviet-booking-system.onrender.com/api/v1}
       local-base-url: ${APP_API_LOCAL_BASE_URL:http://localhost:8088/api/v1}
   datasource:
     failover:
-      enabled: ${DB_FAILOVER_ENABLED:true}
-      prefer-remote: ${DB_PREFER_REMOTE:true}
+      enabled: ${DB_FAILOVER_ENABLED}
+      prefer-remote: ${DB_PREFER_REMOTE}
       probe-timeout-ms: 8000
       remote:
         enabled: true
-        host: ${AIVEN_DB_HOST:}
-        port: ${AIVEN_DB_PORT:3306}
-        database: defaultdb
-        username: avnadmin
-        password: ${AIVEN_DB_PASSWORD:}
-        ssl-mode: REQUIRED
-        ca-cert-path: classpath:ssl/ca.pem
+        host: ${AIVEN_DB_HOST}
+        port: ${AIVEN_DB_PORT}
+        database: ${AIVEN_DB_DATABASE}
+        username: ${AIVEN_DB_USER}
+        password: ${AIVEN_DB_PASSWORD}
+        ssl-mode: ${AIVEN_DB_SSL_MODE}
+        ca-cert-path: ${AIVEN_CA_CERT_PATH}
       local:
         enabled: true
         host: 127.0.0.1
