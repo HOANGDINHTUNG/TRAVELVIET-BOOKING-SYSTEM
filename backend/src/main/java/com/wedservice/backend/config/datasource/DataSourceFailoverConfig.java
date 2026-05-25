@@ -40,9 +40,12 @@ public class DataSourceFailoverConfig {
         AppDataSourceFailoverProperties.Local local = props.getLocal();
         AppDataSourceFailoverProperties.Remote remote = props.getRemote();
 
-        if (MysqlServiceUriResolver.applyFromEnvironment(remote)) {
+        boolean fromYamlUri = MysqlServiceUriResolver.applyFromConfiguredProperties(remote);
+        boolean fromEnvUri = MysqlServiceUriResolver.applyFromEnvironment(remote);
+        if (fromYamlUri || fromEnvUri) {
             log.info(
-                    "Remote DB settings from MYSQL_SERVICE_URI / DATABASE_URL → {}:{} / {}",
+                    "Remote DB from {} → {}:{} / {}",
+                    fromEnvUri ? "env URI" : "app.datasource.failover.remote.service-uri",
                     remote.getHost(),
                     remote.getPort(),
                     remote.getDatabase()
@@ -51,14 +54,27 @@ public class DataSourceFailoverConfig {
 
         if (props.isPreferRemote() && remote.isEnabled()) {
             if (!local.isEnabled()) {
+                RemoteDataSourceEnvDiagnostics.logRenderDatabaseEnv(remote);
                 RemoteDataSourceRequirements.requireConfiguredForProd(remote);
             }
         }
 
         if (props.isPreferRemote() && remote.isEnabled() && StringUtils.hasText(remote.getPassword())) {
             log.info("Probing remote database {}:{} / {} ...", remote.getHost(), remote.getPort(), remote.getDatabase());
-            TcpReachabilityProbe.Result tcp = TcpReachabilityProbe.probe(remote.getHost(), remote.getPort(), 8000);
+            TcpReachabilityProbe.Result tcp = TcpReachabilityProbe.probe(remote.getHost(), remote.getPort(), 5000);
             log.info("TCP pre-check: {}", tcp.detail());
+
+            if (!local.isEnabled() && !tcp.reachable()) {
+                throw new IllegalStateException(
+                        buildProdAivenFailureMessage(
+                                remote,
+                                RemoteDataSourceRequirements.isDnsFailure(tcp)
+                                        ? "DNS resolution failed"
+                                        : "TCP unreachable",
+                                tcp
+                        )
+                );
+            }
 
             if (JdbcUrlBuilder.resolveCaCert(remote.getCaCertPath(), inlineCaCertPem, resourceLoader).isEmpty()) {
                 log.warn(

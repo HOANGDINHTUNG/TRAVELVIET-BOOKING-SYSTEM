@@ -27,6 +27,19 @@ class MysqlServiceUriResolverTest {
     }
 
     @Test
+    void applyFromConfiguredProperties_usesServiceUriField() {
+        AppDataSourceFailoverProperties.Remote remote = new AppDataSourceFailoverProperties.Remote();
+        remote.setServiceUri("mysql://avnadmin:pass@mysql-new.aivencloud.com:12345/defaultdb");
+
+        boolean applied = MysqlServiceUriResolver.applyFromConfiguredProperties(remote);
+
+        assertThat(applied).isTrue();
+        assertThat(remote.getHost()).isEqualTo("mysql-new.aivencloud.com");
+        assertThat(remote.getPort()).isEqualTo(12345);
+        assertThat(remote.getPassword()).isEqualTo("pass");
+    }
+
+    @Test
     void applyUri_parsesJdbcPrefix() {
         AppDataSourceFailoverProperties.Remote remote = new AppDataSourceFailoverProperties.Remote();
 

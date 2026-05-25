@@ -19,7 +19,18 @@ final class MysqlServiceUriResolver {
     }
 
     static boolean applyFromEnvironment(AppDataSourceFailoverProperties.Remote remote) {
-        for (String candidate : envCandidates()) {
+        return applyFirstMatching(remote, envCandidates());
+    }
+
+    static boolean applyFromConfiguredProperties(AppDataSourceFailoverProperties.Remote remote) {
+        if (!StringUtils.hasText(remote.getServiceUri())) {
+            return false;
+        }
+        return applyUri(remote, remote.getServiceUri().trim());
+    }
+
+    private static boolean applyFirstMatching(AppDataSourceFailoverProperties.Remote remote, Iterable<String> candidates) {
+        for (String candidate : candidates) {
             if (!StringUtils.hasText(candidate)) {
                 continue;
             }

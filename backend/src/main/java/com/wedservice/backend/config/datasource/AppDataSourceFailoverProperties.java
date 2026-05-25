@@ -38,6 +38,10 @@ public class AppDataSourceFailoverProperties {
          * Đường dẫn file CA.pem từ Aiven (Show → download). Có thể relative từ thư mục chạy app.
          */
         private String caCertPath = "";
+        /**
+         * URI Public từ Aiven (mysql://user:pass@host:port/db) — map từ MYSQL_SERVICE_URI trên Render.
+         */
+        private String serviceUri = "";
     }
 
     @Data
