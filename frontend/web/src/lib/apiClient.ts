@@ -28,10 +28,8 @@ import {
 import {
   getApiBaseUrl,
   shouldUseApiFailover,
-  switchToLocalApiBaseUrl,
+  switchToAlternateApiBaseUrl,
 } from '../config/apiBaseUrl'
-import { isLocalApiBaseUrl } from '../config/apiConfig'
-
 export { getApiBaseUrl } from '../config/apiBaseUrl'
 
 type RetryableRequestConfig = InternalAxiosRequestConfig & {
@@ -183,10 +181,9 @@ apiClient.interceptors.response.use(
       isNetworkFailoverCandidate(error) &&
       originalRequest &&
       !originalRequest._failoverRetry &&
-      !isLocalApiBaseUrl(getApiBaseUrl())
+      switchToAlternateApiBaseUrl()
     ) {
       originalRequest._failoverRetry = true
-      switchToLocalApiBaseUrl()
       syncClientBaseUrl()
       const retryResponse = await apiClient(originalRequest)
       return unwrapSuccessResponseData(retryResponse)

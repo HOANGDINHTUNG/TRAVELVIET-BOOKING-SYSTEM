@@ -1,10 +1,11 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { Calendar, ChevronDown, MapPin, Plane, Search } from "lucide-react";
+import { ChevronDown, MapPin, Plane, Search } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { RevealOnScroll } from "@/components/ui/MotionStagger";
+import { SingleDatePicker } from "./SingleDatePicker";
 
 type SelectOption = { value: string; label: string };
 
@@ -121,11 +122,13 @@ export function HomeSearchBar() {
               <option value="">
                 {t("homePage.search.departurePlaceholder")}
               </option>
-              {departureOptions.map((item) => (
-                <option key={item.value} value={item.value}>
-                  {item.label}
-                </option>
-              ))}
+              {departureOptions
+                .filter((item) => !destination || item.value !== destination)
+                .map((item) => (
+                  <option key={item.value} value={item.value}>
+                    {item.label}
+                  </option>
+                ))}
             </select>
             <ChevronDown
               size={14}
@@ -197,11 +200,13 @@ export function HomeSearchBar() {
               <option value="">
                 {t("homePage.search.destinationPlaceholder")}
               </option>
-              {destinationOptions.map((item) => (
-                <option key={item.value} value={item.value}>
-                  {item.label}
-                </option>
-              ))}
+              {destinationOptions
+                .filter((item) => !departure || item.value !== departure)
+                .map((item) => (
+                  <option key={item.value} value={item.value}>
+                    {item.label}
+                  </option>
+                ))}
             </select>
             <ChevronDown
               size={14}
@@ -212,35 +217,14 @@ export function HomeSearchBar() {
           </label>
 
           {/* Ngày khởi hành */}
-          <label
+          <SingleDatePicker
+            date={date}
+            onChange={setDate}
             className={cn(
               fieldShellClass,
               "min-w-[130px] flex-[1_1_calc(50%-6px)] md:flex-[1_1_160px]",
             )}
-          >
-            <span className={fieldIconClass}>
-              <Calendar size={17} strokeWidth={2.4} aria-hidden />
-            </span>
-            <input
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              title={t("homePage.search.dateInputTitle")}
-              aria-label={t("homePage.search.dateInputTitle")}
-              className={cn(
-                fieldControlClass,
-                "relative z-[3] pr-3",
-                date
-                  ? "text-[var(--home-search-field-text)]"
-                  : "text-transparent",
-              )}
-            />
-            {!date ? (
-              <span className="pointer-events-none absolute left-9 right-3 top-1/2 z-[1] -translate-y-1/2 text-sm text-[var(--home-search-field-muted)]">
-                {t("homePage.search.datePlaceholder")}
-              </span>
-            ) : null}
-          </label>
+          />
 
           {/* CTA tìm kiếm */}
           <button

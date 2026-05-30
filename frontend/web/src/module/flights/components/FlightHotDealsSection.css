@@ -1,0 +1,221 @@
+.flight-hot-deals {
+  background: var(--flight-page-bg, var(--color-page));
+  padding: clamp(32px, 5vw, 56px) clamp(16px, 4vw, 48px);
+}
+
+.flight-hot-deals__inner {
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.flight-hot-deals__section {
+  margin-bottom: 48px;
+}
+
+.flight-hot-deals__header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.flight-hot-deals__title {
+  margin: 0;
+  font-size: clamp(1.5rem, 3vw, 1.8rem);
+  font-weight: 800;
+  color: #111827;
+}
+
+.flight-hot-deals__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid #3b82f6;
+  color: #3b82f6;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.flight-hot-deals__tabs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.flight-hot-deals__tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.flight-hot-deals__tab {
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  color: #6b7280;
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.flight-hot-deals__tab.is-active {
+  background: #111827;
+  color: #fff;
+  border-color: #111827;
+}
+
+.flight-hot-deals__carousel-wrap {
+  position: relative;
+}
+
+.flight-hot-deals__grid {
+  display: flex;
+  overflow-x: auto;
+  gap: 16px;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding-bottom: 8px;
+}
+
+.flight-hot-deals__grid::-webkit-scrollbar {
+  display: none;
+}
+
+.flight-hot-deals__grid > * {
+  flex: 0 0 calc(33.333% - 11px);
+}
+
+@media (max-width: 1024px) {
+  .flight-hot-deals__grid > * {
+    flex: 0 0 calc(50% - 8px);
+  }
+}
+
+@media (max-width: 640px) {
+  .flight-hot-deals__grid > * {
+    flex: 0 0 calc(100%);
+  }
+}
+
+.flight-hot-deals__btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid #eef2f7;
+  color: #111827;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.flight-hot-deals__carousel-wrap:hover .flight-hot-deals__btn {
+  opacity: 1;
+}
+
+.flight-hot-deals__btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.flight-hot-deals__btn--prev {
+  left: -20px;
+}
+.flight-hot-deals__btn--next {
+  right: -20px;
+}
+
+/* Fight Card Styles */
+.fh-card {
+  border: 1px solid #111827;
+  border-radius: 12px;
+  padding: 16px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.fh-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.fh-card__location {
+  display: flex;
+  flex-direction: column;
+}
+
+.fh-card__location-code {
+  font-size: 16px;
+  font-weight: 800;
+  color: #111827;
+}
+
+.fh-card__location-name {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.fh-card__middle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.fh-card__logo {
+  height: 24px;
+  object-fit: contain;
+  margin-bottom: 4px;
+}
+
+.fh-card__date {
+  font-size: 13px;
+  color: #111827;
+  font-weight: 600;
+}
+
+.fh-card__bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+}
+
+.fh-card__price {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.fh-card__price-val {
+  color: #e91e63;
+  font-weight: 800;
+  font-size: 16px;
+}
+
+.fh-card__cta {
+  background: #0f172a;
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}

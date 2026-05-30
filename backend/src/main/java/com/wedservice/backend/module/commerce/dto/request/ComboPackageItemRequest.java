@@ -33,4 +33,10 @@ public class ComboPackageItemRequest {
     @NotNull(message = "unitPrice is required")
     @DecimalMin(value = "0.00", inclusive = true, message = "unitPrice must be >= 0")
     private BigDecimal unitPrice;
+
+    private BigDecimal unitPriceSnapshot;
+
+    private Boolean isMandatory;
+
+    private Integer sortOrder;
 }

@@ -31,13 +31,30 @@ public class ComboPackageRequest {
     @Size(max = 5000, message = "description must not exceed 5000 characters")
     private String description;
 
+    private Long destinationId;
+
+    @Size(max = 30, message = "comboType must not exceed 30 characters")
+    private String comboType;
+
     @NotNull(message = "basePrice is required")
     @DecimalMin(value = "0.00", inclusive = true, message = "basePrice must be >= 0")
     private BigDecimal basePrice;
 
+    @Size(max = 20, message = "discountType must not exceed 20 characters")
+    private String discountType;
+
+    @DecimalMin(value = "0.00", inclusive = true, message = "discountValue must be >= 0")
+    private BigDecimal discountValue;
+
     @NotNull(message = "discountAmount is required")
     @DecimalMin(value = "0.00", inclusive = true, message = "discountAmount must be >= 0")
     private BigDecimal discountAmount;
+
+    private String pricingRuleJson;
+
+    private java.time.LocalDateTime startAt;
+
+    private java.time.LocalDateTime endAt;
 
     private Boolean isActive;
 

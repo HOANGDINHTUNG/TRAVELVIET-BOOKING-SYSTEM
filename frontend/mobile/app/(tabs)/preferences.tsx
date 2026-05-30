@@ -1,7 +1,6 @@
-import React, { useMemo, useState } from 'react';
+import React from 'react';
 import {
   Alert,
-  Image,
   ScrollView,
   StyleSheet,
   Text,
@@ -10,199 +9,105 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { SERVICE_ITEMS } from '../../constants/Tours';
-
-type ThemeMode = 'light' | 'dark';
-type LanguageMode = 'vi' | 'en';
-
-const copy = {
-  vi: {
-    profileRole: 'Thanh vien Vang',
-    services: 'Dich vu TravelViet',
-    servicesCopy: 'Cac dich vu ho tro duoc dua ve Preferences de Home gon hon.',
-    appearance: 'Giao dien',
-    language: 'Ngon ngu',
-    account: 'Tai khoan',
-    light: 'Sang',
-    dark: 'Toi',
-    vietnamese: 'Tieng Viet',
-    english: 'English',
-    bookings: 'Lich su dat tour',
-    favorite: 'Tour yeu thich',
-    notifications: 'Cai dat thong bao',
-    support: 'Trung tam tro giup',
-    logout: 'Dang xuat',
-    logoutTitle: 'Dang xuat',
-    logoutMessage: 'Ban co chac chan muon dang xuat khoi TravelViet?',
-    cancel: 'Huy',
-  },
-  en: {
-    profileRole: 'Gold member',
-    services: 'TravelViet Services',
-    servicesCopy: 'Support services are grouped in Preferences so Home stays focused.',
-    appearance: 'Appearance',
-    language: 'Language',
-    account: 'Account',
-    light: 'Light',
-    dark: 'Dark',
-    vietnamese: 'Vietnamese',
-    english: 'English',
-    bookings: 'Booking history',
-    favorite: 'Favorite tours',
-    notifications: 'Notification settings',
-    support: 'Help center',
-    logout: 'Log out',
-    logoutTitle: 'Log out',
-    logoutMessage: 'Do you want to log out of TravelViet?',
-    cancel: 'Cancel',
-  },
-};
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { getApiBaseUrl } from '@/config/apiBaseUrl';
+import { adminPreferencesCopy } from '@/constants/adminPreferencesCopy';
+import { clearAuthSession, getAuthSession } from '@/services/authStorage';
+import { setAiChatAccessTokenProvider } from '@/services/aiChatApi';
+import { AppRoutes, asHref } from '@/lib/navigation';
+import { commerceDesk } from '@/theme/commerceDesk';
+import { space } from '@/theme/spacing';
 
 export default function PreferencesScreen() {
   const router = useRouter();
-  const [themeMode, setThemeMode] = useState<ThemeMode>('light');
-  const [language, setLanguage] = useState<LanguageMode>('vi');
-  const isDark = themeMode === 'dark';
-  const text = copy[language];
-  const styles = useMemo(() => createStyles(isDark), [isDark]);
+  const insets = useSafeAreaInsets();
+  const session = getAuthSession();
+  const user = session?.user;
+  const displayName =
+    user?.displayName?.trim() || user?.fullName?.trim() || user?.email || adminPreferencesCopy.guestName;
+  const email = user?.email ?? '—';
+  const permissions = session?.permissions ?? [];
 
   const handleLogout = () => {
-    Alert.alert(text.logoutTitle, text.logoutMessage, [
-      { text: text.cancel, style: 'cancel' },
+    Alert.alert(adminPreferencesCopy.logoutTitle, adminPreferencesCopy.logoutMessage, [
+      { text: adminPreferencesCopy.cancel, style: 'cancel' },
       {
-        text: text.logout,
+        text: adminPreferencesCopy.logout,
         style: 'destructive',
-        onPress: () => router.replace('/(auth)/login'),
+        onPress: async () => {
+          await clearAuthSession();
+          setAiChatAccessTokenProvider(null);
+          router.replace(asHref(AppRoutes.login));
+        },
       },
     ]);
   };
 
-  const MenuItem = ({
-    icon,
-    title,
-    color,
-    onPress,
-  }: {
-    icon: keyof typeof Ionicons.glyphMap;
-    title: string;
-    color?: string;
-    onPress?: () => void;
-  }) => (
-    <TouchableOpacity style={styles.menuItem} onPress={onPress}>
-      <View style={styles.menuItemLeft}>
-        <Ionicons
-          name={icon}
-          size={22}
-          color={color ?? stylesToken(isDark).muted}
-          style={styles.menuIcon}
-        />
-        <Text style={[styles.menuTitle, color ? { color } : null]}>{title}</Text>
-      </View>
-      <Ionicons name="chevron-forward" size={18} color={stylesToken(isDark).subtle} />
-    </TouchableOpacity>
-  );
-
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      <View style={styles.profileHeader}>
-        <Image
-          source={{ uri: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png' }}
-          style={styles.avatar}
-        />
-        <Text style={styles.userName}>Tru (Admin)</Text>
-        <Text style={styles.userEmail}>admin@gmail.com</Text>
-        <View style={styles.badge}>
-          <Text style={styles.badgeText}>{text.profileRole}</Text>
-        </View>
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionKicker}>{text.appearance}</Text>
-        <View style={styles.segmentedControl}>
-          <TouchableOpacity
-            style={[styles.segmentButton, themeMode === 'light' && styles.segmentActive]}
-            onPress={() => setThemeMode('light')}
-          >
-            <Ionicons
-              name="sunny-outline"
-              size={17}
-              color={themeMode === 'light' ? '#fff' : stylesToken(isDark).text}
-            />
-            <Text
-              style={[
-                styles.segmentText,
-                themeMode === 'light' && styles.segmentTextActive,
-              ]}
-            >
-              {text.light}
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.segmentButton, themeMode === 'dark' && styles.segmentActive]}
-            onPress={() => setThemeMode('dark')}
-          >
-            <Ionicons
-              name="moon-outline"
-              size={17}
-              color={themeMode === 'dark' ? '#fff' : stylesToken(isDark).text}
-            />
-            <Text
-              style={[
-                styles.segmentText,
-                themeMode === 'dark' && styles.segmentTextActive,
-              ]}
-            >
-              {text.dark}
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionKicker}>{text.language}</Text>
-        <View style={styles.segmentedControl}>
-          <TouchableOpacity
-            style={[styles.segmentButton, language === 'vi' && styles.segmentActive]}
-            onPress={() => setLanguage('vi')}
-          >
-            <Text style={[styles.segmentText, language === 'vi' && styles.segmentTextActive]}>
-              {text.vietnamese}
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.segmentButton, language === 'en' && styles.segmentActive]}
-            onPress={() => setLanguage('en')}
-          >
-            <Text style={[styles.segmentText, language === 'en' && styles.segmentTextActive]}>
-              {text.english}
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionKicker}>{text.services}</Text>
-        <Text style={styles.sectionCopy}>{text.servicesCopy}</Text>
-        <View style={styles.serviceGrid}>
-          {SERVICE_ITEMS.map((service) => (
-            <View style={styles.serviceItem} key={service}>
-              <Ionicons name="shield-checkmark-outline" size={18} color="#087f9c" />
-              <Text style={styles.serviceText}>{service}</Text>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={{ paddingBottom: insets.bottom + space.lg }}
+      showsVerticalScrollIndicator={false}>
+      <View style={[styles.header, { paddingTop: insets.top + space.md }]}>
+        <Text style={styles.kicker}>{adminPreferencesCopy.kicker}</Text>
+        <Text style={styles.title}>{adminPreferencesCopy.title}</Text>
+        <View style={styles.profileCard}>
+          <View style={styles.avatar}>
+            <Ionicons name="person-circle-outline" size={52} color={commerceDesk.accent} />
+          </View>
+          <Text style={styles.userName}>{displayName}</Text>
+          <Text style={styles.userEmail}>{email}</Text>
+          {session?.isSuperAdmin ? (
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>{adminPreferencesCopy.superAdmin}</Text>
             </View>
-          ))}
+          ) : session?.hasManagementAccess ? (
+            <View style={[styles.badge, styles.badgeMuted]}>
+              <Text style={styles.badgeText}>{adminPreferencesCopy.managementAccess}</Text>
+            </View>
+          ) : null}
         </View>
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionKicker}>{text.account}</Text>
-        <MenuItem icon="ticket-outline" title={text.bookings} />
-        <MenuItem icon="heart-outline" title={text.favorite} />
-        <MenuItem icon="notifications-outline" title={text.notifications} />
-        <MenuItem icon="headset-outline" title={text.support} />
-        <MenuItem
+        <Text style={styles.sectionKicker}>{adminPreferencesCopy.apiSection}</Text>
+        <Text style={styles.sectionHint}>{adminPreferencesCopy.apiHint}</Text>
+        <Text style={styles.apiUrl} selectable>
+          {getApiBaseUrl()}
+        </Text>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionKicker}>{adminPreferencesCopy.sessionSection}</Text>
+        <Text style={styles.metaLabel}>
+          {adminPreferencesCopy.permissions} ({permissions.length})
+        </Text>
+        {permissions.length === 0 ? (
+          <Text style={styles.metaValue}>{adminPreferencesCopy.noPermissions}</Text>
+        ) : (
+          <View style={styles.permissionWrap}>
+            {permissions.slice(0, 12).map((perm) => (
+              <View key={perm} style={styles.permissionChip}>
+                <Text style={styles.permissionText}>{perm}</Text>
+              </View>
+            ))}
+            {permissions.length > 12 ? (
+              <Text style={styles.moreText}>+{permissions.length - 12} quyền khác</Text>
+            ) : null}
+          </View>
+        )}
+      </View>
+
+      <View style={styles.section}>
+        <MenuRow
+          icon="pricetags-outline"
+          title={adminPreferencesCopy.commerceDesk}
+          onPress={() => router.push(asHref(AppRoutes.productTab))}
+        />
+        <MenuRow
           icon="log-out-outline"
-          title={text.logout}
-          color="#FF3B30"
+          title={adminPreferencesCopy.logout}
+          danger
           onPress={handleLogout}
         />
       </View>
@@ -210,118 +115,174 @@ export default function PreferencesScreen() {
   );
 }
 
-function stylesToken(isDark: boolean) {
-  return {
-    page: isDark ? '#080b0b' : '#f6f3ea',
-    surface: isDark ? '#15110f' : '#ffffff',
-    soft: isDark ? '#231a16' : '#fffdf8',
-    text: isDark ? '#eef6f2' : '#283618',
-    muted: isDark ? 'rgba(238,246,242,0.72)' : '#606c38',
-    subtle: isDark ? 'rgba(238,246,242,0.36)' : '#a6ad8b',
-    border: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(96,108,56,0.18)',
-  };
+function MenuRow({
+  icon,
+  title,
+  onPress,
+  danger,
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  title: string;
+  onPress: () => void;
+  danger?: boolean;
+}) {
+  return (
+    <TouchableOpacity style={styles.menuRow} onPress={onPress}>
+      <View style={styles.menuLeft}>
+        <Ionicons
+          name={icon}
+          size={22}
+          color={danger ? '#DC2626' : commerceDesk.accent}
+          style={styles.menuIcon}
+        />
+        <Text style={[styles.menuTitle, danger && styles.menuTitleDanger]}>{title}</Text>
+      </View>
+      <Ionicons name="chevron-forward" size={18} color={commerceDesk.textMuted} />
+    </TouchableOpacity>
+  );
 }
 
-function createStyles(isDark: boolean) {
-  const token = stylesToken(isDark);
-
-  return StyleSheet.create({
-    container: { flex: 1, backgroundColor: token.page },
-    profileHeader: {
-      alignItems: 'center',
-      paddingTop: 58,
-      paddingBottom: 28,
-      backgroundColor: token.surface,
-      borderBottomLeftRadius: 24,
-      borderBottomRightRadius: 24,
-      borderBottomWidth: 1,
-      borderColor: token.border,
-    },
-    avatar: {
-      width: 92,
-      height: 92,
-      borderRadius: 46,
-      marginBottom: 14,
-      borderWidth: 3,
-      borderColor: '#087f9c',
-    },
-    userName: { color: token.text, fontSize: 24, fontWeight: '900' },
-    userEmail: { color: token.muted, fontSize: 14, marginTop: 4, fontWeight: '700' },
-    badge: {
-      marginTop: 12,
-      minHeight: 32,
-      justifyContent: 'center',
-      paddingHorizontal: 14,
-      borderRadius: 999,
-      backgroundColor: isDark ? 'rgba(221,161,94,0.18)' : '#ffe08a',
-    },
-    badgeText: { color: isDark ? '#f7d7a7' : '#856404', fontWeight: '900' },
-    section: {
-      marginHorizontal: 16,
-      marginTop: 16,
-      padding: 16,
-      borderRadius: 8,
-      borderWidth: 1,
-      borderColor: token.border,
-      backgroundColor: token.surface,
-    },
-    sectionKicker: {
-      color: '#dda15e',
-      fontSize: 11,
-      fontWeight: '900',
-      textTransform: 'uppercase',
-      marginBottom: 10,
-    },
-    sectionCopy: {
-      color: token.muted,
-      fontSize: 13,
-      lineHeight: 19,
-      fontWeight: '600',
-      marginBottom: 12,
-    },
-    segmentedControl: {
-      flexDirection: 'row',
-      gap: 8,
-      padding: 4,
-      borderRadius: 8,
-      backgroundColor: token.soft,
-      borderWidth: 1,
-      borderColor: token.border,
-    },
-    segmentButton: {
-      flex: 1,
-      minHeight: 42,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 7,
-      borderRadius: 6,
-    },
-    segmentActive: { backgroundColor: '#606c38' },
-    segmentText: { color: token.text, fontSize: 13, fontWeight: '900' },
-    segmentTextActive: { color: '#fff' },
-    serviceGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-    serviceItem: {
-      width: '48%',
-      minHeight: 62,
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 8,
-      padding: 10,
-      borderRadius: 8,
-      backgroundColor: isDark ? 'rgba(0,180,216,0.12)' : 'rgba(0,180,216,0.08)',
-    },
-    serviceText: { flex: 1, color: token.text, fontSize: 12, lineHeight: 16, fontWeight: '800' },
-    menuItem: {
-      minHeight: 54,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      borderBottomWidth: 1,
-      borderBottomColor: token.border,
-    },
-    menuItemLeft: { flexDirection: 'row', alignItems: 'center' },
-    menuIcon: { marginRight: 12 },
-    menuTitle: { color: token.text, fontSize: 15, fontWeight: '800' },
-  });
-}
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: commerceDesk.surfaceSoft,
+  },
+  header: {
+    paddingHorizontal: space.md,
+    paddingBottom: space.sm,
+  },
+  kicker: {
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 0.6,
+    color: commerceDesk.accent,
+  },
+  title: {
+    marginTop: 4,
+    fontSize: 22,
+    fontWeight: '800',
+    color: commerceDesk.text,
+  },
+  profileCard: {
+    marginTop: space.md,
+    alignItems: 'center',
+    padding: space.md,
+    borderRadius: commerceDesk.radius,
+    borderWidth: 1,
+    borderColor: commerceDesk.border,
+    backgroundColor: commerceDesk.surface,
+  },
+  avatar: {
+    marginBottom: 8,
+  },
+  userName: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: commerceDesk.text,
+  },
+  userEmail: {
+    marginTop: 4,
+    fontSize: 14,
+    color: commerceDesk.textMuted,
+    fontWeight: '600',
+  },
+  badge: {
+    marginTop: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 999,
+    backgroundColor: commerceDesk.statusActiveBg,
+  },
+  badgeMuted: {
+    backgroundColor: 'rgba(143, 93, 32, 0.12)',
+  },
+  badgeText: {
+    fontSize: 11,
+    fontWeight: '900',
+    color: commerceDesk.statusActiveText,
+  },
+  section: {
+    marginHorizontal: space.md,
+    marginTop: space.md,
+    padding: space.md,
+    borderRadius: commerceDesk.radius,
+    borderWidth: 1,
+    borderColor: commerceDesk.border,
+    backgroundColor: commerceDesk.surface,
+  },
+  sectionKicker: {
+    fontSize: 11,
+    fontWeight: '900',
+    textTransform: 'uppercase',
+    color: commerceDesk.accent,
+    marginBottom: 8,
+  },
+  sectionHint: {
+    fontSize: 13,
+    color: commerceDesk.textMuted,
+    marginBottom: 8,
+  },
+  apiUrl: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: commerceDesk.text,
+    lineHeight: 20,
+  },
+  metaLabel: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: commerceDesk.text,
+    marginBottom: 8,
+  },
+  metaValue: {
+    fontSize: 13,
+    color: commerceDesk.textMuted,
+  },
+  permissionWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  permissionChip: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 999,
+    backgroundColor: commerceDesk.surfaceSoft,
+    borderWidth: 1,
+    borderColor: commerceDesk.border,
+  },
+  permissionText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: commerceDesk.textMuted,
+  },
+  moreText: {
+    width: '100%',
+    fontSize: 12,
+    color: commerceDesk.textMuted,
+    marginTop: 4,
+  },
+  menuRow: {
+    minHeight: 52,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderBottomWidth: 1,
+    borderBottomColor: commerceDesk.border,
+  },
+  menuLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  menuIcon: {
+    marginRight: 12,
+  },
+  menuTitle: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: commerceDesk.text,
+  },
+  menuTitleDanger: {
+    color: '#DC2626',
+  },
+});

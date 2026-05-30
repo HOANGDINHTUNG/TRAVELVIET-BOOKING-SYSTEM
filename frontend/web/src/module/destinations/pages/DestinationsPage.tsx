@@ -2,12 +2,15 @@ import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } f
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useParams } from 'react-router-dom'
+import { toast } from 'sonner'
 import { ArrowLeft, ArrowRight, Compass, Image, MapPin, RotateCcw, Search } from 'lucide-react'
 import { destinationApi } from '../../../api/server/Destination.api'
-import { ErrorBlock } from '../../../components/common/ui/ErrorBlock'
 import { Footer } from '../../../components/Footer/Footer'
+import { PageSkeletonBlock } from '../../../components/ui/skeletons/PageSkeletonBlock'
 import type { DestinationDetail } from '../database/interface/destination'
 import type { Destination } from '../../home/database/interface/publicTravel'
+import { DestinationsPageMainSkeleton } from '../components/DestinationsPageSkeleton'
+import '../components/DestinationsPageSkeleton.css'
 import '../styles/DestinationsPage.css'
 
 const HERO_DEFAULT_IMAGE =
@@ -176,10 +179,24 @@ function DestinationsPage() {
     branchProgramSlug && anchorDetail
       ? `Khám phá ${anchorDetail.name}`
       : 'Bạn muốn kích hoạt hành trình tại địa điểm nào?'
-  const heroKicker =
-    !loading && destinations.length > 0
+  const heroKicker = loading
+    ? ''
+    : destinations.length > 0
       ? `${destinations.length} điểm đến đang chờ khám phá`
       : 'Khám phá các điểm đến hấp dẫn nhất'
+
+  useEffect(() => {
+    if (!loading || destinations.length > 0) return undefined
+    const timer = window.setTimeout(() => {
+      toast.warning('Không nhận được dữ liệu điểm đến. Kiểm tra backend và thử lại.')
+    }, 4500)
+    return () => window.clearTimeout(timer)
+  }, [destinations.length, loading])
+
+  useEffect(() => {
+    if (!error || destinations.length > 0) return
+    toast.error(error)
+  }, [destinations.length, error])
 
   // Key for resetting card entrance animations when filters change
   const filterKey = `${selectedArea}|${selectedActivity}|${deferredSearchQuery}`
@@ -188,7 +205,10 @@ function DestinationsPage() {
     <>
       <main className="dest-page">
         {/* ── Hero ──────────────────────────────────────────── */}
-        <section className="dest-page-hero" aria-label="Tìm kiếm điểm đến">
+        <section
+          className={`dest-page-hero${loading ? ' dest-page-hero--skeleton' : ''}`}
+          aria-label="Tìm kiếm điểm đến"
+        >
           <img
             src={heroImage}
             alt=""
@@ -202,24 +222,40 @@ function DestinationsPage() {
           />
           <div className="dest-page-hero__overlay" aria-hidden="true" />
           <div className="dest-page-hero__content">
-            <p className="dest-page-hero__kicker">{heroKicker}</p>
-            <h1 className="dest-page-hero__title">{heroTitle}</h1>
-            <form className="dest-hero-glass-bar" onSubmit={handleHeroSearch} role="search">
-              <label className="dest-hero-glass-bar__input">
-                <Search size={18} strokeWidth={2} aria-hidden="true" />
-                <input
-                  type="search"
-                  value={searchQuery}
-                  placeholder="Tên điểm đến, tỉnh thành, vùng..."
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  aria-label="Tìm kiếm điểm đến"
-                />
-              </label>
-              <button type="submit" className="dest-hero-glass-bar__btn">
-                <Search size={15} strokeWidth={2.4} aria-hidden="true" />
-                Khám phá
-              </button>
-            </form>
+            {loading ? (
+              <>
+                <PageSkeletonBlock className="dest-sk-title psb" style={{ width: 280, height: 12, marginBottom: 10 }} as="div" />
+                <PageSkeletonBlock className="dest-sk-title psb" style={{ width: 'min(520px, 90%)', height: 32, marginBottom: 16 }} as="div" />
+              </>
+            ) : (
+              <>
+                <p className="dest-page-hero__kicker">{heroKicker}</p>
+                <h1 className="dest-page-hero__title">{heroTitle}</h1>
+              </>
+            )}
+            {loading ? (
+              <div className="dest-hero-glass-bar dest-hero-glass-bar--skeleton" aria-hidden>
+                <PageSkeletonBlock className="dest-sk-search psb" as="div" />
+                <PageSkeletonBlock className="dest-sk-search-btn psb" as="div" />
+              </div>
+            ) : (
+              <form className="dest-hero-glass-bar" onSubmit={handleHeroSearch} role="search">
+                <label className="dest-hero-glass-bar__input">
+                  <Search size={18} strokeWidth={2} aria-hidden="true" />
+                  <input
+                    type="search"
+                    value={searchQuery}
+                    placeholder="Tên điểm đến, tỉnh thành, vùng..."
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    aria-label="Tìm kiếm điểm đến"
+                  />
+                </label>
+                <button type="submit" className="dest-hero-glass-bar__btn">
+                  <Search size={15} strokeWidth={2.4} aria-hidden="true" />
+                  Khám phá
+                </button>
+              </form>
+            )}
           </div>
         </section>
 
@@ -257,13 +293,8 @@ function DestinationsPage() {
             ) : null}
 
             {/* Loading */}
-            {loading ? (
-              <div className="dest-loading" role="status" aria-live="polite">
-                <span className="dest-loading__spinner" aria-hidden="true" />
-                <p>Đang tải danh sách điểm đến...</p>
-              </div>
-            ) : error && destinations.length === 0 ? (
-              <ErrorBlock message={error} />
+            {loading || (error && destinations.length === 0) ? (
+              <DestinationsPageMainSkeleton />
             ) : (
               <>
                 {/* Filter bar */}

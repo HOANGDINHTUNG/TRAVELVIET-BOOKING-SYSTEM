@@ -1,0 +1,300 @@
+/* Skeleton — /tours catalog (khớp layout ToursCatalogLayout + Cards) */
+
+.tours-catalog-page.is-skeleton-loading {
+  pointer-events: none;
+}
+
+.tours-vt-sk {
+  position: relative;
+  display: block;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--color-border) 72%, var(--color-surface-soft));
+  overflow: hidden;
+}
+
+.theme-dark .tours-vt-sk {
+  background: color-mix(in srgb, #ffffff 12%, var(--color-surface-elevated));
+}
+
+.tours-vt-sk::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, #ffffff 55%, transparent),
+    transparent
+  );
+  animation: tours-vt-sk-shimmer 1.25s ease-in-out infinite;
+}
+
+.theme-dark .tours-vt-sk::after {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
+}
+
+@keyframes tours-vt-sk-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.tours-vt-sk--hero-title {
+  width: min(420px, 72%);
+  height: clamp(28px, 4vw, 40px);
+  border-radius: 10px;
+  margin-bottom: 14px;
+}
+
+.tours-vt-sk--hero-lead {
+  width: min(560px, 88%);
+  height: 14px;
+  border-radius: 6px;
+}
+
+.tours-vt-sk--hero-lead-short {
+  width: min(380px, 62%);
+  height: 14px;
+  margin-top: 8px;
+  border-radius: 6px;
+}
+
+.tours-vt-search-form--skeleton .tours-vt-sk--kicker {
+  width: 140px;
+  height: 11px;
+  margin-bottom: 12px;
+  border-radius: 4px;
+}
+
+.tours-vt-search-form--skeleton .tours-vt-search-cell {
+  pointer-events: none;
+  min-height: 58px;
+}
+
+.tours-vt-search-form--skeleton .tours-vt-sk--cell-label {
+  width: 56px;
+  height: 10px;
+  border-radius: 4px;
+}
+
+.tours-vt-search-form--skeleton .tours-vt-sk--cell-value {
+  width: 78%;
+  height: 14px;
+  margin-top: 6px;
+  border-radius: 6px;
+}
+
+.tours-vt-search-form--skeleton .tours-vt-sk--submit {
+  width: 100%;
+  min-height: 58px;
+  border-radius: 12px;
+}
+
+.tours-vt-sidebar--skeleton .tours-vt-sk--sidebar-title {
+  width: 88px;
+  height: 20px;
+  border-radius: 6px;
+}
+
+.tours-vt-sidebar--skeleton .tours-vt-sk--sidebar-reset {
+  width: 52px;
+  height: 14px;
+  border-radius: 6px;
+}
+
+.tours-vt-sidebar--skeleton .tours-vt-sk--esg-row {
+  width: 100%;
+  height: 40px;
+  border-radius: 10px;
+}
+
+.tours-vt-sidebar--skeleton .tours-vt-sk--block-title {
+  width: 96px;
+  height: 14px;
+  margin-bottom: 12px;
+  border-radius: 4px;
+}
+
+.tours-vt-sidebar--skeleton .tours-vt-sk--check-row {
+  width: 100%;
+  height: 22px;
+  margin-bottom: 10px;
+  border-radius: 6px;
+}
+
+.tours-vt-sidebar--skeleton .tours-vt-sk--range {
+  width: 100%;
+  height: 8px;
+  margin: 12px 0 10px;
+  border-radius: 999px;
+}
+
+.tours-vt-main-toolbar--skeleton .tours-vt-sk--results {
+  width: 220px;
+  height: 16px;
+  border-radius: 6px;
+}
+
+.tours-vt-main-toolbar--skeleton .tours-vt-sk--sort {
+  width: 168px;
+  height: 36px;
+  border-radius: 10px;
+}
+
+.tours-vt-main-toolbar--skeleton .tours-vt-sk--toggle {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+}
+
+.tours-catalog-card--skeleton {
+  pointer-events: none;
+  min-height: clamp(360px, 42vw, 410px);
+}
+
+.tours-catalog-card--skeleton .tours-catalog-card__media {
+  background: color-mix(in srgb, var(--color-border) 65%, var(--color-surface-soft));
+}
+
+.tours-catalog-card--skeleton .tours-catalog-card__media::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: color-mix(in srgb, var(--color-border) 55%, var(--color-surface-soft));
+}
+
+.tours-catalog-card--skeleton .tours-catalog-card__media::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, #ffffff 50%, transparent),
+    transparent
+  );
+  animation: tours-vt-sk-shimmer 1.25s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.tours-catalog-card--skeleton .tours-catalog-card__panel {
+  transform: none;
+  opacity: 1;
+  pointer-events: none;
+  background: #ffffff;
+}
+
+.theme-dark .tours-catalog-card--skeleton .tours-catalog-card__panel {
+  background: var(--color-surface-elevated);
+}
+
+.tours-catalog-card--skeleton .tours-catalog-card__tag-slot,
+.tours-catalog-card--skeleton .tours-catalog-card__esg-slot {
+  position: absolute;
+  z-index: 2;
+  border-radius: 999px;
+}
+
+.tours-catalog-card--skeleton .tours-catalog-card__tag-slot {
+  left: 12px;
+  top: 12px;
+  width: 72px;
+  height: 22px;
+}
+
+.tours-catalog-card--skeleton .tours-catalog-card__esg-slot {
+  right: 12px;
+  top: 12px;
+  width: 88px;
+  height: 22px;
+  border-radius: 8px;
+}
+
+.tours-catalog-card--skeleton .tours-vt-sk--card-title {
+  width: 92%;
+  height: 18px;
+  margin-bottom: 10px;
+  border-radius: 6px;
+}
+
+.tours-catalog-card--skeleton .tours-vt-sk--card-line {
+  width: 100%;
+  height: 12px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+}
+
+.tours-catalog-card--skeleton .tours-vt-sk--card-line-mid {
+  width: 72%;
+}
+
+.tours-catalog-card--skeleton .tours-vt-sk--card-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 4px 0 10px;
+}
+
+.tours-catalog-card--skeleton .tours-vt-sk--card-badge {
+  width: 52px;
+  height: 20px;
+  border-radius: 6px;
+}
+
+.tours-catalog-card--skeleton .tours-catalog-card__foot {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 8px;
+}
+
+.tours-catalog-card--skeleton .tours-vt-sk--card-price-label {
+  width: 48px;
+  height: 10px;
+  margin-bottom: 6px;
+  border-radius: 4px;
+}
+
+.tours-catalog-card--skeleton .tours-vt-sk--card-price {
+  width: 108px;
+  height: 22px;
+  border-radius: 6px;
+}
+
+.tours-catalog-card--skeleton .tours-vt-sk--card-cta {
+  width: 108px;
+  height: 40px;
+  border-radius: 999px 0 14px 0;
+  flex-shrink: 0;
+}
+
+.tours-vt-grid.is-list .tours-catalog-card--skeleton {
+  height: 260px;
+  min-height: 260px;
+}
+
+.tours-vt-grid.is-list .tours-catalog-card--skeleton .tours-catalog-card__media {
+  min-height: 260px;
+}
+
+.tours-vt-grid.is-list .tours-catalog-card--skeleton .tours-catalog-card__foot-anchor {
+  min-height: 260px;
+}
+
+.tours-vt-grid.is-list .tours-catalog-card--skeleton .tours-catalog-card__panel {
+  height: calc(100% - 20px);
+  margin: 10px 10px 10px -20px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .tours-catalog-card--skeleton .tours-catalog-card__panel {
+    transform: none;
+    opacity: 1;
+  }
+}

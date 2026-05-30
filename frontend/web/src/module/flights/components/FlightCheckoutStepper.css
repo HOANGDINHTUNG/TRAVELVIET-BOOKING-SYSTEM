@@ -1,0 +1,77 @@
+.fc-stepper__list {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fc-stepper__sep-wrap {
+  display: flex;
+  align-items: center;
+  padding: 0 2px;
+}
+
+.fc-stepper__sep {
+  color: #c5cdd8;
+  flex-shrink: 0;
+}
+
+.fc-stepper__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fc-stepper__dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.fc-stepper__label {
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.fc-stepper__item.is-active .fc-stepper__dot,
+.fc-stepper__item.is-complete .fc-stepper__dot {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.fc-stepper__item.is-active .fc-stepper__label,
+.fc-stepper__item.is-complete .fc-stepper__label {
+  color: #2563eb;
+}
+
+.fc-stepper__item.is-upcoming .fc-stepper__dot {
+  background: #9ca3af;
+  color: #ffffff;
+}
+
+.fc-stepper__item.is-upcoming .fc-stepper__label {
+  color: #9ca3af;
+  font-weight: 600;
+}
+
+@media (max-width: 640px) {
+  .fc-stepper__label {
+    font-size: 12px;
+  }
+
+  .fc-stepper__dot {
+    width: 20px;
+    height: 20px;
+    font-size: 11px;
+  }
+}

@@ -1,50 +1,49 @@
-# Welcome to your Expo app 👋
+# TravelViet Commerce (Mobile)
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Ứng dụng Expo dành cho **admin / commerce desk** — đồng bộ web `PromotionCommercePanel` (4 tab: Vouchers, Campaigns, Products, Combos).
 
-## Get started
+## Tính năng
 
-1. Install dependencies
+- List + tìm kiếm + phân trang (`size=12`) + bật/tắt trạng thái (PATCH status)
+- **Không** CRUD form (chờ web có `ProductManagementPane` — Giai đoạn 5)
+- Đăng nhập API thật, SecureStore, refresh token khi 401
+- Tab: **Commerce** + **Cài đặt** (+ AI assistant khi đã login)
 
-   ```bash
-   npm install
-   ```
+## Tài liệu
 
-2. Start the app
+| File | Mô tả |
+|------|--------|
+| [docs/MOBILE_WEB_PRODUCT_ALIGNMENT_PLAN.md](docs/MOBILE_WEB_PRODUCT_ALIGNMENT_PLAN.md) | Kế hoạch G0–G9 |
+| [HUONG_DAN_TEST_SAN_PHAM.md](HUONG_DAN_TEST_SAN_PHAM.md) | Hướng dẫn test API / quyền |
 
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Cấu hình
 
 ```bash
-npm run reset-project
+cd frontend/mobile
+npm install
+copy .env.example .env
+# Sửa EXPO_PUBLIC_API_LOCAL_URL (emulator: 10.0.2.2:8088, máy thật: IP LAN)
+npx expo start -c
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Quyền tối thiểu
 
-## Learn more
+- Vào app: `voucher.view` **hoặc** `promotion.campaign.view`
+- Toggle voucher: `voucher.publish`
+- Toggle campaign: `promotion.campaign.publish`
+- Toggle product/combo: `voucher.delete`
 
-To learn more about developing your project with Expo, look at the following resources:
+## Cấu trúc chính
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```
+app/(tabs)/products/     → Commerce Desk (4 segment tabs)
+app/(tabs)/preferences/  → Tài khoản + API + đăng xuất
+app/(auth)/login.tsx     → Login desk theme #8f5d20
+features/commerce/       → CommerceDeskScreen, hooks API
+services/                → apiClient, authSession, promotionApi, …
+theme/commerceDesk.ts    → Design tokens web backoffice
+```
 
-## Join the community
+## Theme
 
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Màu chủ đạo desk: **`#8f5d20`** (`theme/commerceDesk.ts`) — không dùng consumer blue `#2563EB` trên desk.

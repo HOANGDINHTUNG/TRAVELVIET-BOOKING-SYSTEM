@@ -1,0 +1,64 @@
+.fc-hold-expired-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  background: rgba(15, 23, 42, 0.5);
+  display: grid;
+  place-items: center;
+  padding: 20px 16px;
+}
+
+.fc-hold-expired-modal {
+  width: min(420px, 100%);
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 28px 24px 24px;
+  text-align: center;
+  box-shadow: 0 24px 48px rgba(15, 23, 42, 0.18);
+}
+
+.fc-hold-expired-modal__art {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.fc-hold-expired-modal__mascot {
+  width: 120px;
+  height: auto;
+  object-fit: contain;
+}
+
+.fc-hold-expired-modal__title {
+  margin: 0 0 10px;
+  font-size: 18px;
+  font-weight: 800;
+  color: #111827;
+  line-height: 1.35;
+}
+
+.fc-hold-expired-modal__desc {
+  margin: 0 0 22px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #64748b;
+  line-height: 1.55;
+}
+
+.fc-hold-expired-modal__cta {
+  width: 100%;
+  max-width: 280px;
+  height: 44px;
+  border: none;
+  border-radius: 999px;
+  background: #2563eb;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: filter 0.15s ease;
+}
+
+.fc-hold-expired-modal__cta:hover {
+  filter: brightness(1.06);
+}

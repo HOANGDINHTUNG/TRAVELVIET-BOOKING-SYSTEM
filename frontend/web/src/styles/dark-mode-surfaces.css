@@ -277,31 +277,40 @@
 }
 
 /* ========== Tour card (panel trắng + chữ #1A1A1A) ========== */
-.app-shell.theme-dark .tv-tour-card-panel {
+.app-shell.theme-dark .tv-tour-card-panel,
+.app-shell.theme-dark .tv-offer-card__panel {
   background: var(--color-surface) !important;
   box-shadow: var(--shadow-card) !important;
 }
 
 .app-shell.theme-dark .tv-tour-card-panel h3,
-.app-shell.theme-dark .tv-tour-card-panel .text-\[\#1A1A1A\] {
+.app-shell.theme-dark .tv-tour-card-panel .text-\[\#1A1A1A\],
+.app-shell.theme-dark .tv-offer-card__panel h3,
+.app-shell.theme-dark .tv-offer-card__panel .text-\[\#1A1A1A\] {
   color: var(--color-heading) !important;
 }
 
 .app-shell.theme-dark .tv-tour-card-panel .text-\[\#5C6478\],
 .app-shell.theme-dark .tv-tour-card-panel .text-\[\#6B7693\],
-.app-shell.theme-dark .tv-tour-card-panel .text-\[\#8B95A8\] {
+.app-shell.theme-dark .tv-tour-card-panel .text-\[\#8B95A8\],
+.app-shell.theme-dark .tv-offer-card__panel .text-\[\#5C6478\],
+.app-shell.theme-dark .tv-offer-card__panel .text-\[\#6B7693\],
+.app-shell.theme-dark .tv-offer-card__panel .text-\[\#8B95A8\] {
   color: var(--color-muted) !important;
 }
 
-.app-shell.theme-dark .tv-tour-card-panel .bg-\[\#E8ECF3\] {
+.app-shell.theme-dark .tv-tour-card-panel .bg-\[\#E8ECF3\],
+.app-shell.theme-dark .tv-offer-card__panel .bg-\[\#E8ECF3\] {
   background: var(--color-border) !important;
 }
 
-.app-shell.theme-dark .tv-tour-card-panel .text-\[\#0046BE\] {
+.app-shell.theme-dark .tv-tour-card-panel .text-\[\#0046BE\],
+.app-shell.theme-dark .tv-offer-card__price-value {
   color: var(--color-ocean) !important;
 }
 
-.app-shell.theme-dark .tv-tour-card-panel a.bg-\[\#0046BE\] {
+.app-shell.theme-dark .tv-tour-card-panel a.bg-\[\#0046BE\],
+.app-shell.theme-dark .tv-offer-card__cta--blue {
   background: color-mix(in srgb, var(--color-ocean) 88%, #1e3a5f) !important;
   color: #fff !important;
 }

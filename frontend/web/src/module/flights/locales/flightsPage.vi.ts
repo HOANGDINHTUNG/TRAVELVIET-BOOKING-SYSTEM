@@ -74,6 +74,9 @@ export const flightsPageVi = {
     carryOn: 'Hành lý xách tay',
     noResults: 'Không có chuyến bay phù hợp bộ lọc.',
     selectToast: 'Đang hoàn thiện bước chọn vé — tạm thời chỉ hiển thị mock.',
+    loadingMessage: 'Đang tìm chuyến bay phù hợp...',
+    loadingFiltersAria: 'Đang tải bộ lọc',
+    loadingCardsAria: 'Đang tải danh sách chuyến bay',
   },
   featured: {
     title: 'Điểm đến nổi bật',
@@ -85,6 +88,18 @@ export const flightsPageVi = {
       { name: 'Busan, Hàn Quốc', alt: 'Kiến trúc cổ Hàn Quốc' },
       { name: 'Singapore', alt: 'Marina Bay Sands' },
     ],
+  },
+  dealSections: {
+    sectionAria: 'Chuyến bay nổi bật',
+    domesticTitle: 'Các chuyến bay nội địa',
+    internationalTitle: 'Các chuyến bay quốc tế',
+    oneWayBadge: 'Chuyến bay 1 chiều',
+    originFilterAria: 'Lọc theo điểm đi',
+    loadingAria: 'Đang tải chuyến bay nổi bật',
+    priceFrom: 'Giá từ:',
+    viewNow: 'Xem ngay',
+    empty: 'Chưa có chuyến bay cho tuyến này.',
+    viewToast: 'Đang chuyển tới kết quả tìm kiếm — dữ liệu mock.',
   },
   about: {
     title: 'Travel Viet — Nâng tầm trải nghiệm bay của bạn',

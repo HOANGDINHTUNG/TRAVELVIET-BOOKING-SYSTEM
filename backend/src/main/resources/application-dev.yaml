@@ -7,9 +7,8 @@
 #
 # API cho frontend: http://localhost:8088/api/v1  (không liên quan cổng 3307)
 #
-# Failover API (public Render → local):
-#   app.api.failover.enabled=true — probe Render lúc start; nếu down → khuyến nghị localhost
-#   GET /system/health → connectivity.api.recommendedBaseUrl
+# Failover API (local trước → Render public nếu local down):
+#   app.api.failover.enabled=true — probe lúc start; GET /system/health → connectivity.api.recommendedBaseUrl
 # =============================================================================
 
 spring:
@@ -19,6 +18,13 @@ spring:
     exclude:
       - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
       - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
+      - org.springframework.boot.data.redis.autoconfigure.health.DataRedisReactiveHealthContributorAutoConfiguration
+      - org.springframework.boot.data.redis.autoconfigure.health.DataRedisHealthContributorAutoConfiguration
+  data:
+    redis:
+      host: ${REDIS_HOST:127.0.0.1}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
   datasource:
     # Chỉ dùng khi tắt app.datasource.failover.enabled
     url: jdbc:mysql://127.0.0.1:3307/wedservice?useSSL=false&serverTimezone=Asia/Ho_Chi_Minh&allowPublicKeyRetrieval=true
@@ -56,8 +62,8 @@ logging:
 app:
   api:
     failover:
-      enabled: ${API_FAILOVER_ENABLED}
-      prefer-public: ${API_PREFER_PUBLIC}
+      enabled: ${API_FAILOVER_ENABLED:true}
+      prefer-public: ${API_PREFER_PUBLIC:false}
       probe-timeout-ms: 8000
       # Hai URL: public (Render) | local (máy dev) — giữ default vì là 2 trường hợp failover
       public-base-url: ${APP_API_PUBLIC_BASE_URL:https://travelviet-booking-system.onrender.com/api/v1}

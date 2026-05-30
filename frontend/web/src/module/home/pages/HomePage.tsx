@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import { Footer } from "../../../components/Footer/Footer";
 import { EmptyState } from "../../../components/common/ui/EmptyState";
-import { ErrorBlock } from "../../../components/common/ui/ErrorBlock";
 import BannerHome, {
   type BannerSlide,
 } from "../../../components/hero/BannerHome";
@@ -37,6 +37,8 @@ function HomePage() {
 
   const [stalled, setStalled] = useState(false);
   const stallTimer = useRef<number | null>(null);
+  const notifiedStalled = useRef(false);
+  const notifiedError = useRef(false);
 
   useEffect(() => {
     void dispatch(fetchHomePublicData());
@@ -81,6 +83,27 @@ function HomePage() {
     toursInternationalHot.length,
     toursLastMinuteDeals.length,
   ]);
+
+  useEffect(() => {
+    if (!stalled) {
+      notifiedStalled.current = false;
+      return;
+    }
+    if (notifiedStalled.current) return;
+    notifiedStalled.current = true;
+    toast.warning(t("homePage.status.backendOfflineTitle"));
+  }, [stalled, t]);
+
+  useEffect(() => {
+    const hasNoInitialData = destinations.length === 0 && tours.length === 0;
+    if (!(error && hasNoInitialData)) {
+      notifiedError.current = false;
+      return;
+    }
+    if (notifiedError.current) return;
+    notifiedError.current = true;
+    toast.error(error);
+  }, [destinations.length, error, tours.length]);
 
   const handleRetry = () => {
     setStalled(false);
@@ -140,37 +163,10 @@ function HomePage() {
     });
   }, [heroTours, t]);
 
-  if (loading && destinations.length === 0 && tours.length === 0) {
-    if (stalled) {
-      return (
-        <>
-          <EmptyState
-            title={t("homePage.status.backendOfflineTitle")}
-            message={t("homePage.status.backendOfflineMessage")}
-            actionLabel={t("homePage.status.retry")}
-            onAction={handleRetry}
-          />
-          <Footer />
-        </>
-      );
-    }
-
+  if ((loading && destinations.length === 0 && tours.length === 0) || (error && destinations.length === 0 && tours.length === 0)) {
     return (
       <>
         <HomePageSkeleton />
-        <Footer />
-      </>
-    );
-  }
-
-  if (error && destinations.length === 0 && tours.length === 0) {
-    return (
-      <>
-        <ErrorBlock
-          message={error}
-          actionLabel={t("homePage.status.retry")}
-          onAction={handleRetry}
-        />
         <Footer />
       </>
     );

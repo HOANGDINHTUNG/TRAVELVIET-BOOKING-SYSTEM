@@ -62,20 +62,41 @@ public class ApiEndpointFailoverStartup implements ApplicationRunner {
         String healthPath = props.getHealthPath();
 
         boolean publicReachable = false;
+        boolean localReachable = false;
         try {
-            if (!props.isPreferPublic()) {
-                log.info("app.api.failover.prefer-public=false — khuyến nghị API local.");
-            } else if (StringUtils.hasText(publicUrl)) {
-                log.info("Background probing public API {} ...", publicUrl);
-                publicReachable = reachabilityProbe.isReachable(publicUrl, healthPath, timeoutMs);
-                if (publicReachable) {
-                    log.info("Public API is reachable.");
-                } else {
-                    log.warn(
-                            "Public API unreachable (timeout {} ms). Clients should use local: {}",
-                            timeoutMs,
-                            localUrl
-                    );
+            if (props.isPreferPublic()) {
+                if (StringUtils.hasText(publicUrl)) {
+                    log.info("Background probing public API (prefer-public) {} ...", publicUrl);
+                    publicReachable = reachabilityProbe.isReachable(publicUrl, healthPath, timeoutMs);
+                    if (publicReachable) {
+                        log.info("Public API is reachable.");
+                    } else {
+                        log.warn(
+                                "Public API unreachable (timeout {} ms). Clients should use local: {}",
+                                timeoutMs,
+                                localUrl
+                        );
+                    }
+                }
+            } else {
+                log.info("app.api.failover.prefer-public=false — probe local trước, public làm dự phòng.");
+                if (StringUtils.hasText(localUrl)) {
+                    log.info("Background probing local API {} ...", localUrl);
+                    localReachable = reachabilityProbe.isReachable(localUrl, healthPath, timeoutMs);
+                    if (localReachable) {
+                        log.info("Local API is reachable.");
+                    } else {
+                        log.warn("Local API unreachable (timeout {} ms). Thử public API ...", timeoutMs);
+                    }
+                }
+                if (!localReachable && StringUtils.hasText(publicUrl)) {
+                    log.info("Background probing public API {} ...", publicUrl);
+                    publicReachable = reachabilityProbe.isReachable(publicUrl, healthPath, timeoutMs);
+                    if (publicReachable) {
+                        log.info("Public API is reachable (fallback).");
+                    } else {
+                        log.warn("Public API also unreachable (timeout {} ms).", timeoutMs);
+                    }
                 }
             }
         } catch (Exception ex) {
@@ -84,7 +105,18 @@ public class ApiEndpointFailoverStartup implements ApplicationRunner {
 
         ActiveApiEndpoint.Kind kind;
         String recommended;
-        if (publicReachable) {
+        if (props.isPreferPublic()) {
+            if (publicReachable) {
+                kind = ActiveApiEndpoint.Kind.PUBLIC;
+                recommended = publicUrl;
+            } else {
+                kind = ActiveApiEndpoint.Kind.LOCAL;
+                recommended = StringUtils.hasText(localUrl) ? localUrl : publicUrl;
+            }
+        } else if (localReachable) {
+            kind = ActiveApiEndpoint.Kind.LOCAL;
+            recommended = localUrl;
+        } else if (publicReachable) {
             kind = ActiveApiEndpoint.Kind.PUBLIC;
             recommended = publicUrl;
         } else {

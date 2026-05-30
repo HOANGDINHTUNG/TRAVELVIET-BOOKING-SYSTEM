@@ -896,11 +896,21 @@ CREATE TABLE IF NOT EXISTS combo_packages (
     code VARCHAR(40) NOT NULL UNIQUE,
     name VARCHAR(200) NOT NULL,
     description TEXT,
+    destination_id BIGINT NULL,
+    combo_type ENUM('tour_hotel','flight_hotel','custom') NOT NULL DEFAULT 'custom',
     base_price DECIMAL(14 , 2 ) NOT NULL DEFAULT 0,
+    discount_type ENUM('fixed_amount','percentage') NOT NULL DEFAULT 'fixed_amount',
+    discount_value DECIMAL(14 , 2 ) NOT NULL DEFAULT 0,
     discount_amount DECIMAL(14 , 2 ) NOT NULL DEFAULT 0,
+    pricing_rule_json JSON NULL,
+    start_at DATETIME NULL,
+    end_at DATETIME NULL,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_combo_packages_destination FOREIGN KEY (destination_id)
+        REFERENCES destinations (id)
+        ON DELETE SET NULL
 )  ENGINE=INNODB;
 
 
@@ -912,6 +922,9 @@ CREATE TABLE IF NOT EXISTS combo_package_items (
     item_name VARCHAR(200) NOT NULL,
     quantity INT NOT NULL DEFAULT 1,
     unit_price DECIMAL(14 , 2 ) NOT NULL DEFAULT 0,
+    unit_price_snapshot DECIMAL(14 , 2 ) NULL,
+    is_mandatory BOOLEAN NOT NULL DEFAULT TRUE,
+    sort_order INT NOT NULL DEFAULT 0,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_combo_package_items_combo FOREIGN KEY (combo_id)
         REFERENCES combo_packages (id)
@@ -971,7 +984,7 @@ CREATE TABLE IF NOT EXISTS orders (
 CREATE TABLE IF NOT EXISTS order_items (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     order_id BIGINT NOT NULL,
-    item_type ENUM('booking','product','combo','addon','insurance','service') NOT NULL,
+    item_type ENUM('booking','tour_booking','hotel_booking','flight_booking','combo_booking','product','combo','addon','insurance','service') NOT NULL,
     item_ref_id BIGINT NULL,
     item_name VARCHAR(255) NOT NULL,
     quantity INT NOT NULL DEFAULT 1,
@@ -1836,9 +1849,13 @@ CREATE TABLE IF NOT EXISTS tour_supplier_services (
 CREATE TABLE IF NOT EXISTS hotels (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     supplier_id BIGINT NULL,
+    destination_id BIGINT NULL,
     code VARCHAR(40) UNIQUE,
     name VARCHAR(200) NOT NULL,
+    slug VARCHAR(220) NULL UNIQUE,
+    description TEXT NULL,
     star_rating DECIMAL(2,1) NULL,
+    review_score DECIMAL(3,2) NULL,
     phone VARCHAR(20),
     email VARCHAR(150),
     province VARCHAR(120),
@@ -1853,6 +1870,9 @@ CREATE TABLE IF NOT EXISTS hotels (
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_hotels_supplier FOREIGN KEY (supplier_id)
         REFERENCES suppliers(id)
+        ON DELETE SET NULL,
+    CONSTRAINT fk_hotels_destination FOREIGN KEY (destination_id)
+        REFERENCES destinations(id)
         ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
@@ -2331,4 +2351,317 @@ CREATE TABLE IF NOT EXISTS tour_inclusion_flags (
     CONSTRAINT fk_tour_inclusion_flags_tour FOREIGN KEY (tour_id)
         REFERENCES tours (id) ON DELETE CASCADE,
     CONSTRAINT chk_tour_inclusion_hotel_stars CHECK (hotel_stars IS NULL OR hotel_stars BETWEEN 1 AND 5)
+) ENGINE=InnoDB;
+
+-- =====================================================================
+-- Hotels / Flights / Combo booking extension (parallel to legacy bookings)
+-- =====================================================================
+
+CREATE TABLE IF NOT EXISTS hotel_room_types (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    hotel_id BIGINT NOT NULL,
+    code VARCHAR(40) NOT NULL,
+    name VARCHAR(180) NOT NULL,
+    bed_type VARCHAR(80) NULL,
+    max_adults INT NOT NULL DEFAULT 2,
+    max_children INT NOT NULL DEFAULT 0,
+    max_occupancy INT NOT NULL DEFAULT 2,
+    base_price DECIMAL(14,2) NOT NULL DEFAULT 0,
+    currency CHAR(3) NOT NULL DEFAULT 'VND',
+    inventory_total INT NOT NULL DEFAULT 0,
+    is_refundable BOOLEAN NOT NULL DEFAULT TRUE,
+    status ENUM('active','inactive') NOT NULL DEFAULT 'active',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at DATETIME NULL,
+    UNIQUE KEY uk_hotel_room_types_hotel_code (hotel_id, code),
+    CONSTRAINT fk_hotel_room_types_hotel FOREIGN KEY (hotel_id)
+        REFERENCES hotels (id)
+        ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS hotel_room_inventory (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    room_type_id BIGINT NOT NULL,
+    stay_date DATE NOT NULL,
+    allotment INT NOT NULL DEFAULT 0,
+    booked_qty INT NOT NULL DEFAULT 0,
+    available_qty INT NOT NULL DEFAULT 0,
+    price_override DECIMAL(14,2) NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_hotel_room_inventory_room_date (room_type_id, stay_date),
+    CONSTRAINT chk_hotel_room_inventory_allotment CHECK (allotment >= 0),
+    CONSTRAINT chk_hotel_room_inventory_booked CHECK (booked_qty >= 0),
+    CONSTRAINT chk_hotel_room_inventory_available CHECK (available_qty >= 0),
+    CONSTRAINT fk_hotel_room_inventory_room_type FOREIGN KEY (room_type_id)
+        REFERENCES hotel_room_types (id)
+        ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS hotel_images (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    hotel_id BIGINT NOT NULL,
+    media_url TEXT NOT NULL,
+    alt_text VARCHAR(255) NULL,
+    sort_order INT NOT NULL DEFAULT 0,
+    is_cover BOOLEAN NOT NULL DEFAULT FALSE,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at DATETIME NULL,
+    CONSTRAINT fk_hotel_images_hotel FOREIGN KEY (hotel_id)
+        REFERENCES hotels (id)
+        ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS hotel_amenities (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    code VARCHAR(40) NOT NULL UNIQUE,
+    name VARCHAR(120) NOT NULL,
+    icon VARCHAR(120) NULL,
+    category VARCHAR(80) NULL,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS hotel_amenity_mappings (
+    hotel_id BIGINT NOT NULL,
+    amenity_id BIGINT NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (hotel_id, amenity_id),
+    CONSTRAINT fk_hotel_amenity_mappings_hotel FOREIGN KEY (hotel_id)
+        REFERENCES hotels (id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_hotel_amenity_mappings_amenity FOREIGN KEY (amenity_id)
+        REFERENCES hotel_amenities (id)
+        ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS airlines (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    code_iata CHAR(2) NOT NULL UNIQUE,
+    code_icao VARCHAR(3) NULL UNIQUE,
+    name VARCHAR(160) NOT NULL,
+    logo_url TEXT NULL,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS airports (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    code_iata CHAR(3) NOT NULL UNIQUE,
+    code_icao VARCHAR(4) NULL UNIQUE,
+    name VARCHAR(180) NOT NULL,
+    city_name VARCHAR(120) NOT NULL,
+    country_code CHAR(2) NOT NULL DEFAULT 'VN',
+    destination_id BIGINT NOT NULL,
+    latitude DECIMAL(10,7) NULL,
+    longitude DECIMAL(10,7) NULL,
+    timezone VARCHAR(60) NULL,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_airports_destination FOREIGN KEY (destination_id)
+        REFERENCES destinations (id)
+        ON DELETE RESTRICT
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS flights (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    airline_id BIGINT NOT NULL,
+    flight_no VARCHAR(10) NOT NULL,
+    origin_airport_id BIGINT NOT NULL,
+    destination_airport_id BIGINT NOT NULL,
+    departure_time_local DATETIME NOT NULL,
+    arrival_time_local DATETIME NOT NULL,
+    duration_minutes INT NOT NULL,
+    status ENUM('scheduled','active','inactive','cancelled') NOT NULL DEFAULT 'scheduled',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_flights_airline FOREIGN KEY (airline_id)
+        REFERENCES airlines (id),
+    CONSTRAINT fk_flights_origin_airport FOREIGN KEY (origin_airport_id)
+        REFERENCES airports (id),
+    CONSTRAINT fk_flights_destination_airport FOREIGN KEY (destination_airport_id)
+        REFERENCES airports (id),
+    CONSTRAINT chk_flights_duration CHECK (duration_minutes >= 0)
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS flight_classes (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    flight_id BIGINT NOT NULL,
+    cabin_class ENUM('economy','premium_economy','business','first') NOT NULL,
+    fare_family VARCHAR(80) NOT NULL DEFAULT 'standard',
+    base_price DECIMAL(14,2) NOT NULL DEFAULT 0,
+    tax_amount DECIMAL(14,2) NOT NULL DEFAULT 0,
+    currency CHAR(3) NOT NULL DEFAULT 'VND',
+    seat_total INT NOT NULL DEFAULT 0,
+    seat_available INT NOT NULL DEFAULT 0,
+    baggage_rule_json JSON NULL,
+    change_refund_rule_json JSON NULL,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_flight_classes_unique (flight_id, cabin_class, fare_family),
+    CONSTRAINT chk_flight_classes_seat_total CHECK (seat_total >= 0),
+    CONSTRAINT chk_flight_classes_seat_available CHECK (seat_available >= 0),
+    CONSTRAINT fk_flight_classes_flight FOREIGN KEY (flight_id)
+        REFERENCES flights (id)
+        ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS hotel_bookings (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    booking_code VARCHAR(50) UNIQUE,
+    user_id CHAR(36) NOT NULL,
+    order_id BIGINT NULL,
+    hotel_id BIGINT NOT NULL,
+    room_type_id BIGINT NOT NULL,
+    checkin_date DATE NOT NULL,
+    checkout_date DATE NOT NULL,
+    rooms INT NOT NULL DEFAULT 1,
+    adults INT NOT NULL DEFAULT 1,
+    children INT NOT NULL DEFAULT 0,
+    status ENUM('pending_payment','confirmed','checked_in','completed','cancel_requested','cancelled','refunded','expired') NOT NULL DEFAULT 'pending_payment',
+    payment_status ENUM('unpaid','partial','paid','failed','refunded','chargeback') NOT NULL DEFAULT 'unpaid',
+    contact_name VARCHAR(150) NOT NULL,
+    contact_phone VARCHAR(20) NOT NULL,
+    contact_email VARCHAR(150) NULL,
+    subtotal_amount DECIMAL(14,2) NOT NULL DEFAULT 0,
+    discount_amount DECIMAL(14,2) NOT NULL DEFAULT 0,
+    tax_amount DECIMAL(14,2) NOT NULL DEFAULT 0,
+    final_amount DECIMAL(14,2) NOT NULL DEFAULT 0,
+    currency CHAR(3) NOT NULL DEFAULT 'VND',
+    special_requests TEXT NULL,
+    cancel_reason TEXT NULL,
+    cancelled_at DATETIME NULL,
+    completed_at DATETIME NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at DATETIME NULL,
+    CONSTRAINT chk_hotel_bookings_stay_date CHECK (checkout_date > checkin_date),
+    CONSTRAINT fk_hotel_bookings_user FOREIGN KEY (user_id)
+        REFERENCES users (id),
+    CONSTRAINT fk_hotel_bookings_order FOREIGN KEY (order_id)
+        REFERENCES orders (id)
+        ON DELETE SET NULL,
+    CONSTRAINT fk_hotel_bookings_hotel FOREIGN KEY (hotel_id)
+        REFERENCES hotels (id),
+    CONSTRAINT fk_hotel_bookings_room_type FOREIGN KEY (room_type_id)
+        REFERENCES hotel_room_types (id)
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS hotel_booking_guests (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    hotel_booking_id BIGINT NOT NULL,
+    full_name VARCHAR(150) NOT NULL,
+    guest_type ENUM('adult','child') NOT NULL DEFAULT 'adult',
+    date_of_birth DATE NULL,
+    identity_no VARCHAR(50) NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at DATETIME NULL,
+    CONSTRAINT fk_hotel_booking_guests_booking FOREIGN KEY (hotel_booking_id)
+        REFERENCES hotel_bookings (id)
+        ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS flight_bookings (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    booking_code VARCHAR(50) UNIQUE,
+    user_id CHAR(36) NOT NULL,
+    order_id BIGINT NULL,
+    flight_id BIGINT NOT NULL,
+    flight_class_id BIGINT NOT NULL,
+    departure_date DATE NOT NULL,
+    trip_type ENUM('one_way','round_trip') NOT NULL DEFAULT 'one_way',
+    return_flight_id BIGINT NULL,
+    return_departure_date DATE NULL,
+    passenger_count INT NOT NULL DEFAULT 1,
+    status ENUM('pending_payment','confirmed','checked_in','completed','cancel_requested','cancelled','refunded','expired') NOT NULL DEFAULT 'pending_payment',
+    payment_status ENUM('unpaid','partial','paid','failed','refunded','chargeback') NOT NULL DEFAULT 'unpaid',
+    contact_name VARCHAR(150) NOT NULL,
+    contact_phone VARCHAR(20) NOT NULL,
+    contact_email VARCHAR(150) NULL,
+    subtotal_amount DECIMAL(14,2) NOT NULL DEFAULT 0,
+    discount_amount DECIMAL(14,2) NOT NULL DEFAULT 0,
+    tax_amount DECIMAL(14,2) NOT NULL DEFAULT 0,
+    final_amount DECIMAL(14,2) NOT NULL DEFAULT 0,
+    currency CHAR(3) NOT NULL DEFAULT 'VND',
+    special_requests TEXT NULL,
+    cancel_reason TEXT NULL,
+    cancelled_at DATETIME NULL,
+    completed_at DATETIME NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at DATETIME NULL,
+    CONSTRAINT chk_flight_bookings_passengers CHECK (passenger_count > 0),
+    CONSTRAINT fk_flight_bookings_user FOREIGN KEY (user_id)
+        REFERENCES users (id),
+    CONSTRAINT fk_flight_bookings_order FOREIGN KEY (order_id)
+        REFERENCES orders (id)
+        ON DELETE SET NULL,
+    CONSTRAINT fk_flight_bookings_flight FOREIGN KEY (flight_id)
+        REFERENCES flights (id),
+    CONSTRAINT fk_flight_bookings_return_flight FOREIGN KEY (return_flight_id)
+        REFERENCES flights (id)
+        ON DELETE SET NULL,
+    CONSTRAINT fk_flight_bookings_class FOREIGN KEY (flight_class_id)
+        REFERENCES flight_classes (id)
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS flight_booking_passengers (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    flight_booking_id BIGINT NOT NULL,
+    passenger_type ENUM('adult','child','infant','senior') NOT NULL DEFAULT 'adult',
+    full_name VARCHAR(150) NOT NULL,
+    gender ENUM('male','female','other','unknown') NOT NULL DEFAULT 'unknown',
+    date_of_birth DATE NULL,
+    passport_no VARCHAR(50) NULL,
+    identity_no VARCHAR(50) NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at DATETIME NULL,
+    CONSTRAINT fk_flight_booking_passengers_booking FOREIGN KEY (flight_booking_id)
+        REFERENCES flight_bookings (id)
+        ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS combo_bookings (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    booking_code VARCHAR(50) UNIQUE,
+    user_id CHAR(36) NOT NULL,
+    order_id BIGINT NULL,
+    combo_id BIGINT NOT NULL,
+    travel_start_date DATE NULL,
+    travel_end_date DATE NULL,
+    selection_snapshot_json JSON NULL,
+    status ENUM('pending_payment','confirmed','checked_in','completed','cancel_requested','cancelled','refunded','expired') NOT NULL DEFAULT 'pending_payment',
+    payment_status ENUM('unpaid','partial','paid','failed','refunded','chargeback') NOT NULL DEFAULT 'unpaid',
+    contact_name VARCHAR(150) NOT NULL,
+    contact_phone VARCHAR(20) NOT NULL,
+    contact_email VARCHAR(150) NULL,
+    subtotal_amount DECIMAL(14,2) NOT NULL DEFAULT 0,
+    discount_amount DECIMAL(14,2) NOT NULL DEFAULT 0,
+    tax_amount DECIMAL(14,2) NOT NULL DEFAULT 0,
+    final_amount DECIMAL(14,2) NOT NULL DEFAULT 0,
+    currency CHAR(3) NOT NULL DEFAULT 'VND',
+    special_requests TEXT NULL,
+    cancel_reason TEXT NULL,
+    cancelled_at DATETIME NULL,
+    completed_at DATETIME NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at DATETIME NULL,
+    CONSTRAINT fk_combo_bookings_user FOREIGN KEY (user_id)
+        REFERENCES users (id),
+    CONSTRAINT fk_combo_bookings_order FOREIGN KEY (order_id)
+        REFERENCES orders (id)
+        ON DELETE SET NULL,
+    CONSTRAINT fk_combo_bookings_combo FOREIGN KEY (combo_id)
+        REFERENCES combo_packages (id)
+        ON DELETE RESTRICT
 ) ENGINE=InnoDB;

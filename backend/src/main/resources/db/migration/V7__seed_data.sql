@@ -1,3 +1,30 @@
+-- =====================================================================
+-- Hotels / Flights / Combos baseline seed
+-- =====================================================================
+
+INSERT INTO hotel_amenities (code, name, icon, category, is_active)
+VALUES
+    ('wifi', 'Wi-Fi', 'wifi', 'connectivity', TRUE),
+    ('breakfast', 'Breakfast Included', 'coffee', 'food', TRUE),
+    ('pool', 'Swimming Pool', 'waves', 'leisure', TRUE),
+    ('gym', 'Fitness Center', 'dumbbell', 'wellness', TRUE),
+    ('airport_shuttle', 'Airport Shuttle', 'bus', 'transport', TRUE)
+ON DUPLICATE KEY UPDATE
+    name = VALUES(name),
+    icon = VALUES(icon),
+    category = VALUES(category),
+    is_active = VALUES(is_active);
+
+INSERT INTO airlines (code_iata, code_icao, name, logo_url, is_active)
+VALUES
+    ('VN', 'HVN', 'Vietnam Airlines', NULL, TRUE),
+    ('VJ', 'VJC', 'VietJet Air', NULL, TRUE),
+    ('QH', 'BAV', 'Bamboo Airways', NULL, TRUE)
+ON DUPLICATE KEY UPDATE
+    name = VALUES(name),
+    code_icao = VALUES(code_icao),
+    logo_url = VALUES(logo_url),
+    is_active = VALUES(is_active);
 INSERT IGNORE INTO roles (code, name, description, role_scope, hierarchy_level, is_system_role, is_active) 
 VALUES ('SUPER_ADMIN', 'Quản trị viên cao cấp', 'Toàn quyền hệ thống, quản lý vai trò và quyền hạn', 'SYSTEM', 100, TRUE, TRUE), ('ADMIN', 'Quản trị viên', 'Quản trị vận hành toàn hệ thống nhưng không toàn quyền như quản trị viên cao cấp', 'BACKOFFICE', 80, TRUE, TRUE), ('CONTENT_EDITOR', 'Biên tập nội dung', 'Quản lý nội dung điểm đến, tour, media, bài mô tả', 'BACKOFFICE', 60, TRUE, TRUE), ('FIELD_STAFF', 'Nhân sự hiện trường', 'Khảo sát thực địa, cập nhật dữ liệu thực tế, hỗ trợ check-in điểm đón', 'BACKOFFICE', 50, TRUE, TRUE), ('OPERATOR', 'Điều hành viên', 'Điều phối lịch khởi hành, đặt chỗ, hỗ trợ và hoàn tiền cơ bản', 'BACKOFFICE', 55, TRUE, TRUE), ('USER', 'Khách hàng', 'Người dùng ứng dụng đặt tour', 'CUSTOMER', 10, TRUE, TRUE); 
 
@@ -1856,6 +1883,112 @@ SELECT n.tid, tg.id FROM (
     SELECT 3 AS tid UNION ALL SELECT 11 UNION ALL SELECT 19 UNION ALL SELECT 33
 ) AS n JOIN tags tg ON tg.code IN ('TRAI_NGHIEM_DOC_LA', 'VAN_HOA');
 
+-- ============================================================
+-- TOUR LINE LABELS (Tours catalog): ESG & LEI / Cao cấp / Tiêu chuẩn / Tiết kiệm / Giá tốt
+-- Quy tắc đã duyệt phía FE:
+-- 1) ESG & LEI: esg_score >= 80 và lei_score >= 70 (hoặc có tag TOUR_LINE_ESG)
+-- 2) Cao cấp: có tag TOUR_LINE_CAO_CAP hoặc giá cao
+-- 3) Tiêu chuẩn: có tag TOUR_LINE_TIEU_CHUAN
+-- 4) Tiết kiệm: có tag TOUR_LINE_TIET_KIEM hoặc list_price > base_price
+-- 5) Giá tốt: fallback
+-- ============================================================
+INSERT IGNORE INTO tags(code, name, tag_group, description)
+VALUES
+    ('TOUR_LINE_ESG', 'Tour ESG & LEI', 'tour_line', 'Tour có điểm ESG/LEI tốt theo chuẩn catalog.'),
+    ('TOUR_LINE_CAO_CAP', 'Cao cấp', 'tour_line', 'Tour premium hoặc mức giá cao.'),
+    ('TOUR_LINE_TIEU_CHUAN', 'Tiêu chuẩn', 'tour_line', 'Tour cân bằng giữa trải nghiệm và ngân sách.'),
+    ('TOUR_LINE_TIET_KIEM', 'Tiết kiệm', 'tour_line', 'Tour tối ưu chi phí hoặc có giá niêm yết cao hơn giá bán.'),
+    ('TOUR_LINE_GIA_TOT', 'Giá tốt', 'tour_line', 'Tour có mức giá tốt cho đa số người dùng.');
+
+UPDATE tours
+SET esg_score = 88, lei_score = 78, list_price = 7600000
+WHERE code = 'TOUR_PQ_01';
+UPDATE tours
+SET esg_score = 86, lei_score = 73, list_price = 4300000
+WHERE code = 'TOUR_HL_01';
+UPDATE tours
+SET esg_score = 82, lei_score = 71, list_price = 3200000
+WHERE code = 'TOUR_SP_01';
+UPDATE tours
+SET esg_score = 81, lei_score = 70, list_price = 3900000
+WHERE code = 'TOUR_HG_01';
+UPDATE tours
+SET esg_score = 84, lei_score = 72, list_price = 5200000
+WHERE code = 'TOUR_DN_01';
+UPDATE tours
+SET esg_score = 89, lei_score = 76, list_price = 128000000
+WHERE code = 'TOUR_US_CA';
+
+UPDATE tours
+SET list_price = 76000000
+WHERE code = 'TOUR_EU_09';
+UPDATE tours
+SET list_price = 45000000
+WHERE code = 'TOUR_MV_01';
+UPDATE tours
+SET list_price = 59000000
+WHERE code = 'TOUR_EG_01';
+UPDATE tours
+SET list_price = 62000000
+WHERE code = 'TOUR_CA_01';
+UPDATE tours
+SET list_price = 98000000
+WHERE code = 'TOUR_NZ_01';
+UPDATE tours
+SET list_price = 43000000
+WHERE code = 'TOUR_TR_01';
+
+-- Bổ sung ESG/LEI cho toàn bộ 100 tour còn thiếu điểm:
+-- - Chỉ áp dụng cho bản ghi chưa đủ 2 chỉ số (esg_score hoặc lei_score đang NULL)
+-- - Sinh điểm giả lập > 70 để hiển thị badge theo yêu cầu UI
+UPDATE tours
+SET
+    esg_score = 61 + MOD(id * 7, 40),
+    lei_score = 61 + MOD(id * 11, 40)
+WHERE id BETWEEN 1 AND 100
+  AND (esg_score IS NULL OR lei_score IS NULL);
+
+-- Tăng dữ liệu mẫu cho rule "Giá tốt" (giảm >= 12%):
+-- Chỉ áp dụng cho tour chưa có line tag Cao cấp/Tiêu chuẩn/Tiết kiệm và chưa có list_price.
+-- Mục tiêu: khi test UI sẽ thấy rõ nhóm "Giá tốt" theo điều kiện mới.
+UPDATE tours t
+SET t.list_price = ROUND(t.base_price * 1.16)
+WHERE t.id BETWEEN 1 AND 100
+  AND (t.list_price IS NULL OR t.list_price <= t.base_price)
+  AND MOD(t.id, 3) = 0
+  AND NOT EXISTS (
+    SELECT 1
+    FROM tour_tags tt
+    JOIN tags tg ON tg.id = tt.tag_id
+    WHERE tt.tour_id = t.id
+      AND tg.code IN ('TOUR_LINE_CAO_CAP', 'TOUR_LINE_TIEU_CHUAN', 'TOUR_LINE_TIET_KIEM')
+  );
+
+INSERT IGNORE INTO tour_tags (tour_id, tag_id)
+SELECT n.tid, tg.id FROM (
+    SELECT 17 AS tid UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 6 UNION ALL SELECT 1 UNION ALL SELECT 93
+) AS n JOIN tags tg ON tg.code = 'TOUR_LINE_ESG';
+
+INSERT IGNORE INTO tour_tags (tour_id, tag_id)
+SELECT n.tid, tg.id FROM (
+    SELECT 68 AS tid UNION ALL SELECT 76 UNION ALL SELECT 92 UNION ALL SELECT 93 UNION ALL SELECT 95 UNION ALL SELECT 75 UNION ALL SELECT 82
+) AS n JOIN tags tg ON tg.code = 'TOUR_LINE_CAO_CAP';
+
+INSERT IGNORE INTO tour_tags (tour_id, tag_id)
+SELECT n.tid, tg.id FROM (
+    SELECT 1 AS tid UNION ALL SELECT 5 UNION ALL SELECT 7 UNION ALL SELECT 9 UNION ALL SELECT 11 UNION ALL SELECT 14 UNION ALL SELECT 24 UNION ALL SELECT 30
+) AS n JOIN tags tg ON tg.code = 'TOUR_LINE_TIEU_CHUAN';
+
+INSERT IGNORE INTO tour_tags (tour_id, tag_id)
+SELECT n.tid, tg.id FROM (
+    SELECT 2 AS tid UNION ALL SELECT 16 UNION ALL SELECT 18 UNION ALL SELECT 20 UNION ALL SELECT 28 UNION ALL SELECT 33 UNION ALL SELECT 36 UNION ALL SELECT 39
+) AS n JOIN tags tg ON tg.code = 'TOUR_LINE_TIET_KIEM';
+
+INSERT IGNORE INTO tour_tags (tour_id, tag_id)
+SELECT n.tid, tg.id FROM (
+    SELECT 10 AS tid UNION ALL SELECT 12 UNION ALL SELECT 13 UNION ALL SELECT 21 UNION ALL SELECT 23 UNION ALL SELECT 26 UNION ALL SELECT 27 UNION ALL SELECT 31 UNION ALL SELECT 34 UNION ALL SELECT 35 UNION ALL SELECT 37 UNION ALL SELECT 38
+) AS n JOIN tags tg ON tg.code = 'TOUR_LINE_GIA_TOT';
+
 
 INSERT IGNORE INTO tour_itinerary_days (id, tour_id, day_number, title, description)
 VALUES
@@ -3293,3 +3426,1808 @@ WHERE s.deleted_at IS NULL
   AND s.capacity_total > 0
   AND s.booked_seats < s.capacity_total
   AND s.departure_at > NOW();
+
+-- =====================================================================
+-- Seed dataset lon cho Hotels / Flights / Combos (muc tieu ~200 ban ghi moi nhom)
+-- Du lieu duoc tao dang sinh so de da dang, co lien ket cheo giua cac bang.
+-- =====================================================================
+
+-- 1) 300 airlines
+INSERT INTO airlines (code_iata, code_icao, name, logo_url, is_active)
+WITH RECURSIVE seq AS (
+    SELECT 1 AS n
+    UNION ALL
+    SELECT n + 1 FROM seq WHERE n < 300
+)
+SELECT
+    CONCAT(CHAR(65 + FLOOR((n - 1) / 26)), CHAR(65 + MOD((n - 1), 26))) AS code_iata,
+    CONCAT(CHAR(65 + MOD((n + 2), 26)), CHAR(65 + MOD((n + 8), 26)), CHAR(65 + MOD((n + 15), 26))) AS code_icao,
+    CONCAT(
+        CASE MOD(n, 8)
+            WHEN 0 THEN 'Pacific'
+            WHEN 1 THEN 'Sky'
+            WHEN 2 THEN 'Lotus'
+            WHEN 3 THEN 'Aurora'
+            WHEN 4 THEN 'Mekong'
+            WHEN 5 THEN 'Bamboo'
+            WHEN 6 THEN 'Sapphire'
+            ELSE 'Sunrise'
+        END,
+        ' ',
+        CASE MOD(n, 7)
+            WHEN 0 THEN 'Air'
+            WHEN 1 THEN 'Aviation'
+            WHEN 2 THEN 'Wings'
+            WHEN 3 THEN 'Jet'
+            WHEN 4 THEN 'Airways'
+            WHEN 5 THEN 'Express'
+            ELSE 'Lines'
+        END,
+        ' ',
+        LPAD(n, 3, '0')
+    ) AS name,
+    CONCAT('https://cdn.travelviet.vn/airlines/logo-', LPAD(n, 3, '0'), '.png') AS logo_url,
+    TRUE
+FROM seq
+ON DUPLICATE KEY UPDATE
+    name = VALUES(name),
+    logo_url = VALUES(logo_url),
+    is_active = VALUES(is_active);
+
+-- 2) 300 airports, map den destinations theo vong lap
+INSERT INTO airports (code_iata, code_icao, name, city_name, country_code, destination_id, latitude, longitude, timezone, is_active)
+WITH RECURSIVE seq AS (
+    SELECT 1 AS n
+    UNION ALL
+    SELECT n + 1 FROM seq WHERE n < 300
+),
+dest_pool AS (
+    SELECT id,
+           province,
+           ROW_NUMBER() OVER (ORDER BY id) AS rn,
+           COUNT(*) OVER () AS total
+    FROM destinations
+    WHERE deleted_at IS NULL
+)
+SELECT
+    CONCAT(CHAR(65 + MOD(n, 26)), CHAR(65 + MOD(n + 7, 26)), LPAD(MOD(n, 10), 1, '0')) AS code_iata,
+    CONCAT(CHAR(65 + MOD(n + 3, 26)), CHAR(65 + MOD(n + 11, 26)), CHAR(65 + MOD(n + 19, 26)), LPAD(MOD(n, 10), 1, '0')) AS code_icao,
+    CONCAT(
+        'Cang hang khong ',
+        COALESCE(NULLIF(dp.province, ''), CONCAT('Khu vuc ', LPAD(n, 3, '0'))),
+        ' ',
+        CASE MOD(n, 4)
+            WHEN 0 THEN 'International'
+            WHEN 1 THEN 'Domestic'
+            WHEN 2 THEN 'Terminal'
+            ELSE 'Hub'
+        END
+    ) AS name,
+    COALESCE(NULLIF(dp.province, ''), CONCAT('Thanh pho ', LPAD(n, 3, '0'))) AS city_name,
+    'VN',
+    dp.id AS destination_id,
+    8.5000000 + (n * 0.0500000),
+    102.0000000 + (n * 0.0700000),
+    'Asia/Ho_Chi_Minh',
+    TRUE
+FROM seq s
+JOIN dest_pool dp
+  ON dp.rn = MOD(s.n - 1, dp.total) + 1
+ON DUPLICATE KEY UPDATE
+    name = VALUES(name),
+    city_name = VALUES(city_name),
+    destination_id = VALUES(destination_id),
+    latitude = VALUES(latitude),
+    longitude = VALUES(longitude),
+    timezone = VALUES(timezone),
+    is_active = VALUES(is_active);
+
+-- 3) 300 hotels, map destination theo vong lap
+INSERT INTO hotels (
+    supplier_id, destination_id, code, name, slug, description, star_rating, review_score, phone, email,
+    province, district, address, latitude, longitude, checkin_time, checkout_time, status
+)
+WITH RECURSIVE seq AS (
+    SELECT 1 AS n
+    UNION ALL
+    SELECT n + 1 FROM seq WHERE n < 300
+),
+dest_pool AS (
+    SELECT id,
+           province,
+           district,
+           ROW_NUMBER() OVER (ORDER BY id) AS rn,
+           COUNT(*) OVER () AS total
+    FROM destinations
+    WHERE deleted_at IS NULL
+)
+SELECT
+    NULL,
+    dp.id,
+    CONCAT('HTL', LPAD(n, 4, '0')) AS code,
+    CONCAT(
+        CASE MOD(n, 10)
+            WHEN 0 THEN 'Grand'
+            WHEN 1 THEN 'Royal'
+            WHEN 2 THEN 'Sunset'
+            WHEN 3 THEN 'Ocean'
+            WHEN 4 THEN 'Heritage'
+            WHEN 5 THEN 'Lotus'
+            WHEN 6 THEN 'Riverside'
+            WHEN 7 THEN 'Palm'
+            WHEN 8 THEN 'Imperial'
+            ELSE 'Garden'
+        END,
+        ' ',
+        CASE MOD(n, 8)
+            WHEN 0 THEN 'Hotel'
+            WHEN 1 THEN 'Resort'
+            WHEN 2 THEN 'Suites'
+            WHEN 3 THEN 'Boutique'
+            WHEN 4 THEN 'Grand Hotel'
+            WHEN 5 THEN 'Collection'
+            WHEN 6 THEN 'Retreat'
+            ELSE 'Palace'
+        END,
+        ' ',
+        COALESCE(NULLIF(dp.province, ''), CONCAT('Khu ', dp.id))
+    ) AS name,
+    CONCAT(
+        'khach-san-',
+        REPLACE(LOWER(COALESCE(NULLIF(dp.province, ''), CONCAT('khu-', dp.id))), ' ', '-'),
+        '-',
+        LPAD(n, 3, '0')
+    ) AS slug,
+    CONCAT(
+        'Co so luu tru tieu chuan ',
+        ((n - 1) % 5) + 1,
+        ' sao, phu hop nghi duong va cong tac tai ',
+        COALESCE(NULLIF(dp.province, ''), 'dia phuong du lich'),
+        '.'
+    ),
+    CAST((((n - 1) % 5) + 1) AS DECIMAL(2,1)),
+    CAST(3.50 + ((n % 15) * 0.10) AS DECIMAL(3,2)),
+    CONCAT('09', LPAD(70000000 + n, 8, '0')),
+    CONCAT('hotel', LPAD(n, 3, '0'), '@travelviet.vn'),
+    COALESCE(dp.province, CONCAT('Province ', n)),
+    COALESCE(dp.district, CONCAT('District ', n)),
+    CONCAT(
+        CASE MOD(n, 6)
+            WHEN 0 THEN '12 Tran Hung Dao'
+            WHEN 1 THEN '88 Nguyen Hue'
+            WHEN 2 THEN '45 Vo Nguyen Giap'
+            WHEN 3 THEN '102 Le Loi'
+            WHEN 4 THEN '27 Bach Dang'
+            ELSE '61 Hai Ba Trung'
+        END,
+        ', ',
+        COALESCE(dp.district, 'Trung tam')
+    ),
+    9.0000000 + (n * 0.0400000),
+    103.0000000 + (n * 0.0600000),
+    '14:00:00',
+    '12:00:00',
+    'active'
+FROM seq s
+JOIN dest_pool dp
+  ON dp.rn = MOD(s.n - 1, dp.total) + 1
+ON DUPLICATE KEY UPDATE
+    destination_id = VALUES(destination_id),
+    name = VALUES(name),
+    slug = VALUES(slug),
+    description = VALUES(description),
+    star_rating = VALUES(star_rating),
+    review_score = VALUES(review_score),
+    phone = VALUES(phone),
+    email = VALUES(email),
+    province = VALUES(province),
+    district = VALUES(district),
+    address = VALUES(address),
+    latitude = VALUES(latitude),
+    longitude = VALUES(longitude),
+    checkin_time = VALUES(checkin_time),
+    checkout_time = VALUES(checkout_time),
+    status = VALUES(status);
+
+-- 4) moi hotel tao 2 room types => ~400
+INSERT INTO hotel_room_types (
+    hotel_id, code, name, bed_type, max_adults, max_children, max_occupancy,
+    base_price, currency, inventory_total, is_refundable, status
+)
+SELECT
+    h.id,
+    CONCAT('RT-', h.id, '-', t.seq_no),
+    CASE t.seq_no
+        WHEN 1 THEN CONCAT('Standard ', h.name)
+        ELSE CONCAT('Deluxe ', h.name)
+    END,
+    CASE t.seq_no
+        WHEN 1 THEN 'queen'
+        ELSE 'king'
+    END,
+    CASE t.seq_no
+        WHEN 1 THEN 2
+        ELSE 3
+    END,
+    CASE t.seq_no
+        WHEN 1 THEN 1
+        ELSE 2
+    END,
+    CASE t.seq_no
+        WHEN 1 THEN 3
+        ELSE 5
+    END,
+    CASE t.seq_no
+        WHEN 1 THEN CAST((900000 + (h.id * 1000)) AS DECIMAL(14,2))
+        ELSE CAST((1500000 + (h.id * 1500)) AS DECIMAL(14,2))
+    END,
+    'VND',
+    CASE t.seq_no
+        WHEN 1 THEN 20 + MOD(h.id, 15)
+        ELSE 10 + MOD(h.id, 8)
+    END,
+    TRUE,
+    'active'
+FROM hotels h
+JOIN (
+    SELECT 1 AS seq_no
+    UNION ALL
+    SELECT 2
+) t
+WHERE h.code LIKE 'HTL%'
+ON DUPLICATE KEY UPDATE
+    name = VALUES(name),
+    bed_type = VALUES(bed_type),
+    max_adults = VALUES(max_adults),
+    max_children = VALUES(max_children),
+    max_occupancy = VALUES(max_occupancy),
+    base_price = VALUES(base_price),
+    currency = VALUES(currency),
+    inventory_total = VALUES(inventory_total),
+    is_refundable = VALUES(is_refundable),
+    status = VALUES(status);
+
+-- 5) inventory 15 ngay toi cho moi room type => da dang availability
+-- Tach 2 buoc (INSERT IGNORE + UPDATE JOIN) de tuong thich parser MySQL/Flyway on all envs.
+INSERT IGNORE INTO hotel_room_inventory (
+    room_type_id, stay_date, allotment, booked_qty, available_qty, price_override
+)
+WITH RECURSIVE day_seq AS (
+    SELECT 0 AS d
+    UNION ALL
+    SELECT d + 1 FROM day_seq WHERE d < 14
+)
+SELECT
+    rt.id,
+    DATE_ADD(CURDATE(), INTERVAL ds.d DAY) AS stay_date,
+    rt.inventory_total AS allotment,
+    MOD(rt.id + ds.d, 5) AS booked_qty,
+    GREATEST(rt.inventory_total - MOD(rt.id + ds.d, 5), 0) AS available_qty,
+    CAST(rt.base_price + (MOD(rt.id + ds.d, 7) * 50000) AS DECIMAL(14,2))
+FROM hotel_room_types rt
+CROSS JOIN day_seq ds;
+
+UPDATE hotel_room_inventory hri
+JOIN hotel_room_types rt ON rt.id = hri.room_type_id
+SET
+    hri.allotment = rt.inventory_total,
+    hri.booked_qty = MOD(rt.id + DATEDIFF(hri.stay_date, CURDATE()), 5),
+    hri.available_qty = GREATEST(rt.inventory_total - MOD(rt.id + DATEDIFF(hri.stay_date, CURDATE()), 5), 0),
+    hri.price_override = CAST(rt.base_price + (MOD(rt.id + DATEDIFF(hri.stay_date, CURDATE()), 7) * 50000) AS DECIMAL(14,2))
+WHERE hri.stay_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 14 DAY);
+
+-- 6) hotel images, moi hotel 2 anh => ~400
+INSERT INTO hotel_images (hotel_id, media_url, alt_text, sort_order, is_cover, is_active)
+SELECT
+    h.id,
+    CONCAT('https://cdn.travelviet.vn/hotels/', h.id, '/img-', p.pos, '.jpg'),
+    CONCAT('Hotel ', h.name, ' image ', p.pos),
+    p.pos - 1,
+    (p.pos = 1),
+    TRUE
+FROM hotels h
+JOIN (
+    SELECT 1 AS pos
+    UNION ALL
+    SELECT 2
+) p
+WHERE h.code LIKE 'HTL%'
+ON DUPLICATE KEY UPDATE
+    media_url = VALUES(media_url),
+    alt_text = VALUES(alt_text),
+    sort_order = VALUES(sort_order),
+    is_cover = VALUES(is_cover),
+    is_active = VALUES(is_active);
+
+-- 7) map amenities cho hotels: moi hotel 4 amenity
+INSERT IGNORE INTO hotel_amenity_mappings (hotel_id, amenity_id, created_at)
+SELECT
+    h.id,
+    ha.id,
+    CURRENT_TIMESTAMP
+FROM hotels h
+JOIN hotel_amenities ha
+  ON MOD(ha.id + h.id, 5) IN (0, 1, 2, 3)
+WHERE h.code LIKE 'HTL%';
+
+-- 8) tao 300 flights co lien ket airlines + airports
+INSERT INTO flights (
+    airline_id, flight_no, origin_airport_id, destination_airport_id,
+    departure_time_local, arrival_time_local, duration_minutes, status
+)
+WITH RECURSIVE seq AS (
+    SELECT 1 AS n
+    UNION ALL
+    SELECT n + 1 FROM seq WHERE n < 300
+),
+airline_pool AS (
+    SELECT id,
+           ROW_NUMBER() OVER (ORDER BY id) AS rn,
+           COUNT(*) OVER () AS total
+    FROM airlines
+),
+airport_pool AS (
+    SELECT id,
+           ROW_NUMBER() OVER (ORDER BY id) AS rn,
+           COUNT(*) OVER () AS total
+    FROM airports
+)
+SELECT
+    al.id,
+    CONCAT('TV', LPAD(s.n, 4, '0')) AS flight_no,
+    ap_from.id,
+    ap_to.id,
+    DATE_ADD(DATE_ADD(CURDATE(), INTERVAL MOD(s.n, 20) DAY), INTERVAL (6 + MOD(s.n, 12)) HOUR),
+    DATE_ADD(
+        DATE_ADD(DATE_ADD(CURDATE(), INTERVAL MOD(s.n, 20) DAY), INTERVAL (6 + MOD(s.n, 12)) HOUR),
+        INTERVAL (60 + MOD(s.n * 13, 240)) MINUTE
+    ),
+    (60 + MOD(s.n * 13, 240)),
+    'scheduled'
+FROM seq s
+JOIN airline_pool al
+  ON al.rn = MOD(s.n - 1, al.total) + 1
+JOIN airport_pool ap_from
+  ON ap_from.rn = MOD(s.n - 1, ap_from.total) + 1
+JOIN airport_pool ap_to
+  ON ap_to.rn = MOD(s.n + 37, ap_to.total) + 1
+WHERE ap_from.id <> ap_to.id
+ON DUPLICATE KEY UPDATE
+    airline_id = VALUES(airline_id),
+    origin_airport_id = VALUES(origin_airport_id),
+    destination_airport_id = VALUES(destination_airport_id),
+    departure_time_local = VALUES(departure_time_local),
+    arrival_time_local = VALUES(arrival_time_local),
+    duration_minutes = VALUES(duration_minutes),
+    status = VALUES(status);
+
+
+
+-- 10) tao 300 combo moi, lien ket destination + gia da dang
+INSERT INTO combo_packages (
+    code, name, description, destination_id, combo_type, base_price,
+    discount_type, discount_value, discount_amount, pricing_rule_json,
+    start_at, end_at, is_active
+)
+WITH RECURSIVE seq AS (
+    SELECT 1 AS n
+    UNION ALL
+    SELECT n + 1 FROM seq WHERE n < 300
+),
+dest_pool AS (
+    SELECT id,
+           province,
+           ROW_NUMBER() OVER (ORDER BY id) AS rn,
+           COUNT(*) OVER () AS total
+    FROM destinations
+    WHERE deleted_at IS NULL
+)
+SELECT
+    CONCAT('CMB', LPAD(s.n, 4, '0')) AS code,
+    CONCAT(
+        CASE MOD(s.n, 6)
+            WHEN 0 THEN 'Combo Nghi duong'
+            WHEN 1 THEN 'Combo Kham pha'
+            WHEN 2 THEN 'Combo Gia dinh'
+            WHEN 3 THEN 'Combo Cuoi tuan'
+            WHEN 4 THEN 'Combo Tiet kiem'
+            ELSE 'Combo Premium'
+        END,
+        ' ',
+        COALESCE(NULLIF(dp.province, ''), CONCAT('Diem den ', dp.id))
+    ) AS name,
+    CONCAT(
+        'Goi ket hop dich vu di chuyen, luu tru va trai nghiem tai ',
+        COALESCE(NULLIF(dp.province, ''), CONCAT('destination #', dp.id)),
+        ', toi uu tong chi phi so voi mua le.'
+    ),
+    dp.id,
+    CASE MOD(s.n, 3)
+        WHEN 0 THEN 'tour_hotel'
+        WHEN 1 THEN 'flight_hotel'
+        ELSE 'custom'
+    END,
+    CAST(3500000 + MOD(s.n * 215000, 12000000) AS DECIMAL(14,2)),
+    CASE MOD(s.n, 2)
+        WHEN 0 THEN 'percentage'
+        ELSE 'fixed_amount'
+    END,
+    CASE MOD(s.n, 2)
+        WHEN 0 THEN CAST(8 + MOD(s.n, 18) AS DECIMAL(14,2))
+        ELSE CAST(250000 + MOD(s.n * 50000, 1200000) AS DECIMAL(14,2))
+    END,
+    CAST(0 AS DECIMAL(14,2)),
+    JSON_OBJECT(
+        'bundle_tier', CONCAT('tier_', MOD(s.n, 5) + 1),
+        'allow_stack_voucher', MOD(s.n, 2) = 0,
+        'season', CASE WHEN MOD(s.n, 4) IN (0, 1) THEN 'peak' ELSE 'offpeak' END
+    ),
+    DATE_ADD(CURDATE(), INTERVAL -10 DAY),
+    DATE_ADD(CURDATE(), INTERVAL 365 DAY),
+    TRUE
+FROM seq s
+JOIN dest_pool dp
+  ON dp.rn = MOD(s.n - 1, dp.total) + 1
+ON DUPLICATE KEY UPDATE
+    name = VALUES(name),
+    description = VALUES(description),
+    destination_id = VALUES(destination_id),
+    combo_type = VALUES(combo_type),
+    base_price = VALUES(base_price),
+    discount_type = VALUES(discount_type),
+    discount_value = VALUES(discount_value),
+    pricing_rule_json = VALUES(pricing_rule_json),
+    start_at = VALUES(start_at),
+    end_at = VALUES(end_at),
+    is_active = VALUES(is_active);
+
+-- 11) dong bo discount_amount tu discount_type + discount_value
+UPDATE combo_packages c
+SET c.discount_amount = CASE
+    WHEN c.discount_type = 'percentage'
+        THEN ROUND(c.base_price * c.discount_value / 100, 2)
+    ELSE c.discount_value
+END
+WHERE c.code LIKE 'CMB%';
+
+-- 12) tao combo items lien ket chéo:
+-- - 1 item room_type
+-- - 1 item flight_class
+-- - 1 item tour (neu co)
+INSERT INTO combo_package_items (
+    combo_id, item_type, item_ref_id, item_name, quantity,
+    unit_price, unit_price_snapshot, is_mandatory, sort_order, created_at
+)
+SELECT
+    c.id,
+    src.item_type,
+    src.item_ref_id,
+    src.item_name,
+    1,
+    src.unit_price,
+    src.unit_price,
+    TRUE,
+    src.sort_order,
+    CURRENT_TIMESTAMP
+FROM combo_packages c
+JOIN (
+    -- room_type
+    SELECT
+        cp.id AS combo_id,
+        'room_type' AS item_type,
+        ANY_VALUE(rt.id) AS item_ref_id,
+        CONCAT('RoomType #', ANY_VALUE(rt.id)) AS item_name,
+        ANY_VALUE(rt.base_price) AS unit_price,
+        1 AS sort_order
+    FROM combo_packages cp
+    JOIN hotels h ON h.destination_id = cp.destination_id
+    JOIN hotel_room_types rt ON rt.hotel_id = h.id
+    WHERE cp.code LIKE 'CMB%'
+    GROUP BY cp.id
+    UNION ALL
+    -- flight_class
+    SELECT
+        cp.id AS combo_id,
+        'flight_class' AS item_type,
+        ANY_VALUE(fc.id) AS item_ref_id,
+        CONCAT('FlightClass #', ANY_VALUE(fc.id)) AS item_name,
+        (ANY_VALUE(fc.base_price) + ANY_VALUE(fc.tax_amount)) AS unit_price,
+        2 AS sort_order
+    FROM combo_packages cp
+    JOIN airports ap ON ap.destination_id = cp.destination_id
+    JOIN flights f ON f.destination_airport_id = ap.id OR f.origin_airport_id = ap.id
+    JOIN flight_classes fc ON fc.flight_id = f.id AND fc.cabin_class = 'economy'
+    WHERE cp.code LIKE 'CMB%'
+    GROUP BY cp.id
+    UNION ALL
+    -- tour
+    SELECT
+        cp.id AS combo_id,
+        'tour' AS item_type,
+        ANY_VALUE(t.id) AS item_ref_id,
+        CONCAT('Tour #', ANY_VALUE(t.id)) AS item_name,
+        ANY_VALUE(t.base_price) AS unit_price,
+        3 AS sort_order
+    FROM combo_packages cp
+    JOIN tours t ON t.destination_id = cp.destination_id AND t.deleted_at IS NULL
+    WHERE cp.code LIKE 'CMB%'
+    GROUP BY cp.id
+) src ON src.combo_id = c.id
+WHERE c.code LIKE 'CMB%'
+  AND NOT EXISTS (
+      SELECT 1
+      FROM combo_package_items ex
+      WHERE ex.combo_id = c.id
+        AND ex.item_type = src.item_type
+        AND (
+            (ex.item_ref_id IS NULL AND src.item_ref_id IS NULL)
+            OR ex.item_ref_id = src.item_ref_id
+        )
+  );
+
+-- =====================================================================
+-- Controlled dictionary seed + market split + E2E bookings
+-- =====================================================================
+
+-- A) DICTIONARY: Airlines (VN + International, controlled names)
+INSERT INTO airlines (code_iata, code_icao, name, logo_url, is_active)
+SELECT d.code_iata, d.code_icao, d.name, d.logo_url, TRUE
+FROM (
+    SELECT 'VN' AS code_iata, 'HVN' AS code_icao, 'Vietnam Airlines' AS name, 'https://cdn.travelviet.vn/airlines/vn.png' AS logo_url UNION ALL
+    SELECT 'VJ', 'VJC', 'VietJet Air', 'https://cdn.travelviet.vn/airlines/vj.png' UNION ALL
+    SELECT 'QH', 'BAV', 'Bamboo Airways', 'https://cdn.travelviet.vn/airlines/qh.png' UNION ALL
+    SELECT 'BL', 'PIC', 'Pacific Airlines', 'https://cdn.travelviet.vn/airlines/bl.png' UNION ALL
+    SELECT 'AA', 'AAL', 'American Airlines', 'https://cdn.travelviet.vn/airlines/aa.png' UNION ALL
+    SELECT 'DL', 'DAL', 'Delta Air Lines', 'https://cdn.travelviet.vn/airlines/dl.png' UNION ALL
+    SELECT 'UA', 'UAL', 'United Airlines', 'https://cdn.travelviet.vn/airlines/ua.png' UNION ALL
+    SELECT 'SQ', 'SIA', 'Singapore Airlines', 'https://cdn.travelviet.vn/airlines/sq.png' UNION ALL
+    SELECT 'TR', 'TGW', 'Scoot', 'https://cdn.travelviet.vn/airlines/tr.png' UNION ALL
+    SELECT 'MH', 'MAS', 'Malaysia Airlines', 'https://cdn.travelviet.vn/airlines/mh.png' UNION ALL
+    SELECT 'AK', 'AXM', 'AirAsia', 'https://cdn.travelviet.vn/airlines/ak.png' UNION ALL
+    SELECT 'TG', 'THA', 'Thai Airways', 'https://cdn.travelviet.vn/airlines/tg.png' UNION ALL
+    SELECT 'FD', 'AIQ', 'Thai AirAsia', 'https://cdn.travelviet.vn/airlines/fd.png' UNION ALL
+    SELECT 'CX', 'CPA', 'Cathay Pacific', 'https://cdn.travelviet.vn/airlines/cx.png' UNION ALL
+    SELECT 'KA', 'HDA', 'Hong Kong Airlines', 'https://cdn.travelviet.vn/airlines/ka.png' UNION ALL
+    SELECT 'NH', 'ANA', 'All Nippon Airways', 'https://cdn.travelviet.vn/airlines/nh.png' UNION ALL
+    SELECT 'JL', 'JAL', 'Japan Airlines', 'https://cdn.travelviet.vn/airlines/jl.png' UNION ALL
+    SELECT 'KE', 'KAL', 'Korean Air', 'https://cdn.travelviet.vn/airlines/ke.png' UNION ALL
+    SELECT 'OZ', 'AAR', 'Asiana Airlines', 'https://cdn.travelviet.vn/airlines/oz.png' UNION ALL
+    SELECT 'CI', 'CAL', 'China Airlines', 'https://cdn.travelviet.vn/airlines/ci.png' UNION ALL
+    SELECT 'BR', 'EVA', 'EVA Air', 'https://cdn.travelviet.vn/airlines/br.png' UNION ALL
+    SELECT 'MU', 'CES', 'China Eastern', 'https://cdn.travelviet.vn/airlines/mu.png' UNION ALL
+    SELECT 'CZ', 'CSN', 'China Southern', 'https://cdn.travelviet.vn/airlines/cz.png' UNION ALL
+    SELECT 'CA', 'CCA', 'Air China', 'https://cdn.travelviet.vn/airlines/ca.png' UNION ALL
+    SELECT 'EK', 'UAE', 'Emirates', 'https://cdn.travelviet.vn/airlines/ek.png' UNION ALL
+    SELECT 'QR', 'QTR', 'Qatar Airways', 'https://cdn.travelviet.vn/airlines/qr.png' UNION ALL
+    SELECT 'EY', 'ETD', 'Etihad Airways', 'https://cdn.travelviet.vn/airlines/ey.png' UNION ALL
+    SELECT 'TK', 'THY', 'Turkish Airlines', 'https://cdn.travelviet.vn/airlines/tk.png' UNION ALL
+    SELECT 'AF', 'AFR', 'Air France', 'https://cdn.travelviet.vn/airlines/af.png' UNION ALL
+    SELECT 'LH', 'DLH', 'Lufthansa', 'https://cdn.travelviet.vn/airlines/lh.png' UNION ALL
+    SELECT 'KL', 'KLM', 'KLM Royal Dutch Airlines', 'https://cdn.travelviet.vn/airlines/kl.png' UNION ALL
+    SELECT 'BA', 'BAW', 'British Airways', 'https://cdn.travelviet.vn/airlines/ba.png' UNION ALL
+    SELECT 'IB', 'IBE', 'Iberia', 'https://cdn.travelviet.vn/airlines/ib.png' UNION ALL
+    SELECT 'AZ', 'ITY', 'ITA Airways', 'https://cdn.travelviet.vn/airlines/az.png' UNION ALL
+    SELECT 'QF', 'QFA', 'Qantas', 'https://cdn.travelviet.vn/airlines/qf.png' UNION ALL
+    SELECT 'NZ', 'ANZ', 'Air New Zealand', 'https://cdn.travelviet.vn/airlines/nz.png'
+) d
+ON DUPLICATE KEY UPDATE
+    name = VALUES(name),
+    logo_url = VALUES(logo_url),
+    is_active = VALUES(is_active);
+
+-- B) DICTIONARY: Airports (VN + International, controlled list)
+INSERT INTO airports (code_iata, code_icao, name, city_name, country_code, destination_id, latitude, longitude, timezone, is_active)
+SELECT
+    d.code_iata,
+    d.code_icao,
+    d.name,
+    d.city_name,
+    d.country_code,
+    COALESCE(
+        (
+            SELECT des.id
+            FROM destinations des
+            WHERE des.deleted_at IS NULL
+              AND (
+                    des.province LIKE CONCAT('%', d.city_name, '%')
+                 OR des.name LIKE CONCAT('%', d.city_name, '%')
+              )
+            ORDER BY des.id
+            LIMIT 1
+        ),
+        (
+            SELECT MIN(des2.id)
+            FROM destinations des2
+            WHERE des2.deleted_at IS NULL
+        )
+    ) AS destination_id,
+    d.latitude,
+    d.longitude,
+    d.timezone,
+    TRUE
+FROM (
+    SELECT 'SGN' AS code_iata, 'VVTS' AS code_icao, 'Tan Son Nhat International Airport' AS name, 'Ho Chi Minh City' AS city_name, 'VN' AS country_code, 10.818889 AS latitude, 106.651944 AS longitude, 'Asia/Ho_Chi_Minh' AS timezone UNION ALL
+    SELECT 'HAN', 'VVNB', 'Noi Bai International Airport', 'Ha Noi', 'VN', 21.221111, 105.807222, 'Asia/Ho_Chi_Minh' UNION ALL
+    SELECT 'DAD', 'VVDN', 'Da Nang International Airport', 'Da Nang', 'VN', 16.043889, 108.198056, 'Asia/Ho_Chi_Minh' UNION ALL
+    SELECT 'CXR', 'VVCR', 'Cam Ranh International Airport', 'Nha Trang', 'VN', 11.998056, 109.219444, 'Asia/Ho_Chi_Minh' UNION ALL
+    SELECT 'PQC', 'VVPQ', 'Phu Quoc International Airport', 'Phu Quoc', 'VN', 10.227222, 103.967778, 'Asia/Ho_Chi_Minh' UNION ALL
+    SELECT 'HUI', 'VVPB', 'Phu Bai International Airport', 'Hue', 'VN', 16.401667, 107.703333, 'Asia/Ho_Chi_Minh' UNION ALL
+    SELECT 'HPH', 'VVCI', 'Cat Bi International Airport', 'Hai Phong', 'VN', 20.819444, 106.724722, 'Asia/Ho_Chi_Minh' UNION ALL
+    SELECT 'VII', 'VVVH', 'Vinh International Airport', 'Vinh', 'VN', 18.7375, 105.670833, 'Asia/Ho_Chi_Minh' UNION ALL
+    SELECT 'VCA', 'VVCT', 'Can Tho International Airport', 'Can Tho', 'VN', 10.085, 105.711944, 'Asia/Ho_Chi_Minh' UNION ALL
+    SELECT 'BMV', 'VVBM', 'Buon Ma Thuot Airport', 'Buon Ma Thuot', 'VN', 12.668333, 108.120278, 'Asia/Ho_Chi_Minh' UNION ALL
+    SELECT 'SIN', 'WSSS', 'Singapore Changi Airport', 'Singapore', 'SG', 1.364444, 103.991667, 'Asia/Singapore' UNION ALL
+    SELECT 'KUL', 'WMKK', 'Kuala Lumpur International Airport', 'Kuala Lumpur', 'MY', 2.745578, 101.709917, 'Asia/Kuala_Lumpur' UNION ALL
+    SELECT 'BKK', 'VTBS', 'Suvarnabhumi Airport', 'Bangkok', 'TH', 13.69, 100.750112, 'Asia/Bangkok' UNION ALL
+    SELECT 'DMK', 'VTBD', 'Don Mueang International Airport', 'Bangkok', 'TH', 13.9125, 100.606667, 'Asia/Bangkok' UNION ALL
+    SELECT 'HKG', 'VHHH', 'Hong Kong International Airport', 'Hong Kong', 'HK', 22.308889, 113.914444, 'Asia/Hong_Kong' UNION ALL
+    SELECT 'TPE', 'RCTP', 'Taiwan Taoyuan International Airport', 'Taipei', 'TW', 25.077731, 121.232822, 'Asia/Taipei' UNION ALL
+    SELECT 'ICN', 'RKSI', 'Incheon International Airport', 'Seoul', 'KR', 37.460194, 126.440694, 'Asia/Seoul' UNION ALL
+    SELECT 'NRT', 'RJAA', 'Narita International Airport', 'Tokyo', 'JP', 35.771987, 140.39285, 'Asia/Tokyo' UNION ALL
+    SELECT 'HND', 'RJTT', 'Haneda Airport', 'Tokyo', 'JP', 35.549393, 139.779839, 'Asia/Tokyo' UNION ALL
+    SELECT 'KIX', 'RJBB', 'Kansai International Airport', 'Osaka', 'JP', 34.434722, 135.244167, 'Asia/Tokyo' UNION ALL
+    SELECT 'PVG', 'ZSPD', 'Shanghai Pudong International Airport', 'Shanghai', 'CN', 31.144344, 121.808273, 'Asia/Shanghai' UNION ALL
+    SELECT 'PEK', 'ZBAA', 'Beijing Capital International Airport', 'Beijing', 'CN', 40.079857, 116.603112, 'Asia/Shanghai' UNION ALL
+    SELECT 'CAN', 'ZGGG', 'Guangzhou Baiyun International Airport', 'Guangzhou', 'CN', 23.392436, 113.298786, 'Asia/Shanghai' UNION ALL
+    SELECT 'SYD', 'YSSY', 'Sydney Kingsford Smith Airport', 'Sydney', 'AU', -33.939922, 151.175276, 'Australia/Sydney' UNION ALL
+    SELECT 'MEL', 'YMML', 'Melbourne Airport', 'Melbourne', 'AU', -37.669012, 144.841028, 'Australia/Melbourne' UNION ALL
+    SELECT 'DXB', 'OMDB', 'Dubai International Airport', 'Dubai', 'AE', 25.253174, 55.365673, 'Asia/Dubai' UNION ALL
+    SELECT 'DOH', 'OTHH', 'Hamad International Airport', 'Doha', 'QA', 25.273056, 51.608056, 'Asia/Qatar' UNION ALL
+    SELECT 'IST', 'LTFM', 'Istanbul Airport', 'Istanbul', 'TR', 41.275278, 28.751944, 'Europe/Istanbul' UNION ALL
+    SELECT 'CDG', 'LFPG', 'Paris Charles de Gaulle Airport', 'Paris', 'FR', 49.009722, 2.547778, 'Europe/Paris' UNION ALL
+    SELECT 'FRA', 'EDDF', 'Frankfurt Airport', 'Frankfurt', 'DE', 50.037933, 8.562152, 'Europe/Berlin' UNION ALL
+    SELECT 'AMS', 'EHAM', 'Amsterdam Schiphol Airport', 'Amsterdam', 'NL', 52.308613, 4.763889, 'Europe/Amsterdam' UNION ALL
+    SELECT 'LHR', 'EGLL', 'Heathrow Airport', 'London', 'GB', 51.47, -0.4543, 'Europe/London' UNION ALL
+    SELECT 'JFK', 'KJFK', 'John F. Kennedy International Airport', 'New York', 'US', 40.641311, -73.778139, 'America/New_York' UNION ALL
+    SELECT 'LAX', 'KLAX', 'Los Angeles International Airport', 'Los Angeles', 'US', 33.941589, -118.40853, 'America/Los_Angeles' UNION ALL
+    SELECT 'SFO', 'KSFO', 'San Francisco International Airport', 'San Francisco', 'US', 37.621313, -122.378955, 'America/Los_Angeles' UNION ALL
+    SELECT 'YYZ', 'CYYZ', 'Toronto Pearson International Airport', 'Toronto', 'CA', 43.677717, -79.624819, 'America/Toronto'
+) d
+ON DUPLICATE KEY UPDATE
+    name = VALUES(name),
+    city_name = VALUES(city_name),
+    country_code = VALUES(country_code),
+    destination_id = VALUES(destination_id),
+    latitude = VALUES(latitude),
+    longitude = VALUES(longitude),
+    timezone = VALUES(timezone),
+    is_active = VALUES(is_active);
+
+-- C) MARKET SPLIT FLIGHTS
+-- C1) Domestic VN flights (origin VN -> destination VN)
+INSERT INTO flights (
+    airline_id, flight_no, origin_airport_id, destination_airport_id,
+    departure_time_local, arrival_time_local, duration_minutes, status
+)
+WITH RECURSIVE seq AS (
+    SELECT 1 AS n
+    UNION ALL
+    SELECT n + 1 FROM seq WHERE n < 220
+),
+vn_airports AS (
+    SELECT id, ROW_NUMBER() OVER (ORDER BY id) AS rn, COUNT(*) OVER () AS total
+    FROM airports
+    WHERE country_code = 'VN'
+),
+vn_airlines AS (
+    SELECT id, ROW_NUMBER() OVER (ORDER BY id) AS rn, COUNT(*) OVER () AS total
+    FROM airlines
+    WHERE code_iata IN ('VN', 'VJ', 'QH', 'BL')
+)
+SELECT
+    al.id,
+    CONCAT('TVN', LPAD(s.n, 4, '0')),
+    ap_from.id,
+    ap_to.id,
+    DATE_ADD(DATE_ADD(CURDATE(), INTERVAL MOD(s.n, 30) DAY), INTERVAL (5 + MOD(s.n, 14)) HOUR),
+    DATE_ADD(
+        DATE_ADD(DATE_ADD(CURDATE(), INTERVAL MOD(s.n, 30) DAY), INTERVAL (5 + MOD(s.n, 14)) HOUR),
+        INTERVAL (50 + MOD(s.n * 7, 110)) MINUTE
+    ),
+    (50 + MOD(s.n * 7, 110)),
+    'scheduled'
+FROM seq s
+JOIN vn_airlines al ON al.rn = MOD(s.n - 1, al.total) + 1
+JOIN vn_airports ap_from ON ap_from.rn = MOD(s.n - 1, ap_from.total) + 1
+JOIN vn_airports ap_to ON ap_to.rn = MOD(s.n + 5, ap_to.total) + 1
+WHERE ap_from.id <> ap_to.id
+ON DUPLICATE KEY UPDATE
+    airline_id = VALUES(airline_id),
+    origin_airport_id = VALUES(origin_airport_id),
+    destination_airport_id = VALUES(destination_airport_id),
+    departure_time_local = VALUES(departure_time_local),
+    arrival_time_local = VALUES(arrival_time_local),
+    duration_minutes = VALUES(duration_minutes),
+    status = VALUES(status);
+
+-- C2) International flights (VN <-> International)
+INSERT INTO flights (
+    airline_id, flight_no, origin_airport_id, destination_airport_id,
+    departure_time_local, arrival_time_local, duration_minutes, status
+)
+WITH RECURSIVE seq AS (
+    SELECT 1 AS n
+    UNION ALL
+    SELECT n + 1 FROM seq WHERE n < 260
+),
+vn_airports AS (
+    SELECT id, ROW_NUMBER() OVER (ORDER BY id) AS rn, COUNT(*) OVER () AS total
+    FROM airports
+    WHERE country_code = 'VN'
+),
+int_airports AS (
+    SELECT id, ROW_NUMBER() OVER (ORDER BY id) AS rn, COUNT(*) OVER () AS total
+    FROM airports
+    WHERE country_code <> 'VN'
+),
+intl_airlines AS (
+    SELECT id, ROW_NUMBER() OVER (ORDER BY id) AS rn, COUNT(*) OVER () AS total
+    FROM airlines
+    WHERE code_iata NOT IN ('VN', 'VJ', 'QH', 'BL')
+)
+SELECT
+    al.id,
+    CONCAT('TQI', LPAD(s.n, 4, '0')),
+    CASE WHEN MOD(s.n, 2) = 0 THEN ap_vn.id ELSE ap_int.id END,
+    CASE WHEN MOD(s.n, 2) = 0 THEN ap_int.id ELSE ap_vn.id END,
+    DATE_ADD(DATE_ADD(CURDATE(), INTERVAL MOD(s.n, 45) DAY), INTERVAL (3 + MOD(s.n, 18)) HOUR),
+    DATE_ADD(
+        DATE_ADD(DATE_ADD(CURDATE(), INTERVAL MOD(s.n, 45) DAY), INTERVAL (3 + MOD(s.n, 18)) HOUR),
+        INTERVAL (140 + MOD(s.n * 11, 420)) MINUTE
+    ),
+    (140 + MOD(s.n * 11, 420)),
+    'scheduled'
+FROM seq s
+JOIN intl_airlines al ON al.rn = MOD(s.n - 1, al.total) + 1
+JOIN vn_airports ap_vn ON ap_vn.rn = MOD(s.n - 1, ap_vn.total) + 1
+JOIN int_airports ap_int ON ap_int.rn = MOD(s.n + 9, ap_int.total) + 1
+ON DUPLICATE KEY UPDATE
+    airline_id = VALUES(airline_id),
+    origin_airport_id = VALUES(origin_airport_id),
+    destination_airport_id = VALUES(destination_airport_id),
+    departure_time_local = VALUES(departure_time_local),
+    arrival_time_local = VALUES(arrival_time_local),
+    duration_minutes = VALUES(duration_minutes),
+    status = VALUES(status);
+
+-- 9) flight classes cho moi flight: economy + business
+INSERT IGNORE INTO flight_classes (
+    flight_id, cabin_class, fare_family, base_price, tax_amount, currency,
+    seat_total, seat_available, baggage_rule_json, change_refund_rule_json, is_active
+)
+SELECT
+    f.id,
+    c.cabin_class,
+    c.fare_family,
+    CASE c.cabin_class
+        WHEN 'economy' THEN CAST(1200000 + MOD(f.id * 17000, 1800000) AS DECIMAL(14,2))
+        ELSE CAST(3500000 + MOD(f.id * 25000, 3000000) AS DECIMAL(14,2))
+    END,
+    CASE c.cabin_class
+        WHEN 'economy' THEN 250000
+        ELSE 450000
+    END,
+    'VND',
+    CASE c.cabin_class
+        WHEN 'economy' THEN 180
+        ELSE 24
+    END,
+    CASE c.cabin_class
+        WHEN 'economy' THEN 120 + MOD(f.id, 40)
+        ELSE 12 + MOD(f.id, 8)
+    END,
+    CASE c.cabin_class
+        WHEN 'economy' THEN JSON_OBJECT('checked_baggage_kg', 20, 'carry_on_kg', 7)
+        ELSE JSON_OBJECT('checked_baggage_kg', 35, 'carry_on_kg', 10)
+    END,
+    JSON_OBJECT('change_fee', CASE c.cabin_class WHEN 'economy' THEN 350000 ELSE 250000 END, 'refundable', CASE c.cabin_class WHEN 'economy' THEN FALSE ELSE TRUE END),
+    TRUE
+FROM flights f
+CROSS JOIN (
+    SELECT 'economy' AS cabin_class, 'standard' AS fare_family
+    UNION ALL
+    SELECT 'business', 'flex'
+) c;
+
+UPDATE flight_classes fc
+JOIN flights f ON f.id = fc.flight_id
+SET
+    fc.base_price = CASE fc.cabin_class
+        WHEN 'economy' THEN CAST(1200000 + MOD(f.id * 17000, 1800000) AS DECIMAL(14,2))
+        ELSE CAST(3500000 + MOD(f.id * 25000, 3000000) AS DECIMAL(14,2))
+    END,
+    fc.tax_amount = CASE fc.cabin_class
+        WHEN 'economy' THEN 250000
+        ELSE 450000
+    END,
+    fc.currency = 'VND',
+    fc.seat_total = CASE fc.cabin_class
+        WHEN 'economy' THEN 180
+        ELSE 24
+    END,
+    fc.seat_available = CASE fc.cabin_class
+        WHEN 'economy' THEN 120 + MOD(f.id, 40)
+        ELSE 12 + MOD(f.id, 8)
+    END,
+    fc.baggage_rule_json = CASE fc.cabin_class
+        WHEN 'economy' THEN JSON_OBJECT('checked_baggage_kg', 20, 'carry_on_kg', 7)
+        ELSE JSON_OBJECT('checked_baggage_kg', 35, 'carry_on_kg', 10)
+    END,
+    fc.change_refund_rule_json = JSON_OBJECT(
+        'change_fee', CASE fc.cabin_class WHEN 'economy' THEN 350000 ELSE 250000 END,
+        'refundable', CASE fc.cabin_class WHEN 'economy' THEN FALSE ELSE TRUE END
+    ),
+    fc.is_active = TRUE
+WHERE fc.cabin_class IN ('economy', 'business')
+  AND fc.fare_family IN ('standard', 'flex');
+
+-- D) E2E seed: orders + hotel/flight/combo bookings + order_items
+-- D1) Hotel booking orders
+INSERT INTO orders (
+    order_code, user_id, status, payment_status, order_source, currency,
+    subtotal_amount, discount_amount, voucher_discount_amount, loyalty_discount_amount,
+    addon_amount, tax_amount, final_amount, note, expires_at, placed_at
+)
+WITH RECURSIVE seq AS (
+    SELECT 1 AS n
+    UNION ALL
+    SELECT n + 1 FROM seq WHERE n < 240
+),
+user_pool AS (
+    SELECT id, ROW_NUMBER() OVER (ORDER BY created_at, id) AS rn, COUNT(*) OVER () AS total
+    FROM users
+    WHERE deleted_at IS NULL
+)
+SELECT
+    CONCAT('HORD', LPAD(s.n, 6, '0')),
+    u.id,
+    'pending_payment',
+    'unpaid',
+    'app',
+    'VND',
+    CAST(1800000 + MOD(s.n * 315000, 5200000) AS DECIMAL(14,2)),
+    0, 0, 0, 0, 0,
+    CAST(1800000 + MOD(s.n * 315000, 5200000) AS DECIMAL(14,2)),
+    CONCAT('Hotel order seed #', s.n),
+    DATE_ADD(NOW(), INTERVAL 2 DAY),
+    NOW()
+FROM seq s
+JOIN user_pool u ON u.rn = MOD(s.n - 1, u.total) + 1
+ON DUPLICATE KEY UPDATE
+    user_id = VALUES(user_id),
+    status = VALUES(status),
+    payment_status = VALUES(payment_status),
+    subtotal_amount = VALUES(subtotal_amount),
+    final_amount = VALUES(final_amount),
+    note = VALUES(note),
+    expires_at = VALUES(expires_at),
+    placed_at = VALUES(placed_at);
+
+INSERT INTO hotel_bookings (
+    booking_code, user_id, order_id, hotel_id, room_type_id, checkin_date, checkout_date,
+    rooms, adults, children, status, payment_status, contact_name, contact_phone, contact_email,
+    subtotal_amount, discount_amount, tax_amount, final_amount, currency, special_requests
+)
+WITH RECURSIVE seq AS (
+    SELECT 1 AS n
+    UNION ALL
+    SELECT n + 1 FROM seq WHERE n < 240
+),
+room_pool AS (
+    SELECT
+        rt.id AS room_type_id,
+        h.id AS hotel_id,
+        rt.currency,
+        rt.base_price,
+        ROW_NUMBER() OVER (ORDER BY rt.id) AS rn,
+        COUNT(*) OVER () AS total
+    FROM hotel_room_types rt
+    JOIN hotels h ON h.id = rt.hotel_id
+),
+user_pool AS (
+    SELECT id, ROW_NUMBER() OVER (ORDER BY created_at, id) AS rn, COUNT(*) OVER () AS total
+    FROM users
+    WHERE deleted_at IS NULL
+)
+SELECT
+    CONCAT('HBK', LPAD(s.n, 6, '0')),
+    u.id,
+    o.id,
+    rp.hotel_id,
+    rp.room_type_id,
+    DATE_ADD(CURDATE(), INTERVAL MOD(s.n, 20) DAY),
+    DATE_ADD(CURDATE(), INTERVAL MOD(s.n, 20) + (1 + MOD(s.n, 4)) DAY),
+    1 + MOD(s.n, 2),
+    1 + MOD(s.n, 3),
+    MOD(s.n, 2),
+    'pending_payment',
+    'unpaid',
+    CONCAT('Khach Hotel ', s.n),
+    CONCAT('09', LPAD(12000000 + s.n, 8, '0')),
+    CONCAT('hotel.booking', s.n, '@travelviet.vn'),
+    CAST(rp.base_price * (1 + MOD(s.n, 3)) AS DECIMAL(14,2)),
+    0, 0,
+    CAST(rp.base_price * (1 + MOD(s.n, 3)) AS DECIMAL(14,2)),
+    rp.currency,
+    'Phong yên tĩnh, tầng cao'
+FROM seq s
+JOIN room_pool rp ON rp.rn = MOD(s.n - 1, rp.total) + 1
+JOIN user_pool u ON u.rn = MOD(s.n - 1, u.total) + 1
+JOIN orders o ON o.order_code = CONCAT('HORD', LPAD(s.n, 6, '0'))
+ON DUPLICATE KEY UPDATE
+    user_id = VALUES(user_id),
+    order_id = VALUES(order_id),
+    hotel_id = VALUES(hotel_id),
+    room_type_id = VALUES(room_type_id),
+    checkin_date = VALUES(checkin_date),
+    checkout_date = VALUES(checkout_date),
+    rooms = VALUES(rooms),
+    adults = VALUES(adults),
+    children = VALUES(children),
+    subtotal_amount = VALUES(subtotal_amount),
+    final_amount = VALUES(final_amount),
+    currency = VALUES(currency),
+    special_requests = VALUES(special_requests);
+
+INSERT INTO order_items (
+    order_id, item_type, item_ref_id, item_name, quantity, unit_price, discount_amount, line_total, metadata_json
+)
+SELECT
+    hb.order_id,
+    'hotel_booking',
+    hb.id,
+    CONCAT('Hotel booking ', hb.booking_code),
+    1,
+    hb.subtotal_amount,
+    hb.discount_amount,
+    hb.final_amount,
+    JSON_OBJECT('booking_type', 'hotel', 'hotel_id', hb.hotel_id, 'room_type_id', hb.room_type_id)
+FROM hotel_bookings hb
+WHERE hb.booking_code LIKE 'HBK%'
+  AND NOT EXISTS (
+      SELECT 1 FROM order_items oi
+      WHERE oi.order_id = hb.order_id
+        AND oi.item_type = 'hotel_booking'
+        AND oi.item_ref_id = hb.id
+  );
+
+-- D2) Flight booking orders
+INSERT INTO orders (
+    order_code, user_id, status, payment_status, order_source, currency,
+    subtotal_amount, discount_amount, voucher_discount_amount, loyalty_discount_amount,
+    addon_amount, tax_amount, final_amount, note, expires_at, placed_at
+)
+WITH RECURSIVE seq AS (
+    SELECT 1 AS n
+    UNION ALL
+    SELECT n + 1 FROM seq WHERE n < 260
+),
+user_pool AS (
+    SELECT id, ROW_NUMBER() OVER (ORDER BY created_at, id) AS rn, COUNT(*) OVER () AS total
+    FROM users
+    WHERE deleted_at IS NULL
+)
+SELECT
+    CONCAT('FORD', LPAD(s.n, 6, '0')),
+    u.id,
+    'pending_payment',
+    'unpaid',
+    'web',
+    'VND',
+    CAST(2800000 + MOD(s.n * 510000, 9000000) AS DECIMAL(14,2)),
+    0, 0, 0, 0, 0,
+    CAST(2800000 + MOD(s.n * 510000, 9000000) AS DECIMAL(14,2)),
+    CONCAT('Flight order seed #', s.n),
+    DATE_ADD(NOW(), INTERVAL 1 DAY),
+    NOW()
+FROM seq s
+JOIN user_pool u ON u.rn = MOD(s.n - 1, u.total) + 1
+ON DUPLICATE KEY UPDATE
+    user_id = VALUES(user_id),
+    subtotal_amount = VALUES(subtotal_amount),
+    final_amount = VALUES(final_amount),
+    note = VALUES(note),
+    expires_at = VALUES(expires_at),
+    placed_at = VALUES(placed_at);
+
+INSERT INTO flight_bookings (
+    booking_code, user_id, order_id, flight_id, flight_class_id, departure_date, trip_type,
+    return_flight_id, return_departure_date, passenger_count, status, payment_status,
+    contact_name, contact_phone, contact_email, subtotal_amount, discount_amount, tax_amount,
+    final_amount, currency, special_requests
+)
+WITH RECURSIVE seq AS (
+    SELECT 1 AS n
+    UNION ALL
+    SELECT n + 1 FROM seq WHERE n < 260
+),
+fc_pool AS (
+    SELECT
+        fc.id AS flight_class_id,
+        f.id AS flight_id,
+        fc.currency,
+        (fc.base_price + fc.tax_amount) AS gross_price,
+        ROW_NUMBER() OVER (ORDER BY fc.id) AS rn,
+        COUNT(*) OVER () AS total
+    FROM flight_classes fc
+    JOIN flights f ON f.id = fc.flight_id
+    WHERE fc.is_active = TRUE
+),
+user_pool AS (
+    SELECT id, ROW_NUMBER() OVER (ORDER BY created_at, id) AS rn, COUNT(*) OVER () AS total
+    FROM users
+    WHERE deleted_at IS NULL
+)
+SELECT
+    CONCAT('FBK', LPAD(s.n, 6, '0')),
+    u.id,
+    o.id,
+    fp.flight_id,
+    fp.flight_class_id,
+    DATE_ADD(CURDATE(), INTERVAL MOD(s.n, 45) DAY),
+    CASE WHEN MOD(s.n, 3) = 0 THEN 'round_trip' ELSE 'one_way' END,
+    NULL,
+    NULL,
+    1 + MOD(s.n, 3),
+    'pending_payment',
+    'unpaid',
+    CONCAT('Khach Flight ', s.n),
+    CONCAT('09', LPAD(22000000 + s.n, 8, '0')),
+    CONCAT('flight.booking', s.n, '@travelviet.vn'),
+    CAST(fp.gross_price * (1 + MOD(s.n, 3)) AS DECIMAL(14,2)),
+    0, 0,
+    CAST(fp.gross_price * (1 + MOD(s.n, 3)) AS DECIMAL(14,2)),
+    fp.currency,
+    'Uu tien ghe gan loi di'
+FROM seq s
+JOIN fc_pool fp ON fp.rn = MOD(s.n - 1, fp.total) + 1
+JOIN user_pool u ON u.rn = MOD(s.n - 1, u.total) + 1
+JOIN orders o ON o.order_code = CONCAT('FORD', LPAD(s.n, 6, '0'))
+ON DUPLICATE KEY UPDATE
+    user_id = VALUES(user_id),
+    order_id = VALUES(order_id),
+    flight_id = VALUES(flight_id),
+    flight_class_id = VALUES(flight_class_id),
+    departure_date = VALUES(departure_date),
+    trip_type = VALUES(trip_type),
+    passenger_count = VALUES(passenger_count),
+    subtotal_amount = VALUES(subtotal_amount),
+    final_amount = VALUES(final_amount),
+    currency = VALUES(currency),
+    special_requests = VALUES(special_requests);
+
+INSERT INTO order_items (
+    order_id, item_type, item_ref_id, item_name, quantity, unit_price, discount_amount, line_total, metadata_json
+)
+SELECT
+    fb.order_id,
+    'flight_booking',
+    fb.id,
+    CONCAT('Flight booking ', fb.booking_code),
+    1,
+    fb.subtotal_amount,
+    fb.discount_amount,
+    fb.final_amount,
+    JSON_OBJECT('booking_type', 'flight', 'flight_id', fb.flight_id, 'flight_class_id', fb.flight_class_id)
+FROM flight_bookings fb
+WHERE fb.booking_code LIKE 'FBK%'
+  AND NOT EXISTS (
+      SELECT 1 FROM order_items oi
+      WHERE oi.order_id = fb.order_id
+        AND oi.item_type = 'flight_booking'
+        AND oi.item_ref_id = fb.id
+  );
+
+-- D3) Combo booking orders
+INSERT INTO orders (
+    order_code, user_id, status, payment_status, order_source, currency,
+    subtotal_amount, discount_amount, voucher_discount_amount, loyalty_discount_amount,
+    addon_amount, tax_amount, final_amount, note, expires_at, placed_at
+)
+WITH RECURSIVE seq AS (
+    SELECT 1 AS n
+    UNION ALL
+    SELECT n + 1 FROM seq WHERE n < 220
+),
+user_pool AS (
+    SELECT id, ROW_NUMBER() OVER (ORDER BY created_at, id) AS rn, COUNT(*) OVER () AS total
+    FROM users
+    WHERE deleted_at IS NULL
+)
+SELECT
+    CONCAT('CORD', LPAD(s.n, 6, '0')),
+    u.id,
+    'pending_payment',
+    'unpaid',
+    'app',
+    'VND',
+    CAST(5200000 + MOD(s.n * 420000, 11000000) AS DECIMAL(14,2)),
+    0, 0, 0, 0, 0,
+    CAST(5200000 + MOD(s.n * 420000, 11000000) AS DECIMAL(14,2)),
+    CONCAT('Combo order seed #', s.n),
+    DATE_ADD(NOW(), INTERVAL 3 DAY),
+    NOW()
+FROM seq s
+JOIN user_pool u ON u.rn = MOD(s.n - 1, u.total) + 1
+ON DUPLICATE KEY UPDATE
+    user_id = VALUES(user_id),
+    subtotal_amount = VALUES(subtotal_amount),
+    final_amount = VALUES(final_amount),
+    note = VALUES(note),
+    expires_at = VALUES(expires_at),
+    placed_at = VALUES(placed_at);
+
+INSERT INTO combo_bookings (
+    booking_code, user_id, order_id, combo_id, travel_start_date, travel_end_date,
+    selection_snapshot_json, status, payment_status, contact_name, contact_phone, contact_email,
+    subtotal_amount, discount_amount, tax_amount, final_amount, currency, special_requests
+)
+WITH RECURSIVE seq AS (
+    SELECT 1 AS n
+    UNION ALL
+    SELECT n + 1 FROM seq WHERE n < 220
+),
+combo_pool AS (
+    SELECT
+        c.id AS combo_id,
+        c.base_price,
+        c.discount_amount,
+        ROW_NUMBER() OVER (ORDER BY c.id) AS rn,
+        COUNT(*) OVER () AS total
+    FROM combo_packages c
+    WHERE c.is_active = TRUE
+),
+user_pool AS (
+    SELECT id, ROW_NUMBER() OVER (ORDER BY created_at, id) AS rn, COUNT(*) OVER () AS total
+    FROM users
+    WHERE deleted_at IS NULL
+)
+SELECT
+    CONCAT('CBK', LPAD(s.n, 6, '0')),
+    u.id,
+    o.id,
+    cp.combo_id,
+    DATE_ADD(CURDATE(), INTERVAL MOD(s.n, 35) DAY),
+    DATE_ADD(CURDATE(), INTERVAL MOD(s.n, 35) + (2 + MOD(s.n, 5)) DAY),
+    JSON_OBJECT('seed', s.n, 'channel', 'app', 'market', CASE WHEN MOD(s.n, 2) = 0 THEN 'domestic' ELSE 'international' END),
+    'pending_payment',
+    'unpaid',
+    CONCAT('Khach Combo ', s.n),
+    CONCAT('09', LPAD(32000000 + s.n, 8, '0')),
+    CONCAT('combo.booking', s.n, '@travelviet.vn'),
+    cp.base_price,
+    cp.discount_amount,
+    0,
+    GREATEST(cp.base_price - cp.discount_amount, 0),
+    'VND',
+    'Uu tien lich trinh gon'
+FROM seq s
+JOIN combo_pool cp ON cp.rn = MOD(s.n - 1, cp.total) + 1
+JOIN user_pool u ON u.rn = MOD(s.n - 1, u.total) + 1
+JOIN orders o ON o.order_code = CONCAT('CORD', LPAD(s.n, 6, '0'))
+ON DUPLICATE KEY UPDATE
+    user_id = VALUES(user_id),
+    order_id = VALUES(order_id),
+    combo_id = VALUES(combo_id),
+    travel_start_date = VALUES(travel_start_date),
+    travel_end_date = VALUES(travel_end_date),
+    selection_snapshot_json = VALUES(selection_snapshot_json),
+    subtotal_amount = VALUES(subtotal_amount),
+    discount_amount = VALUES(discount_amount),
+    final_amount = VALUES(final_amount),
+    special_requests = VALUES(special_requests);
+
+INSERT INTO order_items (
+    order_id, item_type, item_ref_id, item_name, quantity, unit_price, discount_amount, line_total, metadata_json
+)
+SELECT
+    cb.order_id,
+    'combo_booking',
+    cb.id,
+    CONCAT('Combo booking ', cb.booking_code),
+    1,
+    cb.subtotal_amount,
+    cb.discount_amount,
+    cb.final_amount,
+    JSON_OBJECT('booking_type', 'combo', 'combo_id', cb.combo_id)
+FROM combo_bookings cb
+WHERE cb.booking_code LIKE 'CBK%'
+  AND NOT EXISTS (
+      SELECT 1 FROM order_items oi
+      WHERE oi.order_id = cb.order_id
+        AND oi.item_type = 'combo_booking'
+        AND oi.item_ref_id = cb.id
+  );
+
+-- E) Status distribution + *_status_history + payments for dashboard realism
+
+-- E1) Phan bo trang thai cho hotel_bookings (gan voi order)
+UPDATE hotel_bookings hb
+SET
+    hb.status = CASE
+        WHEN MOD(hb.id, 100) < 62 THEN 'confirmed'
+        WHEN MOD(hb.id, 100) < 78 THEN 'completed'
+        WHEN MOD(hb.id, 100) < 90 THEN 'cancelled'
+        WHEN MOD(hb.id, 100) < 96 THEN 'expired'
+        ELSE 'pending_payment'
+    END,
+    hb.payment_status = CASE
+        WHEN MOD(hb.id, 100) < 76 THEN 'paid'
+        WHEN MOD(hb.id, 100) < 88 THEN 'failed'
+        WHEN MOD(hb.id, 100) < 94 THEN 'refunded'
+        ELSE 'unpaid'
+    END,
+    hb.cancel_reason = CASE WHEN MOD(hb.id, 100) BETWEEN 78 AND 95 THEN 'Customer requested cancellation' ELSE hb.cancel_reason END,
+    hb.cancelled_at = CASE WHEN MOD(hb.id, 100) BETWEEN 78 AND 95 THEN DATE_SUB(NOW(), INTERVAL MOD(hb.id, 30) DAY) ELSE hb.cancelled_at END,
+    hb.completed_at = CASE WHEN MOD(hb.id, 100) BETWEEN 62 AND 77 THEN DATE_SUB(NOW(), INTERVAL MOD(hb.id, 20) DAY) ELSE hb.completed_at END
+WHERE hb.booking_code LIKE 'HBK%';
+
+-- E2) Phan bo trang thai cho flight_bookings
+UPDATE flight_bookings fb
+SET
+    fb.status = CASE
+        WHEN MOD(fb.id, 100) < 58 THEN 'confirmed'
+        WHEN MOD(fb.id, 100) < 74 THEN 'completed'
+        WHEN MOD(fb.id, 100) < 89 THEN 'cancelled'
+        WHEN MOD(fb.id, 100) < 95 THEN 'expired'
+        ELSE 'pending_payment'
+    END,
+    fb.payment_status = CASE
+        WHEN MOD(fb.id, 100) < 73 THEN 'paid'
+        WHEN MOD(fb.id, 100) < 86 THEN 'failed'
+        WHEN MOD(fb.id, 100) < 93 THEN 'refunded'
+        ELSE 'unpaid'
+    END,
+    fb.cancel_reason = CASE WHEN MOD(fb.id, 100) BETWEEN 74 AND 95 THEN 'Schedule changed or customer cancellation' ELSE fb.cancel_reason END,
+    fb.cancelled_at = CASE WHEN MOD(fb.id, 100) BETWEEN 74 AND 95 THEN DATE_SUB(NOW(), INTERVAL MOD(fb.id, 25) DAY) ELSE fb.cancelled_at END,
+    fb.completed_at = CASE WHEN MOD(fb.id, 100) BETWEEN 58 AND 73 THEN DATE_SUB(NOW(), INTERVAL MOD(fb.id, 18) DAY) ELSE fb.completed_at END
+WHERE fb.booking_code LIKE 'FBK%';
+
+-- E3) Phan bo trang thai cho combo_bookings
+UPDATE combo_bookings cb
+SET
+    cb.status = CASE
+        WHEN MOD(cb.id, 100) < 60 THEN 'confirmed'
+        WHEN MOD(cb.id, 100) < 76 THEN 'completed'
+        WHEN MOD(cb.id, 100) < 90 THEN 'cancelled'
+        WHEN MOD(cb.id, 100) < 96 THEN 'expired'
+        ELSE 'pending_payment'
+    END,
+    cb.payment_status = CASE
+        WHEN MOD(cb.id, 100) < 74 THEN 'paid'
+        WHEN MOD(cb.id, 100) < 87 THEN 'failed'
+        WHEN MOD(cb.id, 100) < 94 THEN 'refunded'
+        ELSE 'unpaid'
+    END,
+    cb.cancel_reason = CASE WHEN MOD(cb.id, 100) BETWEEN 76 AND 95 THEN 'Combo policy cancellation' ELSE cb.cancel_reason END,
+    cb.cancelled_at = CASE WHEN MOD(cb.id, 100) BETWEEN 76 AND 95 THEN DATE_SUB(NOW(), INTERVAL MOD(cb.id, 22) DAY) ELSE cb.cancelled_at END,
+    cb.completed_at = CASE WHEN MOD(cb.id, 100) BETWEEN 60 AND 75 THEN DATE_SUB(NOW(), INTERVAL MOD(cb.id, 16) DAY) ELSE cb.completed_at END
+WHERE cb.booking_code LIKE 'CBK%';
+
+-- E4) Dong bo order status/payment_status theo booking moi
+UPDATE orders o
+JOIN hotel_bookings hb ON hb.order_id = o.id AND hb.booking_code LIKE 'HBK%'
+SET
+    o.status = CASE
+        WHEN hb.payment_status = 'paid' AND hb.status IN ('confirmed', 'completed') THEN 'paid'
+        WHEN hb.payment_status = 'refunded' THEN 'refunded'
+        WHEN hb.payment_status = 'failed' THEN 'cancelled'
+        WHEN hb.status = 'expired' THEN 'expired'
+        ELSE 'pending_payment'
+    END,
+    o.payment_status = CASE
+        WHEN hb.payment_status = 'paid' THEN 'paid'
+        WHEN hb.payment_status = 'failed' THEN 'failed'
+        WHEN hb.payment_status = 'refunded' THEN 'refunded'
+        ELSE 'unpaid'
+    END,
+    o.completed_at = CASE WHEN hb.status = 'completed' THEN hb.completed_at ELSE o.completed_at END,
+    o.cancelled_at = CASE WHEN hb.status = 'cancelled' THEN hb.cancelled_at ELSE o.cancelled_at END;
+
+UPDATE orders o
+JOIN flight_bookings fb ON fb.order_id = o.id AND fb.booking_code LIKE 'FBK%'
+SET
+    o.status = CASE
+        WHEN fb.payment_status = 'paid' AND fb.status IN ('confirmed', 'completed') THEN 'paid'
+        WHEN fb.payment_status = 'refunded' THEN 'refunded'
+        WHEN fb.payment_status = 'failed' THEN 'cancelled'
+        WHEN fb.status = 'expired' THEN 'expired'
+        ELSE 'pending_payment'
+    END,
+    o.payment_status = CASE
+        WHEN fb.payment_status = 'paid' THEN 'paid'
+        WHEN fb.payment_status = 'failed' THEN 'failed'
+        WHEN fb.payment_status = 'refunded' THEN 'refunded'
+        ELSE 'unpaid'
+    END,
+    o.completed_at = CASE WHEN fb.status = 'completed' THEN fb.completed_at ELSE o.completed_at END,
+    o.cancelled_at = CASE WHEN fb.status = 'cancelled' THEN fb.cancelled_at ELSE o.cancelled_at END;
+
+UPDATE orders o
+JOIN combo_bookings cb ON cb.order_id = o.id AND cb.booking_code LIKE 'CBK%'
+SET
+    o.status = CASE
+        WHEN cb.payment_status = 'paid' AND cb.status IN ('confirmed', 'completed') THEN 'paid'
+        WHEN cb.payment_status = 'refunded' THEN 'refunded'
+        WHEN cb.payment_status = 'failed' THEN 'cancelled'
+        WHEN cb.status = 'expired' THEN 'expired'
+        ELSE 'pending_payment'
+    END,
+    o.payment_status = CASE
+        WHEN cb.payment_status = 'paid' THEN 'paid'
+        WHEN cb.payment_status = 'failed' THEN 'failed'
+        WHEN cb.payment_status = 'refunded' THEN 'refunded'
+        ELSE 'unpaid'
+    END,
+    o.completed_at = CASE WHEN cb.status = 'completed' THEN cb.completed_at ELSE o.completed_at END,
+    o.cancelled_at = CASE WHEN cb.status = 'cancelled' THEN cb.cancelled_at ELSE o.cancelled_at END;
+
+-- E5) *_status_history tables cho booking moi
+CREATE TABLE IF NOT EXISTS hotel_booking_status_history (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    hotel_booking_id BIGINT NOT NULL,
+    old_status ENUM('pending_payment','confirmed','checked_in','completed','cancel_requested','cancelled','refunded','expired') NULL,
+    new_status ENUM('pending_payment','confirmed','checked_in','completed','cancel_requested','cancelled','refunded','expired') NOT NULL,
+    changed_by CHAR(36) NULL,
+    change_reason TEXT,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_hotel_booking_status_history_booking
+        FOREIGN KEY (hotel_booking_id) REFERENCES hotel_bookings (id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_hotel_booking_status_history_user
+        FOREIGN KEY (changed_by) REFERENCES users (id)
+        ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS flight_booking_status_history (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    flight_booking_id BIGINT NOT NULL,
+    old_status ENUM('pending_payment','confirmed','checked_in','completed','cancel_requested','cancelled','refunded','expired') NULL,
+    new_status ENUM('pending_payment','confirmed','checked_in','completed','cancel_requested','cancelled','refunded','expired') NOT NULL,
+    changed_by CHAR(36) NULL,
+    change_reason TEXT,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_flight_booking_status_history_booking
+        FOREIGN KEY (flight_booking_id) REFERENCES flight_bookings (id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_flight_booking_status_history_user
+        FOREIGN KEY (changed_by) REFERENCES users (id)
+        ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS combo_booking_status_history (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    combo_booking_id BIGINT NOT NULL,
+    old_status ENUM('pending_payment','confirmed','checked_in','completed','cancel_requested','cancelled','refunded','expired') NULL,
+    new_status ENUM('pending_payment','confirmed','checked_in','completed','cancel_requested','cancelled','refunded','expired') NOT NULL,
+    changed_by CHAR(36) NULL,
+    change_reason TEXT,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_combo_booking_status_history_booking
+        FOREIGN KEY (combo_booking_id) REFERENCES combo_bookings (id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_combo_booking_status_history_user
+        FOREIGN KEY (changed_by) REFERENCES users (id)
+        ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+-- E6) Seed lich su trang thai (2-3 moc su kien)
+INSERT INTO hotel_booking_status_history (hotel_booking_id, old_status, new_status, changed_by, change_reason, created_at)
+SELECT hb.id, NULL, 'pending_payment', hb.user_id, 'Booking created', DATE_SUB(COALESCE(hb.created_at, NOW()), INTERVAL 5 MINUTE)
+FROM hotel_bookings hb
+WHERE hb.booking_code LIKE 'HBK%'
+  AND NOT EXISTS (
+      SELECT 1 FROM hotel_booking_status_history hsh
+      WHERE hsh.hotel_booking_id = hb.id
+  );
+
+INSERT INTO hotel_booking_status_history (hotel_booking_id, old_status, new_status, changed_by, change_reason, created_at)
+SELECT hb.id, 'pending_payment',
+       CASE
+           WHEN hb.status IN ('confirmed', 'completed') THEN 'confirmed'
+           WHEN hb.status = 'cancelled' THEN 'cancelled'
+           WHEN hb.status = 'expired' THEN 'expired'
+           ELSE 'pending_payment'
+       END,
+       hb.user_id,
+       'Auto progression by seed scenario',
+       DATE_ADD(COALESCE(hb.created_at, NOW()), INTERVAL 2 HOUR)
+FROM hotel_bookings hb
+WHERE hb.booking_code LIKE 'HBK%'
+  AND hb.status <> 'pending_payment'
+  AND NOT EXISTS (
+      SELECT 1 FROM hotel_booking_status_history hsh
+      WHERE hsh.hotel_booking_id = hb.id
+        AND hsh.old_status = 'pending_payment'
+  );
+
+INSERT INTO hotel_booking_status_history (hotel_booking_id, old_status, new_status, changed_by, change_reason, created_at)
+SELECT hb.id, 'confirmed', 'completed', hb.user_id, 'Stay completed', COALESCE(hb.completed_at, DATE_ADD(hb.created_at, INTERVAL 3 DAY))
+FROM hotel_bookings hb
+WHERE hb.booking_code LIKE 'HBK%'
+  AND hb.status = 'completed'
+  AND NOT EXISTS (
+      SELECT 1 FROM hotel_booking_status_history hsh
+      WHERE hsh.hotel_booking_id = hb.id
+        AND hsh.old_status = 'confirmed'
+        AND hsh.new_status = 'completed'
+  );
+
+INSERT INTO flight_booking_status_history (flight_booking_id, old_status, new_status, changed_by, change_reason, created_at)
+SELECT fb.id, NULL, 'pending_payment', fb.user_id, 'Booking created', DATE_SUB(COALESCE(fb.created_at, NOW()), INTERVAL 5 MINUTE)
+FROM flight_bookings fb
+WHERE fb.booking_code LIKE 'FBK%'
+  AND NOT EXISTS (
+      SELECT 1 FROM flight_booking_status_history fsh
+      WHERE fsh.flight_booking_id = fb.id
+  );
+
+INSERT INTO flight_booking_status_history (flight_booking_id, old_status, new_status, changed_by, change_reason, created_at)
+SELECT fb.id, 'pending_payment',
+       CASE
+           WHEN fb.status IN ('confirmed', 'completed') THEN 'confirmed'
+           WHEN fb.status = 'cancelled' THEN 'cancelled'
+           WHEN fb.status = 'expired' THEN 'expired'
+           ELSE 'pending_payment'
+       END,
+       fb.user_id,
+       'Auto progression by seed scenario',
+       DATE_ADD(COALESCE(fb.created_at, NOW()), INTERVAL 1 HOUR)
+FROM flight_bookings fb
+WHERE fb.booking_code LIKE 'FBK%'
+  AND fb.status <> 'pending_payment'
+  AND NOT EXISTS (
+      SELECT 1 FROM flight_booking_status_history fsh
+      WHERE fsh.flight_booking_id = fb.id
+        AND fsh.old_status = 'pending_payment'
+  );
+
+INSERT INTO flight_booking_status_history (flight_booking_id, old_status, new_status, changed_by, change_reason, created_at)
+SELECT fb.id, 'confirmed', 'completed', fb.user_id, 'Flight completed', COALESCE(fb.completed_at, DATE_ADD(fb.created_at, INTERVAL 2 DAY))
+FROM flight_bookings fb
+WHERE fb.booking_code LIKE 'FBK%'
+  AND fb.status = 'completed'
+  AND NOT EXISTS (
+      SELECT 1 FROM flight_booking_status_history fsh
+      WHERE fsh.flight_booking_id = fb.id
+        AND fsh.old_status = 'confirmed'
+        AND fsh.new_status = 'completed'
+  );
+
+INSERT INTO combo_booking_status_history (combo_booking_id, old_status, new_status, changed_by, change_reason, created_at)
+SELECT cb.id, NULL, 'pending_payment', cb.user_id, 'Booking created', DATE_SUB(COALESCE(cb.created_at, NOW()), INTERVAL 5 MINUTE)
+FROM combo_bookings cb
+WHERE cb.booking_code LIKE 'CBK%'
+  AND NOT EXISTS (
+      SELECT 1 FROM combo_booking_status_history csh
+      WHERE csh.combo_booking_id = cb.id
+  );
+
+INSERT INTO combo_booking_status_history (combo_booking_id, old_status, new_status, changed_by, change_reason, created_at)
+SELECT cb.id, 'pending_payment',
+       CASE
+           WHEN cb.status IN ('confirmed', 'completed') THEN 'confirmed'
+           WHEN cb.status = 'cancelled' THEN 'cancelled'
+           WHEN cb.status = 'expired' THEN 'expired'
+           ELSE 'pending_payment'
+       END,
+       cb.user_id,
+       'Auto progression by seed scenario',
+       DATE_ADD(COALESCE(cb.created_at, NOW()), INTERVAL 90 MINUTE)
+FROM combo_bookings cb
+WHERE cb.booking_code LIKE 'CBK%'
+  AND cb.status <> 'pending_payment'
+  AND NOT EXISTS (
+      SELECT 1 FROM combo_booking_status_history csh
+      WHERE csh.combo_booking_id = cb.id
+        AND csh.old_status = 'pending_payment'
+  );
+
+INSERT INTO combo_booking_status_history (combo_booking_id, old_status, new_status, changed_by, change_reason, created_at)
+SELECT cb.id, 'confirmed', 'completed', cb.user_id, 'Combo itinerary completed', COALESCE(cb.completed_at, DATE_ADD(cb.created_at, INTERVAL 4 DAY))
+FROM combo_bookings cb
+WHERE cb.booking_code LIKE 'CBK%'
+  AND cb.status = 'completed'
+  AND NOT EXISTS (
+      SELECT 1 FROM combo_booking_status_history csh
+      WHERE csh.combo_booking_id = cb.id
+        AND csh.old_status = 'confirmed'
+        AND csh.new_status = 'completed'
+  );
+
+-- E7) payments cho don tour legacy co order + paid (dashboard doanh thu)
+INSERT INTO payments (
+    payment_code, booking_id, order_id, payment_method, provider, transaction_ref,
+    amount, currency, status, paid_at, request_payload, response_payload, created_at, updated_at
+)
+SELECT
+    CONCAT('PAY', LPAD(b.id, 8, '0')),
+    b.id,
+    b.order_id,
+    CASE MOD(b.id, 4)
+        WHEN 0 THEN 'gateway'
+        WHEN 1 THEN 'credit_card'
+        WHEN 2 THEN 'qr'
+        ELSE 'e_wallet'
+    END,
+    CASE MOD(b.id, 3)
+        WHEN 0 THEN 'vnpay'
+        WHEN 1 THEN 'stripe'
+        ELSE 'momo'
+    END,
+    CONCAT('TXN', LPAD(b.id, 10, '0')),
+    b.final_amount,
+    b.currency,
+    CASE
+        WHEN b.payment_status = 'paid' THEN 'paid'
+        WHEN b.payment_status = 'failed' THEN 'failed'
+        WHEN b.payment_status = 'refunded' THEN 'refunded'
+        ELSE 'unpaid'
+    END,
+    CASE WHEN b.payment_status = 'paid' THEN DATE_ADD(b.created_at, INTERVAL 20 MINUTE) ELSE NULL END,
+    JSON_OBJECT('source', 'seed_v7', 'booking_type', 'tour'),
+    JSON_OBJECT('status', b.payment_status),
+    COALESCE(b.created_at, NOW()),
+    NOW()
+FROM bookings b
+WHERE b.order_id IS NOT NULL
+  AND b.deleted_at IS NULL
+  AND b.payment_status IN ('paid','failed','refunded')
+  AND NOT EXISTS (
+      SELECT 1
+      FROM payments p
+      WHERE p.booking_id = b.id
+        AND p.order_id = b.order_id
+  );
+
+-- E8) payment_attempts cho ca booking moi (hotel/flight/combo) thong qua order
+INSERT INTO payment_attempts (
+    payment_id, order_id, booking_id, attempt_no, provider, payment_method, status,
+    gateway_transaction_ref, gateway_response_code, gateway_message,
+    request_payload, response_payload, started_at, finished_at, created_at, updated_at
+)
+SELECT
+    NULL,
+    o.id,
+    NULL,
+    1,
+    CASE MOD(o.id, 3)
+        WHEN 0 THEN 'vnpay'
+        WHEN 1 THEN 'stripe'
+        ELSE 'momo'
+    END,
+    CASE MOD(o.id, 4)
+        WHEN 0 THEN 'gateway'
+        WHEN 1 THEN 'credit_card'
+        WHEN 2 THEN 'qr'
+        ELSE 'e_wallet'
+    END,
+    CASE
+        WHEN o.payment_status = 'paid' THEN 'paid'
+        WHEN o.payment_status = 'failed' THEN 'failed'
+        WHEN o.payment_status = 'refunded' THEN 'refunded'
+        ELSE 'pending'
+    END,
+    CONCAT('ATT', LPAD(o.id, 10, '0')),
+    CASE
+        WHEN o.payment_status = 'paid' THEN '00'
+        WHEN o.payment_status = 'failed' THEN '99'
+        ELSE NULL
+    END,
+    CASE
+        WHEN o.payment_status = 'paid' THEN 'Payment success'
+        WHEN o.payment_status = 'failed' THEN 'Payment failed'
+        WHEN o.payment_status = 'refunded' THEN 'Refunded after payment'
+        ELSE 'Pending payment'
+    END,
+    JSON_OBJECT('source', 'seed_v7', 'order_code', o.order_code),
+    JSON_OBJECT('payment_status', o.payment_status),
+    DATE_SUB(COALESCE(o.placed_at, NOW()), INTERVAL 10 MINUTE),
+    CASE WHEN o.payment_status IN ('paid','failed','refunded') THEN COALESCE(o.placed_at, NOW()) ELSE NULL END,
+    NOW(),
+    NOW()
+FROM orders o
+WHERE (o.order_code LIKE 'HORD%' OR o.order_code LIKE 'FORD%' OR o.order_code LIKE 'CORD%')
+  AND NOT EXISTS (
+      SELECT 1
+      FROM payment_attempts pa
+      WHERE pa.order_id = o.id
+  );
+
+-- E9) payment_webhook_logs cho cac payment da seed
+INSERT INTO payment_webhook_logs (
+    provider, event_type, event_ref, order_id, payment_id, booking_id,
+    is_verified, payload, processed_result, received_at, processed_at
+)
+SELECT
+    COALESCE(p.provider, 'gateway'),
+    CASE
+        WHEN p.status = 'paid' THEN 'payment.succeeded'
+        WHEN p.status = 'failed' THEN 'payment.failed'
+        WHEN p.status = 'refunded' THEN 'payment.refunded'
+        ELSE 'payment.pending'
+    END,
+    CONCAT('EVT-', p.payment_code),
+    p.order_id,
+    p.id,
+    p.booking_id,
+    TRUE,
+    JSON_OBJECT(
+        'payment_code', p.payment_code,
+        'amount', p.amount,
+        'currency', p.currency,
+        'status', p.status
+    ),
+    JSON_OBJECT(
+        'mapped_status', p.status,
+        'note', 'processed by V7 seed'
+    ),
+    DATE_ADD(COALESCE(p.created_at, NOW()), INTERVAL 2 MINUTE),
+    DATE_ADD(COALESCE(p.created_at, NOW()), INTERVAL 3 MINUTE)
+FROM payments p
+WHERE p.order_id IS NOT NULL
+  AND p.booking_id IS NOT NULL
+  AND p.status IN ('paid','failed','refunded')
+  AND NOT EXISTS (
+      SELECT 1
+      FROM payment_webhook_logs wl
+      WHERE wl.payment_id = p.id
+  );
+
+-- E10) refund_requests gan tu booking bi refunded (end-to-end)
+INSERT INTO refund_requests (
+    refund_code, booking_id, requested_by, reason_type, reason_detail,
+    requested_amount, quoted_amount, approved_amount, voucher_offer_amount,
+    refund_method, status, policy_snapshot, processed_by, processed_at, created_at, updated_at
+)
+SELECT
+    CONCAT('RFD', LPAD(b.id, 8, '0')),
+    b.id,
+    b.user_id,
+    CASE MOD(b.id, 4)
+        WHEN 0 THEN 'customer_change_plan'
+        WHEN 1 THEN 'schedule_change'
+        WHEN 2 THEN 'service_issue'
+        ELSE 'weather_disruption'
+    END,
+    CONCAT('Refund request seeded from booking ', b.booking_code),
+    b.final_amount,
+    b.final_amount,
+    b.final_amount,
+    0,
+    CASE MOD(b.id, 3)
+        WHEN 0 THEN 'original_method'
+        WHEN 1 THEN 'bank_transfer'
+        ELSE 'wallet'
+    END,
+    'completed',
+    JSON_OBJECT(
+        'source', 'seed_v7',
+        'booking_status', b.status,
+        'payment_status', b.payment_status
+    ),
+    b.user_id,
+    DATE_ADD(COALESCE(b.updated_at, NOW()), INTERVAL 1 HOUR),
+    COALESCE(b.updated_at, NOW()),
+    NOW()
+FROM bookings b
+WHERE b.deleted_at IS NULL
+  AND (b.payment_status = 'refunded' OR b.status = 'refunded')
+  AND b.final_amount > 0
+  AND NOT EXISTS (
+      SELECT 1
+      FROM refund_requests rr
+      WHERE rr.booking_id = b.id
+  );
+
+-- E11) refund_status_history (requested -> approved -> processing -> completed)
+INSERT INTO refund_status_history (refund_request_id, old_status, new_status, changed_by, note, created_at)
+SELECT
+    rr.id,
+    NULL,
+    'requested',
+    rr.requested_by,
+    'Refund requested by customer',
+    DATE_SUB(rr.created_at, INTERVAL 30 MINUTE)
+FROM refund_requests rr
+WHERE rr.refund_code LIKE 'RFD%'
+  AND NOT EXISTS (
+      SELECT 1
+      FROM refund_status_history rsh
+      WHERE rsh.refund_request_id = rr.id
+  );
+
+INSERT INTO refund_status_history (refund_request_id, old_status, new_status, changed_by, note, created_at)
+SELECT
+    rr.id,
+    'requested',
+    'approved',
+    rr.processed_by,
+    'Approved by system seed',
+    DATE_SUB(rr.created_at, INTERVAL 20 MINUTE)
+FROM refund_requests rr
+WHERE rr.refund_code LIKE 'RFD%'
+  AND rr.status = 'completed'
+  AND NOT EXISTS (
+      SELECT 1
+      FROM refund_status_history rsh
+      WHERE rsh.refund_request_id = rr.id
+        AND rsh.old_status = 'requested'
+        AND rsh.new_status = 'approved'
+  );
+
+INSERT INTO refund_status_history (refund_request_id, old_status, new_status, changed_by, note, created_at)
+SELECT
+    rr.id,
+    'approved',
+    'processing',
+    rr.processed_by,
+    'Refund is processing',
+    DATE_SUB(rr.created_at, INTERVAL 10 MINUTE)
+FROM refund_requests rr
+WHERE rr.refund_code LIKE 'RFD%'
+  AND rr.status = 'completed'
+  AND NOT EXISTS (
+      SELECT 1
+      FROM refund_status_history rsh
+      WHERE rsh.refund_request_id = rr.id
+        AND rsh.old_status = 'approved'
+        AND rsh.new_status = 'processing'
+  );
+
+INSERT INTO refund_status_history (refund_request_id, old_status, new_status, changed_by, note, created_at)
+SELECT
+    rr.id,
+    'processing',
+    'completed',
+    rr.processed_by,
+    'Refund completed',
+    COALESCE(rr.processed_at, rr.updated_at)
+FROM refund_requests rr
+WHERE rr.refund_code LIKE 'RFD%'
+  AND rr.status = 'completed'
+  AND NOT EXISTS (
+      SELECT 1
+      FROM refund_status_history rsh
+      WHERE rsh.refund_request_id = rr.id
+        AND rsh.old_status = 'processing'
+        AND rsh.new_status = 'completed'
+  );
+
+-- E12) refund_transactions lien ket payment + refund_request
+INSERT INTO refund_transactions (
+    refund_request_id, payment_id, provider, transaction_ref, amount, currency,
+    status, response_payload, processed_at, created_at, updated_at
+)
+SELECT
+    rr.id,
+    p.id,
+    COALESCE(p.provider, 'gateway'),
+    CONCAT('RTX-', rr.refund_code),
+    rr.approved_amount,
+    COALESCE(p.currency, 'VND'),
+    'completed',
+    JSON_OBJECT(
+        'refund_code', rr.refund_code,
+        'payment_code', p.payment_code,
+        'approved_amount', rr.approved_amount
+    ),
+    COALESCE(rr.processed_at, NOW()),
+    rr.created_at,
+    NOW()
+FROM refund_requests rr
+LEFT JOIN payments p
+       ON p.booking_id = rr.booking_id
+      AND p.order_id = (
+          SELECT b.order_id
+          FROM bookings b
+          WHERE b.id = rr.booking_id
+          LIMIT 1
+      )
+WHERE rr.refund_code LIKE 'RFD%'
+  AND rr.status = 'completed'
+  AND NOT EXISTS (
+      SELECT 1
+      FROM refund_transactions rt
+      WHERE rt.refund_request_id = rr.id
+  );

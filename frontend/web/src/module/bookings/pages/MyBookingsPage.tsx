@@ -21,6 +21,7 @@ import { isPayable } from '../constants/bookingStatus'
 import type { BookingSummaryResponse } from '../types/publicBooking'
 import { CustomerPageHero } from '../../../components/ui/CustomerPageHero/CustomerPageHero'
 import { Footer } from '../../../components/Footer/Footer'
+import { MyBookingsPageSkeleton } from '../../../components/ui/skeletons/CustomerPageSkeletons'
 import { VirtualScrollList } from '../../../components/common/virtual/VirtualScrollList'
 import './MyBookings.css'
 
@@ -107,6 +108,15 @@ function MyBookingsPage() {
     startFilterTransition(() => setFilter(next))
   }
 
+  if (query.isPending || (query.error && allBookings.length === 0)) {
+    return (
+      <>
+        <MyBookingsPageSkeleton />
+        <Footer />
+      </>
+    )
+  }
+
   return (
     <>
       <CustomerPageHero
@@ -140,12 +150,7 @@ function MyBookingsPage() {
             </span>
           </div>
 
-          {query.isPending ? (
-            <div className="mybk-state" role="status" aria-live="polite">
-              <span className="mybk-spinner" aria-hidden="true" />
-              <p className="mybk-state__desc">{String(t('myBookings.loading'))}</p>
-            </div>
-          ) : query.error ? (
+          {query.error ? (
             <div className="mybk-state mybk-state--error" role="alert">
               <XCircle size={36} strokeWidth={1.4} aria-hidden="true" />
               <p className="mybk-state__title">Không thể tải dữ liệu</p>

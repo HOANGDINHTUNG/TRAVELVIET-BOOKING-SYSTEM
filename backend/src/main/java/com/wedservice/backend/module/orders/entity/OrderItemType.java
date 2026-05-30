@@ -9,6 +9,10 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum OrderItemType {
     BOOKING("booking"),
+    TOUR_BOOKING("tour_booking"),
+    HOTEL_BOOKING("hotel_booking"),
+    FLIGHT_BOOKING("flight_booking"),
+    COMBO_BOOKING("combo_booking"),
     PRODUCT("product"),
     COMBO("combo"),
     ADDON("addon"),

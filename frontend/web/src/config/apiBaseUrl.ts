@@ -7,7 +7,7 @@ import {
 } from './apiConfig'
 
 const API_HEALTH_PATH = '/system/health'
-/** Probe startup — ngắn hơn để không kéo dài TTI khi public API chậm. */
+/** Probe startup — ngắn hơn để không kéo dài TTI khi API chậm. */
 const DEFAULT_PROBE_MS = 3_000
 
 let activeBaseUrl: string | null = null
@@ -67,8 +67,40 @@ export async function probeApiHealth(
   }
 }
 
+function preferPublicApiFirst(): boolean {
+  return import.meta.env.VITE_API_PREFER_PUBLIC === 'true'
+}
+
+async function chooseWithFailover(
+  primaryUrl: string,
+  fallbackUrl: string,
+  primaryLabel: string,
+  fallbackLabel: string,
+): Promise<string> {
+  if (primaryUrl === fallbackUrl) {
+    activeBaseUrl = primaryUrl
+    return primaryUrl
+  }
+
+  const primaryOk = await probeApiHealth(primaryUrl)
+  if (primaryOk) {
+    activeBaseUrl = primaryUrl
+    console.info(`[api] ${primaryLabel} OK:`, primaryUrl)
+    return primaryUrl
+  }
+
+  activeBaseUrl = fallbackUrl
+  console.warn(
+    `[api] ${primaryLabel} không phản hồi (${primaryUrl}) — chuyển sang ${fallbackLabel}:`,
+    fallbackUrl,
+  )
+  return fallbackUrl
+}
+
 /**
- * Chọn API base URL trước khi render app: thử public (Render), không được thì localhost.
+ * Chọn API base URL trước khi render app.
+ * Mặc định (dev): thử local trước → Render public nếu local down.
+ * `VITE_API_PREFER_PUBLIC=true`: thử Render trước → local.
  */
 export async function initializeApiBaseUrl(): Promise<string> {
   if (!shouldUseApiFailover()) {
@@ -78,34 +110,33 @@ export async function initializeApiBaseUrl(): Promise<string> {
   }
 
   const localUrl = resolveLocalApiBaseUrl()
-  const preferPublic = import.meta.env.VITE_API_PREFER_PUBLIC !== 'false'
-
-  if (!preferPublic) {
-    activeBaseUrl = localUrl
-    console.info('[api] VITE_API_PREFER_PUBLIC=false — dùng local:', localUrl)
-    return localUrl
-  }
-
   const publicUrl = resolvePublicApiBaseUrl()
+
   if (isLocalApiBaseUrl(publicUrl)) {
     activeBaseUrl = publicUrl
     return publicUrl
   }
 
-  const reachable = await probeApiHealth(publicUrl)
-  const chosen = reachable ? publicUrl : localUrl
-  activeBaseUrl = chosen
-
-  if (reachable) {
-    console.info('[api] Public API OK:', publicUrl)
-  } else {
-    console.warn(
-      `[api] Public API không phản hồi (${publicUrl}) — chuyển sang local:`,
-      localUrl,
-    )
+  if (preferPublicApiFirst()) {
+    return chooseWithFailover(publicUrl, localUrl, 'Public API', 'local API')
   }
 
-  return chosen
+  return chooseWithFailover(localUrl, publicUrl, 'Local API', 'public API (Render)')
+}
+
+/** URL dự phòng so với URL đang dùng (local ↔ public). */
+export function resolveAlternateApiBaseUrl(currentUrl: string): string | null {
+  const localUrl = resolveLocalApiBaseUrl()
+  const publicUrl = resolvePublicApiBaseUrl()
+  const current = normalizeApiBaseUrl(currentUrl)
+
+  if (current === normalizeApiBaseUrl(localUrl) && publicUrl !== localUrl) {
+    return publicUrl
+  }
+  if (current === normalizeApiBaseUrl(publicUrl) && publicUrl !== localUrl) {
+    return localUrl
+  }
+  return null
 }
 
 export function switchToLocalApiBaseUrl(): string {
@@ -115,4 +146,22 @@ export function switchToLocalApiBaseUrl(): string {
     console.warn('[api] Runtime failover → local:', localUrl)
   }
   return localUrl
+}
+
+export function switchToPublicApiBaseUrl(): string {
+  const publicUrl = resolvePublicApiBaseUrl()
+  if (getApiBaseUrl() !== publicUrl) {
+    activeBaseUrl = publicUrl
+    console.warn('[api] Runtime failover → public (Render):', publicUrl)
+  }
+  return publicUrl
+}
+
+export function switchToAlternateApiBaseUrl(): string | null {
+  const alternate = resolveAlternateApiBaseUrl(getApiBaseUrl())
+  if (!alternate) return null
+  if (isLocalApiBaseUrl(alternate)) {
+    return switchToLocalApiBaseUrl()
+  }
+  return switchToPublicApiBaseUrl()
 }

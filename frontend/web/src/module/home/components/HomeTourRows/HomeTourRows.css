@@ -3,7 +3,7 @@
   background: var(--color-page);
 }
 
-/* Cùng --home-content-max: vừa 4 card 300px + 3 gap 18px */
+/* Cùng --home-content-max: vừa 4 card + 3 gap (--home-tour-card-*) */
 .home-tour-rows-inner {
   max-width: var(--home-content-max);
   margin-left: auto;
@@ -109,9 +109,9 @@
 }
 
 /* ============================================================
-   Carousel: tối đa 8 tour, mỗi card cố định 300×400px.
-   Màn rộng: 4 card trọn trong --home-content-max, không scroll.
-   Màn hẹp: scroll ngang + snap, không co bóp card.
+   Carousel: tối đa 8 tour, mỗi card cố định theo --home-tour-card-*.
+   Màn rộng: viewport = 4 card + 3 gap, hiển thị trọn 4 thẻ.
+   Màn hẹp: viewport 100%, scroll ngang, không co bóp card.
    ============================================================ */
 .home-tour-row-viewport-wrap {
   width: 100%;
@@ -120,15 +120,15 @@
 }
 
 .home-tour-row-viewport {
-  width: 100%;
-  max-width: var(--home-content-max);
+  width: var(--home-content-max);
+  max-width: 100%;
   margin-inline: auto;
   overflow: hidden;
 }
 
 .home-tour-row-track {
   gap: var(--home-tour-card-gap);
-  padding: 4px 2px;
+  padding-block: 4px;
 }
 
 .home-tour-row-slide {
@@ -139,8 +139,11 @@
 .home-tour-row-track--skeleton {
   display: flex;
   gap: var(--home-tour-card-gap);
-  padding: 4px 2px;
+  padding-block: 4px;
   overflow: hidden;
+  width: var(--home-content-max);
+  max-width: 100%;
+  margin-inline: auto;
 }
 
 /* ============================================================
@@ -169,7 +172,7 @@
 
 .home-tour-row-track .home-tour-card-skeleton.tv-glass-card--flat {
   width: var(--home-tour-card-width);
-  height: 400px;
+  height: var(--home-tour-card-height);
   flex-shrink: 0;
   padding: 0;
   border-radius: 18px;
@@ -205,7 +208,9 @@
 
 /* TourCard (tv-tour-card) — zoom ảnh khi hover, giống tour hot */
 .home-tour-row-track .tv-tour-card:hover .tv-tour-card__image-wrap,
-.home-tour-row-track .tv-tour-card:focus-within .tv-tour-card__image-wrap {
+.home-tour-row-track .tv-tour-card:focus-within .tv-tour-card__image-wrap,
+.home-tour-row-track .tv-offer-card:hover .tv-offer-card__image-wrap,
+.home-tour-row-track .tv-offer-card:focus-within .tv-offer-card__image-wrap {
   transform: scale(1.04);
 }
 
@@ -235,7 +240,7 @@
   line-height: 1.4;
   color: var(--color-heading);
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   min-height: 40px;

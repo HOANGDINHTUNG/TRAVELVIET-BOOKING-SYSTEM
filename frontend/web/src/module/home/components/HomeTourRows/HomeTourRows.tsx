@@ -14,29 +14,31 @@ import {
 import { SmoothCarouselTrack } from "../../../../components/ui/SmoothCarousel/SmoothCarouselTrack";
 import { useSmoothInfiniteCarousel } from "../../../../components/ui/SmoothCarousel/useSmoothInfiniteCarousel";
 import { tourDetailPath } from "../../../tours/utils/slug";
-import { HOME_TOUR_CARD_BRAND_LOGO } from "../../../tours/utils/relatedTourCard";
+import { inclusionBadgeLabels } from "../../../tours/utils/tourInclusionBadges";
+import {
+  savingTierForHomeTour,
+} from "../../../tours/utils/relatedTourCard";
 import "./HomeTourRows.css";
 
 const MAX_TOURS = 8;
 const VISIBLE_SLOTS = 4;
+const HOME_ROW_TIERS: TourCardSavingTier[] = ["gia_tot", "tieu_chuan", "tiet_kiem"];
 
 function cornerLabelsForTour(tour: Tour): string[] {
-  const labels: string[] = [];
-  if (tour.category?.trim()) labels.push(tour.category.trim());
+  const labels: string[] = [...inclusionBadgeLabels(tour.inclusionFlags)];
+  if (tour.category?.trim() && labels.length < 3) labels.push(tour.category.trim());
   const h = tour.highlights?.[0]?.trim();
-  if (h) labels.push(h.length > 26 ? `${h.slice(0, 26)}…` : h);
+  if (h && labels.length < 3) labels.push(h.length > 26 ? `${h.slice(0, 26)}…` : h);
   return labels.slice(0, 3);
 }
 
-/** Gán badge tier theo vị trí slot để có đủ kiểu (demo UI; sau thay bằng API). */
-function savingTierForSlot(index: number): TourCardSavingTier | undefined {
-  const tiers: (TourCardSavingTier | undefined)[] = [
-    "tiet_kiem",
-    "tieu_chuan",
-    "cao_cap",
-    undefined,
-  ];
-  return tiers[index % tiers.length];
+function homeSavingTierForCard(tour: Tour): TourCardSavingTier {
+  const fromData = savingTierForHomeTour(tour);
+  if (fromData === "gia_tot" || fromData === "tieu_chuan" || fromData === "tiet_kiem") {
+    return fromData;
+  }
+  const index = Math.abs(Number(tour.id ?? 0)) % HOME_ROW_TIERS.length;
+  return HOME_ROW_TIERS[index];
 }
 
 function TourRowCarousel({
@@ -157,7 +159,7 @@ function TourRowCarousel({
             trackClassName="home-tour-row-track"
           >
             {trackTours.map((tour, index) => {
-              const tier = savingTierForSlot(index);
+              const tier = homeSavingTierForCard(tour);
               return (
                 <div
                   key={`${tour.id}-${index}`}
@@ -173,7 +175,7 @@ function TourRowCarousel({
                     price={tour.price}
                     savingTier={tier}
                     cornerLabels={cornerLabelsForTour(tour)}
-                    brandLogoUrl={HOME_TOUR_CARD_BRAND_LOGO}
+                    brandLogoUrl={null}
                     className="home-tour-card"
                     onQuickView={() => onQuickViewTour(tour, tier)}
                   />

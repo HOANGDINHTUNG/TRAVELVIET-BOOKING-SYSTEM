@@ -117,8 +117,9 @@
   --dest-hero-lead: rgba(255, 255, 255, 0.88);
   --dest-hero-image-filter: none;
 
-  /* Home — 4 tour card 300px + gap 18px (carousel / section căn đều) */
-  --home-tour-card-width: 300px;
+  /* Home — 4 tour card + gap 18px (carousel / section căn đều, khớp TourCard) */
+  --home-tour-card-width: 310px;
+  --home-tour-card-height: 420px;
   --home-tour-card-gap: 18px;
   --home-content-max: calc(
     var(--home-tour-card-width) * 4 + var(--home-tour-card-gap) * 3

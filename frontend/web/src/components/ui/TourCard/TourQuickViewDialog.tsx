@@ -18,6 +18,7 @@ const SAVING_BADGE: Record<
   TourCardSavingTier,
   { bg: string; text: string }
 > = {
+  gia_tot: { bg: 'rgba(254, 240, 138, 0.96)', text: '#854D0E' },
   tiet_kiem: { bg: 'rgba(168, 132, 244, 0.92)', text: '#fff' },
   tieu_chuan: { bg: 'rgba(244, 246, 251, 0.98)', text: '#1B1B4D' },
   cao_cap: { bg: 'rgba(255, 222, 145, 0.96)', text: '#7A4A0F' },

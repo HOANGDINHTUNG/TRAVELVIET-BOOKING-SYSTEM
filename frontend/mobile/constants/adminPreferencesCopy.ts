@@ -1,0 +1,17 @@
+export const adminPreferencesCopy = {
+  kicker: 'TÀI KHOẢN ADMIN',
+  title: 'Cài đặt Commerce Desk',
+  apiSection: 'Kết nối API',
+  apiHint: 'URL backend đang dùng (sau failover nếu bật)',
+  sessionSection: 'Phiên đăng nhập',
+  permissions: 'Quyền',
+  superAdmin: 'SUPER_ADMIN',
+  managementAccess: 'Có quyền quản trị',
+  noPermissions: 'Chưa tải danh sách quyền',
+  commerceDesk: 'Mở Commerce Desk',
+  logout: 'Đăng xuất',
+  logoutTitle: 'Đăng xuất',
+  logoutMessage: 'Xóa phiên trên thiết bị và quay về màn đăng nhập?',
+  cancel: 'Hủy',
+  guestName: 'Chưa đăng nhập',
+} as const;

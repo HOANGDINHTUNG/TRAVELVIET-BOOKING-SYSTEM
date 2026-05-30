@@ -6,7 +6,7 @@ import {
   useState,
 } from 'react'
 
-const DEFAULT_STRIDE = 318
+const DEFAULT_STRIDE = 328
 /** Trượt chậm, dễ thấy — ~0.65s mỗi bước */
 const SLIDE_DURATION_S = 0.65
 

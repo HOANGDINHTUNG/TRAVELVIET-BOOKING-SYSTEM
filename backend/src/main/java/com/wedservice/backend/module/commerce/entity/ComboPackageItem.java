@@ -53,6 +53,17 @@ public class ComboPackageItem {
     @Builder.Default
     private BigDecimal unitPrice = BigDecimal.ZERO;
 
+    @Column(name = "unit_price_snapshot", precision = 14, scale = 2)
+    private BigDecimal unitPriceSnapshot;
+
+    @Column(name = "is_mandatory", nullable = false)
+    @Builder.Default
+    private Boolean isMandatory = true;
+
+    @Column(name = "sort_order", nullable = false)
+    @Builder.Default
+    private Integer sortOrder = 0;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -66,6 +77,12 @@ public class ComboPackageItem {
         }
         if (unitPrice == null) {
             unitPrice = BigDecimal.ZERO;
+        }
+        if (isMandatory == null) {
+            isMandatory = true;
+        }
+        if (sortOrder == null) {
+            sortOrder = 0;
         }
     }
 }

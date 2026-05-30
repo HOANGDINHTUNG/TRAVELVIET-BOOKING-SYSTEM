@@ -183,17 +183,44 @@ public class BookingPricingService {
             throw BadRequestException.i18n("api.error.bookingPricing.comboInactive");
         }
 
-        BigDecimal finalPrice = comboPackage.getBasePrice().subtract(comboPackage.getDiscountAmount()).max(ZERO);
+        BigDecimal computedDiscount = computeComboDiscount(comboPackage);
+        BigDecimal finalPrice = comboPackage.getBasePrice().subtract(computedDiscount).max(ZERO);
         AppliedComboQuoteResponse appliedCombo = AppliedComboQuoteResponse.builder()
                 .comboId(comboPackage.getId())
                 .comboCode(comboPackage.getCode())
                 .comboName(comboPackage.getName())
                 .unitPrice(comboPackage.getBasePrice())
-                .discountAmount(comboPackage.getDiscountAmount())
+                .discountAmount(computedDiscount)
                 .finalPrice(finalPrice)
                 .build();
 
-        return new ComboQuote(comboPackage.getDiscountAmount(), finalPrice, appliedCombo);
+        return new ComboQuote(computedDiscount, finalPrice, appliedCombo);
+    }
+
+    /**
+     * Tinh giam gia cho combo theo cau hinh moi:
+     * - fixed_amount: giam truc tiep theo discount_value (fallback discount_amount neu null)
+     * - percentage: giam theo phan tram tren base_price
+     * Sau cung luon chot trong khoang [0, base_price] de tranh am tien.
+     */
+    private BigDecimal computeComboDiscount(ComboPackage comboPackage) {
+        String discountType = comboPackage.getDiscountType() == null ? "fixed_amount" : comboPackage.getDiscountType();
+        BigDecimal discountValue = comboPackage.getDiscountValue() == null ? comboPackage.getDiscountAmount() : comboPackage.getDiscountValue();
+        if (discountValue == null) {
+            discountValue = ZERO;
+        }
+        BigDecimal discount;
+        if ("percentage".equalsIgnoreCase(discountType)) {
+            discount = comboPackage.getBasePrice()
+                    .multiply(discountValue)
+                    .divide(ONE_HUNDRED, 2, RoundingMode.HALF_UP);
+        } else {
+            discount = discountValue;
+        }
+        if (discount.compareTo(comboPackage.getBasePrice()) > 0) {
+            return comboPackage.getBasePrice();
+        }
+        return discount.max(ZERO);
     }
 
     private VoucherQuote resolveVoucherQuote(String rawVoucherCode, UUID userId, Tour tour, BigDecimal subtotalAmount) {

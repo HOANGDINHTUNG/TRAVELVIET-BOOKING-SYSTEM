@@ -1,36 +1,39 @@
-import { useEffect, useId, useRef, useState } from 'react'
-import { MapPin, Plane, X } from 'lucide-react'
+import { useEffect, useId, useRef, useState } from "react";
+import { MapPin, Plane, X } from "lucide-react";
 import {
   filterFlightAirports,
   formatAirportLabel,
   type FlightAirportOption,
-} from '../data/flightAirportData'
+} from "../data/flightAirportData";
 
 type FlightAirportAutocompleteProps = {
-  label: string
-  placeholder: string
-  value: string
-  onChange: (value: string, option?: FlightAirportOption) => void
-  clearAria: string
-  listAria: string
-}
+  label: string;
+  placeholder: string;
+  value: string;
+  onChange: (value: string, option?: FlightAirportOption) => void;
+  clearAria: string;
+  listAria: string;
+  excludeValue?: string;
+};
 
 function HighlightMatch({ text, query }: { text: string; query: string }) {
-  const q = query.trim()
-  if (!q) return <>{text}</>
+  const q = query.trim();
+  if (!q) return <>{text}</>;
 
-  const lower = text.toLowerCase()
-  const needle = q.toLowerCase()
-  const idx = lower.indexOf(needle)
-  if (idx === -1) return <>{text}</>
+  const lower = text.toLowerCase();
+  const needle = q.toLowerCase();
+  const idx = lower.indexOf(needle);
+  if (idx === -1) return <>{text}</>;
 
   return (
     <>
       {text.slice(0, idx)}
-      <mark className="flight-ac__mark">{text.slice(idx, idx + needle.length)}</mark>
+      <mark className="flight-ac__mark">
+        {text.slice(idx, idx + needle.length)}
+      </mark>
       {text.slice(idx + needle.length)}
     </>
-  )
+  );
 }
 
 export function FlightAirportAutocomplete({
@@ -40,69 +43,76 @@ export function FlightAirportAutocomplete({
   onChange,
   clearAria,
   listAria,
+  excludeValue,
 }: FlightAirportAutocompleteProps) {
-  const listboxId = useId()
-  const rootRef = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
-  const [open, setOpen] = useState(false)
-  const [activeIndex, setActiveIndex] = useState(0)
+  const listboxId = useId();
+  const rootRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [open, setOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
 
-  const suggestions = filterFlightAirports(value)
+  // Extract IATA from excludeValue like "SGN - Ho Chi Minh" -> "SGN"
+  const getIata = (v?: string) => (v ? v.split(" - ")[0] : null);
+  const excludedIata = getIata(excludeValue);
+
+  const suggestions = filterFlightAirports(value).filter(
+    (s) => s.iata !== excludedIata,
+  );
 
   useEffect(() => {
-    setActiveIndex(0)
-  }, [value])
+    setActiveIndex(0);
+  }, [value]);
 
   useEffect(() => {
-    if (!open) return undefined
+    if (!open) return undefined;
     const onPointerDown = (e: MouseEvent) => {
       if (!rootRef.current?.contains(e.target as Node)) {
-        setOpen(false)
+        setOpen(false);
       }
-    }
-    document.addEventListener('mousedown', onPointerDown)
-    return () => document.removeEventListener('mousedown', onPointerDown)
-  }, [open])
+    };
+    document.addEventListener("mousedown", onPointerDown);
+    return () => document.removeEventListener("mousedown", onPointerDown);
+  }, [open]);
 
-  const showList = open && suggestions.length > 0
+  const showList = open && suggestions.length > 0;
 
-  const openList = () => setOpen(true)
+  const openList = () => setOpen(true);
 
   const pick = (opt: FlightAirportOption) => {
-    onChange(formatAirportLabel(opt), opt)
-    setOpen(false)
-  }
+    onChange(formatAirportLabel(opt), opt);
+    setOpen(false);
+  };
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (!showList) {
-      if (e.key === 'ArrowDown' || e.key === 'Enter') {
-        openList()
+      if (e.key === "ArrowDown" || e.key === "Enter") {
+        openList();
       }
-      return
+      return;
     }
-    if (e.key === 'ArrowDown') {
-      e.preventDefault()
-      setActiveIndex((i) => Math.min(i + 1, suggestions.length - 1))
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault()
-      setActiveIndex((i) => Math.max(i - 1, 0))
-    } else if (e.key === 'Enter' && suggestions[activeIndex]) {
-      e.preventDefault()
-      pick(suggestions[activeIndex])
-    } else if (e.key === 'Escape') {
-      setOpen(false)
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setActiveIndex((i) => Math.min(i + 1, suggestions.length - 1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActiveIndex((i) => Math.max(i - 1, 0));
+    } else if (e.key === "Enter" && suggestions[activeIndex]) {
+      e.preventDefault();
+      pick(suggestions[activeIndex]);
+    } else if (e.key === "Escape") {
+      setOpen(false);
     }
-  }
+  };
 
   return (
     <div
       className="flight-route-field"
       ref={rootRef}
       onMouseDown={(e) => {
-        if (e.target === inputRef.current) return
-        e.preventDefault()
-        inputRef.current?.focus()
-        openList()
+        if (e.target === inputRef.current) return;
+        e.preventDefault();
+        inputRef.current?.focus();
+        openList();
       }}
     >
       <span className="flight-route-field__icon" aria-hidden>
@@ -124,8 +134,8 @@ export function FlightAirportAutocomplete({
           onFocus={openList}
           onClick={openList}
           onChange={(e) => {
-            onChange(e.target.value)
-            openList()
+            onChange(e.target.value);
+            openList();
           }}
           onKeyDown={onKeyDown}
         />
@@ -136,8 +146,8 @@ export function FlightAirportAutocomplete({
           className="flight-route-field__clear"
           aria-label={clearAria}
           onClick={() => {
-            onChange('')
-            inputRef.current?.focus()
+            onChange("");
+            inputRef.current?.focus();
           }}
         >
           <X size={14} strokeWidth={2.2} aria-hidden />
@@ -157,7 +167,7 @@ export function FlightAirportAutocomplete({
                 type="button"
                 role="option"
                 aria-selected={index === activeIndex}
-                className={`flight-ac__item${index === activeIndex ? ' is-active' : ''}`}
+                className={`flight-ac__item${index === activeIndex ? " is-active" : ""}`}
                 onMouseEnter={() => setActiveIndex(index)}
                 onClick={() => pick(opt)}
               >
@@ -177,5 +187,5 @@ export function FlightAirportAutocomplete({
         </ul>
       ) : null}
     </div>
-  )
+  );
 }

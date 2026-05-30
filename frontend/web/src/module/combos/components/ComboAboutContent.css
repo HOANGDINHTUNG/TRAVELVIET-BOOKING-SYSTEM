@@ -1,0 +1,43 @@
+.combo-about {
+  background: var(--color-page);
+  padding: 0 clamp(16px, 4vw, 48px) clamp(48px, 8vw, 80px);
+}
+
+.combo-about__inner {
+  max-width: 900px;
+  margin: 0 auto;
+  color: var(--color-text);
+}
+
+.combo-about__title {
+  margin: 0 0 16px;
+  font-size: clamp(1.25rem, 2.2vw, 1.5rem);
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+.combo-about__intro,
+.combo-about__closing {
+  margin: 0 0 20px;
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--color-muted, color-mix(in srgb, var(--color-text) 72%, transparent));
+}
+
+.combo-about__subtitle {
+  margin: 28px 0 12px;
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.combo-about__list {
+  margin: 0 0 8px;
+  padding-left: 1.25rem;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--color-muted, color-mix(in srgb, var(--color-text) 78%, transparent));
+}
+
+.combo-about__list li + li {
+  margin-top: 8px;
+}

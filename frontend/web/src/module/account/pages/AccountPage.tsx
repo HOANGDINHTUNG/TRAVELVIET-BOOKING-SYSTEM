@@ -46,7 +46,7 @@ import {
   type WishlistTour,
 } from "../../../api/server/Wishlist.api";
 import { ErrorBlock } from "../../../components/common/ui/ErrorBlock";
-import { PageLoader } from "../../../components/common/ux/PageLoader";
+import { AccountPageSkeleton } from "../../../components/ui/skeletons/CustomerPageSkeletons";
 import { Footer } from "../../../components/Footer/Footer";
 import { CustomerPageHero } from "../../../components/ui/CustomerPageHero/CustomerPageHero";
 import { persistStoredAuthUser } from "../../auth/api/authApi";
@@ -746,7 +746,12 @@ export default function AccountPage() {
   };
 
   if (loading) {
-    return <PageLoader label={copy.loading} />;
+    return (
+      <>
+        <AccountPageSkeleton />
+        <Footer />
+      </>
+    );
   }
 
   if (error) {

@@ -44,13 +44,37 @@ public class ComboPackage {
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
+    @Column(name = "destination_id")
+    private Long destinationId;
+
+    @Column(name = "combo_type", nullable = false, length = 30)
+    @Builder.Default
+    private String comboType = "custom";
+
     @Column(name = "base_price", precision = 14, scale = 2, nullable = false)
     @Builder.Default
     private BigDecimal basePrice = BigDecimal.ZERO;
 
+    @Column(name = "discount_type", nullable = false, length = 20)
+    @Builder.Default
+    private String discountType = "fixed_amount";
+
+    @Column(name = "discount_value", precision = 14, scale = 2, nullable = false)
+    @Builder.Default
+    private BigDecimal discountValue = BigDecimal.ZERO;
+
     @Column(name = "discount_amount", precision = 14, scale = 2, nullable = false)
     @Builder.Default
     private BigDecimal discountAmount = BigDecimal.ZERO;
+
+    @Column(name = "pricing_rule_json", columnDefinition = "JSON")
+    private String pricingRuleJson;
+
+    @Column(name = "start_at")
+    private LocalDateTime startAt;
+
+    @Column(name = "end_at")
+    private LocalDateTime endAt;
 
     @Column(name = "is_active", nullable = false)
     @Builder.Default
@@ -82,6 +106,9 @@ public class ComboPackage {
         if (discountAmount == null) {
             discountAmount = BigDecimal.ZERO;
         }
+        if (discountValue == null) {
+            discountValue = BigDecimal.ZERO;
+        }
         if (isActive == null) {
             isActive = true;
         }
@@ -95,6 +122,9 @@ public class ComboPackage {
         }
         if (discountAmount == null) {
             discountAmount = BigDecimal.ZERO;
+        }
+        if (discountValue == null) {
+            discountValue = BigDecimal.ZERO;
         }
         if (isActive == null) {
             isActive = true;

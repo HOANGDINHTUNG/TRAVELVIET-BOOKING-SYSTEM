@@ -141,10 +141,11 @@ export function buildTourCatalogUrl(filters: TourCatalogUiFilters): string {
 
 export function catalogFiltersToServerParams(
   filters: TourCatalogUiFilters,
+  paging?: { page?: number; size?: number },
 ): PublicTourSearchParams {
   const params: PublicTourSearchParams = {
-    page: 0,
-    size: 100,
+    page: paging?.page ?? 0,
+    size: paging?.size ?? 20,
     sortBy: filters.sortBy,
     sortDir: filters.sortDir,
   }
@@ -157,7 +158,8 @@ export function catalogFiltersToServerParams(
   if (mergedTags.length) params.tagCodes = [...new Set(mergedTags)]
   if (filters.featuredOnly) params.featuredOnly = true
   if (filters.esgOnly) params.esgOnly = true
-  /* Giá lọc phía client — tránh thu hẹp ngưỡng slider khi gọi API có maxPrice */
+  if (filters.minPrice != null) params.minPrice = filters.minPrice
+  if (filters.maxPrice != null) params.maxPrice = filters.maxPrice
   if (filters.transportTypes.length === 1) {
     params.transportType = filters.transportTypes[0]
   }

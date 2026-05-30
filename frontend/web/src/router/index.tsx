@@ -11,6 +11,9 @@ const lazyDestinationsPage = lazy(
   () => import("../module/destinations/pages/DestinationsPage"),
 );
 const lazyToursPage = lazy(() => import("../module/tours/pages/ToursPage"));
+const lazyTourCheckoutPage = lazy(
+  () => import("../module/tours/pages/TourCheckoutPage"),
+);
 const lazyTourLegacyIdRedirect = lazy(
   () => import("../module/tours/pages/TourLegacyIdRedirect"),
 );
@@ -35,6 +38,9 @@ const lazyRegisterPage = lazy(
   () => import("../module/auth/pages/RegisterPage"),
 );
 const lazyNotFoundPage = lazy(() => import("../components/error/NotFoundPage"));
+const lazyRouteErrorPage = lazy(
+  () => import("../components/error/RouteErrorPage"),
+);
 const lazyRequireAuthenticated = lazy(
   () => import("./guards/RequireAuthenticated"),
 );
@@ -98,8 +104,40 @@ const lazyServiceHubPage = lazy(
 const lazyFlightsPage = lazy(
   () => import("../module/flights/pages/FlightsPage"),
 );
+const lazyHotelsPage = lazy(() => import("../module/hotels/pages/HotelsPage"));
+const lazyCombosPage = lazy(() => import("../module/combos/pages/CombosPage"));
+const lazyComboSearchResultsPage = lazy(
+  () => import("../module/combos/pages/ComboSearchResultsPage"),
+);
+const lazyComboCatalogPage = lazy(
+  () => import("../module/combos/pages/ComboCatalogPage"),
+);
+const lazyComboDetailPage = lazy(
+  () => import("../module/combos/pages/ComboDetailPage"),
+);
+const lazyComboCheckoutPage = lazy(
+  () => import("../module/combos/pages/ComboCheckoutPage"),
+);
+const lazyHotelSearchResultsPage = lazy(
+  () => import("../module/hotels/pages/HotelSearchResultsPage"),
+);
+const lazyHotelDetailPage = lazy(
+  () => import("../module/hotels/pages/HotelDetailPage"),
+);
+const lazyHotelCheckoutPage = lazy(
+  () => import("../module/hotels/pages/HotelCheckoutPage"),
+);
+const lazyHotelPaymentSuccessPage = lazy(
+  () => import("../module/hotels/pages/HotelPaymentSuccessPage"),
+);
 const lazyFlightSearchResultsPage = lazy(
   () => import("../module/flights/pages/FlightSearchResultsPage"),
+);
+const lazyFlightCheckoutPage = lazy(
+  () => import("../module/flights/pages/FlightCheckoutPage"),
+);
+const lazyFlightPaymentSuccessPage = lazy(
+  () => import("../module/flights/pages/FlightPaymentSuccessPage"),
 );
 const lazyManagementBookingsPage = lazy(
   () => import("../module/management/bookings/pages/ManagementBookingsPage"),
@@ -115,7 +153,7 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: <App />,
-    errorElement: withSuspense(createElement(lazyNotFoundPage)),
+    errorElement: withSuspense(createElement(lazyRouteErrorPage)),
     children: [
       { index: true, element: withSuspense(createElement(lazyHomePage)) },
       {
@@ -135,6 +173,10 @@ const router = createBrowserRouter([
         element: withSuspense(createElement(lazyToursPage)),
       },
       {
+        path: "tours/checkout",
+        element: withSuspense(createElement(lazyTourCheckoutPage)),
+      },
+      {
         path: "flights",
         element: withSuspense(createElement(lazyFlightsPage)),
       },
@@ -143,8 +185,56 @@ const router = createBrowserRouter([
         element: withSuspense(createElement(lazyFlightSearchResultsPage)),
       },
       {
+        path: "flights/checkout",
+        element: withSuspense(createElement(lazyFlightCheckoutPage)),
+      },
+      {
+        path: "flights/success",
+        element: withSuspense(createElement(lazyFlightPaymentSuccessPage)),
+      },
+      {
         path: "hotels",
-        element: withSuspense(createElement(lazyServiceHubPage)),
+        element: withSuspense(createElement(lazyHotelsPage)),
+      },
+      {
+        path: "hotels/all",
+        element: <Navigate to="/hotels/search" replace />,
+      },
+      {
+        path: "hotels/search",
+        element: withSuspense(createElement(lazyHotelSearchResultsPage)),
+      },
+      {
+        path: "hotels/checkout",
+        element: withSuspense(createElement(lazyHotelCheckoutPage)),
+      },
+      {
+        path: "hotels/success",
+        element: withSuspense(createElement(lazyHotelPaymentSuccessPage)),
+      },
+      {
+        path: "hotels/:id",
+        element: withSuspense(createElement(lazyHotelDetailPage)),
+      },
+      {
+        path: "combos",
+        element: withSuspense(createElement(lazyCombosPage)),
+      },
+      {
+        path: "combos/search",
+        element: withSuspense(createElement(lazyComboSearchResultsPage)),
+      },
+      {
+        path: "combos/all",
+        element: withSuspense(createElement(lazyComboCatalogPage)),
+      },
+      {
+        path: "combos/checkout",
+        element: withSuspense(createElement(lazyComboCheckoutPage)),
+      },
+      {
+        path: "combos/:id",
+        element: withSuspense(createElement(lazyComboDetailPage)),
       },
       {
         path: "car-rental",
@@ -235,7 +325,9 @@ const router = createBrowserRouter([
               },
               {
                 path: "system-api-probe",
-                element: withSuspense(createElement(lazyManagementApiProbePage)),
+                element: withSuspense(
+                  createElement(lazyManagementApiProbePage),
+                ),
               },
               {
                 path: "developer-hub",
@@ -243,15 +335,23 @@ const router = createBrowserRouter([
               },
               {
                 path: "users",
-                element: withSuspense(createElement(lazyManagementSystemPage, { pageId: "users" })),
+                element: withSuspense(
+                  createElement(lazyManagementSystemPage, { pageId: "users" }),
+                ),
               },
               {
                 path: "roles",
-                element: withSuspense(createElement(lazyManagementSystemPage, { pageId: "roles" })),
+                element: withSuspense(
+                  createElement(lazyManagementSystemPage, { pageId: "roles" }),
+                ),
               },
               {
                 path: "permissions",
-                element: withSuspense(createElement(lazyManagementSystemPage, { pageId: "permissions" })),
+                element: withSuspense(
+                  createElement(lazyManagementSystemPage, {
+                    pageId: "permissions",
+                  }),
+                ),
               },
               {
                 path: "audit-logs",
@@ -259,7 +359,9 @@ const router = createBrowserRouter([
               },
               {
                 path: "destinations",
-                element: withSuspense(createElement(lazyManagementDestinationPage)),
+                element: withSuspense(
+                  createElement(lazyManagementDestinationPage),
+                ),
               },
               {
                 path: "tours",
@@ -267,19 +369,31 @@ const router = createBrowserRouter([
               },
               {
                 path: "schedules",
-                element: withSuspense(createElement(lazyManagementTourPage, { mode: "schedules" })),
+                element: withSuspense(
+                  createElement(lazyManagementTourPage, { mode: "schedules" }),
+                ),
               },
               {
                 path: "bookings",
-                element: withSuspense(createElement(lazyManagementBookingsPage)),
+                element: withSuspense(
+                  createElement(lazyManagementBookingsPage),
+                ),
               },
               {
                 path: "payments",
-                element: withSuspense(createElement(lazyManagementModulePage, { pageId: "payments" })),
+                element: withSuspense(
+                  createElement(lazyManagementModulePage, {
+                    pageId: "payments",
+                  }),
+                ),
               },
               {
                 path: "refunds",
-                element: withSuspense(createElement(lazyManagementModulePage, { pageId: "refunds" })),
+                element: withSuspense(
+                  createElement(lazyManagementModulePage, {
+                    pageId: "refunds",
+                  }),
+                ),
               },
               {
                 path: "support",
@@ -287,19 +401,33 @@ const router = createBrowserRouter([
               },
               {
                 path: "promotions",
-                element: withSuspense(createElement(lazyManagementPromotionPage)),
+                element: withSuspense(
+                  createElement(lazyManagementPromotionPage),
+                ),
               },
               {
                 path: "reviews",
-                element: withSuspense(createElement(lazyManagementModulePage, { pageId: "reviews" })),
+                element: withSuspense(
+                  createElement(lazyManagementModulePage, {
+                    pageId: "reviews",
+                  }),
+                ),
               },
               {
                 path: "notifications",
-                element: withSuspense(createElement(lazyManagementModulePage, { pageId: "notifications" })),
+                element: withSuspense(
+                  createElement(lazyManagementModulePage, {
+                    pageId: "notifications",
+                  }),
+                ),
               },
               {
                 path: "reports",
-                element: withSuspense(createElement(lazyManagementModulePage, { pageId: "reports" })),
+                element: withSuspense(
+                  createElement(lazyManagementModulePage, {
+                    pageId: "reports",
+                  }),
+                ),
               },
               {
                 path: ":roleCode",

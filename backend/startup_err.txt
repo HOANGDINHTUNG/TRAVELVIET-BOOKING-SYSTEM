@@ -1,0 +1,24 @@
+2026-05-29 18:53:28 [main] INFO  o.f.c.i.s.JdbcTableSchemaHistory [NO-TRACE] - Repair of failed migration in Schema History table `wedservice`.`flyway_schema_history` not necessary. No failed migration detected.
+2026-05-29 18:53:28 [main] INFO  o.f.core.internal.command.DbRepair [NO-TRACE] - Successfully repaired schema history table `wedservice`.`flyway_schema_history` (execution time 00:00.097s).
+2026-05-29 18:53:28 [main] INFO  o.f.core.internal.command.DbMigrate [NO-TRACE] - Current version of schema `wedservice`: 8
+ALTER TABLE `hotels` ADD COLUMN `deleted_at` timestamp NULL DEFAULT NULL
+2026-05-29 18:53:28 [main] INFO  o.f.core.internal.command.DbMigrate [NO-TRACE] - Migrating schema `wedservice` to version "9 - add deleted at to hotels"
+ALTER TABLE `hotels` ADD COLUMN `deleted_at` timestamp NULL DEFAULT NULL
+2026-05-29 18:53:29 [main] INFO  o.f.core.internal.command.DbMigrate [NO-TRACE] - Successfully applied 1 migration to schema `wedservice`, now at version v9 (execution time 00:00.221s)
+2026-05-29 18:53:33 [main] INFO  o.s.b.a.e.web.EndpointLinksResolver [NO-TRACE] - Exposing 3 endpoints beneath base path '/actuator'
+2026-05-29 18:53:33 [main] INFO  o.s.boot.tomcat.TomcatWebServer [NO-TRACE] - Tomcat started on port 8088 (http) with context path '/api/v1'
+2026-05-29 18:53:33 [main] INFO  c.w.backend.BackendApplication [NO-TRACE] - Started BackendApplication in 29.297 seconds (process running for 30.485)
+2026-05-29 18:53:33 [main] INFO  c.w.b.c.a.ApiEndpointFailoverStartup [NO-TRACE] - API failover probe scheduled on background thread (startup not blocked).
+2026-05-29 18:53:33 [api-probe-1] INFO  c.w.b.c.a.ApiEndpointFailoverStartup [NO-TRACE] - app.api.failover.prefer-public=false — probe local trước, public làm dự phòng.
+2026-05-29 18:53:33 [main] INFO  c.w.b.c.d.DatabaseTargetStartupLogger [NO-TRACE] - Database target registered: Local MySQL (127.0.0.1:3307/wedservice)
+2026-05-29 18:53:33 [api-probe-1] INFO  c.w.b.c.a.ApiEndpointFailoverStartup [NO-TRACE] - Background probing local API http://localhost:8088/api/v1 ...
+2026-05-29 18:53:34 [http-nio-8088-exec-1] INFO  o.a.c.c.C.[.[localhost].[/api/v1] [NO-TRACE] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-05-29 18:53:34 [http-nio-8088-exec-1] INFO  o.s.web.servlet.DispatcherServlet [NO-TRACE] - Initializing Servlet 'dispatcherServlet'
+2026-05-29 18:53:34 [http-nio-8088-exec-1] INFO  o.s.web.servlet.DispatcherServlet [NO-TRACE] - Completed initialization in 3 ms
+2026-05-29 18:53:34 [api-probe-1] INFO  c.w.b.c.a.ApiEndpointFailoverStartup [NO-TRACE] - Local API is reachable.
+2026-05-29 18:53:34 [api-probe-1] INFO  c.w.b.c.a.ApiEndpointFailoverStartup [NO-TRACE] - ============================================================
+2026-05-29 18:53:34 [api-probe-1] INFO  c.w.b.c.a.ApiEndpointFailoverStartup [NO-TRACE] - Active API endpoint (post-probe): LOCAL — http://localhost:8088/api/v1
+2026-05-29 18:53:34 [api-probe-1] INFO  c.w.b.c.a.ApiEndpointFailoverStartup [NO-TRACE] -   publicBaseUrl=https://travelviet-booking-system.onrender.com/api/v1 (reachable=false)
+2026-05-29 18:53:34 [api-probe-1] INFO  c.w.b.c.a.ApiEndpointFailoverStartup [NO-TRACE] -   localBaseUrl=http://localhost:8088/api/v1
+2026-05-29 18:53:34 [api-probe-1] INFO  c.w.b.c.a.ApiEndpointFailoverStartup [NO-TRACE] - ============================================================
+

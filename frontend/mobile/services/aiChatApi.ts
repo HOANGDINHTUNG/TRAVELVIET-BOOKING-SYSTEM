@@ -1,13 +1,7 @@
-import { Platform } from 'react-native';
 import type { AiChatResponse } from '@/types/aiChat';
-
-const defaultApiUrl =
-  Platform.OS === 'android'
-    ? 'http://10.0.2.2:8088/api/v1'
-    : 'http://localhost:8088/api/v1';
-
-const rawBaseUrl = process.env.EXPO_PUBLIC_API_URL ?? defaultApiUrl;
-const API_BASE_URL = rawBaseUrl.replace(/\/+$/, '');
+import { getApiBaseUrl } from '@/config/apiBaseUrl';
+import { getAccessToken } from '@/services/authStorage';
+import { refreshAccessToken } from '@/services/authTokenRefresh';
 
 type AccessTokenProvider = () => Promise<string | null> | string | null;
 
@@ -17,28 +11,40 @@ export function setAiChatAccessTokenProvider(provider: AccessTokenProvider | nul
   accessTokenProvider = provider;
 }
 
-async function buildHeaders() {
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-  };
-
-  const token = await accessTokenProvider?.();
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
-  }
-
-  return headers;
+async function resolveToken() {
+  const fromProvider = await accessTokenProvider?.();
+  return fromProvider ?? getAccessToken();
 }
 
-export async function sendAiMessage(message: string, conversationId?: string | null) {
-  const response = await fetch(`${API_BASE_URL}/ai/chat`, {
+async function postChat(message: string, conversationId: string | null | undefined, token: string | null) {
+  const response = await fetch(`${getApiBaseUrl()}/ai/chat`, {
     method: 'POST',
-    headers: await buildHeaders(),
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
     body: JSON.stringify({
       message,
       conversationId: conversationId ?? null,
     }),
   });
+
+  return response;
+}
+
+export async function sendAiMessage(message: string, conversationId?: string | null) {
+  let token = await resolveToken();
+  let response = await postChat(message, conversationId, token);
+
+  if (response.status === 401 && token) {
+    try {
+      await refreshAccessToken();
+      token = await resolveToken();
+      response = await postChat(message, conversationId, token);
+    } catch {
+      throw new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+    }
+  }
 
   if (!response.ok) {
     throw new Error('Xin lỗi, hệ thống AI đang gặp lỗi khi xử lý câu hỏi.');

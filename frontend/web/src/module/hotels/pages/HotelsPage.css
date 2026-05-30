@@ -1,0 +1,11 @@
+.hotels-page {
+  --hotel-page-bg: var(--color-page);
+  background: var(--hotel-page-bg);
+  color: var(--color-text);
+  overflow-x: clip;
+}
+
+.hotels-page .hotel-hero {
+  margin-top: calc(-1 * var(--site-header-height, 72px));
+  padding-top: var(--site-header-height, 72px);
+}
