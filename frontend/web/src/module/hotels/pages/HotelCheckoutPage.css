@@ -1,0 +1,4 @@
+/* Additional custom overrides for Hotel Checkout can be placed here */
+.hc-booking-info-grid {
+  line-height: 1.6;
+}

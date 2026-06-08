@@ -24,12 +24,12 @@ type AiChatModalProps = {
 const initialMessage: AiChatMessage = {
   id: 'welcome',
   role: 'ai',
-  text: 'Xin chào, tôi có thể tư vấn tour, địa điểm và hỗ trợ thông tin đặt tour dựa trên dữ liệu hiện có của TravelViet.',
+  text: 'Xin chào! Tôi hỗ trợ tra cứu nhanh tour, khuyến mãi và thông tin vận hành TravelViet khi bạn đang dùng Commerce Desk.',
   createdAt: new Date(),
   suggestions: [
-    'Tôi muốn đi Đà Lạt 3 ngày 2 đêm',
-    'Tôi có 5 triệu nên đi đâu?',
-    'Có địa điểm nào đẹp ở miền Trung không?',
+    'Liệt kê campaign đang bật',
+    'Gợi ý kiểm tra voucher sắp hết hạn',
+    'Tóm tắt quy trình bật/tắt sản phẩm trên desk',
   ],
 };
 

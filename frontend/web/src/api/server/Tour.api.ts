@@ -43,6 +43,15 @@ export type PublicTourSearchParams = {
   esgOnly?: boolean;
 };
 
+export type PublicTourSearchPage = {
+  items: Tour[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  last: boolean;
+};
+
 function appendTourSearchToUrlSearchParams(
   usp: URLSearchParams,
   params: PublicTourSearchParams,
@@ -259,6 +268,17 @@ export const tourApi = {
   async searchPublicTours(params: PublicTourSearchParams) {
     const page = await getTourSearchPage(params);
     return page.content.map(mapTour);
+  },
+  async searchPublicToursPage(params: PublicTourSearchParams): Promise<PublicTourSearchPage> {
+    const page = await getTourSearchPage(params);
+    return {
+      items: page.content.map(mapTour),
+      page: page.page,
+      size: page.size,
+      totalElements: page.totalElements,
+      totalPages: page.totalPages,
+      last: page.last,
+    };
   },
   async getTourById(id: string) {
     const tour = await getBackendData<BackendTour>(`tours/${id}`);

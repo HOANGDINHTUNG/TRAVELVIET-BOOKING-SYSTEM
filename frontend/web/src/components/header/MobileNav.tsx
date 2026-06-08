@@ -25,6 +25,7 @@ type MobileNavProps = {
   brandName: string
   brandTagline: string
   logoSrc: string
+  wordmarkSrc?: string
   items: MobileNavItem[]
   theme: ThemeMode
   language: LanguageMode
@@ -45,6 +46,7 @@ export function MobileNav({
   brandName,
   brandTagline,
   logoSrc,
+  wordmarkSrc,
   items,
   theme,
   language,
@@ -85,9 +87,20 @@ export function MobileNav({
               className="h-10 w-10 rounded-md bg-white/5 object-contain"
             />
             <div className="min-w-0 flex-1">
-              <SheetTitle className="text-sm font-semibold uppercase tracking-[0.18em] text-white">
-                {brandName}
-              </SheetTitle>
+              {wordmarkSrc ? (
+                <SheetTitle className="sr-only">{brandName}</SheetTitle>
+              ) : (
+                <SheetTitle className="text-sm font-semibold uppercase tracking-[0.18em] text-white">
+                  {brandName}
+                </SheetTitle>
+              )}
+              {wordmarkSrc ? (
+                <img
+                  src={wordmarkSrc}
+                  alt={brandName}
+                  className="h-7 w-auto max-w-[140px] object-contain object-left"
+                />
+              ) : null}
               <SheetDescription className="text-[11px] text-white/60">
                 {brandTagline}
               </SheetDescription>

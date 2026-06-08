@@ -12,6 +12,10 @@ export function resolveHeaderVariant(pathname: string): HeaderVariant {
   if (pathname === '/tours') return 'over-hero'
   if (pathname === '/flights') return 'over-hero'
   if (pathname === '/flights/search') return 'solid'
+  if (pathname === '/flights/checkout' || pathname === '/flights/success') return 'solid'
+  if (pathname === '/hotels') return 'over-hero'
+  if (pathname === '/hotels/search') return 'solid'
+  if (pathname === '/combos') return 'over-hero'
 
   if (pathname.startsWith('/tour/')) return 'solid'
 

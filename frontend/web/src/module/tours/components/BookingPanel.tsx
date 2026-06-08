@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useTranslation } from 'react-i18next'
-import { motion, AnimatePresence } from 'motion/react'
-import { toast } from 'sonner'
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { motion, AnimatePresence } from "motion/react";
+import { toast } from "sonner";
 import {
   CheckCircle2,
   Loader2,
@@ -12,68 +12,69 @@ import {
   Plus,
   Tag,
   XCircle,
-} from 'lucide-react'
+} from "lucide-react";
 import {
   selectCurrentUser,
   selectIsAuthenticated,
   useAuthStore,
-} from '../../../stores/authStore'
-import { useDebouncedValue } from '../../../hooks/useDebouncedValue'
+} from "../../../stores/authStore";
+import { useDebouncedValue } from "../../../hooks/useDebouncedValue";
 import {
   formatCurrencyVnd,
   formatDateTime,
   formatNumberVi,
-} from '../../management/schedules/utils/currency'
-import { handleApiError } from '../../../lib/handleApiError'
+} from "../../management/schedules/utils/currency";
+import { handleApiError } from "../../../lib/handleApiError";
 import {
   useBookingQuote,
   useCreateBooking,
-} from '../../bookings/hooks/useBookingMutation'
+} from "../../bookings/hooks/useBookingMutation";
 import type {
   BookingPassengerCount,
   BookingQuotePayload,
   CreateBookingPayload,
-} from '../../bookings/types/publicBooking'
-import type { UserMeResponse } from '../../../types/user'
+} from "../../bookings/types/publicBooking";
+import type { UserMeResponse } from "../../../types/user";
 import type {
   TourComboPackageOfferSummary,
   TourScheduleResponse,
-} from '../types/publicTour'
+} from "../types/publicTour";
 import {
   getScheduleRemainingSeats,
   isBookingOverSeatCapacity,
-} from '../utils/scheduleSeatAvailability'
-import '../styles/BookingPanel.css'
+} from "../utils/scheduleSeatAvailability";
+import { tourCheckoutStorage } from "../lib/tourCheckoutStorage";
+import "../styles/BookingPanel.css";
 
 function bookingContactFromUser(user: UserMeResponse) {
   return {
-    contactName: user.fullName || user.displayName || '',
-    contactPhone: user.phone ?? '',
-    contactEmail: user.email ?? '',
-  }
+    contactName: user.fullName || user.displayName || "",
+    contactPhone: user.phone ?? "",
+    contactEmail: user.email ?? "",
+  };
 }
 
 type BookingPanelProps = {
-  tourId: number
-  schedule: TourScheduleResponse | null
-  comboPackages?: TourComboPackageOfferSummary[]
-}
+  tourId: number;
+  schedule: TourScheduleResponse | null;
+  comboPackages?: TourComboPackageOfferSummary[];
+};
 
 function parseComboPrice(value: number | string | undefined | null) {
-  const amount = Number(value)
-  return Number.isFinite(amount) ? amount : 0
+  const amount = Number(value);
+  return Number.isFinite(amount) ? amount : 0;
 }
 
 function comboRoleLabel(
   role: string | null | undefined,
   t: (key: string) => string,
 ) {
-  if (role === 'included') return String(t('detail.comboRoleIncluded'))
-  if (role === 'recommended') return String(t('detail.comboRoleRecommended'))
-  return String(t('detail.comboRoleOptional'))
+  if (role === "included") return String(t("detail.comboRoleIncluded"));
+  if (role === "recommended") return String(t("detail.comboRoleRecommended"));
+  return String(t("detail.comboRoleOptional"));
 }
 
-const QUOTE_DEBOUNCE_MS = 400
+const QUOTE_DEBOUNCE_MS = 400;
 
 /**
  * Panel đặt chỗ public:
@@ -88,83 +89,83 @@ function BookingPanel({
   schedule,
   comboPackages = [],
 }: BookingPanelProps) {
-  const { t } = useTranslation('bookings')
-  const { t: tTour } = useTranslation('tours')
-  const navigate = useNavigate()
-  const isAuthenticated = useAuthStore(selectIsAuthenticated)
-  const currentUser = useAuthStore(selectCurrentUser)
+  const { t } = useTranslation("bookings");
+  const { t: tTour } = useTranslation("tours");
+  const navigate = useNavigate();
+  const isAuthenticated = useAuthStore(selectIsAuthenticated);
+  const currentUser = useAuthStore(selectCurrentUser);
 
   const [counts, setCounts] = useState<BookingPassengerCount>({
     adults: 1,
     children: 0,
     infants: 0,
     seniors: 0,
-  })
+  });
 
   // Voucher: dùng 2 state — `voucherInput` (đang gõ) và `appliedVoucherCode`
   // (đã apply → mới được include vào quote payload).
-  const [voucherInput, setVoucherInput] = useState('')
+  const [voucherInput, setVoucherInput] = useState("");
   const [appliedVoucherCode, setAppliedVoucherCode] = useState<string | null>(
     null,
-  )
+  );
 
-  const [contactName, setContactName] = useState('')
-  const [contactPhone, setContactPhone] = useState('')
-  const [contactEmail, setContactEmail] = useState('')
-  const [specialRequests, setSpecialRequests] = useState('')
+  const [contactName, setContactName] = useState("");
+  const [contactPhone, setContactPhone] = useState("");
+  const [contactEmail, setContactEmail] = useState("");
+  const [specialRequests, setSpecialRequests] = useState("");
 
   const defaultComboId = useMemo(() => {
-    const included = comboPackages.find((c) => c.packageRole === 'included')
-    if (included) return included.comboId
-    const recommended = comboPackages.find((c) => c.isDefault)
-    if (recommended) return recommended.comboId
-    return 0
-  }, [comboPackages])
+    const included = comboPackages.find((c) => c.packageRole === "included");
+    if (included) return included.comboId;
+    const recommended = comboPackages.find((c) => c.isDefault);
+    if (recommended) return recommended.comboId;
+    return 0;
+  }, [comboPackages]);
 
-  const [comboId, setComboId] = useState(defaultComboId)
+  const [comboId, setComboId] = useState(defaultComboId);
 
   useEffect(() => {
-    setComboId(defaultComboId)
-  }, [defaultComboId, tourId])
+    setComboId(defaultComboId);
+  }, [defaultComboId, tourId]);
 
   // Đã đăng nhập: tự điền họ tên / SĐT / email từ tài khoản; yêu cầu đặc biệt để trống.
   useEffect(() => {
     if (!currentUser) {
-      setContactName('')
-      setContactPhone('')
-      setContactEmail('')
-      return
+      setContactName("");
+      setContactPhone("");
+      setContactEmail("");
+      return;
     }
-    const contact = bookingContactFromUser(currentUser)
-    setContactName(contact.contactName)
-    setContactPhone(contact.contactPhone)
-    setContactEmail(contact.contactEmail)
+    const contact = bookingContactFromUser(currentUser);
+    setContactName(contact.contactName);
+    setContactPhone(contact.contactPhone);
+    setContactEmail(contact.contactEmail);
   }, [
     currentUser?.id,
     currentUser?.fullName,
     currentUser?.displayName,
     currentUser?.phone,
     currentUser?.email,
-  ])
+  ]);
 
   /* ----------------------------- Pricing ----------------------------- */
 
   /** Client-side instant preview (chưa có discount/voucher). */
   const clientSubtotal = useMemo(() => {
-    if (!schedule) return 0
-    const a = (schedule.adultPrice ?? 0) * counts.adults
-    const c = (schedule.childPrice ?? 0) * counts.children
-    const i = (schedule.infantPrice ?? 0) * counts.infants
-    const s = (schedule.seniorPrice ?? 0) * counts.seniors
-    return a + c + i + s
-  }, [schedule, counts])
+    if (!schedule) return 0;
+    const a = (schedule.adultPrice ?? 0) * counts.adults;
+    const c = (schedule.childPrice ?? 0) * counts.children;
+    const i = (schedule.infantPrice ?? 0) * counts.infants;
+    const s = (schedule.seniorPrice ?? 0) * counts.seniors;
+    return a + c + i + s;
+  }, [schedule, counts]);
 
   /**
    * Live payload (sync). Truyền qua `useDebouncedValue` để chỉ refetch quote
    * sau khi user dừng thao tác `QUOTE_DEBOUNCE_MS` ms.
    */
   const livePayload = useMemo<BookingQuotePayload | null>(() => {
-    if (!schedule || !isAuthenticated) return null
+    if (!schedule || !isAuthenticated) return null;
     return {
       tourId,
       scheduleId: schedule.id,
@@ -174,136 +175,139 @@ function BookingPanel({
       seniors: counts.seniors,
       voucherCode: appliedVoucherCode ?? undefined,
       comboId: comboId > 0 ? comboId : undefined,
-    }
-  }, [tourId, schedule, counts, appliedVoucherCode, comboId, isAuthenticated])
+    };
+  }, [tourId, schedule, counts, appliedVoucherCode, comboId, isAuthenticated]);
 
   const debouncedQuotePayload = useDebouncedValue(
     livePayload,
     QUOTE_DEBOUNCE_MS,
-  )
+  );
 
-  const quoteQuery = useBookingQuote(debouncedQuotePayload)
+  const quoteQuery = useBookingQuote(debouncedQuotePayload);
 
-  const totalSeats = counts.adults + counts.children + counts.seniors // infants không chiếm chỗ
-  const remainingSeats = getScheduleRemainingSeats(schedule)
-  const overCapacity = isBookingOverSeatCapacity(schedule, totalSeats)
+  const totalSeats = counts.adults + counts.children + counts.seniors; // infants không chiếm chỗ
+  const remainingSeats = getScheduleRemainingSeats(schedule);
+  const overCapacity = isBookingOverSeatCapacity(schedule, totalSeats);
 
   /* ----------------------------- Mutation ----------------------------- */
-  const createMutation = useCreateBooking()
+  const createMutation = useCreateBooking();
 
   /* ------------------------------ Handlers ------------------------------ */
 
   function bump(key: keyof BookingPassengerCount, delta: number) {
     setCounts((prev) => {
-      const next = { ...prev, [key]: Math.max(0, (prev[key] ?? 0) + delta) }
+      const next = { ...prev, [key]: Math.max(0, (prev[key] ?? 0) + delta) };
       // Đảm bảo có ít nhất 1 adult
-      if (next.adults < 1) next.adults = 1
-      return next
-    })
+      if (next.adults < 1) next.adults = 1;
+      return next;
+    });
   }
 
   function handleApplyVoucher() {
-    const code = voucherInput.trim()
+    const code = voucherInput.trim();
     if (!code) {
-      setAppliedVoucherCode(null)
-      return
+      setAppliedVoucherCode(null);
+      return;
     }
-    setAppliedVoucherCode(code)
+    setAppliedVoucherCode(code);
     // Quote sẽ tự re-fetch qua effect debounce.
   }
 
   function handleClearVoucher() {
-    setVoucherInput('')
-    setAppliedVoucherCode(null)
+    setVoucherInput("");
+    setAppliedVoucherCode(null);
   }
 
   function handleSubmit() {
-    if (!schedule) return
+    if (!schedule) return;
     if (!isAuthenticated) {
-      toast.info(String(t('panel.authRequired')))
-      const from = `${window.location.pathname}${window.location.search}`
-      navigate('/login', { state: { from } })
-      return
+      toast.info(String(t("panel.authRequired")));
+      const from = `${window.location.pathname}${window.location.search}`;
+      navigate("/login", { state: { from } });
+      return;
     }
     if (!contactName.trim() || !contactPhone.trim()) {
-      toast.error(String(t('panel.contactRequired')))
-      return
+      toast.error(String(t("panel.contactRequired")));
+      return;
     }
     if (overCapacity) {
       toast.error(
         String(
-          t('panel.overCapacityDetail', {
+          t("panel.overCapacityDetail", {
             selected: totalSeats,
             remaining: remainingSeats ?? 0,
             defaultValue:
-              'Bạn chọn {{selected}} chỗ nhưng đợt này chỉ còn {{remaining}} chỗ trống.',
+              "Bạn chọn {{selected}} chỗ nhưng đợt này chỉ còn {{remaining}} chỗ trống.",
           }),
         ),
-      )
-      return
+      );
+      return;
     }
 
-    const payload: CreateBookingPayload = {
+    tourCheckoutStorage.save({
       tourId,
+      tourTitle: schedule.tourName || `Tour #${tourId}`,
       scheduleId: schedule.id,
-      adults: counts.adults,
-      children: counts.children,
-      infants: counts.infants,
-      seniors: counts.seniors,
-      voucherCode: appliedVoucherCode ?? undefined,
+      scheduleCode: schedule.scheduleCode || "TOUR-###",
+      adultPrice: schedule.adultPrice || 0,
+      childPrice: schedule.childPrice || 0,
+      infantPrice: schedule.infantPrice || 0,
+      departureAt: schedule.departureAt,
+      primaryDepartureCity: schedule.meetingPointName || "Hồ Chí Minh",
+      adultCount: counts.adults,
+      childCount: counts.children,
+      infantCount: counts.infants,
+      seniorCount: counts.seniors,
       comboId: comboId > 0 ? comboId : undefined,
-      contactName,
-      contactPhone,
-      contactEmail,
-      specialRequests,
-      bookingSource: 'web',
-    }
-    createMutation.mutate(payload)
+    });
+
+    navigate("/tours/checkout");
   }
 
   /* ------------------------------ Render ------------------------------ */
 
   if (!schedule) {
     return (
-      <div className="tour-booking-empty">{String(t('panel.selectSchedulePrompt'))}</div>
-    )
+      <div className="tour-booking-empty">
+        {String(t("panel.selectSchedulePrompt"))}
+      </div>
+    );
   }
 
-  const quoteData = quoteQuery.data
+  const quoteData = quoteQuery.data;
   const finalAmount =
     quoteData?.finalAmount != null && quoteData.finalAmount > 0
       ? quoteData.finalAmount
-      : clientSubtotal
-  const voucherDiscount = quoteData?.voucherDiscountAmount ?? 0
-  const totalDiscount = quoteData?.discountAmount ?? 0
+      : clientSubtotal;
+  const voucherDiscount = quoteData?.voucherDiscountAmount ?? 0;
+  const totalDiscount = quoteData?.discountAmount ?? 0;
 
-  const appliedVoucherInfo = quoteData?.appliedVoucher
+  const appliedVoucherInfo = quoteData?.appliedVoucher;
   const isVoucherInvalid =
     appliedVoucherCode != null &&
     quoteQuery.isSuccess &&
-    (!appliedVoucherInfo || (appliedVoucherInfo.discountAmount ?? 0) === 0)
+    (!appliedVoucherInfo || (appliedVoucherInfo.discountAmount ?? 0) === 0);
 
   const quoteErrorMessage =
     isAuthenticated && quoteQuery.isError
-      ? handleApiError(
-          quoteQuery.error,
-          String(t('panel.quoteError')),
-        )
-      : null
+      ? handleApiError(quoteQuery.error, String(t("panel.quoteError")))
+      : null;
 
   return (
     <div className="tour-booking-card">
       <div>
-        <p className="tour-booking-label">{String(t('panel.title'))}</p>
+        <p className="tour-booking-label">{String(t("panel.title"))}</p>
         <p className="text-sm font-semibold text-[var(--color-text)]">
           {schedule.scheduleCode ?? `#${schedule.id}`}
         </p>
       </div>
 
-      {(schedule.meetingPointName ||
-        (schedule.pickupPoints && schedule.pickupPoints.length > 0)) ? (
+      {schedule.meetingPointName ||
+      (schedule.pickupPoints && schedule.pickupPoints.length > 0) ? (
         <div className="tour-booking-pickup-hint">
-          <p className="tour-booking-label">{String(tTour('detail.pickupTitle'))}</p>
+          <p className="tour-booking-label">
+            {String(tTour("detail.pickupTitle"))}
+          </p>
           {schedule.meetingPointName ? (
             <p className="tour-booking-pickup-line">
               <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden />
@@ -314,8 +318,8 @@ function BookingPanel({
             {(schedule.pickupPoints ?? []).map((point) => (
               <li key={point.id ?? point.pointName}>
                 {point.pointName}
-                {point.pickupAt ? ` · ${formatDateTime(point.pickupAt)}` : ''}
-                {point.address ? ` — ${point.address}` : ''}
+                {point.pickupAt ? ` · ${formatDateTime(point.pickupAt)}` : ""}
+                {point.address ? ` — ${point.address}` : ""}
               </li>
             ))}
           </ul>
@@ -326,28 +330,30 @@ function BookingPanel({
       <div className="flex flex-col gap-2">
         {(
           [
-            { key: 'adults', label: 'panel.passengers.adult', min: 1 },
-            { key: 'children', label: 'panel.passengers.child', min: 0 },
-            { key: 'infants', label: 'panel.passengers.infant', min: 0 },
-            { key: 'seniors', label: 'panel.passengers.senior', min: 0 },
+            { key: "adults", label: "panel.passengers.adult", min: 1 },
+            { key: "children", label: "panel.passengers.child", min: 0 },
+            { key: "infants", label: "panel.passengers.infant", min: 0 },
+            { key: "seniors", label: "panel.passengers.senior", min: 0 },
           ] as const
         ).map((row) => {
-          const count = counts[row.key]
+          const count = counts[row.key];
           const unitPrice =
-            row.key === 'adults'
+            row.key === "adults"
               ? schedule.adultPrice
-              : row.key === 'children'
+              : row.key === "children"
                 ? schedule.childPrice
-                : row.key === 'infants'
+                : row.key === "infants"
                   ? schedule.infantPrice
-                  : schedule.seniorPrice
+                  : schedule.seniorPrice;
           return (
             <div key={row.key} className="tour-booking-row">
               <div className="min-w-0">
                 <p className="text-sm font-medium text-[var(--color-text)]">
                   {String(t(row.label))}
                 </p>
-                <p className="text-xs text-[var(--color-muted)]">{formatCurrencyVnd(unitPrice)}</p>
+                <p className="text-xs text-[var(--color-muted)]">
+                  {formatCurrencyVnd(unitPrice)}
+                </p>
               </div>
               <div className="flex items-center gap-2">
                 <button
@@ -372,14 +378,14 @@ function BookingPanel({
                 </button>
               </div>
             </div>
-          )
+          );
         })}
       </div>
 
       {comboPackages.length > 0 ? (
         <fieldset className="tour-booking-combo-field">
           <legend className="tour-booking-label">
-            {String(tTour('detail.comboTitle'))}
+            {String(tTour("detail.comboTitle"))}
           </legend>
           <div className="tour-booking-combo-list">
             <label className="tour-booking-combo-option">
@@ -389,15 +395,17 @@ function BookingPanel({
                 checked={comboId === 0}
                 onChange={() => setComboId(0)}
               />
-              <span>{String(tTour('detail.comboNone'))}</span>
+              <span>{String(tTour("detail.comboNone"))}</span>
             </label>
             {comboPackages.map((combo) => {
-              const isIncluded = combo.packageRole === 'included'
-              const price = parseComboPrice(combo.finalPrice ?? combo.basePrice)
+              const isIncluded = combo.packageRole === "included";
+              const price = parseComboPrice(
+                combo.finalPrice ?? combo.basePrice,
+              );
               return (
                 <label
                   key={combo.comboId}
-                  className={`tour-booking-combo-option${isIncluded ? ' is-included' : ''}`}
+                  className={`tour-booking-combo-option${isIncluded ? " is-included" : ""}`}
                 >
                   <input
                     type="radio"
@@ -407,11 +415,13 @@ function BookingPanel({
                     onChange={() => setComboId(combo.comboId)}
                   />
                   <span className="tour-booking-combo-copy">
-                    <strong>{combo.name ?? combo.code ?? `#${combo.comboId}`}</strong>
+                    <strong>
+                      {combo.name ?? combo.code ?? `#${combo.comboId}`}
+                    </strong>
                     <small>
                       {comboRoleLabel(combo.packageRole, tTour)}
                       {isIncluded
-                        ? ` · ${String(tTour('detail.comboIncluded'))}`
+                        ? ` · ${String(tTour("detail.comboIncluded"))}`
                         : ` · ${formatCurrencyVnd(price)}`}
                     </small>
                     {combo.description ? (
@@ -421,7 +431,7 @@ function BookingPanel({
                     ) : null}
                   </span>
                 </label>
-              )
+              );
             })}
           </div>
         </fieldset>
@@ -429,7 +439,9 @@ function BookingPanel({
 
       {/* Voucher */}
       <div className="flex flex-col gap-1">
-        <label className="tour-booking-label">{String(t('panel.voucher.label'))}</label>
+        <label className="tour-booking-label">
+          {String(t("panel.voucher.label"))}
+        </label>
         <div className="flex gap-2">
           <div className="relative flex-1">
             <Tag
@@ -440,28 +452,35 @@ function BookingPanel({
               type="text"
               value={voucherInput}
               onChange={(event) => setVoucherInput(event.target.value)}
-              placeholder={String(t('panel.voucher.placeholder'))}
+              placeholder={String(t("panel.voucher.placeholder"))}
               className="tour-booking-input pl-7"
               maxLength={50}
             />
           </div>
           {appliedVoucherCode ? (
-            <button type="button" onClick={handleClearVoucher} className="tour-booking-clear">
-              {String(t('panel.voucher.clear'))}
+            <button
+              type="button"
+              onClick={handleClearVoucher}
+              className="tour-booking-clear"
+            >
+              {String(t("panel.voucher.clear"))}
             </button>
           ) : (
             <button
               type="button"
               onClick={handleApplyVoucher}
-              disabled={voucherInput.trim().length === 0 || quoteQuery.isFetching}
+              disabled={
+                voucherInput.trim().length === 0 || quoteQuery.isFetching
+              }
               className="tour-booking-apply"
             >
-              {String(t('panel.voucher.apply'))}
+              {String(t("panel.voucher.apply"))}
             </button>
           )}
         </div>
         <AnimatePresence>
-          {appliedVoucherInfo && (appliedVoucherInfo.discountAmount ?? 0) > 0 ? (
+          {appliedVoucherInfo &&
+          (appliedVoucherInfo.discountAmount ?? 0) > 0 ? (
             <motion.p
               key="voucher-success"
               initial={{ opacity: 0, y: -4 }}
@@ -470,7 +489,7 @@ function BookingPanel({
               className="tour-booking-hint--ok"
             >
               <CheckCircle2 className="h-3 w-3" aria-hidden />
-              {String(t('panel.voucher.appliedHint'))}{' '}
+              {String(t("panel.voucher.appliedHint"))}{" "}
               <strong>
                 -{formatCurrencyVnd(appliedVoucherInfo.discountAmount)}
               </strong>
@@ -485,7 +504,7 @@ function BookingPanel({
               className="tour-booking-hint--bad"
             >
               <XCircle className="h-3 w-3" aria-hidden />
-              {String(t('panel.voucher.invalid'))}
+              {String(t("panel.voucher.invalid"))}
             </motion.p>
           ) : null}
         </AnimatePresence>
@@ -494,39 +513,39 @@ function BookingPanel({
       {/* Contact info */}
       <div className="tour-booking-divider grid grid-cols-1 gap-2">
         <p className="tour-booking-label mb-0">
-          {String(t('panel.contact.title'))}
+          {String(t("panel.contact.title"))}
         </p>
         {isAuthenticated ? (
           <p className="tour-booking-hint mb-0 text-[11px]">
-            {String(t('panel.contact.prefilledHint'))}
+            {String(t("panel.contact.prefilledHint"))}
           </p>
         ) : null}
         <input
           type="text"
           value={contactName}
           onChange={(event) => setContactName(event.target.value)}
-          placeholder={String(t('panel.contact.name'))}
+          placeholder={String(t("panel.contact.name"))}
           className="tour-booking-input"
         />
         <input
           type="tel"
           value={contactPhone}
           onChange={(event) => setContactPhone(event.target.value)}
-          placeholder={String(t('panel.contact.phone'))}
+          placeholder={String(t("panel.contact.phone"))}
           className="tour-booking-input"
         />
         <input
           type="email"
           value={contactEmail}
           onChange={(event) => setContactEmail(event.target.value)}
-          placeholder={String(t('panel.contact.email'))}
+          placeholder={String(t("panel.contact.email"))}
           className="tour-booking-input"
         />
         <textarea
           rows={2}
           value={specialRequests}
           onChange={(event) => setSpecialRequests(event.target.value)}
-          placeholder={String(t('panel.contact.note'))}
+          placeholder={String(t("panel.contact.note"))}
           className="tour-booking-input"
         />
       </div>
@@ -535,7 +554,7 @@ function BookingPanel({
       <dl className="tour-booking-divider space-y-1 text-sm">
         <div className="flex justify-between">
           <dt className="text-[var(--color-muted,#64748b)]">
-            {String(t('panel.summary.subtotal'))}
+            {String(t("panel.summary.subtotal"))}
           </dt>
           <dd className="font-medium tabular-nums">
             {formatCurrencyVnd(clientSubtotal)}
@@ -543,32 +562,39 @@ function BookingPanel({
         </div>
         {voucherDiscount > 0 ? (
           <div className="flex justify-between text-[var(--color-primary)]">
-            <dt>{String(t('panel.summary.voucherDiscount'))}</dt>
-            <dd className="tabular-nums">-{formatCurrencyVnd(voucherDiscount)}</dd>
+            <dt>{String(t("panel.summary.voucherDiscount"))}</dt>
+            <dd className="tabular-nums">
+              -{formatCurrencyVnd(voucherDiscount)}
+            </dd>
           </div>
         ) : null}
         {totalDiscount > 0 && totalDiscount !== voucherDiscount ? (
           <div className="flex justify-between text-[var(--color-primary)]">
-            <dt>{String(t('panel.summary.discount'))}</dt>
-            <dd className="tabular-nums">-{formatCurrencyVnd(totalDiscount)}</dd>
+            <dt>{String(t("panel.summary.discount"))}</dt>
+            <dd className="tabular-nums">
+              -{formatCurrencyVnd(totalDiscount)}
+            </dd>
           </div>
         ) : null}
         {quoteData?.appliedCombo?.name ? (
           <div className="flex justify-between text-[var(--color-muted)]">
-            <dt>{String(tTour('detail.appliedCombo'))}</dt>
+            <dt>{String(tTour("detail.appliedCombo"))}</dt>
             <dd className="text-right text-xs font-medium">
               {quoteData.appliedCombo.name}
               {(quoteData.appliedCombo.finalPrice ?? 0) > 0
                 ? ` · ${formatCurrencyVnd(quoteData.appliedCombo.finalPrice)}`
-                : ''}
+                : ""}
             </dd>
           </div>
         ) : null}
         <div className="flex items-baseline justify-between border-t border-[var(--color-border)] pt-2">
           <dt className="text-sm font-semibold">
-            {String(t('panel.summary.total'))}
+            {String(t("panel.summary.total"))}
             {quoteQuery.isFetching ? (
-              <Loader2 className="ml-1 inline h-3 w-3 animate-spin" aria-hidden />
+              <Loader2
+                className="ml-1 inline h-3 w-3 animate-spin"
+                aria-hidden
+              />
             ) : null}
           </dt>
           <dd className="text-lg font-bold text-[var(--color-primary)] tabular-nums">
@@ -576,14 +602,14 @@ function BookingPanel({
           </dd>
         </div>
         <p className="text-[10px] text-[var(--color-muted)]">
-          {String(t('panel.summary.totalSeats'))}: {formatNumberVi(totalSeats)}
+          {String(t("panel.summary.totalSeats"))}: {formatNumberVi(totalSeats)}
           {remainingSeats != null
-            ? ` · ${String(t('panel.summary.remainingSeats', { count: remainingSeats, defaultValue: 'Còn {{count}} chỗ' }))}`
+            ? ` · ${String(t("panel.summary.remainingSeats", { count: remainingSeats, defaultValue: "Còn {{count}} chỗ" }))}`
             : null}
         </p>
         {!isAuthenticated ? (
           <p className="text-[10px] text-[var(--color-muted)]">
-            {String(t('panel.guestPriceHint'))}
+            {String(t("panel.guestPriceHint"))}
           </p>
         ) : null}
       </dl>
@@ -595,11 +621,11 @@ function BookingPanel({
       {overCapacity ? (
         <p className="tour-booking-warn">
           {String(
-            t('panel.overCapacityDetail', {
+            t("panel.overCapacityDetail", {
               selected: totalSeats,
               remaining: remainingSeats ?? 0,
               defaultValue:
-                'Bạn chọn {{selected}} chỗ nhưng đợt này chỉ còn {{remaining}} chỗ trống.',
+                "Bạn chọn {{selected}} chỗ nhưng đợt này chỉ còn {{remaining}} chỗ trống.",
             }),
           )}
         </p>
@@ -618,17 +644,17 @@ function BookingPanel({
           <LogIn className="h-4 w-4" aria-hidden />
         ) : null}
         {createMutation.isPending
-          ? String(t('panel.submitting'))
+          ? String(t("panel.submitting"))
           : isAuthenticated
-            ? String(t('panel.submit'))
-            : String(t('panel.loginToBook'))}
+            ? String(t("panel.submit"))
+            : String(t("panel.loginToBook"))}
       </button>
 
       <p className="text-center text-[10px] text-[var(--color-muted)]">
-        {String(t('panel.disclaimer'))}
+        {String(t("panel.disclaimer"))}
       </p>
     </div>
-  )
+  );
 }
 
-export default BookingPanel
+export default BookingPanel;

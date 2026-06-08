@@ -1,7 +1,7 @@
 /**
  * API backend URL. Production build defaults to Render; dev defaults to localhost.
  * Override: VITE_API_BASE_URL or VITE_API_URL in .env / hosting dashboard.
- * Failover public → local: `src/config/apiBaseUrl.ts` + `VITE_API_FAILOVER_ENABLED`.
+ * Failover dev (mặc định local → Render): `src/config/apiBaseUrl.ts` + `VITE_API_FAILOVER_ENABLED`.
  */
 export const PRODUCTION_API_BASE_URL =
   'https://travelviet-booking-system.onrender.com/api/v1'

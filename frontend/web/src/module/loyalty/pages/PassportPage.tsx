@@ -21,7 +21,7 @@ import {
   type UserMission,
 } from '../../../api/server/Loyalty.api'
 import { ErrorBlock } from '../../../components/common/ui/ErrorBlock'
-import { PageLoader } from '../../../components/common/ux/PageLoader'
+import { PassportPageSkeleton } from '../../../components/ui/skeletons/CustomerPageSkeletons'
 import { Footer } from '../../../components/Footer/Footer'
 import { CustomerPageHero } from '../../../components/ui/CustomerPageHero/CustomerPageHero'
 import './PassportPage.css'
@@ -210,7 +210,12 @@ export default function PassportPage() {
   }
 
   if (loading) {
-    return <PageLoader label={copy.loading} />
+    return (
+      <>
+        <PassportPageSkeleton />
+        <Footer />
+      </>
+    )
   }
 
   if (error) {

@@ -1,6 +1,6 @@
 .flight-featured {
   background: var(--flight-page-bg, var(--color-page));
-  padding: clamp(32px, 5vw, 48px) clamp(16px, 4vw, 48px);
+  padding: 0 clamp(16px, 4vw, 48px) clamp(32px, 5vw, 48px);
 }
 
 .flight-featured__inner {

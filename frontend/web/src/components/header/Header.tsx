@@ -11,18 +11,19 @@ import { HeaderUtilityActions } from "./HeaderUtilityActions";
 import { MobileNav } from "./MobileNav";
 import { userApi } from "../../api/server/User.api";
 import { useAppDispatch, useAppSelector } from "../../hooks/reduxHooks";
+import { fetchHomePublicData } from "../../module/home/store/homeSlice";
 import { toUserMeResponse, type AuthLoginUser } from "../../module/auth/types/auth";
 import { setLanguage, setTheme } from "../../stores/slices/preferencesSlice";
 import { useAuthStore } from "../../stores/authStore";
 import { resolveHeaderVariant } from "./headerVariant";
 
+import { BRAND_LOGO_SRC, BRAND_WORDMARK_SRC } from "@/constants/brandAssets";
+
 // === CẤU HÌNH BRAND (đổi theo dự án) ===========================
 const BRAND = {
-  logoSrc:
-    "https://res.cloudinary.com/dmzvum1lp/image/upload/v1779513001/logo_web_1_1_qqnm26.png",
+  logoSrc: BRAND_LOGO_SRC,
+  wordmarkSrc: BRAND_WORDMARK_SRC,
   name: "Travel Viet",
-  wordmark: "Travel Viet",
-  travelBlue: "#0a4d69",
 };
 
 const HEADER_HIDE_DEADZONE_PX = 2;
@@ -30,24 +31,23 @@ const HEADER_GLASS_THRESHOLD_PX = 24;
 
 function HeaderBrandWordmark({
   logoSizeClass,
-  textClassName = "text-[15px] md:text-[17px]",
+  wordmarkClassName = "h-7 w-auto max-w-[128px] md:h-8 md:max-w-[148px]",
 }: {
   logoSizeClass: string;
-  textClassName?: string;
+  wordmarkClassName?: string;
 }) {
   return (
     <>
       <img
         src={BRAND.logoSrc}
-        alt={BRAND.name}
+        alt=""
         className={`shrink-0 object-contain transition-[height,width] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${logoSizeClass}`}
       />
-      <span
-        className={`flex flex-col leading-[1.05] font-extrabold tracking-tight ${textClassName}`}
-      >
-        <span style={{ color: BRAND.travelBlue }}>Travel</span>
-        <span className="text-[#ff6600]">Viet</span>
-      </span>
+      <img
+        src={BRAND.wordmarkSrc}
+        alt={BRAND.name}
+        className={`shrink-0 object-contain object-left transition-[height,width,max-width] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${wordmarkClassName}`}
+      />
     </>
   );
 }
@@ -109,6 +109,10 @@ export default function Header() {
   );
 
   const brandTagline = t("header.brandTagline");
+
+  useEffect(() => {
+    void dispatch(fetchHomePublicData());
+  }, [dispatch]);
 
   useEffect(() => {
     const syncScrollState = () => {
@@ -239,15 +243,11 @@ export default function Header() {
                    transition-[padding] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]`
                   }
       >
-        {/* Logo + chữ hai hàng (Travel / Viet) phía sau logo */}
         <Link
           to="/"
           className="hidden md:inline-flex shrink-0 items-center gap-2.5 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ff6600]/50"
         >
-          <HeaderBrandWordmark
-            logoSizeClass={logoSizeClass}
-            textClassName="text-[15px] md:text-[17px]"
-          />
+          <HeaderBrandWordmark logoSizeClass={logoSizeClass} />
         </Link>
 
         {/* Menu giữa — không dùng `hidden` (trước đó làm mất toàn bộ item) */}
@@ -284,9 +284,10 @@ export default function Header() {
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <MobileNav
-              brandName={BRAND.wordmark}
+              brandName={BRAND.name}
               brandTagline={brandTagline}
               logoSrc={BRAND.logoSrc}
+              wordmarkSrc={BRAND.wordmarkSrc}
               items={mobileNavItems}
               theme={theme}
               language={language}
@@ -300,7 +301,7 @@ export default function Header() {
             >
               <HeaderBrandWordmark
                 logoSizeClass="h-8 w-8"
-                textClassName="text-[13px]"
+                wordmarkClassName="h-6 w-auto max-w-[108px]"
               />
             </Link>
           </div>

@@ -19,7 +19,7 @@ import {
 } from "../../../api/server/Booking.api";
 import { paymentApi, type Payment } from "../../../api/server/Payment.api";
 import { formatCurrencyVnd } from "../../management/schedules/utils/currency";
-import { PageLoader } from "../../../components/common/ux/PageLoader";
+import { BookingDetailPageSkeleton } from "../../../components/ui/skeletons/CustomerPageSkeletons";
 import { ErrorBlock } from "../../../components/common/ui/ErrorBlock";
 import { Footer } from "../../../components/Footer/Footer";
 import { CustomerPageHero } from "../../../components/ui/CustomerPageHero/CustomerPageHero";
@@ -327,7 +327,12 @@ export default function BookingDetailPage() {
   };
 
   if (loading) {
-    return <PageLoader label={copy.loading} />;
+    return (
+      <>
+        <BookingDetailPageSkeleton />
+        <Footer />
+      </>
+    );
   }
 
   if (error || !booking) {

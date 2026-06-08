@@ -1,0 +1,64 @@
+.fps-page {
+  min-height: 100vh;
+  background: #f4f6f9;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 18px;
+}
+
+.fps-stepper-wrap {
+  width: min(960px, 100%);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.fps-card {
+  width: min(560px, 100%);
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 18px;
+  text-align: center;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+}
+
+.fps-card h1 {
+  margin: 0 0 8px;
+  font-size: 22px;
+  font-weight: 900;
+  color: #111827;
+}
+
+.fps-card p {
+  margin: 0 0 16px;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.fps-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.fps-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  border-radius: 999px;
+  background: #0ea5e9;
+  color: #fff;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.fps-link {
+  color: #1a73b8;
+  font-weight: 800;
+  text-decoration: none;
+}
+

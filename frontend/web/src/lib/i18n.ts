@@ -9,6 +9,10 @@ import { homePageVi } from '../module/home/locales/homePage.vi'
 import { homePageEn } from '../module/home/locales/homePage.en'
 import { flightsPageVi } from '../module/flights/locales/flightsPage.vi'
 import { flightsPageEn } from '../module/flights/locales/flightsPage.en'
+import { hotelsPageVi } from '../module/hotels/locales/hotelsPage.vi'
+import { hotelsPageEn } from '../module/hotels/locales/hotelsPage.en'
+import { combosPageVi } from '../module/combos/locales/combosPage.vi'
+import { combosPageEn } from '../module/combos/locales/combosPage.en'
 
 export const resources = {
   vi: {
@@ -272,6 +276,7 @@ export const resources = {
         departurePlace: 'Khởi hành: {{place}}',
         departureFallback: 'Đang cập nhật',
         savingTier: {
+          gia_tot: 'Giá tốt',
           tiet_kiem: 'Tiết kiệm',
           tieu_chuan: 'Tiêu chuẩn',
           cao_cap: 'Cao cấp',
@@ -579,6 +584,8 @@ export const resources = {
       homePage: homePageVi,
       homeLower: homeLowerVi,
       flightsPage: flightsPageVi,
+      hotelsPage: hotelsPageVi,
+      combosPage: combosPageVi,
     },
   },
   en: {
@@ -842,6 +849,7 @@ export const resources = {
         departurePlace: 'Departure: {{place}}',
         departureFallback: 'Details updating',
         savingTier: {
+          gia_tot: 'Best deal',
           tiet_kiem: 'Saver',
           tieu_chuan: 'Standard',
           cao_cap: 'Premium',
@@ -1149,6 +1157,8 @@ export const resources = {
       homePage: homePageEn,
       homeLower: homeLowerEn,
       flightsPage: flightsPageEn,
+      hotelsPage: hotelsPageEn,
+      combosPage: combosPageEn,
     },
   },
 } as const

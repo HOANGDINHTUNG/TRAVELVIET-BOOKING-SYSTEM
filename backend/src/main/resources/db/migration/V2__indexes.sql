@@ -60,3 +60,73 @@ CREATE INDEX idx_file_attachments_entity ON file_attachments(entity_name, entity
 CREATE INDEX idx_tour_departure_hubs_tour ON tour_departure_hubs (tour_id, is_primary);
 CREATE INDEX idx_tour_combo_packages_tour ON tour_combo_packages (tour_id, package_role);
 CREATE INDEX idx_tour_schedules_open_lookup ON tour_schedules (tour_id, status, departure_at);
+
+-- Merged from former V8__perf_indexes.sql
+CREATE INDEX idx_bookings_user_created
+    ON bookings (user_id, created_at DESC, id DESC);
+
+CREATE INDEX idx_bookings_schedule_status
+    ON bookings (schedule_id, status, deleted_at);
+
+CREATE INDEX idx_bookings_admin_list
+    ON bookings (deleted_at, created_at DESC, id DESC);
+
+CREATE INDEX idx_bookings_paid_revenue
+    ON bookings (deleted_at, payment_status, final_amount);
+
+CREATE INDEX idx_bookings_status_created
+    ON bookings (status, deleted_at, created_at);
+
+CREATE INDEX idx_tours_dest_status_active
+    ON tours (destination_id, status, deleted_at);
+
+CREATE INDEX idx_destinations_public_list
+    ON destinations (status, is_active, deleted_at, parent_id, is_featured);
+
+CREATE INDEX idx_destinations_approved_sort
+    ON destinations (status, is_active, deleted_at, created_at DESC, id DESC);
+
+CREATE INDEX idx_schedules_tour_status_departure
+    ON tour_schedules (tour_id, status, deleted_at, departure_at);
+
+CREATE INDEX idx_payments_status_paid_at
+    ON payments (status, deleted_at, paid_at);
+
+CREATE INDEX idx_schedule_pickup_schedule
+    ON tour_schedule_pickup_points (schedule_id, deleted_at, sort_order);
+
+CREATE INDEX idx_schedule_guides_schedule
+    ON tour_schedule_guides (schedule_id, deleted_at);
+
+CREATE INDEX idx_dest_translation_dest_locale
+    ON destination_translations (destination_id, locale);
+
+CREATE INDEX idx_tour_translation_tour_locale
+    ON tour_translations (tour_id, locale);
+
+-- Hotels / Flights / Combos extensions
+CREATE INDEX idx_hotels_destination_status ON hotels(destination_id, status);
+CREATE INDEX idx_hotels_star_status ON hotels(star_rating, status);
+CREATE INDEX idx_hotel_room_types_hotel_status ON hotel_room_types(hotel_id, status);
+CREATE INDEX idx_hotel_room_inventory_date_availability ON hotel_room_inventory(stay_date, available_qty);
+CREATE INDEX idx_hotel_images_hotel_sort ON hotel_images(hotel_id, sort_order);
+CREATE INDEX idx_airports_destination_active ON airports(destination_id, is_active);
+CREATE INDEX idx_flights_route_departure ON flights(origin_airport_id, destination_airport_id, departure_time_local);
+CREATE INDEX idx_flights_airline_status ON flights(airline_id, status);
+CREATE INDEX idx_flight_classes_cabin_availability ON flight_classes(cabin_class, seat_available, is_active);
+CREATE INDEX idx_combo_packages_destination_active ON combo_packages(destination_id, is_active, combo_type);
+CREATE INDEX idx_combo_package_items_combo_type ON combo_package_items(combo_id, item_type, sort_order);
+
+CREATE INDEX idx_hotel_bookings_user_created ON hotel_bookings(user_id, created_at DESC, id DESC);
+CREATE INDEX idx_hotel_bookings_order_id ON hotel_bookings(order_id);
+CREATE INDEX idx_hotel_bookings_stay_range ON hotel_bookings(checkin_date, checkout_date, status);
+CREATE INDEX idx_hotel_bookings_hotel_room ON hotel_bookings(hotel_id, room_type_id);
+
+CREATE INDEX idx_flight_bookings_user_created ON flight_bookings(user_id, created_at DESC, id DESC);
+CREATE INDEX idx_flight_bookings_order_id ON flight_bookings(order_id);
+CREATE INDEX idx_flight_bookings_flight_date ON flight_bookings(flight_id, departure_date, status);
+CREATE INDEX idx_flight_bookings_class ON flight_bookings(flight_class_id);
+
+CREATE INDEX idx_combo_bookings_user_created ON combo_bookings(user_id, created_at DESC, id DESC);
+CREATE INDEX idx_combo_bookings_order_id ON combo_bookings(order_id);
+CREATE INDEX idx_combo_bookings_combo_date ON combo_bookings(combo_id, travel_start_date, status);

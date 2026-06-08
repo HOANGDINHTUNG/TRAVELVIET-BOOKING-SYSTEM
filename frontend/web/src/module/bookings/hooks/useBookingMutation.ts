@@ -4,27 +4,31 @@ import {
   useQueryClient,
   type UseMutationOptions,
   type UseQueryOptions,
-} from '@tanstack/react-query'
-import { useNavigate } from 'react-router-dom'
-import { useTranslation } from 'react-i18next'
-import { toast } from 'sonner'
-import { handleApiError } from '../../../lib/handleApiError'
-import { PublicBookingsApi } from '../api/publicBookings.api'
+} from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
+import { handleApiError } from "../../../lib/handleApiError";
+import { PublicBookingsApi } from "../api/publicBookings.api";
 import type {
   BookingQuotePayload,
   BookingQuoteResult,
   BookingResponse,
-  BookingSummaryResponse,
+  ExtendedBookingResponse,
+  CreateHotelBookingPayload,
+  CreateFlightBookingPayload,
+  CreateComboBookingPayload,
   CreateBookingPayload,
-} from '../types/publicBooking'
+  BookingSummaryResponse,
+} from "../types/publicBooking";
 
 export const publicBookingKeys = {
-  all: ['public', 'bookings'] as const,
+  all: ["public", "bookings"] as const,
   quote: (payload: BookingQuotePayload) =>
-    [...publicBookingKeys.all, 'quote', payload] as const,
-  detail: (id: number) => [...publicBookingKeys.all, 'detail', id] as const,
-  myList: () => [...publicBookingKeys.all, 'me'] as const,
-}
+    [...publicBookingKeys.all, "quote", payload] as const,
+  detail: (id: number) => [...publicBookingKeys.all, "detail", id] as const,
+  myList: () => [...publicBookingKeys.all, "me"] as const,
+};
 
 /**
  * Hook gọi `POST /bookings/quote` để lấy giá authoritative từ BE.
@@ -32,30 +36,33 @@ export const publicBookingKeys = {
  */
 export function useBookingQuote(
   payload: BookingQuotePayload | null,
-  options: Omit<UseQueryOptions<BookingQuoteResult>, 'queryKey' | 'queryFn' | 'enabled'> = {},
+  options: Omit<
+    UseQueryOptions<BookingQuoteResult>,
+    "queryKey" | "queryFn" | "enabled"
+  > = {},
 ) {
   return useQuery<BookingQuoteResult>({
     queryKey:
       payload != null
         ? publicBookingKeys.quote(payload)
-        : [...publicBookingKeys.all, 'quote', 'disabled'],
+        : [...publicBookingKeys.all, "quote", "disabled"],
     queryFn: () => PublicBookingsApi.quote(payload as BookingQuotePayload),
     enabled: payload != null && payload.scheduleId > 0 && payload.tourId > 0,
     staleTime: 15_000,
     retry: false,
     ...options,
-  })
+  });
 }
 
 type CreateBookingOptions = {
   /** Callback chạy SAU khi booking tạo thành công, trước khi redirect. */
-  onAuthenticated?: (booking: BookingResponse) => void
+  onAuthenticated?: (booking: BookingResponse) => void;
   /** Tắt redirect mặc định `/bookings/{id}` để caller tự xử lý. */
-  disableRedirect?: boolean
+  disableRedirect?: boolean;
 } & Omit<
   UseMutationOptions<BookingResponse, unknown, CreateBookingPayload>,
-  'mutationFn'
->
+  "mutationFn"
+>;
 
 /**
  * Mutation tạo booking — sau success:
@@ -63,9 +70,10 @@ type CreateBookingOptions = {
  * - Redirect `/bookings/{id}` (trang detail/confirmation, đã có guard auth)
  */
 export function useCreateBooking(options: CreateBookingOptions = {}) {
-  const navigate = useNavigate()
-  const { t } = useTranslation('bookings')
-  const { onAuthenticated, disableRedirect, onSuccess, onError, ...rest } = options
+  const navigate = useNavigate();
+  const { t } = useTranslation("bookings");
+  const { onAuthenticated, disableRedirect, onSuccess, onError, ...rest } =
+    options;
 
   return useMutation<BookingResponse, unknown, CreateBookingPayload>({
     mutationFn: (payload) => PublicBookingsApi.create(payload),
@@ -73,28 +81,113 @@ export function useCreateBooking(options: CreateBookingOptions = {}) {
     onSuccess: (data, variables, context, mutation) => {
       toast.success(
         String(
-          t('toast.createSuccess', {
-            defaultValue: 'Đặt chỗ thành công! Đang chuyển sang trang xác nhận...',
+          t("toast.createSuccess", {
+            defaultValue:
+              "Đặt chỗ thành công! Đang chuyển sang trang xác nhận...",
             code: data.bookingCode ?? `#${data.id}`,
           }),
         ),
-      )
-      onAuthenticated?.(data)
+      );
+      onAuthenticated?.(data);
       if (!disableRedirect) {
-        navigate(`/booking-confirmation/${data.id}`, { replace: true })
+        navigate(`/booking-confirmation/${data.id}`, { replace: true });
       }
-      onSuccess?.(data, variables, context, mutation)
+      onSuccess?.(data, variables, context, mutation);
     },
     onError: (error, variables, context, mutation) => {
       const fallback = String(
-        t('toast.createFailed', {
-          defaultValue: 'Không tạo được đơn đặt chỗ. Vui lòng thử lại.',
+        t("toast.createFailed", {
+          defaultValue: "Không tạo được đơn đặt chỗ. Vui lòng thử lại.",
         }),
-      )
-      toast.error(handleApiError(error, fallback))
-      onError?.(error, variables, context, mutation)
+      );
+      toast.error(handleApiError(error, fallback));
+      onError?.(error, variables, context, mutation);
     },
-  })
+  });
+}
+
+export function useCreateHotelBooking(
+  options: Omit<
+    UseMutationOptions<
+      ExtendedBookingResponse,
+      unknown,
+      CreateHotelBookingPayload
+    >,
+    "mutationFn"
+  > = {},
+) {
+  const { onSuccess, onError, ...rest } = options;
+  return useMutation({
+    mutationFn: (payload) => PublicBookingsApi.createHotelBooking(payload),
+    ...rest,
+    onSuccess: (data, variables, context) => {
+      toast.success(`Đặt phòng khách sạn thành công! Mã: ${data.bookingCode}`);
+      onSuccess?.(data, variables, context);
+    },
+    onError: (error, variables, context) => {
+      toast.error(
+        handleApiError(
+          error,
+          "Không thể đặt phòng khách sạn. Vui lòng thử lại.",
+        ),
+      );
+      onError?.(error, variables, context);
+    },
+  });
+}
+
+export function useCreateFlightBooking(
+  options: Omit<
+    UseMutationOptions<
+      ExtendedBookingResponse,
+      unknown,
+      CreateFlightBookingPayload
+    >,
+    "mutationFn"
+  > = {},
+) {
+  const { onSuccess, onError, ...rest } = options;
+  return useMutation({
+    mutationFn: (payload) => PublicBookingsApi.createFlightBooking(payload),
+    ...rest,
+    onSuccess: (data, variables, context) => {
+      toast.success(`Đặt vé máy bay thành công! Mã: ${data.bookingCode}`);
+      onSuccess?.(data, variables, context);
+    },
+    onError: (error, variables, context) => {
+      toast.error(
+        handleApiError(error, "Không thể đặt vé máy bay. Vui lòng thử lại."),
+      );
+      onError?.(error, variables, context);
+    },
+  });
+}
+
+export function useCreateComboBooking(
+  options: Omit<
+    UseMutationOptions<
+      ExtendedBookingResponse,
+      unknown,
+      CreateComboBookingPayload
+    >,
+    "mutationFn"
+  > = {},
+) {
+  const { onSuccess, onError, ...rest } = options;
+  return useMutation({
+    mutationFn: (payload) => PublicBookingsApi.createComboBooking(payload),
+    ...rest,
+    onSuccess: (data, variables, context) => {
+      toast.success(`Đặt combo thành công! Mã: ${data.bookingCode}`);
+      onSuccess?.(data, variables, context);
+    },
+    onError: (error, variables, context) => {
+      toast.error(
+        handleApiError(error, "Không thể đặt combo. Vui lòng thử lại."),
+      );
+      onError?.(error, variables, context);
+    },
+  });
 }
 
 export function useBookingDetail(id: number | null | undefined) {
@@ -102,18 +195,18 @@ export function useBookingDetail(id: number | null | undefined) {
     queryKey:
       id != null
         ? publicBookingKeys.detail(id)
-        : [...publicBookingKeys.all, 'detail', 'disabled'],
+        : [...publicBookingKeys.all, "detail", "disabled"],
     queryFn: () => PublicBookingsApi.detail(id as number),
     enabled: id != null,
     staleTime: 30_000,
-  })
+  });
 }
 
 /** `GET /bookings/me` — danh sách booking của user hiện tại. */
 export function useMyBookingsQuery(
   options: Omit<
     UseQueryOptions<BookingSummaryResponse[]>,
-    'queryKey' | 'queryFn'
+    "queryKey" | "queryFn"
   > = {},
 ) {
   return useQuery<BookingSummaryResponse[]>({
@@ -121,21 +214,21 @@ export function useMyBookingsQuery(
     queryFn: () => PublicBookingsApi.listMine(),
     staleTime: 5 * 60_000,
     ...options,
-  })
+  });
 }
 
-type CancelBookingArgs = { id: number; reason?: string }
+type CancelBookingArgs = { id: number; reason?: string };
 
 /** `PATCH /bookings/{id}/cancel` — user-side hủy đơn của mình. */
 export function useCancelMyBooking(
   options: Omit<
     UseMutationOptions<BookingResponse, unknown, CancelBookingArgs>,
-    'mutationFn'
+    "mutationFn"
   > = {},
 ) {
-  const queryClient = useQueryClient()
-  const { t } = useTranslation('bookings')
-  const { onSuccess, onError, ...rest } = options
+  const queryClient = useQueryClient();
+  const { t } = useTranslation("bookings");
+  const { onSuccess, onError, ...rest } = options;
 
   return useMutation<BookingResponse, unknown, CancelBookingArgs>({
     mutationFn: ({ id, reason }) => PublicBookingsApi.cancel(id, reason),
@@ -143,16 +236,16 @@ export function useCancelMyBooking(
     onSuccess: (data, variables, context, mutation) => {
       void queryClient.invalidateQueries({
         queryKey: publicBookingKeys.myList(),
-      })
+      });
       void queryClient.invalidateQueries({
         queryKey: publicBookingKeys.detail(data.id),
-      })
-      toast.success(String(t('toast.cancelSuccess')))
-      onSuccess?.(data, variables, context, mutation)
+      });
+      toast.success(String(t("toast.cancelSuccess")));
+      onSuccess?.(data, variables, context, mutation);
     },
     onError: (error, variables, context, mutation) => {
-      toast.error(handleApiError(error, String(t('toast.cancelFailed'))))
-      onError?.(error, variables, context, mutation)
+      toast.error(handleApiError(error, String(t("toast.cancelFailed"))));
+      onError?.(error, variables, context, mutation);
     },
-  })
+  });
 }

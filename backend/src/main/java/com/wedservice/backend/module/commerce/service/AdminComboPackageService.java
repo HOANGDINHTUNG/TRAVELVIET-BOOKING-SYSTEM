@@ -13,6 +13,7 @@ import com.wedservice.backend.module.commerce.entity.ComboPackage;
 import com.wedservice.backend.module.commerce.entity.ComboPackageItem;
 import com.wedservice.backend.module.commerce.repository.ComboPackageRepository;
 import com.wedservice.backend.module.commerce.repository.ProductRepository;
+import com.wedservice.backend.module.commerce.rules.ComboStructureRule;
 import com.wedservice.backend.module.tours.repository.TourRepository;
 import com.wedservice.backend.module.users.service.AuditActionType;
 import com.wedservice.backend.module.users.service.AuditTrailRecorder;
@@ -36,11 +37,14 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class AdminComboPackageService {
 
-    private static final Set<String> ALLOWED_ITEM_TYPES = Set.of("product", "tour", "service", "gift", "other");
+    private static final Set<String> ALLOWED_ITEM_TYPES = Set.of(
+            "product", "tour", "tour_schedule", "hotel", "room_type", "flight", "flight_class", "service", "gift", "other"
+    );
 
     private final ComboPackageRepository comboPackageRepository;
     private final ProductRepository productRepository;
     private final TourRepository tourRepository;
+    private final ComboStructureRule comboStructureRule;
     private final AuditTrailRecorder auditTrailRecorder;
 
     @Transactional(readOnly = true)
@@ -76,6 +80,9 @@ public class AdminComboPackageService {
 
         ComboPackage comboPackage = ComboPackage.builder().build();
         applyRequest(comboPackage, request, normalizedCode);
+        
+        // Step 2 Refactor: Validate rule engine
+        comboStructureRule.validate(comboPackage);
 
         ComboPackage savedComboPackage = comboPackageRepository.save(comboPackage);
         ComboPackageResponse response = toResponse(findComboPackageDetail(savedComboPackage.getId()), true);
@@ -95,6 +102,9 @@ public class AdminComboPackageService {
 
         ComboPackageResponse oldState = toResponse(comboPackage, true);
         applyRequest(comboPackage, request, normalizedCode);
+
+        // Step 2 Refactor: Validate rule engine
+        comboStructureRule.validate(comboPackage);
 
         ComboPackage savedComboPackage = comboPackageRepository.save(comboPackage);
         ComboPackageResponse response = toResponse(findComboPackageDetail(savedComboPackage.getId()), true);
@@ -118,8 +128,15 @@ public class AdminComboPackageService {
         comboPackage.setCode(normalizedCode);
         comboPackage.setName(normalizeRequiredText(request.getName(), "name"));
         comboPackage.setDescription(normalizeNullable(request.getDescription()));
+        comboPackage.setDestinationId(request.getDestinationId());
+        comboPackage.setComboType(StringUtils.hasText(request.getComboType()) ? request.getComboType() : "custom");
         comboPackage.setBasePrice(request.getBasePrice());
+        comboPackage.setDiscountType(StringUtils.hasText(request.getDiscountType()) ? request.getDiscountType() : "fixed_amount");
+        comboPackage.setDiscountValue(request.getDiscountValue() == null ? BigDecimal.ZERO : request.getDiscountValue());
         comboPackage.setDiscountAmount(request.getDiscountAmount());
+        comboPackage.setPricingRuleJson(normalizeNullable(request.getPricingRuleJson()));
+        comboPackage.setStartAt(request.getStartAt());
+        comboPackage.setEndAt(request.getEndAt());
         comboPackage.setIsActive(request.getIsActive() == null ? true : request.getIsActive());
 
         comboPackage.getItems().clear();
@@ -136,6 +153,9 @@ public class AdminComboPackageService {
                 .itemName(normalizeRequiredText(request.getItemName(), "itemName"))
                 .quantity(request.getQuantity())
                 .unitPrice(request.getUnitPrice())
+                .unitPriceSnapshot(request.getUnitPriceSnapshot())
+                .isMandatory(request.getIsMandatory() == null ? true : request.getIsMandatory())
+                .sortOrder(request.getSortOrder() == null ? 0 : request.getSortOrder())
                 .build();
     }
 
@@ -148,6 +168,9 @@ public class AdminComboPackageService {
         }
         if (request.getDiscountAmount().compareTo(request.getBasePrice()) > 0) {
             throw BadRequestException.i18n("api.error.commerce.combo.discountLteBase");
+        }
+        if (request.getDiscountValue() != null && request.getDiscountValue().compareTo(BigDecimal.ZERO) < 0) {
+            throw BadRequestException.i18n("api.error.commerce.combo.discountGteZero");
         }
 
         BigDecimal computedBasePrice = BigDecimal.ZERO;
@@ -233,8 +256,15 @@ public class AdminComboPackageService {
                 .code(comboPackage.getCode())
                 .name(comboPackage.getName())
                 .description(comboPackage.getDescription())
+                .destinationId(comboPackage.getDestinationId())
+                .comboType(comboPackage.getComboType())
                 .basePrice(comboPackage.getBasePrice())
+                .discountType(comboPackage.getDiscountType())
+                .discountValue(comboPackage.getDiscountValue())
                 .discountAmount(comboPackage.getDiscountAmount())
+                .pricingRuleJson(comboPackage.getPricingRuleJson())
+                .startAt(comboPackage.getStartAt())
+                .endAt(comboPackage.getEndAt())
                 .finalPrice(finalPrice.max(BigDecimal.ZERO))
                 .isActive(comboPackage.getIsActive())
                 .items(includeItems ? comboPackage.getItems().stream().map(this::toResponse).toList() : null)
@@ -251,6 +281,9 @@ public class AdminComboPackageService {
                 .itemName(item.getItemName())
                 .quantity(item.getQuantity())
                 .unitPrice(item.getUnitPrice())
+                .unitPriceSnapshot(item.getUnitPriceSnapshot())
+                .isMandatory(item.getIsMandatory())
+                .sortOrder(item.getSortOrder())
                 .lineTotal(item.getUnitPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
                 .build();
     }

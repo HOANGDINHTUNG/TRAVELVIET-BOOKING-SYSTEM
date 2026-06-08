@@ -1,0 +1,95 @@
+.combo-offer-card__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px 4px 6px;
+  border-radius: 999px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: #ffffff;
+  color: #d32f2f;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.1);
+}
+
+.combo-offer-card__badge-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  background: #fce4ec;
+  color: #e91e8c;
+}
+
+.combo-hot-deals__grid .combo-offer-card,
+.cc-main__grid .combo-offer-card {
+  justify-self: center;
+  width: 100%;
+  max-width: 248px;
+}
+
+.cc-main__grid .combo-offer-card.tv-offer-card {
+  height: 410px !important;
+  border-radius: 12px !important;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 6px 16px rgba(15, 23, 42, 0.08),
+    0 0 0 1px rgba(15, 23, 42, 0.05) !important;
+}
+
+.cc-main__grid .tv-offer-card__image-wrap {
+  height: 75% !important;
+}
+
+.cc-main__grid .tv-offer-card__panel {
+  border-radius: 10px !important;
+}
+
+.cc-main__grid .tv-offer-card__body {
+  padding: 9px 10px 7px;
+}
+
+.cc-main__grid .tv-offer-card__body h3 {
+  font-size: 16px !important;
+  line-height: 1.26 !important;
+  min-height: 40px !important;
+  margin-bottom: 4px !important;
+}
+
+.cc-main__grid .tv-offer-card__stars {
+  margin-bottom: 4px !important;
+}
+
+.cc-main__grid .tv-offer-card__meta {
+  gap: 2px;
+}
+
+.cc-main__grid .tv-offer-card__meta-item {
+  font-size: 11px;
+}
+
+.cc-main__grid .tv-offer-card__footer--corner-cta {
+  min-height: 44px;
+}
+
+.cc-main__grid .tv-offer-card__footer--corner-cta .tv-offer-card__price {
+  padding: 5px 92px 8px 10px;
+}
+
+.cc-main__grid .tv-offer-card__price-label {
+  font-size: 11px;
+}
+
+.cc-main__grid .tv-offer-card__price-value {
+  font-size: 20px;
+  color: #0b4ea2;
+}
+
+.cc-main__grid .tv-offer-card__cta--yellow {
+  min-width: 102px;
+  padding: 8px 16px 8px 20px;
+  font-size: 14px;
+  border-top-left-radius: 24px;
+  border-bottom-right-radius: 10px;
+}

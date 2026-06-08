@@ -5,7 +5,8 @@
 
 import { Platform } from 'react-native';
 
-const tintColorLight = '#0a7ea4';
+/** Đồng bộ Commerce Desk — @see theme/commerceDesk.ts */
+const tintColorLight = '#8f5d20';
 const tintColorDark = '#fff';
 
 export const Colors = {

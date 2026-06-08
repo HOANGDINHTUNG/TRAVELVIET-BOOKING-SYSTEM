@@ -1,0 +1,42 @@
+.psb {
+  position: relative;
+  display: block;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--color-border) 72%, var(--color-surface-soft));
+  overflow: hidden;
+}
+
+.theme-dark .psb {
+  background: color-mix(in srgb, #ffffff 12%, var(--color-surface-elevated));
+}
+
+.psb::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, #ffffff 55%, transparent),
+    transparent
+  );
+  animation: psb-shimmer 1.25s ease-in-out infinite;
+}
+
+.theme-dark .psb::after {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
+}
+
+@keyframes psb-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .psb::after {
+    animation: none;
+    opacity: 0.35;
+  }
+}

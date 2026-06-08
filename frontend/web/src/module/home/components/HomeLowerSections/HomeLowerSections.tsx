@@ -1,7 +1,11 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { Calendar, ChevronRight, Clock } from "lucide-react";
+import {
+  testimonialApi,
+  type CustomerTestimonial,
+} from "../../../../api/server/Testimonial.api";
 import type { Destination } from "../../database/interface/publicTravel";
 import type { homeLowerVi } from "../../locales/homeLower.vi";
 import "./HomeLowerSections.css";
@@ -105,6 +109,44 @@ function useHomeLowerBundle(): HomeLowerBundle {
 // ============================================================
 function TestimonialsSection({ bundle }: { bundle: HomeLowerBundle }) {
   const scrollerRef = useRef<HTMLDivElement>(null);
+  const [testimonials, setTestimonials] = useState<CustomerTestimonial[]>([]);
+
+  useEffect(() => {
+    let isMounted = true;
+    testimonialApi
+      .getPublicTestimonials()
+      .then((items) => {
+        if (!isMounted) return;
+        setTestimonials(Array.isArray(items) ? items : []);
+      })
+      .catch(() => {
+        if (!isMounted) return;
+        setTestimonials([]);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const testimonialItems = useMemo(() => {
+    const fromDb = testimonials
+      .filter((item) => item.content && item.customerName)
+      .sort((left, right) => (left.sortOrder ?? 0) - (right.sortOrder ?? 0))
+      .map((item) => ({
+        id: item.id,
+        text: String(item.content ?? ""),
+        stars: Math.min(Math.max(Math.round(item.rating ?? 5), 1), 5),
+        avatar: String(
+          item.avatarUrl ||
+            "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=160&q=80",
+        ),
+        name: String(item.customerName ?? "Khach hang"),
+        location: String(item.customerTitle ?? ""),
+      }));
+
+    return fromDb.length > 0 ? fromDb : bundle.testimonials;
+  }, [bundle.testimonials, testimonials]);
 
   const scroll = (dir: "prev" | "next") => {
     const el = scrollerRef.current;
@@ -128,7 +170,7 @@ function TestimonialsSection({ bundle }: { bundle: HomeLowerBundle }) {
             </svg>
           </button>
           <div ref={scrollerRef} className="hls-testi-scroller">
-            {bundle.testimonials.map((item) => (
+            {testimonialItems.map((item) => (
               <article key={item.id} className="hls-testi-card">
                 <p className="hls-testi-text">{item.text}</p>
                 <div className="hls-testi-stars">

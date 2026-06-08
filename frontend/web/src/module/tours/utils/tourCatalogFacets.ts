@@ -1,5 +1,5 @@
 import type { Tour } from '../../home/database/interface/publicTravel'
-import { resolveEsgScore } from './tourSustainability'
+import { resolveEsgScore, resolveLeiScore, resolveListPrice } from './tourSustainability'
 
 export type TourLineFacet = {
   id: string
@@ -16,47 +16,59 @@ export const TOUR_LINE_TAG_CODES: Record<string, string> = {
   cao_cap: 'TOUR_LINE_CAO_CAP',
 }
 
-const TOUR_LINE_RULES: { id: string; label: string; match: (tour: Tour) => boolean }[] = [
-  {
-    id: 'tieu_chuan',
-    label: 'Tiêu chuẩn',
-    match: (t) =>
-      hasTourLineTag(t, 'tieu_chuan') ||
-      /tiêu chuẩn|standard/i.test(tourLineHaystack(t)),
-  },
-  {
-    id: 'tiet_kiem',
-    label: 'Tiết kiệm',
-    match: (t) =>
-      hasTourLineTag(t, 'tiet_kiem') ||
-      /tiết kiệm|economy|budget/i.test(tourLineHaystack(t)),
-  },
-  {
-    id: 'gia_tot',
-    label: 'Giá tốt',
-    match: (t) =>
-      hasTourLineTag(t, 'gia_tot') ||
-      /giá tốt|deal|hot/i.test(tourLineHaystack(t)),
-  },
-  {
-    id: 'esg',
-    label: 'Tour ESG & LEI',
-    match: (t) => {
-      const esg = resolveEsgScore(t)
-      return hasTourLineTag(t, 'esg') || (esg != null && esg >= 85)
-    },
-  },
-  {
-    id: 'cao_cap',
-    label: 'Cao cấp',
-    match: (t) =>
-      hasTourLineTag(t, 'cao_cap') ||
-      /cao cấp|premium|luxury/i.test(tourLineHaystack(t)),
-  },
+const HIGH_PRICE_THRESHOLD = 30_000_000
+const GOOD_PRICE_DISCOUNT_RATIO = 0.12
+
+const TOUR_LINE_RULES: { id: string; label: string }[] = [
+  { id: 'cao_cap', label: 'Cao cấp' },
+  { id: 'tieu_chuan', label: 'Tiêu chuẩn' },
+  { id: 'tiet_kiem', label: 'Tiết kiệm' },
+  { id: 'gia_tot', label: 'Giá tốt' },
+  { id: 'esg', label: 'Tour ESG & LEI' },
 ]
 
 function tourLineHaystack(tour: Tour): string {
   return `${tour.category} ${tour.title}`
+}
+
+function isEsgLine(tour: Tour): boolean {
+  if (hasTourLineTag(tour, 'esg')) return true
+  const esg = resolveEsgScore(tour)
+  const lei = resolveLeiScore(tour)
+  return esg != null && lei != null && esg >= 80 && lei >= 70
+}
+
+function isCaoCapLine(tour: Tour): boolean {
+  if (hasTourLineTag(tour, 'cao_cap')) return true
+  return tour.price >= HIGH_PRICE_THRESHOLD || /cao cấp|premium|luxury/i.test(tourLineHaystack(tour))
+}
+
+function isTieuChuanLine(tour: Tour): boolean {
+  return hasTourLineTag(tour, 'tieu_chuan') || /tiêu chuẩn|standard/i.test(tourLineHaystack(tour))
+}
+
+function isTietKiemLine(tour: Tour): boolean {
+  if (hasTourLineTag(tour, 'tiet_kiem')) return true
+  const listPrice = resolveListPrice(tour)
+  if (listPrice != null && listPrice > 0) {
+    const discountRatio = (listPrice - tour.price) / listPrice
+    if (
+      Number.isFinite(discountRatio) &&
+      discountRatio > 0 &&
+      discountRatio < GOOD_PRICE_DISCOUNT_RATIO
+    ) {
+      return true
+    }
+  }
+  return /tiết kiệm|economy|budget/i.test(tourLineHaystack(tour))
+}
+
+function isGiaTotLine(tour: Tour): boolean {
+  if (hasTourLineTag(tour, 'gia_tot')) return true
+  const listPrice = resolveListPrice(tour)
+  if (listPrice == null || listPrice <= 0) return false
+  const discountRatio = (listPrice - tour.price) / listPrice
+  return Number.isFinite(discountRatio) && discountRatio >= GOOD_PRICE_DISCOUNT_RATIO
 }
 
 export function hasTourLineTag(tour: Tour, lineId: string): boolean {
@@ -65,17 +77,25 @@ export function hasTourLineTag(tour: Tour, lineId: string): boolean {
   return tour.tagCodes.includes(code)
 }
 
+export function resolveTourLineId(tour: Tour): string {
+  if (isCaoCapLine(tour)) return 'cao_cap'
+  if (isTieuChuanLine(tour)) return 'tieu_chuan'
+  if (isTietKiemLine(tour)) return 'tiet_kiem'
+  if (isGiaTotLine(tour)) return 'gia_tot'
+  if (isEsgLine(tour)) return 'esg'
+  return 'gia_tot'
+}
+
 export function buildTourLineFacets(tours: Tour[]): TourLineFacet[] {
   return TOUR_LINE_RULES.map((rule) => ({
     id: rule.id,
     label: rule.label,
-    count: tours.filter(rule.match).length,
+    count: tours.filter((tour) => resolveTourLineId(tour) === rule.id).length,
   }))
 }
 
 export function tourMatchesLine(tour: Tour, lineId: string): boolean {
-  const rule = TOUR_LINE_RULES.find((r) => r.id === lineId)
-  return rule ? rule.match(tour) : true
+  return resolveTourLineId(tour) === lineId
 }
 
 export function tourMatchesTransport(tour: Tour, transports: string[]): boolean {

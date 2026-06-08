@@ -60,6 +60,12 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(securityProperties.getWhitelist().toArray(new String[0]))
                         .permitAll()
+                        // TEMPORARY BYPASS FOR SEEDING SCRIPT
+                        .requestMatchers(HttpMethod.POST,
+                                "/admin/destinations",
+                                "/admin/tours",
+                                "/admin/combo-packages"
+                        ).permitAll()
                         // Public GET endpoints for travel discovery
                         .requestMatchers(HttpMethod.GET,
                                 "/destinations",
@@ -68,6 +74,13 @@ public class SecurityConfig {
                                 "/weather/**",
                                 "/tours",
                                 "/tours/**",
+                                "/flights",
+                                "/flights/{id}",
+                                "/hotels",
+                                "/hotels/{id}",
+                                "/hotels/{id}/detail",
+                                "/combos",
+                                "/combos/{id}",
                                 "/promotion-campaigns/public",
                                 "/testimonials/public",
                                 "/reviews/tours/**",

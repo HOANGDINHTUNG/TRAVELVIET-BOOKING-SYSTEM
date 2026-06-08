@@ -76,6 +76,105 @@
   box-shadow: 0 1px 4px rgba(10, 40, 82, 0.06);
 }
 
+/* Itinerary (step 1/2) */
+.fr-itinerary {
+  border: 1px solid var(--fr-border);
+  border-radius: var(--fr-radius-lg);
+  padding: 12px;
+  margin-bottom: 14px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(248, 250, 252, 1));
+}
+
+.fr-itinerary__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.fr-itinerary__route {
+  font-weight: 800;
+  color: var(--fr-navy);
+  font-size: 14px;
+}
+
+.fr-itinerary__toggle {
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  border: 1px solid var(--fr-border);
+  background: #fff;
+  color: var(--fr-muted);
+}
+
+.fr-itinerary__steps {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.fr-itinerary__step {
+  display: grid;
+  grid-template-columns: 26px 1fr;
+  gap: 10px;
+  align-items: start;
+  border: none;
+  background: transparent;
+  padding: 8px 6px;
+  border-radius: 10px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.fr-itinerary__step:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.fr-itinerary__step.is-active {
+  background: rgba(2, 132, 199, 0.08);
+}
+
+.fr-itinerary__step.is-done:not(.is-active) {
+  opacity: 0.55;
+}
+
+.fr-itinerary__num {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+  font-size: 12px;
+  background: rgba(10, 40, 82, 0.08);
+  color: var(--fr-navy);
+}
+
+.fr-itinerary__step.is-active .fr-itinerary__num {
+  background: #0a2852;
+  color: #fff;
+}
+
+.fr-itinerary__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.fr-itinerary__date {
+  font-size: 12px;
+  color: var(--fr-muted);
+  font-weight: 600;
+}
+
+.fr-itinerary__text strong {
+  font-size: 13px;
+  color: var(--fr-navy);
+  font-weight: 800;
+}
+
 .fr-sidebar__head {
   display: flex;
   align-items: center;
@@ -607,6 +706,121 @@
 
 .fr-card__select:hover {
   background: var(--fr-navy-deep);
+}
+
+/* Loading skeletons */
+.fr-skeleton {
+  background: linear-gradient(90deg, #eef1f5 0%, #f8fafc 50%, #eef1f5 100%);
+  background-size: 200% 100%;
+  animation: fr-shimmer 1.4s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+.fr-filters-skeleton__lines {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.fr-filters-skeleton__line {
+  height: 14px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #eef1f5 0%, #f8fafc 50%, #eef1f5 100%);
+  background-size: 200% 100%;
+  animation: fr-shimmer 1.4s ease-in-out infinite;
+}
+
+.fr-filters-skeleton__line:nth-child(3n + 1) {
+  width: 92%;
+}
+
+.fr-filters-skeleton__line:nth-child(3n + 2) {
+  width: 78%;
+}
+
+.fr-filters-skeleton__line:nth-child(3n) {
+  width: 86%;
+}
+
+.fr-loading__progress-wrap {
+  margin-bottom: 20px;
+}
+
+.fr-loading__track {
+  height: 5px;
+  border-radius: 999px;
+  background: #e8edf2;
+  overflow: hidden;
+}
+
+.fr-loading__bar {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #00aeef, #1a73b8);
+  transition: width 0.12s ease-out;
+}
+
+.fr-loading__labels {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--fr-muted);
+}
+
+.fr-loading__labels p {
+  margin: 0;
+}
+
+.fr-loading__labels span {
+  font-weight: 700;
+  color: var(--fr-blue-link);
+}
+
+.fr-quick--skeleton {
+  margin-bottom: 16px;
+}
+
+.fr-quick__card--skeleton {
+  cursor: default;
+  pointer-events: none;
+}
+
+.fr-skeleton--inline {
+  display: block;
+  height: 22px;
+  width: 72%;
+  margin-top: 6px;
+}
+
+.fr-loading__cards {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.fr-skeleton--card {
+  height: 132px;
+  border-radius: var(--fr-radius-lg);
+  border: 1px solid var(--fr-border);
+}
+
+.fr-sidebar__reset:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+@keyframes fr-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
 }
 
 /* Responsive */

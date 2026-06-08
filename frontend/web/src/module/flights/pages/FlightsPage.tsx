@@ -1,8 +1,10 @@
-import { Footer } from '@/components/Footer/Footer'
-import { FlightAboutContent } from '../components/FlightAboutContent'
-import { FlightFeaturedDestinations } from '../components/FlightFeaturedDestinations'
-import { FlightSearchHero } from '../components/FlightSearchHero'
-import './FlightsPage.css'
+import { Footer } from "@/components/Footer/Footer";
+import { FlightAboutContent } from "../components/FlightAboutContent";
+
+import { FlightSearchHero } from "../components/FlightSearchHero";
+import { FlightHotDealsSection } from "../components/FlightHotDealsSection";
+import { FlightFeaturedDestinations } from "../components/FlightFeaturedDestinations";
+import "./FlightsPage.css";
 
 /**
  * Trang đặt vé máy bay (UI only) — `/flights`
@@ -12,9 +14,10 @@ export default function FlightsPage() {
   return (
     <div className="flights-page">
       <FlightSearchHero />
+      <FlightHotDealsSection />
       <FlightFeaturedDestinations />
       <FlightAboutContent />
       <Footer />
     </div>
-  )
+  );
 }

@@ -1,27 +1,41 @@
-import { Tabs } from 'expo-router';
+import { Redirect, Tabs } from 'expo-router';
 import React from 'react';
 import { Ionicons } from '@expo/vector-icons';
 
 import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { getAccessToken } from '@/services/authStorage';
+import { commerceDesk } from '@/theme/commerceDesk';
+import { AppRoutes, asHref } from '@/lib/navigation';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  if (!getAccessToken()) {
+    return <Redirect href={asHref(AppRoutes.login)} />;
+  }
 
   return (
     <Tabs
+      initialRouteName="products"
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        tabBarActiveTintColor: commerceDesk.accent,
+        tabBarInactiveTintColor: commerceDesk.textMuted,
         headerShown: false,
         tabBarButton: HapticTab,
+        tabBarStyle: {
+          borderTopColor: commerceDesk.border,
+          backgroundColor: commerceDesk.surface,
+        },
       }}>
+      <Tabs.Screen
+        name="products"
+        options={{
+          title: 'Commerce',
+          tabBarIcon: ({ color }) => <Ionicons size={25} name="pricetags-outline" color={color} />,
+        }}
+      />
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          href: null,
         }}
       />
       <Tabs.Screen
@@ -33,21 +47,19 @@ export default function TabLayout() {
       <Tabs.Screen
         name="tours"
         options={{
-          title: 'Tours',
-          tabBarIcon: ({ color }) => <Ionicons size={25} name="ticket-outline" color={color} />,
+          href: null,
         }}
       />
       <Tabs.Screen
         name="destinations"
         options={{
-          title: 'Destinations',
-          tabBarIcon: ({ color }) => <Ionicons size={25} name="map-outline" color={color} />,
+          href: null,
         }}
       />
       <Tabs.Screen
         name="preferences"
         options={{
-          title: 'Preferences',
+          title: 'Cài đặt',
           tabBarIcon: ({ color }) => <Ionicons size={25} name="settings-outline" color={color} />,
         }}
       />

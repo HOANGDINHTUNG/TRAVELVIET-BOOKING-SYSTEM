@@ -3,7 +3,7 @@ import type { ChangeEvent, FormEvent } from "react";
 import type { SupportMessage, SupportSession } from "../../../api/server/Support.api";
 import { supportApi } from "../../../api/server/Support.api";
 import { ErrorBlock } from "../../../components/common/ui/ErrorBlock";
-import { PageLoader } from "../../../components/common/ux/PageLoader";
+import { SupportCenterPageSkeleton } from "../../../components/ui/skeletons/CustomerPageSkeletons";
 import { Footer } from "../../../components/Footer/Footer";
 import { CustomerPageHero } from "../../../components/ui/CustomerPageHero/CustomerPageHero";
 import { useTranslation } from "react-i18next";
@@ -286,7 +286,12 @@ export default function SupportCenterPage() {
   };
 
   if (loading) {
-    return <PageLoader label={copy.loading} />;
+    return (
+      <>
+        <SupportCenterPageSkeleton />
+        <Footer />
+      </>
+    );
   }
 
   if (error) {

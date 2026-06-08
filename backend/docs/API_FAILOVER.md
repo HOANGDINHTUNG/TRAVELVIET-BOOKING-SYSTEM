@@ -12,15 +12,17 @@ Backend probe URL public **một lần lúc khởi động** (profile `dev`, `ap
 
 ```properties
 API_FAILOVER_ENABLED=true
-API_PREFER_PUBLIC=true
+API_PREFER_PUBLIC=false
 APP_API_PUBLIC_BASE_URL=https://travelviet-booking-system.onrender.com/api/v1
 APP_API_LOCAL_BASE_URL=http://localhost:8088/api/v1
 ```
 
-Chỉ dùng local (không probe Render):
+Mặc định dev: **probe local trước** → nếu local down mới probe Render.
+
+Thử Render trước (cách cũ):
 
 ```properties
-API_PREFER_PUBLIC=false
+API_PREFER_PUBLIC=true
 ```
 
 ## Kiểm tra sau khi start backend

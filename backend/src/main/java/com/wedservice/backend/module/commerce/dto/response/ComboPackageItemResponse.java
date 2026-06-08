@@ -14,5 +14,8 @@ public class ComboPackageItemResponse {
     private String itemName;
     private Integer quantity;
     private BigDecimal unitPrice;
+    private BigDecimal unitPriceSnapshot;
+    private Boolean isMandatory;
+    private Integer sortOrder;
     private BigDecimal lineTotal;
 }

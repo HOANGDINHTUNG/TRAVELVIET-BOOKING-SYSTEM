@@ -2,7 +2,8 @@ import { applyApiClientBaseUrl } from '../lib/apiClient'
 import { initializeApiBaseUrl } from '../config/apiBaseUrl'
 
 /**
- * Probe API public (Render); nếu down thì gắn axios vào localhost trước khi render React.
+ * Probe API trước khi render React.
+ * Mặc định dev: local (8088) trước → Render nếu local không phản hồi.
  */
 export async function bootstrapApi(): Promise<void> {
   await initializeApiBaseUrl()

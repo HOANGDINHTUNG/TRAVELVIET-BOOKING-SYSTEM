@@ -1,8 +1,8 @@
 /**
- * Tiền tố tv-tour-card — tránh trùng .tour-card (PackagesSection / SiteMotion).
- * Zoom ảnh giống .tour-hot-card: scale khung ảnh, overflow hidden.
+ * TourCard dùng chung zoom ảnh với TravelOfferCardFrame (alias class cũ).
  */
-.tv-tour-card__image-wrap {
+.tv-tour-card__image-wrap,
+.tv-offer-card__image-wrap {
   overflow: hidden;
   transform: scale(1);
   transform-origin: center center;
@@ -11,25 +11,23 @@
 }
 
 .tv-tour-card:hover .tv-tour-card__image-wrap,
-.tv-tour-card:focus-within .tv-tour-card__image-wrap {
+.tv-tour-card:focus-within .tv-tour-card__image-wrap,
+.tv-offer-card:hover .tv-offer-card__image-wrap,
+.tv-offer-card:focus-within .tv-offer-card__image-wrap {
   transform: scale(1.04);
 }
 
-.tv-tour-card__image {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .tv-tour-card__image-wrap {
+  .tv-tour-card__image-wrap,
+  .tv-offer-card__image-wrap {
     transition: none;
     will-change: auto;
   }
 
   .tv-tour-card:hover .tv-tour-card__image-wrap,
-  .tv-tour-card:focus-within .tv-tour-card__image-wrap {
+  .tv-tour-card:focus-within .tv-tour-card__image-wrap,
+  .tv-offer-card:hover .tv-offer-card__image-wrap,
+  .tv-offer-card:focus-within .tv-offer-card__image-wrap {
     transform: scale(1);
   }
 }

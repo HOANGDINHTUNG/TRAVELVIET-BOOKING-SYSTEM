@@ -16,7 +16,7 @@ import {
   type ScheduleChatRoom,
 } from "../../../api/server/ScheduleChat.api";
 import { ErrorBlock } from "../../../components/common/ui/ErrorBlock";
-import { PageLoader } from "../../../components/common/ux/PageLoader";
+import { ScheduleChatPageSkeleton } from "../../../components/ui/skeletons/CustomerPageSkeletons";
 import { Footer } from "../../../components/Footer/Footer";
 import { CustomerPageHero } from "../../../components/ui/CustomerPageHero/CustomerPageHero";
 import { getStoredAuthUser } from "../../auth/api/authApi";
@@ -208,7 +208,12 @@ export default function ScheduleChatPage() {
   };
 
   if (loading) {
-    return <PageLoader label={copy.loading} />;
+    return (
+      <>
+        <ScheduleChatPageSkeleton />
+        <Footer />
+      </>
+    );
   }
 
   if (error) {

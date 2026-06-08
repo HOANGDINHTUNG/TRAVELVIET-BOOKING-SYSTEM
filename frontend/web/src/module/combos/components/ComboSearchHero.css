@@ -1,0 +1,277 @@
+.combo-hero {
+  position: relative;
+  min-height: clamp(480px, 62vh, 620px);
+  display: flex;
+  flex-direction: column;
+  color: #fff;
+  overflow: visible;
+}
+
+.combo-hero__media {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.combo-hero__bg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.combo-hero__shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    120deg,
+    rgba(0, 35, 70, 0.58) 0%,
+    rgba(0, 25, 50, 0.42) 50%,
+    rgba(0, 15, 30, 0.32) 100%
+  );
+}
+
+.combo-hero__top {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: flex-end;
+  padding: clamp(12px, 2vw, 20px) clamp(16px, 4vw, 48px) 0;
+}
+
+.combo-hero__brand {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.combo-hero__logo {
+  height: clamp(36px, 5vw, 48px);
+  width: auto;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.35));
+}
+
+.combo-hero__tagline {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.92;
+}
+
+.combo-hero__content {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 14px;
+  padding: clamp(12px, 2vw, 24px) clamp(16px, 4vw, 48px) clamp(32px, 4vw, 48px);
+  max-width: 1180px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.combo-hero__title {
+  margin: 0;
+  font-family: var(--font-display, 'Oswald', sans-serif);
+  font-size: clamp(2rem, 4.5vw, 2.75rem);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  text-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+}
+
+.combo-search-card {
+  background: #fff;
+  color: #1a1a2e;
+  border-radius: 16px;
+  padding: 16px 18px 18px;
+  box-shadow:
+    0 16px 48px rgba(15, 23, 42, 0.18),
+    0 2px 6px rgba(15, 23, 42, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.combo-search-card__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.combo-search-card__tab {
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  color: #374151;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.combo-search-card__tab.is-active {
+  background: #111827;
+  border-color: #111827;
+  color: #fff;
+}
+
+.combo-search-card__occupancy {
+  position: relative;
+}
+
+.combo-search-card__occupancy-trigger {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+}
+
+.combo-search-card__occupancy-label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.combo-search-card__occupancy-counts {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #6b7280;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.combo-search-card__occupancy-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 20;
+  min-width: min(360px, 92vw);
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.14);
+  padding: 12px;
+}
+
+.combo-search-card__occupancy-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 4px;
+}
+
+.combo-search-card__occupancy-row + .combo-search-card__occupancy-row {
+  border-top: 1px solid #f3f4f6;
+}
+
+.combo-search-card__occupancy-row-label {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.combo-search-card__occupancy-row-hint {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.combo-search-card__occupancy-stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.combo-search-card__occupancy-stepper button {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.combo-search-card__occupancy-stepper button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.combo-search-card__flight-row,
+.combo-search-card__hotel-row {
+  display: grid;
+  gap: 10px;
+  align-items: end;
+}
+
+.combo-search-card__flight-row {
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) minmax(0, 1.2fr);
+}
+
+.combo-search-card__hotel-row {
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) auto;
+}
+
+.combo-search-card__swap {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: none;
+  background: #10b981;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-bottom: 6px;
+}
+
+.combo-search-card__submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 52px;
+  padding: 0 22px;
+  border: none;
+  border-radius: 999px;
+  background: #1e3a5f;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.combo-search-card__submit:hover {
+  background: #16304f;
+}
+
+@media (max-width: 960px) {
+  .combo-search-card__flight-row,
+  .combo-search-card__hotel-row {
+    grid-template-columns: 1fr;
+  }
+
+  .combo-search-card__swap {
+    margin: 0 auto 4px;
+  }
+
+  .combo-search-card__submit {
+    width: 100%;
+  }
+}

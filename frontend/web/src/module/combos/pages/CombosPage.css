@@ -1,0 +1,10 @@
+.combos-page {
+  background: var(--color-page);
+  color: var(--color-text);
+  overflow-x: clip;
+}
+
+.combos-page .combo-hero {
+  margin-top: calc(-1 * var(--site-header-height, 72px));
+  padding-top: var(--site-header-height, 72px);
+}

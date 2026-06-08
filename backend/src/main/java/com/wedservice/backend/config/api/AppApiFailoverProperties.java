@@ -14,7 +14,7 @@ public class AppApiFailoverProperties {
     private boolean enabled = false;
 
     /** Thử URL public trước; false = luôn khuyến nghị local. */
-    private boolean preferPublic = true;
+    private boolean preferPublic = false;
 
     private int probeTimeoutMs = 8000;
 

@@ -11,7 +11,7 @@ export function HomeBannerSkeleton({ className }: { className?: string }) {
       role="status"
       aria-busy="true"
       className={cn(
-        'relative h-dvh min-h-svh w-full overflow-hidden bg-neutral-950',
+        'pointer-events-none relative h-dvh min-h-svh w-full overflow-hidden bg-neutral-950',
         className,
       )}
     >
@@ -115,7 +115,7 @@ export function ServiceRowSkeleton({ className }: { className?: string }) {
  */
 export function HomePageSkeleton() {
   return (
-    <div role="status" aria-busy="true" className="space-y-6">
+    <div role="status" aria-busy="true" className="pointer-events-none space-y-6">
       <HomeBannerSkeleton />
       <ServiceRowSkeleton />
       <section className="mx-auto w-full max-w-[var(--home-content-max)] space-y-4 px-3 md:px-6">

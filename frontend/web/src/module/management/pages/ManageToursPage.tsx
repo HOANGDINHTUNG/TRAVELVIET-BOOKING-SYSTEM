@@ -14,7 +14,8 @@ import {
   X,
 } from 'lucide-react'
 import { ErrorBlock } from '../../../components/common/ui/ErrorBlock'
-import { PageLoader } from '../../../components/common/ux/PageLoader'
+import { ManagementContentGridSkeleton } from '../../../components/ui/skeletons/CustomerPageSkeletons'
+import { PageSkeletonBlock } from '../../../components/ui/skeletons/PageSkeletonBlock'
 import {
   contentManagementApi,
   resolveTourCover,
@@ -294,7 +295,18 @@ function ManageToursPage() {
   }
 
   if (loading && tours.length === 0) {
-    return <PageLoader label="Dang tai tour quan tri..." />
+    return (
+      <div className="mgmt-content-page">
+        <header className="mgmt-content-header">
+          <div>
+            <p className="mgmt-content-kicker">Tour management</p>
+            <PageSkeletonBlock className="psb" style={{ width: 320, height: 24, marginBottom: 8 }} as="div" />
+            <PageSkeletonBlock className="psb" style={{ width: 'min(520px, 100%)', height: 14 }} as="div" />
+          </div>
+        </header>
+        <ManagementContentGridSkeleton />
+      </div>
+    )
   }
 
   return (

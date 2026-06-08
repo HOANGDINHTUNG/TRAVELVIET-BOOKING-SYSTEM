@@ -74,6 +74,9 @@ export const flightsPageEn = {
     carryOn: 'Carry-on',
     noResults: 'No flights match your filters.',
     selectToast: 'Fare selection is coming soon — mock data only.',
+    loadingMessage: 'Finding suitable flights...',
+    loadingFiltersAria: 'Loading filters',
+    loadingCardsAria: 'Loading flight results',
   },
   featured: {
     title: 'Featured destinations',
@@ -85,6 +88,18 @@ export const flightsPageEn = {
       { name: 'Busan, South Korea', alt: 'Historic Korean architecture' },
       { name: 'Singapore', alt: 'Marina Bay Sands skyline' },
     ],
+  },
+  dealSections: {
+    sectionAria: 'Featured flight deals',
+    domesticTitle: 'Domestic flights',
+    internationalTitle: 'International flights',
+    oneWayBadge: 'One-way flight',
+    originFilterAria: 'Filter by origin',
+    loadingAria: 'Loading featured flights',
+    priceFrom: 'From:',
+    viewNow: 'View now',
+    empty: 'No flights for this route yet.',
+    viewToast: 'Opening search results — mock data only.',
   },
   about: {
     title: 'Travel Viet — Elevating your flight experience',

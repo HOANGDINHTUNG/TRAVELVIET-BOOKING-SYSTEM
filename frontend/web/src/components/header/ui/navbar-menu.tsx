@@ -192,6 +192,8 @@ type ProductItemProps = {
   description: string;
   to: string;
   src: string;
+  /** Giữ skeleton (ảnh + dòng chữ) khi BE chưa sẵn sàng hoặc đang tải. */
+  forceLoading?: boolean;
 };
 
 export const ProductItem: React.FC<ProductItemProps> = ({
@@ -199,26 +201,85 @@ export const ProductItem: React.FC<ProductItemProps> = ({
   description,
   to,
   src,
+  forceLoading = false,
 }) => {
+  const [imageReady, setImageReady] = React.useState(false);
+  const [imageFailed, setImageFailed] = React.useState(false);
+  const hasText = title.trim().length > 0 && description.trim().length > 0;
+  const canLoadImage = !forceLoading && src.trim().length > 0;
+  const showTextSkeleton = forceLoading || !hasText;
+  const showImageSkeleton =
+    forceLoading || (canLoadImage && !imageReady && !imageFailed);
+
+  const markImageLoaded = React.useCallback(() => {
+    setImageReady(true);
+    setImageFailed(false);
+  }, []);
+
+  const markImageFailed = React.useCallback(() => {
+    setImageFailed(true);
+    setImageReady(false);
+  }, []);
+
+  const handleImageRef = React.useCallback(
+    (node: HTMLImageElement | null) => {
+      if (!node || !canLoadImage) return;
+      if (node.complete && node.naturalWidth > 0) {
+        markImageLoaded();
+      }
+    },
+    [canLoadImage, markImageLoaded],
+  );
+
+  React.useEffect(() => {
+    setImageReady(false);
+    setImageFailed(false);
+  }, [src, forceLoading]);
+
   return (
     <Link
       to={to}
       className="group flex space-x-3 rounded-lg p-2 transition-all duration-300 hover:bg-neutral-100 dark:hover:bg-neutral-800/70 hover:shadow-lg cursor-pointer"
     >
-      <img
-        src={src}
-        width={140}
-        height={70}
-        alt={title}
-        className="shrink-0 rounded-md shadow-xl transition-transform duration-300 group-hover:scale-[1.03]"
-      />
+      <div className="relative h-[70px] w-[140px] shrink-0 overflow-hidden rounded-md shadow-xl">
+        {canLoadImage && !imageFailed ? (
+          <img
+            ref={handleImageRef}
+            src={src}
+            width={140}
+            height={70}
+            alt={title}
+            onLoad={markImageLoaded}
+            onError={markImageFailed}
+            className={`h-full w-full object-cover transition-[transform,opacity] duration-300 group-hover:scale-[1.03] ${
+              imageReady ? "opacity-100" : "opacity-0"
+            }`}
+          />
+        ) : null}
+        {showImageSkeleton ? (
+          <div
+            aria-hidden
+            className="absolute inset-0 animate-pulse bg-neutral-200 dark:bg-neutral-700"
+          />
+        ) : null}
+      </div>
       <div className="flex flex-col justify-center">
-        <h4 className="mb-1 text-xl font-bold text-black transition-colors duration-300 group-hover:text-[#ff6600] dark:text-white">
-          {title}
-        </h4>
-        <p className="max-w-40 text-sm text-neutral-700 dark:text-neutral-300">
-          {description}
-        </p>
+        {showTextSkeleton ? (
+          <div className="w-40 space-y-2" aria-hidden>
+            <div className="h-4 w-28 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700" />
+            <div className="h-3 w-36 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700" />
+            <div className="h-3 w-24 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700" />
+          </div>
+        ) : (
+          <>
+            <h4 className="mb-1 text-xl font-bold text-black transition-colors duration-300 group-hover:text-[#ff6600] dark:text-white">
+              {title}
+            </h4>
+            <p className="max-w-40 text-sm text-neutral-700 dark:text-neutral-300">
+              {description}
+            </p>
+          </>
+        )}
       </div>
     </Link>
   );
@@ -229,16 +290,61 @@ type HoveredLinkProps = {
   to?: string;
   href?: string;
   className?: string;
+  /** Giữ skeleton thay chữ khi BE chưa sẵn sàng. */
+  forceLoading?: boolean;
+  /** Độ rộng thanh skeleton (Tailwind width class). */
+  skeletonWidthClass?: string;
 };
+
+export function DropdownSectionHeading({
+  children,
+  forceLoading = false,
+  className = "",
+}: {
+  children: React.ReactNode;
+  forceLoading?: boolean;
+  className?: string;
+}) {
+  if (forceLoading) {
+    return (
+      <div className={`px-2 pb-1 ${className}`.trim()} aria-hidden>
+        <div className="h-2.5 w-24 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700" />
+      </div>
+    );
+  }
+
+  return (
+    <p
+      className={`px-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-neutral-400 ${className}`.trim()}
+    >
+      {children}
+    </p>
+  );
+}
 
 export const HoveredLink: React.FC<HoveredLinkProps> = ({
   children,
   to,
   href,
   className = "",
+  forceLoading = false,
+  skeletonWidthClass = "w-36",
 }) => {
   const tone =
     "block rounded-md px-2 py-1.5 text-[13px] font-medium text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 hover:text-[#ff6600] dark:hover:bg-neutral-800/70 transition-colors";
+
+  if (forceLoading) {
+    return (
+      <span
+        className={`block rounded-md px-2 py-1.5 ${className}`.trim()}
+        aria-hidden
+      >
+        <span
+          className={`block h-3.5 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700 ${skeletonWidthClass}`}
+        />
+      </span>
+    );
+  }
 
   if (to) {
     return (

@@ -1,0 +1,162 @@
+/* Skeleton thẻ — logo Vietravel + 3 dòng (mockup chung flights/hotels/combo) */
+.brand-cards-skeleton--flex {
+  display: flex;
+  gap: var(--home-tour-card-gap, 18px);
+  overflow: hidden;
+  padding-block: 4px;
+}
+
+.brand-cards-skeleton--grid {
+  display: grid;
+  gap: 14px;
+}
+
+.brand-cards-skeleton--grid.brand-cards-skeleton--cols-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.brand-cards-skeleton--grid.brand-cards-skeleton--cols-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.brand-cards-skeleton--span-full {
+  grid-column: 1 / -1;
+}
+
+.brand-cards-skeleton--flex .brand-cards-skeleton__card {
+  flex: 0 0 var(--home-tour-card-width, 310px);
+  width: var(--home-tour-card-width, 310px);
+}
+
+.brand-cards-skeleton__card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 200px;
+  padding: 22px 16px 18px;
+  border-radius: 14px;
+  background: #f3f4f6;
+  border: 1px solid #e8eaed;
+  overflow: hidden;
+}
+
+.brand-cards-skeleton--tall .brand-cards-skeleton__card {
+  min-height: var(--home-tour-card-height, 420px);
+}
+
+.brand-cards-skeleton__brand {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding-bottom: 12px;
+}
+
+.brand-cards-skeleton__logo {
+  width: min(148px, 72%);
+  height: auto;
+  max-height: 44px;
+  object-fit: contain;
+  opacity: 0.92;
+}
+
+.brand-cards-skeleton__tagline {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #9ca3af;
+  text-align: center;
+  line-height: 1.3;
+}
+
+.brand-cards-skeleton__lines {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+.brand-cards-skeleton__line {
+  display: block;
+  height: 10px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #e2e8f0 0%, #f8fafc 45%, #e2e8f0 90%);
+  background-size: 200% 100%;
+  animation: brand-cards-skeleton-shimmer 1.35s ease-in-out infinite;
+}
+
+.brand-cards-skeleton__line--lg {
+  width: 92%;
+  height: 12px;
+  margin-inline: auto;
+}
+
+.brand-cards-skeleton__line--md {
+  width: 78%;
+  margin-inline: auto;
+}
+
+.brand-cards-skeleton__line--sm {
+  width: 52%;
+  margin-inline: auto;
+}
+
+@keyframes brand-cards-skeleton-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+.theme-dark .brand-cards-skeleton__card {
+  background: #243044;
+  border-color: color-mix(in srgb, var(--color-border) 80%, transparent);
+}
+
+.theme-dark .brand-cards-skeleton__tagline {
+  color: #94a3b8;
+}
+
+.theme-dark .brand-cards-skeleton__line {
+  background: linear-gradient(90deg, #334155 0%, #475569 45%, #334155 90%);
+  background-size: 200% 100%;
+}
+
+@media (max-width: 1100px) {
+  .brand-cards-skeleton--grid.brand-cards-skeleton--cols-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 960px) {
+  .brand-cards-skeleton--grid.brand-cards-skeleton--cols-3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .brand-cards-skeleton--flex .brand-cards-skeleton__card {
+    flex: 0 0 min(var(--home-tour-card-width, 310px), calc(100vw - 120px));
+    width: min(var(--home-tour-card-width, 310px), calc(100vw - 120px));
+  }
+}
+
+@media (max-width: 640px) {
+  .brand-cards-skeleton--grid.brand-cards-skeleton--cols-3,
+  .brand-cards-skeleton--grid.brand-cards-skeleton--cols-4 {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand-cards-skeleton__line {
+    animation: none;
+  }
+}

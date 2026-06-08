@@ -19,4 +19,4 @@ FLUSH PRIVILEGES;
 --    mở tab mới đăng nhập root rồi chỉ chạy dòng SET GLOBAL.
 --    Flyway tạo FUNCTION/TRIGGER (V5, V6) có thể cần setting này.
 -- -----------------------------------------------------------------------------
--- SET GLOBAL log_bin_trust_function_creators = 1;
+SET GLOBAL log_bin_trust_function_creators = 1;

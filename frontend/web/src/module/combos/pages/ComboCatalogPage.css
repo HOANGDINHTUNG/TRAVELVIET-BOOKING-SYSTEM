@@ -1,0 +1,367 @@
+/* Combo catalog — Vietravel "Combo tiết kiệm" */
+.combo-catalog-page {
+  --cc-blue: #0047ba;
+  --cc-blue-hover: #003a9b;
+  --cc-yellow: #ffcc00;
+  --cc-yellow-text: #212121;
+  --cc-page-bg: #ffffff;
+  --cc-card: #ffffff;
+  --cc-border: #e0e0e0;
+  --cc-text: #212121;
+  --cc-muted: #757575;
+  --cc-label: #424242;
+  --cc-sticky-top: calc(var(--site-header-height, 3.25rem) + 10px);
+  --cc-sticky-max-h: calc(100vh - var(--site-header-height, 3.25rem) - 20px);
+
+  background: var(--cc-page-bg);
+  min-height: 100vh;
+}
+
+/* Layout */
+.combo-catalog-page__body {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 16px 18px 40px;
+}
+
+.combo-catalog-page__layout {
+  display: grid;
+  grid-template-columns: 252px minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+
+/* Sidebar cố định khi cuộn — chừa header phía trên */
+.combo-catalog-page__sidebar {
+  position: sticky;
+  top: var(--cc-sticky-top);
+  align-self: start;
+  z-index: 20;
+  max-height: var(--cc-sticky-max-h);
+}
+
+/* Sidebar filters */
+.cc-filters {
+  background: var(--cc-card);
+  border: 1px solid var(--cc-border);
+  border-radius: 14px;
+  padding: 12px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+  max-height: var(--cc-sticky-max-h);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+.cc-filters::-webkit-scrollbar {
+  width: 6px;
+}
+
+.cc-filters::-webkit-scrollbar-thumb {
+  background: #cfd8dc;
+  border-radius: 999px;
+}
+
+.cc-filters__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eeeeee;
+}
+
+.cc-filters__title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 800;
+  color: #111827;
+}
+
+.cc-filters__reset {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: none;
+  background: none;
+  color: #9ca3af;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 4px 6px;
+}
+
+.cc-filters__reset:hover {
+  color: var(--cc-muted);
+}
+
+.cc-filters__body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cc-filter__group {
+  border: none;
+  margin: 0;
+  padding: 0;
+}
+
+.cc-filter__label {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--cc-label);
+  margin-bottom: 6px;
+}
+
+.cc-filter__pills {
+  display: flex;
+  gap: 8px;
+}
+
+.cc-filter__pills--2 .cc-filter__pill {
+  flex: 1;
+}
+
+.cc-filter__budget-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.cc-filter__pill {
+  padding: 8px 10px;
+  border-radius: 12px;
+  border: 1px solid #d0d0d0;
+  background: #ffffff;
+  color: #616161;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  line-height: 1.3;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+.cc-filter__pill.is-active {
+  border-color: var(--cc-blue);
+  color: var(--cc-blue);
+  background: #f0f6ff;
+  font-weight: 600;
+}
+
+.cc-filter__select-wrap,
+.cc-filter__date-wrap {
+  position: relative;
+  display: block;
+}
+
+.cc-filter__select-wrap select,
+.cc-filter__date-wrap input {
+  width: 100%;
+  padding: 9px 36px 9px 12px;
+  border-radius: 14px;
+  border: 1px solid #d0d0d0;
+  background: #fff;
+  font-size: 13px;
+  color: #424242;
+  appearance: none;
+}
+
+.cc-filter__chevron {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9e9e9e;
+  pointer-events: none;
+}
+
+.cc-filter__date-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9e9e9e;
+  pointer-events: none;
+}
+
+.cc-filter__stars {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cc-filter__star-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.cc-filter__star-row input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--cc-blue);
+  flex-shrink: 0;
+}
+
+.cc-filter__star-icons .is-on {
+  color: #ffcc00;
+}
+
+.cc-filter__star-icons .is-off {
+  color: #e0e0e0;
+}
+
+.cc-filters__apply {
+  width: 100%;
+  margin-top: 10px;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 999px;
+  background: var(--cc-blue);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.cc-filters__apply:hover {
+  background: var(--cc-blue-hover);
+}
+
+/* Main */
+.cc-main__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.cc-main__count {
+  margin: 0;
+  font-size: 15px;
+  color: #111827;
+  font-weight: 700;
+}
+
+.cc-main__count strong {
+  color: #1d4ed8;
+  font-weight: 800;
+}
+
+.cc-main__sort {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #111827;
+  font-weight: 700;
+}
+
+.cc-main__sort-select {
+  position: relative;
+}
+
+.cc-main__sort-select select {
+  appearance: none;
+  padding: 8px 34px 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--cc-border);
+  background: #fff;
+  font-size: 13px;
+  color: #1d4ed8;
+  min-width: 222px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.cc-main__sort-chevron {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #9e9e9e;
+}
+
+.cc-main__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px 14px;
+}
+
+.cc-main__empty {
+  grid-column: 1 / -1;
+  padding: 48px 24px;
+  text-align: center;
+  background: #fff;
+  border: 1px dashed var(--cc-border);
+  border-radius: 10px;
+  color: var(--cc-muted);
+  font-size: 14px;
+}
+
+@media (max-width: 1024px) {
+  .combo-catalog-page__layout {
+    grid-template-columns: 1fr;
+  }
+
+  .combo-catalog-page__sidebar {
+    position: static;
+    top: auto;
+    max-height: none;
+    justify-content: flex-start;
+  }
+
+  .cc-filters {
+    max-height: none;
+    overflow: visible;
+  }
+
+  .cc-main__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cc-filters__title {
+    font-size: 18px;
+  }
+
+  .cc-filter__label,
+  .cc-filter__pill,
+  .cc-filters__apply,
+  .cc-main__sort,
+  .cc-main__sort-select select,
+  .cc-filter__select-wrap select,
+  .cc-filter__date-wrap input {
+    font-size: 14px;
+  }
+
+  .cc-main__count {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 640px) {
+  .combo-catalog-page__body {
+    padding: 16px 14px 32px;
+  }
+
+  .cc-main__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cc-main__sort-select select {
+    min-width: 180px;
+  }
+}

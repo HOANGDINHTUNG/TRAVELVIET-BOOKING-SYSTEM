@@ -230,4 +230,26 @@ export const { clearHomeWeather } = homeSlice.actions
 
 export const selectHome = (state: RootState) => state.home
 
+function hasAnyHomePublicData(state: HomeState): boolean {
+  return (
+    state.destinations.length > 0 ||
+    state.tours.length > 0 ||
+    state.toursDomesticBeach.length > 0 ||
+    state.toursInternationalHot.length > 0 ||
+    state.toursLastMinuteDeals.length > 0
+  )
+}
+
+/** Mega menu: skeleton khi đang gọi BE hoặc đã gọi xong nhưng không có dữ liệu. */
+export function selectMegaMenuForceLoading(state: RootState): boolean {
+  const home = state.home
+  if (home.loading) return true
+  return !hasAnyHomePublicData(home)
+}
+
+/** @deprecated Dùng selectMegaMenuForceLoading — giữ để tương thích. */
+export function selectMegaMenuContentReady(state: RootState): boolean {
+  return !selectMegaMenuForceLoading(state)
+}
+
 export default homeSlice.reducer

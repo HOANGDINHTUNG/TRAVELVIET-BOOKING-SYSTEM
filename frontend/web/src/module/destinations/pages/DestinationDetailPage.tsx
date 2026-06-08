@@ -1,12 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link, useParams } from 'react-router-dom'
-import { ArrowLeft } from 'lucide-react'
+import { useParams } from 'react-router-dom'
+import { toast } from 'sonner'
 import { destinationApi } from '../../../api/server/Destination.api'
 import { weatherApi } from '../../../api/server/Weather.api'
-import { ErrorBlock } from '../../../components/common/ui/ErrorBlock'
-import { PageLoader } from '../../../components/common/ux/PageLoader'
 import { Footer } from '../../../components/Footer/Footer'
+import { DestinationDetailPageSkeleton } from '../components/DestinationDetailPageSkeleton'
 import { DestinationPublicDetailShell } from '../components/public-detail/DestinationPublicDetailShell'
 import type { DestinationDetail } from '../database/interface/destination'
 import {
@@ -127,26 +126,16 @@ function DestinationDetailPage() {
     [copy, detail],
   )
 
-  if (loading) {
-    return <PageLoader label={copy.loading} />
-  }
+  useEffect(() => {
+    if (!error || detail) return
+    toast.error(error)
+  }, [detail, error])
 
-  if (error || !detail || !viewModel) {
+  if (loading || !detail || !viewModel) {
     return (
       <>
-        <div className="bg-slate-950 p-6">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 text-sm font-semibold text-white no-underline"
-          >
-            <ArrowLeft aria-hidden="true" className="h-4 w-4" />
-            {copy.backHome}
-          </Link>
-        </div>
-        <ErrorBlock
-          title={copy.detailErrorTitle}
-          message={error || copy.missingDestination}
-        />
+        <DestinationDetailPageSkeleton />
+        <Footer />
       </>
     )
   }

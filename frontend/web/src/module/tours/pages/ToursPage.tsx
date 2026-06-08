@@ -9,6 +9,7 @@ import {
 } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { toast } from 'sonner'
 import {
   CalendarDays,
   Clock,
@@ -30,13 +31,9 @@ import {
 } from '../utils/tourCatalogSearch'
 import {
   buildTourLineFacets,
-  hasTourLineTag,
   priceBounds,
-  sortCatalogTours,
+  resolveTourLineId,
   tourMatchesDeparture,
-  tourMatchesLine,
-  tourMatchesPrice,
-  tourMatchesTransport,
 } from '../utils/tourCatalogFacets'
 import {
   hasSustainabilityScores,
@@ -45,7 +42,6 @@ import {
 } from '../utils/tourSustainability'
 import { tourApi } from '../../../api/server/Tour.api'
 import { EmptyState } from '../../../components/common/ui/EmptyState'
-import { ErrorBlock } from '../../../components/common/ui/ErrorBlock'
 import { PageLoader } from '../../../components/common/ux/PageLoader'
 import { Footer } from '../../../components/Footer/Footer'
 import {
@@ -54,6 +50,7 @@ import {
 } from '../../../components/ui/TourCard/TourQuickViewDialog'
 import type { Tour } from '../../home/database/interface/publicTravel'
 import { ToursCatalogHero } from '../components/catalog/ToursCatalogHero'
+import { ToursCatalogSkeleton } from '../components/catalog/ToursCatalogSkeleton'
 import {
   ToursCatalogSearchBar,
   type ToursCatalogSearchBarHandle,
@@ -73,17 +70,15 @@ import '../styles/ToursCatalogLayout.css'
 
 import { formatCurrencyVnd } from '../../management/schedules/utils/currency'
 import { OptimizedImage } from '../../../components/common/media/OptimizedImage'
-import { useProgressiveList } from '../../../hooks/useProgressiveList'
+
+const TOUR_PAGE_SIZE = 20
 
 function tourListingBadge(tour: Tour): { kind: 'deal' | 'standard' | 'esg'; label: string } {
-  const esg = resolveEsgScore(tour)
-  if (hasTourLineTag(tour, 'esg') || (esg != null && esg >= 85)) {
-    return { kind: 'esg', label: 'ESG & LEI' }
-  }
-  if (hasTourLineTag(tour, 'cao_cap')) return { kind: 'standard', label: 'Cao cấp' }
-  if (hasTourLineTag(tour, 'tieu_chuan')) return { kind: 'standard', label: 'Tiêu chuẩn' }
-  if (hasTourLineTag(tour, 'tiet_kiem')) return { kind: 'deal', label: 'Tiết kiệm' }
-  if (hasTourLineTag(tour, 'gia_tot')) return { kind: 'deal', label: 'Giá tốt' }
+  const lineId = resolveTourLineId(tour)
+  if (lineId === 'esg') return { kind: 'esg', label: 'ESG & LEI' }
+  if (lineId === 'cao_cap') return { kind: 'standard', label: 'Cao cấp' }
+  if (lineId === 'tieu_chuan') return { kind: 'standard', label: 'Tiêu chuẩn' }
+  if (lineId === 'tiet_kiem') return { kind: 'deal', label: 'Tiết kiệm' }
   return { kind: 'deal', label: 'Giá tốt' }
 }
 
@@ -102,7 +97,14 @@ function ToursPage() {
   const [quickOpen, setQuickOpen] = useState(false)
   const searchDockRef = useRef<HTMLDivElement>(null)
   const searchBarRef = useRef<ToursCatalogSearchBarHandle>(null)
+  const loadMoreRef = useRef<HTMLDivElement>(null)
   const [searchDockInView, setSearchDockInView] = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
+  const [hasMore, setHasMore] = useState(false)
+  const [nextPage, setNextPage] = useState(1)
+  const [totalResults, setTotalResults] = useState(0)
+  const stallNotifiedRef = useRef(false)
+  const errorNotifiedRef = useRef(false)
 
   const appliedFilters = useMemo(
     () => parseTourCatalogFilters(searchParams),
@@ -159,13 +161,19 @@ function ToursPage() {
 
       setLoading(true)
       setError(null)
+      setLoadingMore(false)
 
       try {
         const serverFilter = catalogFiltersToServerParams(
           parseTourCatalogFilters(new URLSearchParams(catalogSearchKey)),
+          { page: 0, size: TOUR_PAGE_SIZE },
         )
-        const data = await tourApi.searchPublicTours(serverFilter)
-        if (isActive) setTours(data)
+        const pageData = await tourApi.searchPublicToursPage(serverFilter)
+        if (!isActive) return
+        setTours(pageData.items)
+        setHasMore(!pageData.last)
+        setNextPage(pageData.page + 1)
+        setTotalResults(pageData.totalElements)
       } catch (loadError) {
         if (isActive) {
           setError(
@@ -185,6 +193,47 @@ function ToursPage() {
     }
   }, [catalogSearchKey])
 
+  const loadMoreTours = useCallback(async () => {
+    if (loading || loadingMore || !hasMore || !catalogSearchKey) return
+    setLoadingMore(true)
+    try {
+      const serverFilter = catalogFiltersToServerParams(
+        parseTourCatalogFilters(new URLSearchParams(catalogSearchKey)),
+        { page: nextPage, size: TOUR_PAGE_SIZE },
+      )
+      const pageData = await tourApi.searchPublicToursPage(serverFilter)
+      setTours((prev) => [...prev, ...pageData.items])
+      setHasMore(!pageData.last)
+      setNextPage(pageData.page + 1)
+      setTotalResults(pageData.totalElements)
+    } catch (loadError) {
+      setError(
+        loadError instanceof Error
+          ? loadError.message
+          : 'Không thể tải thêm danh sách tour.',
+      )
+    } finally {
+      setLoadingMore(false)
+    }
+  }, [catalogSearchKey, hasMore, loading, loadingMore, nextPage])
+
+  useEffect(() => {
+    if (!hasMore || loading) return undefined
+    const target = loadMoreRef.current
+    if (!target) return undefined
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries
+        if (entry?.isIntersecting) {
+          void loadMoreTours()
+        }
+      },
+      { rootMargin: '320px 0px' },
+    )
+    observer.observe(target)
+    return () => observer.disconnect()
+  }, [hasMore, loadMoreTours, loading])
+
   const translateTourField = useCallback(
     (tour: Tour, field: 'title' | 'days' | 'location', fallback: string) => {
       if (!tour.translationKey) return fallback
@@ -195,37 +244,14 @@ function ToursPage() {
   )
 
   const hero = useMemo(() => catalogHeroCopy(appliedFilters), [appliedFilters])
-  const bounds = useMemo(() => priceBounds(tours), [tours])
-  const lineFacets = useMemo(() => buildTourLineFacets(tours), [tours])
-
-  const filteredTours = useMemo(() => {
-    const matched = tours.filter((tour) => {
-      if (!tourMatchesDeparture(tour, deferredAppliedFilters.departure)) return false
-      if (!tourMatchesTransport(tour, deferredAppliedFilters.transportTypes)) return false
-      /* esgOnly đã lọc phía server khi bật toggle */
-      if (deferredAppliedFilters.tourLines.length > 0) {
-        const ok = deferredAppliedFilters.tourLines.some((line) =>
-          tourMatchesLine(tour, line),
-        )
-        if (!ok) return false
-      }
-      if (
-        !tourMatchesPrice(
-          tour,
-          deferredAppliedFilters.minPrice,
-          deferredAppliedFilters.maxPrice,
-        )
-      ) {
-        return false
-      }
-      return true
-    })
-    return sortCatalogTours(
-      matched,
-      deferredAppliedFilters.sortBy,
-      deferredAppliedFilters.sortDir,
+  const displayTours = useMemo(() => {
+    if (!deferredAppliedFilters.departure.trim()) return tours
+    return tours.filter((tour) =>
+      tourMatchesDeparture(tour, deferredAppliedFilters.departure),
     )
-  }, [deferredAppliedFilters, tours])
+  }, [deferredAppliedFilters.departure, tours])
+  const bounds = useMemo(() => priceBounds(displayTours), [displayTours])
+  const lineFacets = useMemo(() => buildTourLineFacets(displayTours), [displayTours])
 
   const applyFilters = useCallback(
     (next: TourCatalogUiFilters) => {
@@ -244,13 +270,6 @@ function ToursPage() {
     },
     [applyFilters, draftFilters],
   )
-
-  const { visibleItems: visibleTours, sentinelRef: catalogSentinelRef } =
-    useProgressiveList(filteredTours, {
-      initial: 12,
-      step: 12,
-      rootMargin: '400px',
-    })
 
   const resetFilters = () => {
     applyFilters({
@@ -286,19 +305,39 @@ function ToursPage() {
   ]
 
   const currentSort = `${appliedFilters.sortBy}:${appliedFilters.sortDir}`
+  const showFullPageSkeleton = loading || (Boolean(error) && tours.length === 0)
+
+  useEffect(() => {
+    if (!loading || tours.length > 0) {
+      stallNotifiedRef.current = false
+      return undefined
+    }
+    const timer = window.setTimeout(() => {
+      if (stallNotifiedRef.current) return
+      stallNotifiedRef.current = true
+      toast.warning('Không nhận được dữ liệu tour. Kiểm tra backend và thử lại.')
+    }, 4500)
+    return () => window.clearTimeout(timer)
+  }, [loading, tours.length])
+
+  useEffect(() => {
+    if (!error || tours.length > 0) {
+      errorNotifiedRef.current = false
+      return
+    }
+    if (errorNotifiedRef.current) return
+    errorNotifiedRef.current = true
+    toast.error(error)
+  }, [error, tours.length])
 
   if (!catalogSearchKey) {
     return <PageLoader label="Đang mở danh sách tour..." />
   }
 
-  if (loading) {
-    return <PageLoader label="Đang tải danh sách tour..." />
-  }
-
-  if (error && tours.length === 0) {
+  if (showFullPageSkeleton) {
     return (
       <>
-        <ErrorBlock message={error} />
+        <ToursCatalogSkeleton view={appliedFilters.view} />
         <Footer />
       </>
     )
@@ -339,7 +378,7 @@ function ToursPage() {
               <p
                 className={`tours-vt-results-count${isFilterStale || isNavigatingFilters ? ' is-pending' : ''}`}
               >
-                Kết quả: <strong>{filteredTours.length}</strong> chương trình tour
+                Kết quả: <strong>{totalResults}</strong> chương trình tour
                 {isFilterStale || isNavigatingFilters ? ' …' : ''}
               </p>
               <div className="tours-vt-toolbar-actions">
@@ -386,7 +425,7 @@ function ToursPage() {
 
             {tours.length === 0 ? (
               <EmptyState title="Danh sách tour đang trống." />
-            ) : filteredTours.length === 0 ? (
+            ) : displayTours.length === 0 && !hasMore && !loadingMore ? (
               <div className="catalog-empty">
                 <Tag size={24} strokeWidth={1.8} aria-hidden />
                 <div>
@@ -403,7 +442,7 @@ function ToursPage() {
                   appliedFilters.view === 'list' ? 'is-list' : 'is-grid'
                 }`}
               >
-                {visibleTours.map((tour) => {
+                {displayTours.map((tour) => {
                   const title = translateTourField(tour, 'title', tour.title)
                   const days = translateTourField(tour, 'days', tour.days)
                   const location = translateTourField(tour, 'location', tour.location)
@@ -536,12 +575,17 @@ function ToursPage() {
                 })}
               </div>
             )}
-            {filteredTours.length > visibleTours.length ? (
+            {hasMore ? (
               <div
-                ref={catalogSentinelRef}
+                ref={loadMoreRef}
                 className="tours-vt-catalog-sentinel"
                 aria-hidden
               />
+            ) : null}
+            {loadingMore ? (
+              <p className="tours-vt-load-more" role="status" aria-live="polite">
+                Đang tải thêm tour...
+              </p>
             ) : null}
           </section>
         </div>
