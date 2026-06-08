@@ -3629,7 +3629,7 @@ ON DUPLICATE KEY UPDATE
     checkout_time = VALUES(checkout_time),
     status = VALUES(status);
 
--- 4) moi hotel tao 2 room types => ~400
+-- 4) moi hotel tao 5 room types => ~1000 phòng
 INSERT INTO hotel_room_types (
     hotel_id, code, name, bed_type, max_adults, max_children, max_occupancy,
     base_price, currency, inventory_total, is_refundable, status
@@ -3639,40 +3639,66 @@ SELECT
     CONCAT('RT-', h.id, '-', t.seq_no),
     CASE t.seq_no
         WHEN 1 THEN CONCAT('Standard ', h.name)
-        ELSE CONCAT('Deluxe ', h.name)
+        WHEN 2 THEN CONCAT('Deluxe ', h.name)
+        WHEN 3 THEN CONCAT('Executive ', h.name)
+        WHEN 4 THEN CONCAT('Suite ', h.name)
+        ELSE CONCAT('Family ', h.name)
     END,
     CASE t.seq_no
         WHEN 1 THEN 'queen'
+        WHEN 4 THEN 'king'
+        WHEN 5 THEN 'double_queen'
         ELSE 'king'
     END,
     CASE t.seq_no
         WHEN 1 THEN 2
-        ELSE 3
+        WHEN 2 THEN 2
+        WHEN 3 THEN 2
+        WHEN 4 THEN 3
+        ELSE 4
     END,
     CASE t.seq_no
         WHEN 1 THEN 1
-        ELSE 2
+        WHEN 2 THEN 1
+        WHEN 3 THEN 2
+        WHEN 4 THEN 2
+        ELSE 3
     END,
     CASE t.seq_no
         WHEN 1 THEN 3
-        ELSE 5
+        WHEN 2 THEN 3
+        WHEN 3 THEN 4
+        WHEN 4 THEN 5
+        ELSE 7
     END,
     CASE t.seq_no
         WHEN 1 THEN CAST((900000 + (h.id * 1000)) AS DECIMAL(14,2))
-        ELSE CAST((1500000 + (h.id * 1500)) AS DECIMAL(14,2))
+        WHEN 2 THEN CAST((1500000 + (h.id * 1500)) AS DECIMAL(14,2))
+        WHEN 3 THEN CAST((2200000 + (h.id * 2000)) AS DECIMAL(14,2))
+        WHEN 4 THEN CAST((3800000 + (h.id * 3000)) AS DECIMAL(14,2))
+        ELSE CAST((4500000 + (h.id * 4000)) AS DECIMAL(14,2))
     END,
     'VND',
     CASE t.seq_no
         WHEN 1 THEN 20 + MOD(h.id, 15)
-        ELSE 10 + MOD(h.id, 8)
+        WHEN 2 THEN 15 + MOD(h.id, 10)
+        WHEN 3 THEN 10 + MOD(h.id, 5)
+        WHEN 4 THEN 5
+        ELSE 3
     END,
-    TRUE,
+    CASE t.seq_no
+        WHEN 4 THEN FALSE
+        WHEN 5 THEN FALSE
+        ELSE TRUE
+    END,
     'active'
 FROM hotels h
 JOIN (
     SELECT 1 AS seq_no
-    UNION ALL
-    SELECT 2
+    UNION ALL SELECT 2
+    UNION ALL SELECT 3
+    UNION ALL SELECT 4
+    UNION ALL SELECT 5
 ) t
 WHERE h.code LIKE 'HTL%'
 ON DUPLICATE KEY UPDATE

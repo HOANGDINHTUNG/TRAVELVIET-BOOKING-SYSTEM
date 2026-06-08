@@ -24,7 +24,8 @@ import { FlightCheckoutStepper } from "../components/FlightCheckoutStepper";
 import { FlightHoldExpiredModal } from "../components/FlightHoldExpiredModal";
 import { buildFlightSearchQuery } from "../utils/flightSearchParams";
 import type { FlightCheckoutSession } from "../types/flightCheckout";
-import { useCreateBooking } from "../../../bookings/hooks/useBookingMutation";
+import { useCreateFlightBooking } from "../../../bookings/hooks/useBookingMutation";
+import type { ExtendedBookingResponse } from "../../../bookings/types/publicBooking";
 import { useAuthStore, selectIsAuthenticated } from "../../../stores/authStore";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
@@ -47,7 +48,7 @@ export default function FlightCheckoutPage() {
   const [bookingId, setBookingId] = useState<number | null>(null);
 
   const isAuthenticated = useAuthStore(selectIsAuthenticated);
-  const createMutation = useCreateBooking();
+  const createMutation = useCreateFlightBooking();
 
   const [passengerModalOpen, setPassengerModalOpen] = useState(false);
   const [baggageModalOpen, setBaggageModalOpen] = useState(false);
@@ -488,22 +489,24 @@ export default function FlightCheckoutPage() {
                   if (canPay) {
                     createMutation.mutate(
                       {
-                        tourId: 2, // Backend requires this for now
-                        scheduleId: 2,
-                        adults: session.params.adults,
-                        children: session.params.children,
-                        infants: session.params.infants,
+                        flightId: session.outbound.offer.id,
+                        flightClassId:
+                          parseInt(session.outbound.fare.id, 10) || 1,
+                        departureDate: session.outbound.departDateIso,
+                        tripType: session.inbound ? "round_trip" : "one_way",
+                        returnFlightId: session.inbound?.offer.id,
+                        returnDepartureDate: session.inbound?.departDateIso,
+                        passengerCount: session.params.adults,
                         contactName: contact.fullName,
                         contactPhone: contact.phone,
                         contactEmail: contact.email,
-                        bookingSource: "web",
                       },
                       {
-                        onSuccess: (data) => {
-                          setBookingId(data.id);
+                        onSuccess: (data: ExtendedBookingResponse) => {
+                          setBookingId(data.bookingId);
                           setPaymentOpen(true);
                         },
-                        onError: (err) => {
+                        onError: (err: unknown) => {
                           toast.error(
                             "Lỗi khi tạo đơn hàng vé máy bay, vui lòng thử lại.",
                           );

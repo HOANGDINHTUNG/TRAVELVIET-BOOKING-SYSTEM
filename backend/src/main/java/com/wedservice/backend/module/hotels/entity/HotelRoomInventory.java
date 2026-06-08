@@ -53,6 +53,14 @@ public class HotelRoomInventory {
     @Builder.Default
     private Integer availableQty = 0;
 
+    @Column(name = "cutoff_days", nullable = false)
+    @Builder.Default
+    private Integer cutoffDays = 0;
+
+    @Column(name = "is_free_sale", nullable = false)
+    @Builder.Default
+    private Boolean isFreeSale = false;
+
     @Column(name = "price_override", precision = 14, scale = 2)
     private BigDecimal priceOverride;
 

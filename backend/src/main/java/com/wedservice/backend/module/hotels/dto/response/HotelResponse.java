@@ -5,6 +5,7 @@ import lombok.Getter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Builder
@@ -28,5 +29,6 @@ public class HotelResponse {
     private Boolean available;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private List<HotelRoomTypeDto> roomTypes;
 }
 

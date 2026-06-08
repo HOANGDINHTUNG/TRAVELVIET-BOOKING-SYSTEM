@@ -25,7 +25,7 @@ import {
   loadHotelCheckoutSession,
 } from "../lib/hotelCheckoutStorage";
 import type { HotelCheckoutSession } from "../types/hotelCheckout";
-import { useCreateBooking } from "../../../bookings/hooks/useBookingMutation";
+import { useCreateHotelBooking } from "../../bookings/hooks/useBookingMutation";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import "@/module/flights/pages/FlightCheckoutPage.css"; // Reuse flight CSS patterns
@@ -46,7 +46,7 @@ export default function HotelCheckoutPage() {
   const [checkoutStep, setCheckoutStep] = useState<1 | 2 | 3>(1);
   const [bookingId, setBookingId] = useState<number | null>(null);
 
-  const createMutation = useCreateBooking();
+  const createMutation = useCreateHotelBooking();
 
   // Modals
   const [paymentOpen, setPaymentOpen] = useState(false);
@@ -977,20 +977,21 @@ export default function HotelCheckoutPage() {
                       if (canProceed) {
                         createMutation.mutate(
                           {
-                            tourId: 1,
-                            scheduleId: 1,
+                            hotelId: session.hotel.id,
+                            roomTypeId: session.room.id,
+                            checkinDate: session.checkInDate,
+                            checkoutDate: session.checkOutDate,
+                            rooms: session.guests.rooms,
                             adults: session.guests.adults,
                             children: session.guests.children,
-                            infants: 0,
                             contactName: contact.fullName,
                             contactPhone: contact.phone,
                             contactEmail: contact.email,
                             specialRequests: specialRequest,
-                            bookingSource: "web",
                           },
                           {
                             onSuccess: (data) => {
-                              setBookingId(data.id);
+                              setBookingId(data.bookingId);
                               setCheckoutStep(2);
                               window.scrollTo(0, 0);
                             },

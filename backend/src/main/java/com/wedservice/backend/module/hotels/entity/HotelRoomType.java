@@ -60,6 +60,13 @@ public class HotelRoomType extends AuditableEntity {
     @Builder.Default
     private BigDecimal basePrice = BigDecimal.ZERO;
 
+    @Column(name = "extra_bed_fee", precision = 14, scale = 2, nullable = false)
+    @Builder.Default
+    private BigDecimal extraBedFee = BigDecimal.ZERO;
+
+    @Column(name = "child_surcharge_rules", columnDefinition = "JSON")
+    private String childSurchargeRules;
+
     @Column(name = "currency", nullable = false, length = 3)
     @Builder.Default
     private String currency = "VND";

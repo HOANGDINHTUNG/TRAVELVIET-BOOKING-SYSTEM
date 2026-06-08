@@ -13,6 +13,7 @@ import com.wedservice.backend.module.commerce.entity.ComboPackage;
 import com.wedservice.backend.module.commerce.entity.ComboPackageItem;
 import com.wedservice.backend.module.commerce.repository.ComboPackageRepository;
 import com.wedservice.backend.module.commerce.repository.ProductRepository;
+import com.wedservice.backend.module.commerce.rules.ComboStructureRule;
 import com.wedservice.backend.module.tours.repository.TourRepository;
 import com.wedservice.backend.module.users.service.AuditActionType;
 import com.wedservice.backend.module.users.service.AuditTrailRecorder;
@@ -43,6 +44,7 @@ public class AdminComboPackageService {
     private final ComboPackageRepository comboPackageRepository;
     private final ProductRepository productRepository;
     private final TourRepository tourRepository;
+    private final ComboStructureRule comboStructureRule;
     private final AuditTrailRecorder auditTrailRecorder;
 
     @Transactional(readOnly = true)
@@ -78,6 +80,9 @@ public class AdminComboPackageService {
 
         ComboPackage comboPackage = ComboPackage.builder().build();
         applyRequest(comboPackage, request, normalizedCode);
+        
+        // Step 2 Refactor: Validate rule engine
+        comboStructureRule.validate(comboPackage);
 
         ComboPackage savedComboPackage = comboPackageRepository.save(comboPackage);
         ComboPackageResponse response = toResponse(findComboPackageDetail(savedComboPackage.getId()), true);
@@ -97,6 +102,9 @@ public class AdminComboPackageService {
 
         ComboPackageResponse oldState = toResponse(comboPackage, true);
         applyRequest(comboPackage, request, normalizedCode);
+
+        // Step 2 Refactor: Validate rule engine
+        comboStructureRule.validate(comboPackage);
 
         ComboPackage savedComboPackage = comboPackageRepository.save(comboPackage);
         ComboPackageResponse response = toResponse(findComboPackageDetail(savedComboPackage.getId()), true);

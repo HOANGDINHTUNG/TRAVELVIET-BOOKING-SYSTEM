@@ -23,7 +23,10 @@ import com.wedservice.backend.module.hotels.dto.response.HotelDetailResponse;
 import com.wedservice.backend.module.hotels.dto.response.HotelImageDto;
 import com.wedservice.backend.module.hotels.dto.response.RoomTypeResponse;
 import com.wedservice.backend.module.hotels.dto.response.RoomRatePlanResponse;
+import com.wedservice.backend.module.hotels.dto.request.HotelRoomTypeRequest;
+import com.wedservice.backend.module.hotels.dto.response.HotelRoomTypeDto;
 import java.util.Arrays;
+import java.util.ArrayList;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -155,7 +158,29 @@ public class HotelService {
         if (!StringUtils.hasText(entity.getStatus())) {
             entity.setStatus("active");
         }
-        return hotelMapper.toResponse(hotelRepository.save(entity));
+        Hotel savedHotel = hotelRepository.save(entity);
+
+        if (request.getRoomTypes() != null) {
+            for (int i = 0; i < request.getRoomTypes().size(); i++) {
+                HotelRoomTypeRequest rtReq = request.getRoomTypes().get(i);
+                HotelRoomType rt = new HotelRoomType();
+                rt.setHotel(savedHotel);
+                rt.setCode(savedHotel.getCode() + "-RT" + (i + 1));
+                rt.setName(rtReq.getName());
+                rt.setBedType("king");
+                rt.setMaxAdults(rtReq.getMaxOccupancy() >= 2 ? 2 : 1);
+                rt.setMaxChildren(rtReq.getMaxOccupancy() > 2 ? rtReq.getMaxOccupancy() - 2 : 0);
+                rt.setMaxOccupancy(rtReq.getMaxOccupancy());
+                rt.setBasePrice(rtReq.getPricePerNight());
+                rt.setCurrency("VND");
+                rt.setInventoryTotal(rtReq.getTotalRooms());
+                rt.setIsRefundable(true);
+                rt.setStatus(rtReq.getStatus());
+                hotelRoomTypeRepository.save(rt);
+            }
+        }
+
+        return getById(savedHotel.getId(), null, null);
     }
 
     @Transactional
@@ -169,7 +194,32 @@ public class HotelService {
         if (!StringUtils.hasText(hotel.getStatus())) {
             hotel.setStatus("active");
         }
-        return hotelMapper.toResponse(hotelRepository.save(hotel));
+        Hotel savedHotel = hotelRepository.save(hotel);
+
+        if (request.getRoomTypes() != null) {
+            List<HotelRoomType> oldTypes = hotelRoomTypeRepository.findByHotelIdAndDeletedAtIsNull(savedHotel.getId());
+            hotelRoomTypeRepository.deleteAll(oldTypes);
+
+            for (int i = 0; i < request.getRoomTypes().size(); i++) {
+                HotelRoomTypeRequest rtReq = request.getRoomTypes().get(i);
+                HotelRoomType rt = new HotelRoomType();
+                rt.setHotel(savedHotel);
+                rt.setCode(savedHotel.getCode() + "-RT" + (i + 1));
+                rt.setName(rtReq.getName());
+                rt.setBedType("king");
+                rt.setMaxAdults(rtReq.getMaxOccupancy() >= 2 ? 2 : 1);
+                rt.setMaxChildren(rtReq.getMaxOccupancy() > 2 ? rtReq.getMaxOccupancy() - 2 : 0);
+                rt.setMaxOccupancy(rtReq.getMaxOccupancy());
+                rt.setBasePrice(rtReq.getPricePerNight());
+                rt.setCurrency("VND");
+                rt.setInventoryTotal(rtReq.getTotalRooms());
+                rt.setIsRefundable(true);
+                rt.setStatus(rtReq.getStatus());
+                hotelRoomTypeRepository.save(rt);
+            }
+        }
+
+        return getById(savedHotel.getId(), null, null);
     }
 
     /**
@@ -218,6 +268,18 @@ public class HotelService {
                 request.getCheckoutDate(),
                 request.getRooms() == null ? 1 : request.getRooms()
         );
+        
+        List<HotelRoomTypeDto> roomTypeDtos = hotelRoomTypeRepository.findByHotelIdAndDeletedAtIsNull(base.getId())
+                .stream()
+                .map(rt -> HotelRoomTypeDto.builder()
+                        .name(rt.getName())
+                        .pricePerNight(rt.getBasePrice())
+                        .maxOccupancy(rt.getMaxOccupancy())
+                        .totalRooms(rt.getInventoryTotal())
+                        .status(rt.getStatus())
+                        .build())
+                .toList();
+
         return HotelResponse.builder()
                 .id(base.getId())
                 .destinationId(base.getDestinationId())
@@ -236,6 +298,7 @@ public class HotelService {
                 .status(base.getStatus())
                 .minRoomPrice(minPrice)
                 .available(available)
+                .roomTypes(roomTypeDtos)
                 .createdAt(base.getCreatedAt())
                 .updatedAt(base.getUpdatedAt())
                 .build();

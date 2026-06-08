@@ -37,6 +37,9 @@ public class FlightClass {
     @JoinColumn(name = "flight_id", nullable = false)
     private Flight flight;
 
+    @jakarta.persistence.OneToOne(mappedBy = "flightClass", cascade = jakarta.persistence.CascadeType.ALL, fetch = FetchType.LAZY)
+    private FlightFareRule fareRule;
+
     @Column(name = "cabin_class", nullable = false, length = 20)
     private String cabinClass;
 

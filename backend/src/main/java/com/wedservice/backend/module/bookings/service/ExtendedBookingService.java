@@ -106,9 +106,12 @@ public class ExtendedBookingService {
     public ExtendedBookingResponse createFlightBooking(CreateFlightBookingRequest request) {
         FlightClass flightClass = flightClassRepository.findById(request.getFlightClassId())
                 .orElseThrow(() -> new ResourceNotFoundException("Flight class not found with id: " + request.getFlightClassId()));
-        if (flightClass.getSeatAvailable() < request.getPassengerCount()) {
+        
+        int updated = flightClassRepository.decrementSeatAvailable(flightClass.getId(), request.getPassengerCount());
+        if (updated == 0) {
             throw BadRequestException.i18n("api.error.flight.notEnoughSeats");
         }
+        
         BigDecimal subtotal = calculateFlightSubtotal(request, flightClass);
 
         UUID userId = authenticatedUserProvider.getRequiredCurrentUserId();
@@ -219,7 +222,9 @@ public class ExtendedBookingService {
         for (LocalDate d = checkinDate; d.isBefore(checkoutDate); d = d.plusDays(1)) {
             HotelRoomInventory inventory = hotelRoomInventoryRepository.findByRoomTypeIdAndStayDate(roomType.getId(), d)
                     .orElseThrow(() -> BadRequestException.i18n("api.error.hotel.inventoryMissing"));
-            if (inventory.getAvailableQty() < request.getRooms()) {
+                    
+            int updated = hotelRoomInventoryRepository.decrementInventory(roomType.getId(), d, request.getRooms());
+            if (updated == 0) {
                 throw BadRequestException.i18n("api.error.hotel.notEnoughRooms");
             }
         }

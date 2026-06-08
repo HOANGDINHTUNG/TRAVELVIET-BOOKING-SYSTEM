@@ -1,7 +1,9 @@
 import { createElement, lazy, Suspense } from "react";
 import type { ReactElement } from "react";
 import { createBrowserRouter, Navigate } from "react-router-dom";
+import AdminPageSkeleton from "../module/admin/layout/AdminPageSkeleton";
 import App from "../App";
+import { LegacyModuleWrapper } from "../module/admin/core/components/LegacyModuleWrapper";
 
 const lazyHomePage = lazy(() => import("../module/home/pages/HomePage"));
 const lazyDestinationDetailPage = lazy(
@@ -47,6 +49,7 @@ const lazyRequireAuthenticated = lazy(
 const lazyRequireManagerAccess = lazy(
   () => import("./guards/RequireManagerAccess"),
 );
+const lazyRequireRoles = lazy(() => import("./guards/RequireRoles"));
 const lazyManagementLayout = lazy(
   () => import("../module/management/layouts/ManagementLayout"),
 );
@@ -143,10 +146,40 @@ const lazyManagementBookingsPage = lazy(
   () => import("../module/management/bookings/pages/ManagementBookingsPage"),
 );
 
+// Admin Module v3 (New Architecture)
+const lazyAdminLayout = lazy(
+  () => import("../module/admin/layout/AdminLayout"),
+);
+const lazyAdminDashboardPage = lazy(
+  () => import("../module/admin/pages/AdminDashboardPage"),
+);
+const lazyAdminHotelsPage = lazy(
+  () => import("../module/admin/features/hotels/pages/HotelPage"),
+);
+const lazyAdminFlightsPage = lazy(
+  () => import("../module/admin/features/flights/pages/FlightPage"),
+);
+const lazyAdminCombosPage = lazy(
+  () => import("../module/admin/features/combos/pages/ComboPage"),
+);
+const lazyAdminDestinationsPage = lazy(
+  () => import("../module/admin/features/destinations/pages/DestinationPage"),
+);
+const lazyAdminToursPage = lazy(
+  () => import("../module/admin/features/tours/pages/ToursPage"),
+);
+const lazyAdminBookingsPage = lazy(
+  () => import("../module/admin/features/bookings/pages/BookingsPage"),
+);
+const lazyAdminSettingsPage = lazy(
+  () => import("../module/admin/features/settings/pages/SettingsPage"),
+);
+const lazyAdminUsersPage = lazy(
+  () => import("../module/admin/features/users/pages/UsersPage"),
+);
+
 const withSuspense = (element: ReactElement) => (
-  <Suspense fallback={<div className="min-h-screen">Đang tải...</div>}>
-    {element}
-  </Suspense>
+  <Suspense fallback={<AdminPageSkeleton />}>{element}</Suspense>
 );
 
 const router = createBrowserRouter([
@@ -457,6 +490,90 @@ const router = createBrowserRouter([
           {
             index: true,
             element: withSuspense(createElement(lazyManagementBookingsPage)),
+          },
+        ],
+      },
+      {
+        element: withSuspense(createElement(lazyRequireManagerAccess)),
+        children: [
+          {
+            // New Admin Architecture Router
+            path: "admin",
+            element: withSuspense(createElement(lazyAdminLayout)),
+            children: [
+              {
+                index: true,
+                element: withSuspense(createElement(lazyAdminDashboardPage)),
+              },
+              {
+                path: "destinations",
+                element: withSuspense(createElement(lazyAdminDestinationsPage)),
+              },
+              {
+                path: "tours",
+                element: withSuspense(createElement(lazyAdminToursPage)),
+              },
+              {
+                element: withSuspense(
+                  createElement(lazyRequireRoles, {
+                    roles: ["SUPER_ADMIN", "ADMIN", "OPERATOR"],
+                  }),
+                ),
+                children: [
+                  {
+                    path: "users",
+                    element: withSuspense(createElement(lazyAdminUsersPage)),
+                  },
+                ],
+              },
+              {
+                element: withSuspense(
+                  createElement(lazyRequireRoles, {
+                    roles: ["SUPER_ADMIN", "ADMIN", "OPERATOR", "FIELD_STAFF"],
+                  }),
+                ),
+                children: [
+                  {
+                    path: "bookings",
+                    element: withSuspense(createElement(lazyAdminBookingsPage)),
+                  },
+                ],
+              },
+              {
+                element: withSuspense(
+                  createElement(lazyRequireRoles, {
+                    roles: ["SUPER_ADMIN", "ADMIN", "CONTENT_EDITOR"],
+                  }),
+                ),
+                children: [
+                  {
+                    path: "hotels",
+                    element: withSuspense(createElement(lazyAdminHotelsPage)),
+                  },
+                  {
+                    path: "flights",
+                    element: withSuspense(createElement(lazyAdminFlightsPage)),
+                  },
+                  {
+                    path: "combos",
+                    element: withSuspense(createElement(lazyAdminCombosPage)),
+                  },
+                ],
+              },
+              {
+                element: withSuspense(
+                  createElement(lazyRequireRoles, {
+                    roles: ["SUPER_ADMIN", "ADMIN"],
+                  }),
+                ),
+                children: [
+                  {
+                    path: "settings",
+                    element: withSuspense(createElement(lazyAdminSettingsPage)),
+                  },
+                ],
+              },
+            ],
           },
         ],
       },

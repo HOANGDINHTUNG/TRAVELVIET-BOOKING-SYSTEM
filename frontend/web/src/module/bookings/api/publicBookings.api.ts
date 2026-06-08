@@ -1,11 +1,15 @@
-import { apiClient } from '../../../lib/apiClient'
+import { apiClient } from "../../../lib/apiClient";
 import type {
   BookingQuotePayload,
   BookingQuoteResult,
   BookingResponse,
   BookingSummaryResponse,
   CreateBookingPayload,
-} from '../types/publicBooking'
+  CreateHotelBookingPayload,
+  CreateFlightBookingPayload,
+  CreateComboBookingPayload,
+  ExtendedBookingResponse,
+} from "../types/publicBooking";
 
 /**
  * Public Booking API.
@@ -18,12 +22,14 @@ import type {
  */
 
 function emptyToUndefined(value: string | undefined): string | undefined {
-  if (value == null) return undefined
-  const trimmed = value.trim()
-  return trimmed.length === 0 ? undefined : trimmed
+  if (value == null) return undefined;
+  const trimmed = value.trim();
+  return trimmed.length === 0 ? undefined : trimmed;
 }
 
-function normalizeQuotePayload(input: BookingQuotePayload): BookingQuotePayload {
+function normalizeQuotePayload(
+  input: BookingQuotePayload,
+): BookingQuotePayload {
   return {
     tourId: input.tourId,
     scheduleId: input.scheduleId,
@@ -33,7 +39,7 @@ function normalizeQuotePayload(input: BookingQuotePayload): BookingQuotePayload 
     seniors: Math.max(0, Math.floor(input.seniors ?? 0)),
     voucherCode: emptyToUndefined(input.voucherCode),
     comboId: input.comboId,
-  }
+  };
 }
 
 export const PublicBookingsApi = {
@@ -43,10 +49,10 @@ export const PublicBookingsApi = {
    */
   async quote(payload: BookingQuotePayload): Promise<BookingQuoteResult> {
     const response = await apiClient.post<BookingQuoteResult>(
-      'bookings/quote',
+      "bookings/quote",
       normalizeQuotePayload(payload),
-    )
-    return response.data
+    );
+    return response.data;
   },
 
   /**
@@ -60,17 +66,47 @@ export const PublicBookingsApi = {
       contactName: payload.contactName.trim(),
       contactPhone: payload.contactPhone.trim(),
       contactEmail: emptyToUndefined(payload.contactEmail),
-      bookingSource: emptyToUndefined(payload.bookingSource) ?? 'web',
+      bookingSource: emptyToUndefined(payload.bookingSource) ?? "web",
       specialRequests: emptyToUndefined(payload.specialRequests),
-    }
-    const response = await apiClient.post<BookingResponse>('bookings', body)
-    return response.data
+    };
+    const response = await apiClient.post<BookingResponse>("bookings", body);
+    return response.data;
   },
 
   /** `GET /bookings/{id}` — lấy chi tiết để hiển thị confirmation. */
   async detail(id: number): Promise<BookingResponse> {
-    const response = await apiClient.get<BookingResponse>(`bookings/${id}`)
-    return response.data
+    const response = await apiClient.get<BookingResponse>(`bookings/${id}`);
+    return response.data;
+  },
+
+  async createHotelBooking(
+    payload: CreateHotelBookingPayload,
+  ): Promise<ExtendedBookingResponse> {
+    const response = await apiClient.post<ExtendedBookingResponse>(
+      "bookings/hotels",
+      payload,
+    );
+    return response.data;
+  },
+
+  async createFlightBooking(
+    payload: CreateFlightBookingPayload,
+  ): Promise<ExtendedBookingResponse> {
+    const response = await apiClient.post<ExtendedBookingResponse>(
+      "bookings/flights",
+      payload,
+    );
+    return response.data;
+  },
+
+  async createComboBooking(
+    payload: CreateComboBookingPayload,
+  ): Promise<ExtendedBookingResponse> {
+    const response = await apiClient.post<ExtendedBookingResponse>(
+      "bookings/combos",
+      payload,
+    );
+    return response.data;
   },
 
   /**
@@ -80,8 +116,9 @@ export const PublicBookingsApi = {
    * BE trả về `List<BookingSummaryResponse>` — không phân trang.
    */
   async listMine(): Promise<BookingSummaryResponse[]> {
-    const response = await apiClient.get<BookingSummaryResponse[]>('bookings/me')
-    return response.data
+    const response =
+      await apiClient.get<BookingSummaryResponse[]>("bookings/me");
+    return response.data;
   },
 
   /**
@@ -89,11 +126,11 @@ export const PublicBookingsApi = {
    * Body optional: `{ reason: string }`.
    */
   async cancel(id: number, reason?: string): Promise<BookingResponse> {
-    const body = reason ? { reason } : undefined
+    const body = reason ? { reason } : undefined;
     const response = await apiClient.patch<BookingResponse>(
       `bookings/${id}/cancel`,
       body,
-    )
-    return response.data
+    );
+    return response.data;
   },
-}
+};

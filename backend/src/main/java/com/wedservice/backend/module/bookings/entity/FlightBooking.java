@@ -105,6 +105,12 @@ public class FlightBooking extends AuditableEntity {
     @Builder.Default
     private String currency = "VND";
 
+    @Column(name = "pnr_code", length = 50)
+    private String pnrCode;
+
+    @Column(name = "ticketing_time_limit")
+    private LocalDateTime ticketingTimeLimit;
+
     @Column(name = "special_requests", columnDefinition = "TEXT")
     private String specialRequests;
 

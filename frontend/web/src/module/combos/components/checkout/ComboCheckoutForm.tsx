@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { type ComboCheckoutSession } from "../../lib/comboCheckoutStorage";
-import { useCreateBooking } from "../../../bookings/hooks/useBookingMutation";
+import { useCreateComboBooking } from "../../../bookings/hooks/useBookingMutation";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import {
@@ -37,7 +37,7 @@ export default function ComboCheckoutForm({
   const [contactEmail, setContactEmail] = useState("");
   const [specialRequests, setSpecialRequests] = useState("");
 
-  const createMutation = useCreateBooking();
+  const createMutation = useCreateComboBooking();
 
   const handleNext = () => {
     if (!contactName || !contactPhone || !contactEmail) {
@@ -56,22 +56,16 @@ export default function ComboCheckoutForm({
     }
     createMutation.mutate(
       {
-        tourId: session.tourId || 1, // Fallback if tourId is zero for some reason
-        scheduleId: session.scheduleId,
-        comboId: session.comboId,
-        adults,
-        children: children + toddlers, // Toddlers are combined into children for backend
-        infants,
+        comboId: session.comboId || 1, // Ensure comboId is passed to API
         contactName,
         contactPhone,
         contactEmail,
         specialRequests,
-        bookingSource: "web",
       },
       {
         onSuccess: (data) => {
           // We pass the actual booking ID to the next step
-          onNext(data.id);
+          onNext(data.bookingId);
         },
         onError: (err) => {
           toast.error("Lỗi khi tạo đơn hàng, vui lòng thử lại.");

@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.util.List;
+import jakarta.validation.Valid;
 
 @Getter
 @Setter
@@ -27,5 +29,8 @@ public class HotelRequest {
     private BigDecimal latitude;
     private BigDecimal longitude;
     private String status;
+
+    @Valid
+    private List<HotelRoomTypeRequest> roomTypes;
 }
 
