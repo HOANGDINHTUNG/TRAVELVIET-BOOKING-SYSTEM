@@ -12,7 +12,10 @@ import { MobileNav } from "./MobileNav";
 import { userApi } from "../../api/server/User.api";
 import { useAppDispatch, useAppSelector } from "../../hooks/reduxHooks";
 import { fetchHomePublicData } from "../../module/home/store/homeSlice";
-import { toUserMeResponse, type AuthLoginUser } from "../../module/auth/types/auth";
+import {
+  toUserMeResponse,
+  type AuthLoginUser,
+} from "../../module/auth/types/auth";
 import { setLanguage, setTheme } from "../../stores/slices/preferencesSlice";
 import { useAuthStore } from "../../stores/authStore";
 import { resolveHeaderVariant } from "./headerVariant";
@@ -72,7 +75,9 @@ export default function Header() {
     () => resolveHeaderVariant(location.pathname),
     [location.pathname],
   );
-  const { theme, language, currency } = useAppSelector((state) => state.preferences);
+  const { theme, language, currency } = useAppSelector(
+    (state) => state.preferences,
+  );
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [showHeader, setShowHeader] = useState(true);
   const [scrolled, setScrolled] = useState(false);
@@ -149,13 +154,14 @@ export default function Header() {
   }, []);
 
   useEffect(() => {
-    if (!isAuthenticated || !user?.id) {
-      setHasManagementAccess(false);
-      return undefined;
-    }
-
     let cancelled = false;
-    void (async () => {
+
+    const checkAccess = async () => {
+      if (!isAuthenticated || !user?.id) {
+        setHasManagementAccess(false);
+        return;
+      }
+
       try {
         const ctx = await userApi.getMyAccessContext();
         if (cancelled) return;
@@ -166,7 +172,9 @@ export default function Header() {
       } catch {
         if (!cancelled) setHasManagementAccess(false);
       }
-    })();
+    };
+
+    void checkAccess();
 
     return () => {
       cancelled = true;
@@ -240,8 +248,7 @@ export default function Header() {
         aria-label={t("nav.ariaMain")}
         className={`site-header-nav mx-auto hidden md:flex max-w-[1440px] min-h-[3.5rem] items-center justify-between
                    px-2 sm:px-3 lg:px-4 gap-1.5 py-2
-                   transition-[padding] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]`
-                  }
+                   transition-[padding] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]`}
       >
         <Link
           to="/"
