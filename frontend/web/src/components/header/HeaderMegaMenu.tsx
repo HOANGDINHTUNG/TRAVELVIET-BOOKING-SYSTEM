@@ -250,7 +250,7 @@ export function HeaderMegaMenu({
         setActive={setActiveMenu}
         active={activeMenu}
         item={moreLabel}
-        to={HEADER_NAV_LINKS.destinations}
+        to="#"
         appearance={appearance}
       >
         <div className="grid min-w-[min(720px,92vw)] grid-cols-1 gap-4 p-1 lg:grid-cols-[1fr_1fr_minmax(280px,1.2fr)]">

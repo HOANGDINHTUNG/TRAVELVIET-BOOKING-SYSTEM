@@ -18,9 +18,9 @@ export const HEADER_MEGA_IMAGES = {
     "https://images.unsplash.com/photo-1506905925340-21bda4d32df4?auto=format&fit=crop&w=300&q=80",
   /** Ảnh Destinations mới: Vùng và Châu Lục */
   destVietnam:
-    "https://images.unsplash.com/photo-1583417319070-4a540ac6e8a8?auto=format&fit=crop&w=300&q=80",
+    "https://dulichtoday.vn/wp-content/uploads/2017/04/vinh-Ha-Long.jpg",
   destAsia:
-    "https://images.unsplash.com/photo-1540483761890-a1f7be05ce99?auto=format&fit=crop&w=300&q=80",
+    "https://media.baoquangninh.vn/dataimages/201804/original/images1045634_1.jpg",
   destEurope:
     "https://images.unsplash.com/photo-1499856871958-5b9627545d1a?auto=format&fit=crop&w=300&q=80",
   destAmericas:

@@ -1,4 +1,14 @@
--- =====================================================================
+﻿import re
+
+file_path = r'backend\src\main\resources\db\migration\V8__seed_i18n_en.sql'
+with open(file_path, 'r', encoding='utf-8') as f:
+    text = f.read()
+
+# We will remove all INSERT INTO tour_translations that use VALUES (...), (...)
+# Specifically the blocks 4.1, 4.2, 4.3 which contain hardcoded IDs.
+# Instead of complex regex, let's just write a clean V8 script that only contains CREATE TABLE and basic SELECT inserts.
+
+clean_sql = '''-- =====================================================================
 -- V8: Seed English i18n overlays for visible public fields
 -- Removed hardcoded EN data as requested by user.
 -- =====================================================================
@@ -95,3 +105,8 @@ INSERT IGNORE INTO tour_translations (tour_id, locale, name, short_description, 
 SELECT t.id, 'en', t.name, t.short_description, t.description, t.highlights, t.inclusions, t.exclusions, t.notes
 FROM tours t WHERE t.deleted_at IS NULL;
 
+'''
+
+with open(file_path, 'w', encoding='utf-8') as f:
+    f.write(clean_sql)
+print("Updated V8_seed_i18n_en.sql")

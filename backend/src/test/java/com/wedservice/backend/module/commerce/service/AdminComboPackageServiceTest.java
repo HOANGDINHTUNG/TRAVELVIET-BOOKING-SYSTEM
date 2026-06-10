@@ -16,6 +16,7 @@ import com.wedservice.backend.module.tours.entity.Tour;
 import com.wedservice.backend.module.tours.repository.TourRepository;
 import com.wedservice.backend.module.users.service.AuditActionType;
 import com.wedservice.backend.module.users.service.AuditTrailRecorder;
+import com.wedservice.backend.module.commerce.rules.ComboStructureRule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -51,6 +52,9 @@ class AdminComboPackageServiceTest {
     @Mock
     private AuditTrailRecorder auditTrailRecorder;
 
+    @Mock
+    private ComboStructureRule comboStructureRule;
+
     private AdminComboPackageService adminComboPackageService;
 
     @BeforeEach
@@ -59,6 +63,7 @@ class AdminComboPackageServiceTest {
                 comboPackageRepository,
                 productRepository,
                 tourRepository,
+                comboStructureRule,
                 auditTrailRecorder
         );
     }

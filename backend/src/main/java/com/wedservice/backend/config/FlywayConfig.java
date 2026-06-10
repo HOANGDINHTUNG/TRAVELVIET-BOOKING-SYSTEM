@@ -24,6 +24,9 @@ public class FlywayConfig {
     @Value("${spring.flyway.repair-on-migrate:true}")
     private boolean repairOnMigrate;
 
+    @Value("${spring.flyway.out-of-order:true}")
+    private boolean outOfOrder;
+
     @Bean
     public Flyway flyway(DataSource dataSource) {
         Flyway flyway = Flyway.configure()
@@ -31,6 +34,7 @@ public class FlywayConfig {
                 .locations(locations)
                 .baselineOnMigrate(baselineOnMigrate)
                 .validateOnMigrate(validateOnMigrate)
+                .outOfOrder(outOfOrder)
                 .load();
         if (repairOnMigrate) {
             flyway.repair();

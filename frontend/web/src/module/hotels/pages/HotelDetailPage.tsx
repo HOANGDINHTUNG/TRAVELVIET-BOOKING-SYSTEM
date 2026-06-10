@@ -1,11 +1,16 @@
 import { useEffect, useState } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import {
+  Link,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 import { CheckCircle2, ChevronRight, MapPin, Star, User } from "lucide-react";
 import { hotelApi, type HotelDetailResponse } from "@/api/server/Hotel.api";
 import { Footer } from "@/components/Footer/Footer";
 import { OptimizedImage } from "@/components/common/media/OptimizedImage";
 import { saveHotelCheckoutSession } from "../lib/hotelCheckoutStorage";
-import { useNavigate } from "react-router-dom";
+
 import { useAuthStore, selectIsAuthenticated } from "../../../stores/authStore";
 import { toast } from "sonner";
 
@@ -72,11 +77,23 @@ export default function HotelDetailPage() {
       <main className="max-w-[1240px] mx-auto px-4 py-6 text-slate-800">
         {/* Breadcrumb */}
         <nav className="flex items-center text-sm text-slate-500 mb-4 whitespace-nowrap overflow-hidden">
-          <span>Du lịch</span>
+          <Link to="/" className="hover:text-blue-600 transition-colors">
+            Trang chủ
+          </Link>
           <ChevronRight size={14} className="mx-1 shrink-0" />
-          <span>Khách sạn</span>
+          <Link
+            to="/destinations"
+            className="hover:text-blue-600 transition-colors"
+          >
+            Việt Nam
+          </Link>
           <ChevronRight size={14} className="mx-1 shrink-0" />
-          <span>{basicInfo.province || "Vietnam"}</span>
+          <Link
+            to={`/hotels?destinationId=${basicInfo.province}`}
+            className="hover:text-blue-600 transition-colors"
+          >
+            {basicInfo.province || "Điểm đến"}
+          </Link>
           <ChevronRight size={14} className="mx-1 shrink-0" />
           <span className="font-semibold text-blue-600 truncate">
             {basicInfo.name}

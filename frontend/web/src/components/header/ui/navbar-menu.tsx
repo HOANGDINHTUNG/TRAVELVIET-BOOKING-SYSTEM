@@ -17,13 +17,13 @@ const springTransition: Transition = {
 export type HeaderNavAppearance = "overlay" | "solid-light" | "solid-dark";
 
 function isNavLinkActive(pathname: string, search: string, to: string) {
+  if (to === "#") return false;
   const qIndex = to.indexOf("?");
   const toPath = qIndex >= 0 ? to.slice(0, qIndex) : to;
   const toQuery = qIndex >= 0 ? to.slice(qIndex + 1) : "";
 
   const pathMatch =
-    pathname === toPath ||
-    (toPath !== "/" && pathname.startsWith(toPath));
+    pathname === toPath || (toPath !== "/" && pathname.startsWith(toPath));
 
   if (!pathMatch) return false;
   if (!toQuery) return true;
@@ -65,20 +65,17 @@ export const SimpleNavItem: React.FC<SimpleNavItemProps> = ({
   appearance = "solid-light",
 }) => {
   const location = useLocation();
-  const isPageActive = isNavLinkActive(
-    location.pathname,
-    location.search,
-    to,
+  const isPageActive = isNavLinkActive(location.pathname, location.search, to);
+  const { labelTone, underlineTone } = useNavLabelTone(
+    appearance,
+    isPageActive,
   );
-  const { labelTone, underlineTone } = useNavLabelTone(appearance, isPageActive);
 
   return (
     <Link to={to} className="group/navitem block">
       <span
         className={`relative inline-flex cursor-pointer items-center whitespace-nowrap pb-1 text-[12px] font-semibold tracking-[0.01em] transition-[color,opacity] lg:text-[12.5px] xl:text-[13px] ${labelTone} ${
-          isPageActive
-            ? "opacity-100"
-            : "opacity-80 hover:opacity-100"
+          isPageActive ? "opacity-100" : "opacity-80 hover:opacity-100"
         }`}
       >
         {item}
@@ -114,11 +111,7 @@ export const MenuItem: React.FC<MenuItemProps> = ({
 }) => {
   const location = useLocation();
 
-  const isPageActive = isNavLinkActive(
-    location.pathname,
-    location.search,
-    to,
-  );
+  const isPageActive = isNavLinkActive(location.pathname, location.search, to);
 
   const isDropdownOpen = active === item;
   const { labelTone, underlineTone } = useNavLabelTone(
@@ -128,7 +121,13 @@ export const MenuItem: React.FC<MenuItemProps> = ({
 
   return (
     <div onMouseEnter={() => setActive(item)} className="relative">
-      <Link to={to} className="group/menuitem block">
+      <Link
+        to={to}
+        className="group/menuitem block"
+        onClick={(e) => {
+          if (to === "#") e.preventDefault();
+        }}
+      >
         <span
           className={`relative inline-flex cursor-pointer items-center gap-1 whitespace-nowrap pb-1 text-[12px] font-semibold tracking-[0.01em] transition-[color,opacity] lg:text-[12.5px] xl:text-[13px] ${labelTone} ${
             isPageActive || isDropdownOpen

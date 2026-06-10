@@ -1,0 +1,125 @@
+﻿cache\TourSearchCacheKeyGenerator.java:34:        append(sb, "dId", request.getDestinationId());
+cache\TourSearchCacheKeyGenerator.java:35:        append(sb, "dSub", request.getDestinationSubtree());
+cache\TourSearchCacheKeyGenerator.java:36:        append(sb, "dCc", blankToEmpty(request.getDestinationCountryCode()));
+dto\request\ItineraryItemRequest.java:36:    private Long destinationId;
+dto\request\TourItineraryDayRequest.java:32:    private Long overnightDestinationId;
+dto\request\TourRequest.java:33:    @NotNull(message = "Destination id is required")
+dto\request\TourRequest.java:34:    private Long destinationId;
+dto\request\TourSearchRequest.java:19:    private Long destinationId;
+dto\request\TourSearchRequest.java:22:     * Khi {@code destinationId} ─æ╞░ß╗úc set: {@code true} (mß║╖c ─æß╗ïnh) ΓÇö gß╗ôm tour cß╗ºa mß╗ìi ─æiß╗âm ─æß║┐n con theo {@code destination_path}.
+dto\request\TourSearchRequest.java:25:    private Boolean destinationSubtree = Boolean.TRUE;
+dto\request\TourSearchRequest.java:28:     * ISO 3166-1 alpha-2 country code of the tour's primary destination (e.g. VN, KR).
+dto\request\TourSearchRequest.java:30:    @Size(min = 2, max = 2, message = "destinationCountryCode must be a 2-letter ISO code")
+dto\request\TourSearchRequest.java:33:            message = "destinationCountryCode must be a 2-letter ISO code"
+dto\request\TourSearchRequest.java:35:    private String destinationCountryCode;
+dto\request\TourSearchRequest.java:37:    /** When true, only tours whose destination {@code country_code} is {@code VN}. */
+dto\request\TourSearchRequest.java:40:    /** When true, only tours whose destination {@code country_code} is not {@code VN}. */
+dto\response\ItineraryItemResponse.java:24:    private Long destinationId;
+dto\response\TourItineraryDayResponse.java:22:    private Long overnightDestinationId;
+dto\response\TourResponse.java:18:    private Long destinationId;
+dto\response\TourResponse.java:19:    private String destinationCountryCode;
+dto\response\TourResponse.java:20:    private String destinationName;
+dto\response\TourResponse.java:21:    private String destinationProvince;
+entity\ItineraryItem.java:37:    @Column(name = "destination_id")
+entity\ItineraryItem.java:38:    private Long destinationId;
+entity\Tour.java:4:import com.wedservice.backend.module.destinations.entity.Destination;
+entity\Tour.java:36:    @JoinColumn(name = "destination_id", nullable = false)
+entity\Tour.java:37:    private Destination destination;
+entity\TourItineraryDay.java:32:    @Column(name = "overnight_destination_id")
+entity\TourItineraryDay.java:33:    private Long overnightDestinationId;
+repository\TourRepository.java:19:    @EntityGraph(attributePaths = "destination")
+repository\TourRepository.java:27:    long countByDestinationIdAndStatusAndDeletedAtIsNull(Long destinationId, com.wedservice.backend.module.tours.entity.TourStatus status);
+repository\TourRepository.java:31:            JOIN t.destination d
+repository\TourRepository.java:36:    long countActiveToursInDestinationSubtree(
+repository\TourRepository.java:43:     * Batch variant of subtree active-tour counts (one round-trip for many destination roots).
+repository\TourRepository.java:47:            FROM destinations d_root
+repository\TourRepository.java:48:            INNER JOIN destinations d
+repository\TourRepository.java:52:                    OR d.destination_path = d_root.destination_path
+repository\TourRepository.java:53:                    OR d.destination_path LIKE CONCAT(d_root.destination_path, '%')
+repository\TourRepository.java:56:                ON t.destination_id = d.id
+repository\TourRepository.java:62:    List<Object[]> countActiveToursByDestinationRootIds(
+rules\GeoTransportRule.java:5:import com.wedservice.backend.module.destinations.entity.Destination;
+rules\GeoTransportRule.java:20:        Destination destination = tour.getDestination();
+rules\GeoTransportRule.java:21:        if (destination == null || destination.getCountryCode() == null) {
+rules\GeoTransportRule.java:25:        String countryCode = destination.getCountryCode().trim().toUpperCase();
+rules\GeoTransportRule.java:33:                throw new BusinessException("Tour ─æi n╞░ß╗¢c ngo├ái (" + destination.getCountryCode() + ") bß║»t buß╗Öc ph╞░╞íng tiß╗çn (TransportType) phß║úi l├á M├íy bay (Flight), kh├┤ng thß╗â l├á " + transportType);
+service\command\impl\TourCommandServiceImpl.java:6:import com.wedservice.backend.module.destinations.entity.Destination;
+service\command\impl\TourCommandServiceImpl.java:7:import com.wedservice.backend.module.destinations.repository.DestinationRepository;
+service\command\impl\TourCommandServiceImpl.java:80:    private final DestinationRepository destinationRepository;
+service\command\impl\TourCommandServiceImpl.java:101:        Destination destination = findDestination(request.getDestinationId());
+service\command\impl\TourCommandServiceImpl.java:108:                .destination(destination)
+service\command\impl\TourCommandServiceImpl.java:141:        Destination destination = findDestination(request.getDestinationId());
+service\command\impl\TourCommandServiceImpl.java:147:        t.setDestination(destination);
+service\command\impl\TourCommandServiceImpl.java:273:    private Destination findDestination(Long destinationId) {
+service\command\impl\TourCommandServiceImpl.java:274:        Destination destination = destinationRepository.findById(destinationId)
+service\command\impl\TourCommandServiceImpl.java:275:                .orElseThrow(() -> new ResourceNotFoundException("Destination not found with id: " + destinationId));
+service\command\impl\TourCommandServiceImpl.java:276:        if (destination.getDeletedAt() != null) {
+service\command\impl\TourCommandServiceImpl.java:277:            throw BadRequestException.i18n("api.error.tour.destinationDeleted");
+service\command\impl\TourCommandServiceImpl.java:279:        return destination;
+service\command\impl\TourCommandServiceImpl.java:456:                    .overnightDestinationId(dayRequest.getOvernightDestinationId())
+service\command\impl\TourCommandServiceImpl.java:474:                .destinationId(item.getDestinationId())
+service\command\impl\TourCommandServiceImpl.java:611:        Long destinationId = null;
+service\command\impl\TourCommandServiceImpl.java:612:        String destinationCountryCode = null;
+service\command\impl\TourCommandServiceImpl.java:613:        String destinationName = null;
+service\command\impl\TourCommandServiceImpl.java:614:        String destinationProvince = null;
+service\command\impl\TourCommandServiceImpl.java:615:        if (t.getDestination() != null) {
+service\command\impl\TourCommandServiceImpl.java:616:            var d = t.getDestination();
+service\command\impl\TourCommandServiceImpl.java:617:            destinationId = d.getId();
+service\command\impl\TourCommandServiceImpl.java:618:            destinationCountryCode = d.getCountryCode();
+service\command\impl\TourCommandServiceImpl.java:619:            destinationName = d.getName();
+service\command\impl\TourCommandServiceImpl.java:620:            destinationProvince = d.getProvince();
+service\command\impl\TourCommandServiceImpl.java:627:                .destinationId(destinationId)
+service\command\impl\TourCommandServiceImpl.java:628:                .destinationCountryCode(destinationCountryCode)
+service\command\impl\TourCommandServiceImpl.java:629:                .destinationName(destinationName)
+service\command\impl\TourCommandServiceImpl.java:630:                .destinationProvince(destinationProvince)
+service\command\impl\TourCommandServiceImpl.java:686:                        .overnightDestinationId(day.getOvernightDestinationId())
+service\command\impl\TourCommandServiceImpl.java:695:                                        .destinationId(item.getDestinationId())
+service\command\impl\TourCommandServiceImpl.java:731:    //             .destinationId(t.getDestination() != null ? t.getDestination().getId() : null)
+service\query\impl\TourQueryServiceImpl.java:9:import com.wedservice.backend.module.destinations.entity.Destination;
+service\query\impl\TourQueryServiceImpl.java:10:import com.wedservice.backend.module.destinations.repository.DestinationRepository;
+service\query\impl\TourQueryServiceImpl.java:139:    private final DestinationRepository destinationRepository;
+service\query\impl\TourQueryServiceImpl.java:167:        if (request.getDestinationId() != null) {
+service\query\impl\TourQueryServiceImpl.java:168:            Destination anchor = destinationRepository.findById(request.getDestinationId()).orElse(null);
+service\query\impl\TourQueryServiceImpl.java:170:                builder.and(qTour.destination.id.eq(request.getDestinationId()));
+service\query\impl\TourQueryServiceImpl.java:171:            } else if (Boolean.FALSE.equals(request.getDestinationSubtree())) {
+service\query\impl\TourQueryServiceImpl.java:172:                builder.and(qTour.destination.id.eq(request.getDestinationId()));
+service\query\impl\TourQueryServiceImpl.java:181:                builder.and(qTour.destination.id.eq(anchor.getId())
+service\query\impl\TourQueryServiceImpl.java:182:                        .or(qTour.destination.path.eq(prefix))
+service\query\impl\TourQueryServiceImpl.java:183:                        .or(qTour.destination.path.startsWith(prefix)));
+service\query\impl\TourQueryServiceImpl.java:187:            builder.and(qTour.destination.countryCode.equalsIgnoreCase("VN"));
+service\query\impl\TourQueryServiceImpl.java:189:            builder.and(qTour.destination.countryCode.toLowerCase().ne("vn"));
+service\query\impl\TourQueryServiceImpl.java:190:        } else if (StringUtils.hasText(request.getDestinationCountryCode())) {
+service\query\impl\TourQueryServiceImpl.java:191:            builder.and(qTour.destination.countryCode.equalsIgnoreCase(request.getDestinationCountryCode().trim()));
+service\query\impl\TourQueryServiceImpl.java:468:        if (StringUtils.hasText(request.getDestinationCountryCode())) {
+service\query\impl\TourQueryServiceImpl.java:469:            String cc = request.getDestinationCountryCode().trim();
+service\query\impl\TourQueryServiceImpl.java:507:        Long destinationId = null;
+service\query\impl\TourQueryServiceImpl.java:508:        String destinationCountryCode = null;
+service\query\impl\TourQueryServiceImpl.java:509:        String destinationName = null;
+service\query\impl\TourQueryServiceImpl.java:510:        String destinationProvince = null;
+service\query\impl\TourQueryServiceImpl.java:512:            if (t.getDestination() != null) {
+service\query\impl\TourQueryServiceImpl.java:513:                Destination d = t.getDestination();
+service\query\impl\TourQueryServiceImpl.java:514:                destinationId = d.getId();
+service\query\impl\TourQueryServiceImpl.java:515:                destinationCountryCode = d.getCountryCode();
+service\query\impl\TourQueryServiceImpl.java:516:                destinationName = d.getName();
+service\query\impl\TourQueryServiceImpl.java:517:                destinationProvince = d.getProvince();
+service\query\impl\TourQueryServiceImpl.java:520:            log.warn("Could not load destination for tour {}: {}", t.getId(), e.getMessage());
+service\query\impl\TourQueryServiceImpl.java:528:                .destinationId(destinationId)
+service\query\impl\TourQueryServiceImpl.java:529:                .destinationCountryCode(destinationCountryCode)
+service\query\impl\TourQueryServiceImpl.java:530:                .destinationName(destinationName)
+service\query\impl\TourQueryServiceImpl.java:531:                .destinationProvince(destinationProvince)
+service\query\impl\TourQueryServiceImpl.java:581:        Long destinationId = null;
+service\query\impl\TourQueryServiceImpl.java:582:        String destinationCountryCode = null;
+service\query\impl\TourQueryServiceImpl.java:583:        String destinationName = null;
+service\query\impl\TourQueryServiceImpl.java:584:        String destinationProvince = null;
+service\query\impl\TourQueryServiceImpl.java:585:        if (t.getDestination() != null) {
+service\query\impl\TourQueryServiceImpl.java:586:            Destination d = t.getDestination();
+service\query\impl\TourQueryServiceImpl.java:587:            destinationId = d.getId();
+service\query\impl\TourQueryServiceImpl.java:588:            destinationCountryCode = d.getCountryCode();
+service\query\impl\TourQueryServiceImpl.java:589:            destinationName = d.getName();
+service\query\impl\TourQueryServiceImpl.java:590:            destinationProvince = d.getProvince();
+service\query\impl\TourQueryServiceImpl.java:597:                .destinationId(destinationId)
+service\query\impl\TourQueryServiceImpl.java:598:                .destinationCountryCode(destinationCountryCode)
+service\query\impl\TourQueryServiceImpl.java:599:                .destinationName(destinationName)
+service\query\impl\TourQueryServiceImpl.java:600:                .destinationProvince(destinationProvince)
+service\query\impl\TourQueryServiceImpl.java:1052:                        .overnightDestinationId(day.getOvernightDestinationId())
+service\query\impl\TourQueryServiceImpl.java:1061:                                        .destinationId(item.getDestinationId())
