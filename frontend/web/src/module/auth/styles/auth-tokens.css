@@ -1,31 +1,31 @@
 /* Liquid Glass Auth — design tokens (no raw hex in components) */
 .auth-liquid {
-  --auth-accent: #6366f1;
-  --auth-accent-hover: #4f46e5;
-  --auth-accent-glow: rgba(99, 102, 241, 0.45);
-  --auth-accent-soft: rgba(99, 102, 241, 0.12);
+  --auth-accent: #0f766e; /* Deep Teal */
+  --auth-accent-hover: #0d9488; /* Vibrant Teal */
+  --auth-accent-glow: rgba(13, 148, 136, 0.4);
+  --auth-accent-soft: rgba(13, 148, 136, 0.1);
 
-  --auth-bg-start: #f8fafc;
-  --auth-bg-mid: #ecfdf5;
-  --auth-bg-end: #ede9fe;
-  --auth-orb-1: rgba(45, 212, 191, 0.35);
-  --auth-orb-2: rgba(167, 139, 250, 0.28);
+  --auth-bg-start: #f0fdfa; /* Teal 50 */
+  --auth-bg-mid: #ecfeff; /* Cyan 50 */
+  --auth-bg-end: #f0fdf4; /* Emerald 50 */
+  --auth-orb-1: rgba(13, 148, 136, 0.3);
+  --auth-orb-2: rgba(56, 189, 248, 0.25);
 
-  --auth-card-bg: rgba(255, 255, 255, 0.7);
-  --auth-card-border: rgba(255, 255, 255, 0.4);
-  --auth-card-shadow: 0 32px 80px rgba(15, 23, 42, 0.12);
+  --auth-card-bg: rgba(255, 255, 255, 0.8);
+  --auth-card-border: rgba(255, 255, 255, 0.6);
+  --auth-card-shadow: 0 32px 80px rgba(15, 23, 42, 0.08);
 
   --auth-title: #0f172a;
-  --auth-subtitle: #64748b;
-  --auth-input-bg: rgba(255, 255, 255, 0.55);
-  --auth-input-border: rgba(148, 163, 184, 0.35);
+  --auth-subtitle: #475569;
+  --auth-input-bg: rgba(255, 255, 255, 0.7);
+  --auth-input-border: rgba(148, 163, 184, 0.4);
   --auth-input-text: #0f172a;
   --auth-error: #ef4444;
   --auth-error-soft: rgba(239, 68, 68, 0.12);
-  --auth-success: #22c55e;
+  --auth-success: #10b981;
 
   --auth-visual-text: #f8fafc;
-  --auth-visual-muted: rgba(248, 250, 252, 0.78);
+  --auth-visual-muted: rgba(248, 250, 252, 0.8);
 
   --auth-transition-theme: color 0.3s ease, background-color 0.3s ease,
     border-color 0.3s ease, box-shadow 0.3s ease;

@@ -22,10 +22,12 @@ export function RegisterForm({ redirectTo, dimmed, onShake }: RegisterFormProps)
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [fieldErrors, setFieldErrors] = useState<{
     fullName?: string
     email?: string
     password?: string
+    confirmPassword?: string
   }>({})
 
   const register = useRegister({ redirectTo })
@@ -42,6 +44,11 @@ export function RegisterForm({ redirectTo, dimmed, onShake }: RegisterFormProps)
       next.password = String(t('validation.required'))
     } else if (password.length < 8) {
       next.password = String(t('validation.passwordMin'))
+    }
+    if (!isNonEmpty(confirmPassword)) {
+      next.confirmPassword = String(t('validation.required'))
+    } else if (confirmPassword !== password) {
+      next.confirmPassword = String(t('validation.passwordMismatch'))
     }
     setFieldErrors(next)
     if (Object.keys(next).length > 0) {
@@ -125,6 +132,21 @@ export function RegisterForm({ redirectTo, dimmed, onShake }: RegisterFormProps)
         onBlurValidate={(value) => {
           if (!isNonEmpty(value)) return String(t('validation.required'))
           if (value.length < 8) return String(t('validation.passwordMin'))
+          return undefined
+        }}
+      />
+
+      <PasswordField
+        name="confirmPassword"
+        label={String(t('form.confirmPasswordLabel'))}
+        autoComplete="new-password"
+        disabled={register.isPending}
+        value={confirmPassword}
+        onChange={(event) => setConfirmPassword(event.target.value)}
+        error={fieldErrors.confirmPassword}
+        onBlurValidate={(value) => {
+          if (!isNonEmpty(value)) return String(t('validation.required'))
+          if (value !== password) return String(t('validation.passwordMismatch'))
           return undefined
         }}
       />
