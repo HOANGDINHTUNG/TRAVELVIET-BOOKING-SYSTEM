@@ -12,6 +12,8 @@ import {
 import { LoginForm } from "./LoginForm";
 import { RegisterForm } from "./RegisterForm";
 import { useAuthTabIndicator } from "./useAuthTabIndicator";
+import halongBg from "../../../../assets/vietnam_halong.png";
+import hoianBg from "../../../../assets/vietnam_hoian.png";
 import "../../styles/auth-tokens.css";
 import "./auth-experience.css";
 
@@ -97,7 +99,11 @@ export function AuthExperience() {
       </header>
 
       <div className="auth-liquid-shell">
-        <aside className="auth-liquid-visual" aria-hidden="true">
+        <aside
+          className="auth-liquid-visual"
+          style={{ "--auth-bg-visual": `url(${isLogin ? halongBg : hoianBg})` } as React.CSSProperties}
+          aria-hidden="true"
+        >
           <span className="auth-visual-ring">
             <MapPinned />
           </span>
