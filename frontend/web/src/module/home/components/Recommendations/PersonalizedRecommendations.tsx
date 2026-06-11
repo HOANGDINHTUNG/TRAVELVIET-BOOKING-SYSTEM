@@ -9,7 +9,7 @@ import {
   type RecommendedTour,
 } from '../../../../api/server/Recommendation.api'
 import { getStoredAccessToken } from '../../../../utils/authSessionStorage'
-import { formatCurrencyVnd } from '../../../management/schedules/utils/currency'
+import { formatCurrencyVnd } from '@/utils/currency'
 import { tourDetailPath } from '../../../tours/utils/slug'
 import './PersonalizedRecommendations.css'
 

@@ -5,7 +5,7 @@ import com.wedservice.backend.module.users.dto.request.AdminCreateUserRequest;
 import com.wedservice.backend.module.users.dto.request.AdminUpdateUserRequest;
 import com.wedservice.backend.module.users.dto.response.UserResponse;
 import com.wedservice.backend.module.users.entity.Status;
-import com.wedservice.backend.module.users.service.AdminUserService;
+import com.wedservice.backend.module.users.facade.AdminUserFacade;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +38,10 @@ class AdminUserControllerTest {
     private ObjectMapper objectMapper;
 
     @MockitoBean
-    private AdminUserService adminUserService;
+    private AdminUserFacade adminUserFacade;
+
+    @MockitoBean
+    private com.wedservice.backend.module.auth.security.JwtService jwtService;
 
     @Test
     void createUser_returnsWrappedApiResponse() throws Exception {
@@ -58,7 +61,7 @@ class AdminUserControllerTest {
                 .role("CUSTOMER")
                 .build();
 
-        when(adminUserService.createUser(any(AdminCreateUserRequest.class))).thenReturn(response);
+        when(adminUserFacade.createUser(any(AdminCreateUserRequest.class))).thenReturn(response);
 
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -90,7 +93,7 @@ class AdminUserControllerTest {
                 .last(true)
                 .build();
 
-        when(adminUserService.getUsers(any())).thenReturn(response);
+        when(adminUserFacade.getUsers(any())).thenReturn(response);
 
         mockMvc.perform(get("/users")
                         .queryParam("page", "0")
@@ -116,7 +119,7 @@ class AdminUserControllerTest {
                 .role("ADMIN")
                 .build();
 
-        when(adminUserService.getUserById(id)).thenReturn(response);
+        when(adminUserFacade.getUserById(id)).thenReturn(response);
 
         mockMvc.perform(get("/users/{id}", id))
                 .andExpect(status().isOk())
@@ -159,7 +162,7 @@ class AdminUserControllerTest {
                 .role("ADMIN")
                 .build();
 
-        when(adminUserService.updateUser(any(UUID.class), any(AdminUpdateUserRequest.class))).thenReturn(response);
+        when(adminUserFacade.updateUser(any(UUID.class), any(AdminUpdateUserRequest.class))).thenReturn(response);
 
         mockMvc.perform(put("/users/{id}", id)
                         .contentType(MediaType.APPLICATION_JSON)

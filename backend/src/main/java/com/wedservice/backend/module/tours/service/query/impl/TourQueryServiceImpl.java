@@ -164,31 +164,34 @@ public class TourQueryServiceImpl implements TourQueryService {
             builder.and(qTour.status.eq(TourStatus.fromValue(request.getStatus().trim())));
         }
 
-        if (request.getDestinationId() != null) {
-            Destination anchor = destinationRepository.findById(request.getDestinationId()).orElse(null);
-            if (anchor == null || anchor.getDeletedAt() != null) {
-                builder.and(qTour.destination.id.eq(request.getDestinationId()));
-            } else if (Boolean.FALSE.equals(request.getDestinationSubtree())) {
-                builder.and(qTour.destination.id.eq(request.getDestinationId()));
-            } else {
-                String pathPrefix = org.springframework.util.StringUtils.hasText(anchor.getPath())
-                        ? anchor.getPath()
-                        : "/" + anchor.getId() + "/";
-                if (!pathPrefix.endsWith("/")) {
-                    pathPrefix = pathPrefix + "/";
+        if (request.getDestinationIds() != null && !request.getDestinationIds().isEmpty()) {
+            List<Destination> anchors = destinationRepository.findAllById(request.getDestinationIds());
+            if (!anchors.isEmpty()) {
+                BooleanBuilder subBuilder = new BooleanBuilder();
+                if (Boolean.FALSE.equals(request.getDestinationSubtree())) {
+                    subBuilder.and(qTour.destinations.any().id.in(request.getDestinationIds()));
+                } else {
+                    for (Destination anchor : anchors) {
+                        String pathPrefix = org.springframework.util.StringUtils.hasText(anchor.getPath())
+                                ? anchor.getPath()
+                                : "/" + anchor.getId() + "/";
+                        if (!pathPrefix.endsWith("/")) {
+                            pathPrefix = pathPrefix + "/";
+                        }
+                        subBuilder.or(qTour.destinations.any().id.eq(anchor.getId())
+                                .or(qTour.destinations.any().path.eq(pathPrefix))
+                                .or(qTour.destinations.any().path.startsWith(pathPrefix)));
+                    }
                 }
-                final String prefix = pathPrefix;
-                builder.and(qTour.destination.id.eq(anchor.getId())
-                        .or(qTour.destination.path.eq(prefix))
-                        .or(qTour.destination.path.startsWith(prefix)));
+                builder.and(subBuilder);
             }
         }
         if (Boolean.TRUE.equals(request.getDomesticOnly())) {
-            builder.and(qTour.destination.countryCode.equalsIgnoreCase("VN"));
+            builder.and(qTour.destinations.any().countryCode.equalsIgnoreCase("VN"));
         } else if (Boolean.TRUE.equals(request.getInternationalOnly())) {
-            builder.and(qTour.destination.countryCode.toLowerCase().ne("vn"));
+            builder.and(qTour.destinations.any().countryCode.toLowerCase().ne("vn"));
         } else if (StringUtils.hasText(request.getDestinationCountryCode())) {
-            builder.and(qTour.destination.countryCode.equalsIgnoreCase(request.getDestinationCountryCode().trim()));
+            builder.and(qTour.destinations.any().countryCode.equalsIgnoreCase(request.getDestinationCountryCode().trim()));
         }
         if (StringUtils.hasText(request.getKeyword())) {
             String keyword = request.getKeyword().trim();
@@ -276,6 +279,7 @@ public class TourQueryServiceImpl implements TourQueryService {
         List<Long> tourIds = content.stream().map(Tour::getId).toList();
         Map<Long, List<TourMediaResponse>> mediaByTour = batchLoadListMediaByTourIds(tourIds);
         Map<Long, List<TagResponse>> tagsByTour = batchLoadTagsByTourIds(tourIds);
+        Map<Long, List<com.wedservice.backend.module.tours.dto.response.TourDestinationSummaryResponse>> destsByTour = batchLoadDestinationsByTourIds(tourIds);
 
         if (publicOnly) {
             String lang = LocaleTagUtil.currentLanguageTag();
@@ -290,7 +294,8 @@ public class TourQueryServiceImpl implements TourQueryService {
                                     viMap.get(t.getId()),
                                     t),
                             mediaByTour.getOrDefault(t.getId(), List.of()),
-                            tagsByTour.getOrDefault(t.getId(), List.of())))
+                            tagsByTour.getOrDefault(t.getId(), List.of()),
+                            destsByTour.getOrDefault(t.getId(), List.of())))
                     .toList();
             enrichPublicListRows(rows);
             return new PageImpl<>(rows, pr, page.getTotalElements());
@@ -301,7 +306,8 @@ public class TourQueryServiceImpl implements TourQueryService {
                         t,
                         tourTranslationMergeHelper.merge(null, null, t),
                         mediaByTour.getOrDefault(t.getId(), List.of()),
-                        tagsByTour.getOrDefault(t.getId(), List.of())))
+                        tagsByTour.getOrDefault(t.getId(), List.of()),
+                        destsByTour.getOrDefault(t.getId(), List.of())))
                 .toList();
         return new PageImpl<>(adminRows, pr, page.getTotalElements());
     }
@@ -504,20 +510,20 @@ public class TourQueryServiceImpl implements TourQueryService {
 
         MergedTourTexts m = tourTranslationMergeHelper.merge(primary, vi, t);
 
-        Long destinationId = null;
-        String destinationCountryCode = null;
-        String destinationName = null;
-        String destinationProvince = null;
+        List<com.wedservice.backend.module.tours.dto.response.TourDestinationSummaryResponse> destinations = new java.util.ArrayList<>();
         try {
-            if (t.getDestination() != null) {
-                Destination d = t.getDestination();
-                destinationId = d.getId();
-                destinationCountryCode = d.getCountryCode();
-                destinationName = d.getName();
-                destinationProvince = d.getProvince();
+            if (t.getDestinations() != null) {
+                destinations = t.getDestinations().stream()
+                    .map(d -> com.wedservice.backend.module.tours.dto.response.TourDestinationSummaryResponse.builder()
+                            .id(d.getId())
+                            .countryCode(d.getCountryCode())
+                            .name(d.getName())
+                            .province(d.getProvince())
+                            .build())
+                    .toList();
             }
         } catch (Exception e) {
-            log.warn("Could not load destination for tour {}: {}", t.getId(), e.getMessage());
+            log.warn("Could not load destination for tour {}", t.getId());
         }
 
         TourResponse.TourResponseBuilder builder = TourResponse.builder()
@@ -525,10 +531,7 @@ public class TourQueryServiceImpl implements TourQueryService {
                 .code(t.getCode())
                 .name(m.name())
                 .slug(t.getSlug())
-                .destinationId(destinationId)
-                .destinationCountryCode(destinationCountryCode)
-                .destinationName(destinationName)
-                .destinationProvince(destinationProvince)
+                .destinations(destinations)
                 .cancellationPolicyId(t.getCancellationPolicyId())
                 .basePrice(t.getBasePrice())
                 .esgScore(t.getEsgScore())
@@ -576,28 +579,15 @@ public class TourQueryServiceImpl implements TourQueryService {
             Tour t,
             MergedTourTexts m,
             List<TourMediaResponse> media,
-            List<TagResponse> tags
+            List<TagResponse> tags,
+            List<com.wedservice.backend.module.tours.dto.response.TourDestinationSummaryResponse> destinations
     ) {
-        Long destinationId = null;
-        String destinationCountryCode = null;
-        String destinationName = null;
-        String destinationProvince = null;
-        if (t.getDestination() != null) {
-            Destination d = t.getDestination();
-            destinationId = d.getId();
-            destinationCountryCode = d.getCountryCode();
-            destinationName = d.getName();
-            destinationProvince = d.getProvince();
-        }
         return TourResponse.builder()
                 .id(t.getId())
                 .code(t.getCode())
                 .name(m.name())
                 .slug(t.getSlug())
-                .destinationId(destinationId)
-                .destinationCountryCode(destinationCountryCode)
-                .destinationName(destinationName)
-                .destinationProvince(destinationProvince)
+                .destinations(destinations)
                 .basePrice(t.getBasePrice())
                 .esgScore(t.getEsgScore())
                 .leiScore(t.getLeiScore())
@@ -618,6 +608,25 @@ public class TourQueryServiceImpl implements TourQueryService {
                 .translationKey(t.getSlug())
                 .itinerarySummary(m.itinerarySummary())
                 .build();
+    }
+
+    private Map<Long, List<com.wedservice.backend.module.tours.dto.response.TourDestinationSummaryResponse>> batchLoadDestinationsByTourIds(List<Long> tourIds) {
+        if (tourIds == null || tourIds.isEmpty()) return Map.of();
+        List<Object[]> rows = tourRepository.findDestinationsByTourIds(tourIds);
+        Map<Long, List<com.wedservice.backend.module.tours.dto.response.TourDestinationSummaryResponse>> map = new HashMap<>();
+        for (Object[] row : rows) {
+            Long tourId = (Long) row[0];
+            Destination d = (Destination) row[1];
+            map.computeIfAbsent(tourId, k -> new ArrayList<>()).add(
+                com.wedservice.backend.module.tours.dto.response.TourDestinationSummaryResponse.builder()
+                    .id(d.getId())
+                    .countryCode(d.getCountryCode())
+                    .name(d.getName())
+                    .province(d.getProvince())
+                    .build()
+            );
+        }
+        return map;
     }
 
     /**

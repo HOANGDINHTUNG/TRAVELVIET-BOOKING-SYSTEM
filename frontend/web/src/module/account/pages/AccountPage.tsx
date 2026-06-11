@@ -18,7 +18,7 @@ import {
   TicketPercent,
   Trash2,
 } from "lucide-react";
-import { formatCurrencyVnd } from "../../management/schedules/utils/currency";
+import { formatCurrencyVnd } from '@/utils/currency';
 import {
   bookingApi,
   type Booking,

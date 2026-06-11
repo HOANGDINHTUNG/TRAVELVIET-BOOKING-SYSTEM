@@ -16,19 +16,21 @@ import java.util.List;
 
 public interface TourRepository extends JpaRepository<Tour, Long>, QuerydslPredicateExecutor<Tour> {
 
-    @EntityGraph(attributePaths = "destination")
     @Override
     Page<Tour> findAll(Predicate predicate, Pageable pageable);
+
+    @Query("SELECT t.id, d FROM Tour t JOIN t.destinations d WHERE t.id IN :tourIds")
+    List<Object[]> findDestinationsByTourIds(@Param("tourIds") Collection<Long> tourIds);
 
     boolean existsByCode(String code);
 
     boolean existsBySlug(String slug);
 
-    long countByDestinationIdAndStatusAndDeletedAtIsNull(Long destinationId, com.wedservice.backend.module.tours.entity.TourStatus status);
+    long countByDestinationsIdAndStatusAndDeletedAtIsNull(Long destinationId, com.wedservice.backend.module.tours.entity.TourStatus status);
 
     @Query("""
             SELECT COUNT(t) FROM Tour t
-            JOIN t.destination d
+            JOIN t.destinations d
             WHERE t.deletedAt IS NULL
               AND t.status = :status
               AND (d.id = :rootId OR d.path = :pathPrefix OR d.path LIKE CONCAT(:pathPrefix, '%'))
@@ -52,8 +54,9 @@ public interface TourRepository extends JpaRepository<Tour, Long>, QuerydslPredi
                     OR d.destination_path = d_root.destination_path
                     OR d.destination_path LIKE CONCAT(d_root.destination_path, '%')
                )
+            INNER JOIN tour_destinations td ON td.destination_id = d.id
             INNER JOIN tours t
-                ON t.destination_id = d.id
+                ON t.id = td.tour_id
                AND t.deleted_at IS NULL
                AND t.status = :status
             WHERE d_root.id IN (:rootIds)

@@ -1,18 +1,18 @@
-import { authApi } from '../../../api/server/Auth.api'
+import { authApi } from "../../../api/server/Auth.api";
 import type {
   AuthResponse,
   AuthUser,
   LoginPayload,
   RegisterPayload,
-} from '../database/interface/users'
+} from "../database/interface/users";
 import {
   clearPersistentAuthSessionData,
   clearStoredAuthSession,
   getStoredAccessToken,
   getStoredAuthUser,
-} from '../../../utils/authSessionStorage'
-import { useAuthStore } from '../../../stores/authStore'
-import { toUserMeResponse, type AuthLoginUser } from '../types/auth'
+} from "../../../utils/authSessionStorage";
+import { useAuthStore } from "../../../stores/authStore";
+import { toUserMeResponse, type AuthLoginUser } from "../types/auth";
 
 export type {
   AuthResponse,
@@ -20,86 +20,86 @@ export type {
   LoginPayload,
   RegisterPayload,
   UserAccessContext,
-} from '../database/interface/users'
+} from "../database/interface/users";
 
 export {
   getStoredAccessToken,
   getStoredAuthUser,
   getStoredRefreshToken,
   persistStoredAuthUser,
-} from '../../../utils/authSessionStorage'
+} from "../../../utils/authSessionStorage";
 
 export type ManagerRoleCode =
-  | 'SUPER_ADMIN'
-  | 'ADMIN'
-  | 'CONTENT_EDITOR'
-  | 'FIELD_STAFF'
-  | 'OPERATOR'
+  | "SUPER_ADMIN"
+  | "ADMIN"
+  | "CONTENT_EDITOR"
+  | "FIELD_STAFF"
+  | "OPERATOR";
 
 export const MANAGER_ROLE_CODES: ManagerRoleCode[] = [
-  'SUPER_ADMIN',
-  'ADMIN',
-  'CONTENT_EDITOR',
-  'FIELD_STAFF',
-  'OPERATOR',
-]
+  "SUPER_ADMIN",
+  "ADMIN",
+  "CONTENT_EDITOR",
+  "FIELD_STAFF",
+  "OPERATOR",
+];
 
 export function loginWithPassword(payload: LoginPayload) {
-  return authApi.login(payload)
+  return authApi.login(payload);
 }
 
 export function registerWithPassword(payload: RegisterPayload) {
-  return authApi.register(payload)
+  return authApi.register(payload);
 }
 
 export function refreshAuthSession(refreshToken: string) {
-  return authApi.refresh({ refreshToken })
+  return authApi.refresh({ refreshToken });
 }
 
 export function persistAuthSession(auth: AuthResponse) {
-  clearPersistentAuthSession()
-  useAuthStore.getState().setAuth(
-    auth.accessToken,
-    toUserMeResponse(auth.user as AuthLoginUser),
-    { refreshToken: auth.refreshToken },
-  )
+  clearPersistentAuthSession();
+  useAuthStore
+    .getState()
+    .setAuth(auth.accessToken, toUserMeResponse(auth.user as AuthLoginUser), {
+      refreshToken: auth.refreshToken,
+    });
 }
 
 export function clearAuthSession() {
-  clearStoredAuthSession()
-  window.sessionStorage.removeItem('travelviet-login-welcome-seen')
-  window.sessionStorage.removeItem('travelviet-login-welcome-pending')
-  window.dispatchEvent(new Event('travelviet:logout'))
+  clearStoredAuthSession();
+  window.sessionStorage.removeItem("travelviet-login-welcome-seen");
+  window.sessionStorage.removeItem("travelviet-login-welcome-pending");
+  window.dispatchEvent(new Event("travelviet:logout"));
 }
 
 export function hasStoredAuthSession() {
-  return Boolean(getStoredAccessToken() || getStoredAuthUser())
+  return Boolean(getStoredAccessToken() || getStoredAuthUser());
 }
 
 export function clearPersistentAuthSession() {
-  clearPersistentAuthSessionData()
+  clearPersistentAuthSessionData();
 }
 
 export function getAuthUserRoleCodes(user: AuthUser | null) {
   if (!user) {
-    return []
+    return [];
   }
 
-  const roleCandidates = [...(user.roles ?? []), user.role ?? '']
+  const roleCandidates = [...(user.roles ?? []), user.role ?? ""]
     .map((role) => role.trim().toUpperCase())
-    .filter(Boolean)
+    .filter(Boolean);
 
-  return [...new Set(roleCandidates)]
+  return [...new Set(roleCandidates)];
 }
 
 export function isManagerRoleCode(role: string): role is ManagerRoleCode {
-  return MANAGER_ROLE_CODES.includes(role as ManagerRoleCode)
+  return MANAGER_ROLE_CODES.includes(role as ManagerRoleCode);
 }
 
 export function hasManagerRole(user: AuthUser | null) {
-  return getAuthUserRoleCodes(user).some(isManagerRoleCode)
+  return getAuthUserRoleCodes(user).some(isManagerRoleCode);
 }
 
 export function resolvePostAuthRedirect(user: AuthUser | null) {
-  return hasManagerRole(user) ? '/management/dashboard' : '/'
+  return hasManagerRole(user) ? "/admin" : "/";
 }

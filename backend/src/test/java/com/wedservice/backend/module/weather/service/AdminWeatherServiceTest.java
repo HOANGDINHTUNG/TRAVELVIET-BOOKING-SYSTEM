@@ -126,7 +126,7 @@ class AdminWeatherServiceTest {
         Destination destination = Destination.builder().id(9L).uuid(destinationUuid).build();
         TourSchedule schedule = TourSchedule.builder().id(20L).tourId(100L).build();
         Destination anotherDestination = Destination.builder().id(999L).build();
-        Tour tour = Tour.builder().id(100L).destination(anotherDestination).build();
+        Tour tour = Tour.builder().id(100L).destinations(java.util.List.of(anotherDestination)).build();
 
         when(destinationRepository.findByUuid(destinationUuid)).thenReturn(Optional.of(destination));
         when(tourScheduleRepository.findById(20L)).thenReturn(Optional.of(schedule));

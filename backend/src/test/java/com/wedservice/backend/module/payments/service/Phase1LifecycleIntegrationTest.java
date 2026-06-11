@@ -221,7 +221,7 @@ class Phase1LifecycleIntegrationTest {
                 .code("TOUR-" + System.nanoTime())
                 .name("Central Vietnam Escape")
                 .slug("central-vietnam-escape-" + System.nanoTime())
-                .destination(destination)
+                .destinations(java.util.List.of(destination))
                 .basePrice(new BigDecimal("1200000"))
                 .currency("VND")
                 .durationDays(3)

@@ -14,7 +14,7 @@ import {
 import { handleApiError } from '../../../lib/handleApiError'
 import { useCancelMyBooking, useMyBookingsQuery } from '../hooks/useBookingMutation'
 import { useVnpayCheckout } from '../../payments/hooks/useVnpay'
-import { formatCurrencyVnd, formatDateTime } from '../../management/schedules/utils/currency'
+import { formatCurrencyVnd, formatDateTime } from '@/utils/currency'
 import BookingStatusBadge from '../components/BookingStatusBadge'
 import PaymentStatusBadge from '../components/PaymentStatusBadge'
 import { isPayable } from '../constants/bookingStatus'

@@ -97,10 +97,11 @@ export const getTourColumns = (
           <CalendarDays size={14} /> {row.original.durationDays}N{" "}
           {row.original.durationNights}Đ
         </div>
-        <div className="flex items-center gap-1.5 text-xs">
+        <div className="flex flex-wrap items-center gap-1.5 text-xs">
           <Navigation size={12} className="text-rose-500" />{" "}
-          {row.original.destinationName ||
-            `Destination ID: ${row.original.destinationId}`}
+          {row.original.destinations && row.original.destinations.length > 0
+            ? row.original.destinations.map((d) => d.name).join(", ")
+            : "Chưa có điểm lộ trình"}
         </div>
       </div>
     ),

@@ -230,13 +230,14 @@ class BookingCommandServiceImplTest {
 
         bookingCommandService.createBooking(request);
 
-        ArgumentCaptor<BookingProduct> productCaptor = ArgumentCaptor.forClass(BookingProduct.class);
-        verify(bookingProductRepository).save(productCaptor.capture());
-        assertThat(productCaptor.getValue().getBookingId()).isEqualTo(101L);
-        assertThat(productCaptor.getValue().getProductId()).isEqualTo(3L);
-        assertThat(productCaptor.getValue().getQuantity()).isEqualTo(2);
-        assertThat(productCaptor.getValue().getUnitPrice()).isEqualByComparingTo("15.00");
-        assertThat(productCaptor.getValue().getLineTotal()).isEqualByComparingTo("30.00");
+        ArgumentCaptor<List> productCaptor = ArgumentCaptor.forClass(List.class);
+        verify(bookingProductRepository).saveAll(productCaptor.capture());
+        BookingProduct savedProduct = (BookingProduct) productCaptor.getValue().get(0);
+        assertThat(savedProduct.getBookingId()).isEqualTo(101L);
+        assertThat(savedProduct.getProductId()).isEqualTo(3L);
+        assertThat(savedProduct.getQuantity()).isEqualTo(2);
+        assertThat(savedProduct.getUnitPrice()).isEqualByComparingTo("15.00");
+        assertThat(savedProduct.getLineTotal()).isEqualByComparingTo("30.00");
         verify(productRepository).decrementStockIfEnough(3L, 2);
     }
 
@@ -339,9 +340,9 @@ class BookingCommandServiceImplTest {
         assertThat(comboCaptor.getValue().getDiscountAmount()).isEqualByComparingTo("50.00");
         assertThat(comboCaptor.getValue().getFinalPrice()).isEqualByComparingTo("200.00");
 
-        ArgumentCaptor<BookingPassenger> passengerCaptor = ArgumentCaptor.forClass(BookingPassenger.class);
-        verify(passengerRepository, times(2)).save(passengerCaptor.capture());
-        List<BookingPassenger> savedPassengers = passengerCaptor.getAllValues();
+        ArgumentCaptor<List> passengerCaptor = ArgumentCaptor.forClass(List.class);
+        verify(passengerRepository).saveAll(passengerCaptor.capture());
+        List<BookingPassenger> savedPassengers = (List<BookingPassenger>) passengerCaptor.getValue();
         assertThat(savedPassengers).hasSize(2);
         assertThat(savedPassengers.get(0).getBookingId()).isEqualTo(99L);
         assertThat(savedPassengers.get(0).getDateOfBirth()).isEqualTo(LocalDate.of(1990, 1, 15));

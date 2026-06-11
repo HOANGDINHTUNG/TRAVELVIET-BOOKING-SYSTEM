@@ -1,6 +1,6 @@
-import { useState, type MouseEventHandler } from 'react'
-import { Link } from 'react-router-dom'
-import { useTranslation } from 'react-i18next'
+import { useState, type MouseEventHandler } from "react";
+import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   Languages,
   LayoutDashboard,
@@ -12,9 +12,9 @@ import {
   SunMedium,
   UserCircle2,
   UserRound,
-} from 'lucide-react'
+} from "lucide-react";
 
-import { cn } from '@/lib/utils'
+import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,29 +22,29 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+} from "@/components/ui/dropdown-menu";
 
-import type { UserMeResponse } from '../../types/user'
-import type { ThemeMode, LanguageMode } from '../../constants/preferences'
+import type { UserMeResponse } from "../../types/user";
+import type { ThemeMode, LanguageMode } from "../../constants/preferences";
 
 type HeaderAccountMenuProps = {
-  user: UserMeResponse
-  theme: ThemeMode
-  language: LanguageMode
-  hasManagementAccess: boolean
-  triggerClassName?: string
-  onChangeTheme: (next: ThemeMode) => void
-  onChangeLanguage: (next: LanguageMode) => void
-  onLogout: () => void
-}
+  user: UserMeResponse;
+  theme: ThemeMode;
+  language: LanguageMode;
+  hasManagementAccess: boolean;
+  triggerClassName?: string;
+  onChangeTheme: (next: ThemeMode) => void;
+  onChangeLanguage: (next: LanguageMode) => void;
+  onLogout: () => void;
+};
 
 function getUserInitial(
   displayName?: string | null,
   fullName?: string | null,
   email?: string | null,
 ) {
-  const source = displayName || fullName || email || 'U'
-  return source.trim().charAt(0).toUpperCase() || 'U'
+  const source = displayName || fullName || email || "U";
+  return source.trim().charAt(0).toUpperCase() || "U";
 }
 
 /**
@@ -70,27 +70,27 @@ export function HeaderAccountMenu({
   onChangeLanguage,
   onLogout,
 }: HeaderAccountMenuProps) {
-  const { t } = useTranslation('translation')
-  const [open, setOpen] = useState(false)
-  const [showProfileDetails, setShowProfileDetails] = useState(false)
+  const { t } = useTranslation("translation");
+  const [open, setOpen] = useState(false);
+  const [showProfileDetails, setShowProfileDetails] = useState(false);
 
   const accountName =
-    user.displayName || user.fullName || user.email || t('header.account')
+    user.displayName || user.fullName || user.email || t("header.account");
 
   const profileDetails = [
-    { label: t('header.fullName'), value: user.fullName },
-    { label: t('header.displayName'), value: user.displayName },
-    { label: t('header.email'), value: user.email },
-    { label: t('header.phone'), value: user.phone },
-    { label: t('header.status'), value: user.status },
-    { label: t('header.memberLevel'), value: user.memberLevel },
-  ]
+    { label: t("header.fullName"), value: user.fullName },
+    { label: t("header.displayName"), value: user.displayName },
+    { label: t("header.email"), value: user.email },
+    { label: t("header.phone"), value: user.phone },
+    { label: t("header.status"), value: user.status },
+    { label: t("header.memberLevel"), value: user.memberLevel },
+  ];
 
   const handleLogout: MouseEventHandler<HTMLDivElement> = () => {
-    setOpen(false)
-    setShowProfileDetails(false)
-    onLogout()
-  }
+    setOpen(false);
+    setShowProfileDetails(false);
+    onLogout();
+  };
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
@@ -100,7 +100,7 @@ export function HeaderAccountMenu({
           aria-label={accountName}
           title={accountName}
           className={cn(
-            'relative inline-flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-full border-2 text-[15px] font-bold leading-none shadow-md outline-none transition-[transform,opacity] duration-200 hover:opacity-95 hover:scale-[1.03] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+            "relative inline-flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-full border-2 text-[15px] font-bold leading-none shadow-md outline-none transition-[transform,opacity] duration-200 hover:opacity-95 hover:scale-[1.03] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
             triggerClassName,
           )}
         >
@@ -154,13 +154,13 @@ export function HeaderAccountMenu({
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
-              {t('header.signedIn')}
+              {t("header.signedIn")}
             </p>
             <p className="truncate text-sm font-semibold text-foreground">
               {accountName}
             </p>
             <p className="truncate text-xs text-muted-foreground">
-              {user.email || t('header.notUpdated')}
+              {user.email || t("header.notUpdated")}
             </p>
           </div>
         </div>
@@ -169,22 +169,24 @@ export function HeaderAccountMenu({
           <DropdownMenuItem asChild>
             <Link to="/account" className="cursor-pointer">
               <UserRound className="h-4 w-4 opacity-70" aria-hidden />
-              <span>{t('header.accountPage')}</span>
+              <span>{t("header.accountPage")}</span>
             </Link>
           </DropdownMenuItem>
 
           <DropdownMenuItem asChild>
             <Link to="/my-bookings" className="cursor-pointer">
               <ReceiptText className="h-4 w-4 opacity-70" aria-hidden />
-              <span>{t('header.myBookings', { defaultValue: 'Đơn đã đặt' })}</span>
+              <span>
+                {t("header.myBookings", { defaultValue: "Đơn đã đặt" })}
+              </span>
             </Link>
           </DropdownMenuItem>
 
           {hasManagementAccess ? (
             <DropdownMenuItem asChild>
-              <Link to="/management/dashboard" className="cursor-pointer">
+              <Link to="/admin" className="cursor-pointer">
                 <LayoutDashboard className="h-4 w-4 opacity-70" aria-hidden />
-                <span>{t('header.managementPage')}</span>
+                <span>{t("header.managementPage")}</span>
               </Link>
             </DropdownMenuItem>
           ) : null}
@@ -192,25 +194,25 @@ export function HeaderAccountMenu({
           <DropdownMenuItem asChild>
             <Link to="/support" className="cursor-pointer">
               <LifeBuoy className="h-4 w-4 opacity-70" aria-hidden />
-              <span>{t('header.supportCenter')}</span>
+              <span>{t("header.supportCenter")}</span>
             </Link>
           </DropdownMenuItem>
 
           <DropdownMenuItem asChild>
             <Link to="/passport" className="cursor-pointer">
               <Stamp className="h-4 w-4 opacity-70" aria-hidden />
-              <span>{t('header.passport')}</span>
+              <span>{t("header.passport")}</span>
             </Link>
           </DropdownMenuItem>
 
           <DropdownMenuItem
             onSelect={(event) => {
-              event.preventDefault()
-              setShowProfileDetails((v) => !v)
+              event.preventDefault();
+              setShowProfileDetails((v) => !v);
             }}
           >
             <UserCircle2 className="h-4 w-4 opacity-70" aria-hidden />
-            <span>{t('header.profileDetails')}</span>
+            <span>{t("header.profileDetails")}</span>
           </DropdownMenuItem>
 
           {showProfileDetails ? (
@@ -222,9 +224,9 @@ export function HeaderAccountMenu({
                 >
                   <span className="text-muted-foreground">{item.label}</span>
                   <strong className="text-right font-medium text-foreground">
-                    {item.value != null && item.value !== ''
+                    {item.value != null && item.value !== ""
                       ? String(item.value)
-                      : t('header.notUpdated')}
+                      : t("header.notUpdated")}
                   </strong>
                 </div>
               ))}
@@ -235,68 +237,68 @@ export function HeaderAccountMenu({
 
           <DropdownMenuLabel className="flex items-center gap-1.5">
             <SunMedium className="h-3.5 w-3.5" aria-hidden />
-            <span>{t('header.theme')}</span>
+            <span>{t("header.theme")}</span>
           </DropdownMenuLabel>
           <div className="px-2 pb-1.5">
             <div className="grid grid-cols-2 gap-1 rounded-full border border-border/70 p-0.5">
               <button
                 type="button"
-                onClick={() => onChangeTheme('light')}
+                onClick={() => onChangeTheme("light")}
                 className={cn(
-                  'rounded-full px-2 py-1 text-[11px] font-semibold uppercase tracking-wider transition-colors',
-                  theme === 'light'
-                    ? 'bg-[#ff6600] text-white shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground',
+                  "rounded-full px-2 py-1 text-[11px] font-semibold uppercase tracking-wider transition-colors",
+                  theme === "light"
+                    ? "bg-[#ff6600] text-white shadow-sm"
+                    : "text-muted-foreground hover:text-foreground",
                 )}
               >
                 <SunMedium className="mr-1 inline h-3 w-3" aria-hidden />
-                {t('header.light')}
+                {t("header.light")}
               </button>
               <button
                 type="button"
-                onClick={() => onChangeTheme('dark')}
+                onClick={() => onChangeTheme("dark")}
                 className={cn(
-                  'rounded-full px-2 py-1 text-[11px] font-semibold uppercase tracking-wider transition-colors',
-                  theme === 'dark'
-                    ? 'bg-[#ff6600] text-white shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground',
+                  "rounded-full px-2 py-1 text-[11px] font-semibold uppercase tracking-wider transition-colors",
+                  theme === "dark"
+                    ? "bg-[#ff6600] text-white shadow-sm"
+                    : "text-muted-foreground hover:text-foreground",
                 )}
               >
                 <Moon className="mr-1 inline h-3 w-3" aria-hidden />
-                {t('header.dark')}
+                {t("header.dark")}
               </button>
             </div>
           </div>
 
           <DropdownMenuLabel className="flex items-center gap-1.5">
             <Languages className="h-3.5 w-3.5" aria-hidden />
-            <span>{t('header.language')}</span>
+            <span>{t("header.language")}</span>
           </DropdownMenuLabel>
           <div className="px-2 pb-1.5">
             <div className="grid grid-cols-2 gap-1 rounded-full border border-border/70 p-0.5">
               <button
                 type="button"
-                onClick={() => onChangeLanguage('vi')}
+                onClick={() => onChangeLanguage("vi")}
                 className={cn(
-                  'rounded-full px-2 py-1 text-[11px] font-semibold uppercase tracking-wider transition-colors',
-                  language === 'vi'
-                    ? 'bg-[#ff6600] text-white shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground',
+                  "rounded-full px-2 py-1 text-[11px] font-semibold uppercase tracking-wider transition-colors",
+                  language === "vi"
+                    ? "bg-[#ff6600] text-white shadow-sm"
+                    : "text-muted-foreground hover:text-foreground",
                 )}
               >
-                {t('header.vietnamese')}
+                {t("header.vietnamese")}
               </button>
               <button
                 type="button"
-                onClick={() => onChangeLanguage('en')}
+                onClick={() => onChangeLanguage("en")}
                 className={cn(
-                  'rounded-full px-2 py-1 text-[11px] font-semibold uppercase tracking-wider transition-colors',
-                  language === 'en'
-                    ? 'bg-[#ff6600] text-white shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground',
+                  "rounded-full px-2 py-1 text-[11px] font-semibold uppercase tracking-wider transition-colors",
+                  language === "en"
+                    ? "bg-[#ff6600] text-white shadow-sm"
+                    : "text-muted-foreground hover:text-foreground",
                 )}
               >
-                {t('header.english')}
+                {t("header.english")}
               </button>
             </div>
           </div>
@@ -305,18 +307,18 @@ export function HeaderAccountMenu({
 
           <DropdownMenuItem
             onSelect={(event) => {
-              event.preventDefault()
+              event.preventDefault();
               handleLogout(
                 event as unknown as Parameters<typeof handleLogout>[0],
-              )
+              );
             }}
             className="text-rose-600 focus:bg-rose-50 focus:text-rose-700 dark:text-rose-300 dark:focus:bg-rose-950/40 dark:focus:text-rose-200"
           >
             <LogOut className="h-4 w-4" aria-hidden />
-            <span>{t('header.logout')}</span>
+            <span>{t("header.logout")}</span>
           </DropdownMenuItem>
         </div>
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }

@@ -10,7 +10,7 @@ import {
   getUserDisplayName,
   userStatusOptions,
   labelFor,
-} from "../../../../management/pages/system/systemShared";
+} from '@/utils/systemShared';
 
 const ActionCell = ({
   user,

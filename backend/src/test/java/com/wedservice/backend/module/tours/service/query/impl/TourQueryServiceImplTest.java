@@ -169,7 +169,7 @@ class TourQueryServiceImplTest {
                 .code("TOUR-015")
                 .name("Sai Gon")
                 .slug("sai-gon")
-                .destination(Destination.builder().id(1L).build())
+                .destinations(java.util.List.of(Destination.builder().id(1L).build()))
                 .basePrice(new BigDecimal("1000000"))
                 .currency("VND")
                 .build();
@@ -198,7 +198,7 @@ class TourQueryServiceImplTest {
 
         when(tourRepository.findById(15L)).thenReturn(Optional.of(tour));
         when(tourScheduleRepository.findByTourId(15L)).thenReturn(List.of(openSchedule, draftSchedule));
-        when(tourSchedulePickupPointRepository.findByScheduleIdOrderBySortOrder(1L)).thenReturn(List.of(
+        when(tourSchedulePickupPointRepository.findByScheduleIdInAndDeletedAtIsNullOrderByScheduleIdAscSortOrderAsc(List.of(1L))).thenReturn(List.of(
                 TourSchedulePickupPoint.builder()
                         .id(10L)
                         .scheduleId(1L)
@@ -207,7 +207,7 @@ class TourQueryServiceImplTest {
                         .sortOrder(1)
                         .build()
         ));
-        when(tourScheduleGuideRepository.findByScheduleId(1L)).thenReturn(List.of(
+        when(tourScheduleGuideRepository.findByScheduleIdInAndDeletedAtIsNull(List.of(1L))).thenReturn(List.of(
                 TourScheduleGuide.builder()
                         .id(20L)
                         .scheduleId(1L)
@@ -261,7 +261,7 @@ class TourQueryServiceImplTest {
                 .code("TOUR-015")
                 .name("Sai Gon")
                 .slug("sai-gon")
-                .destination(Destination.builder().id(1L).build())
+                .destinations(java.util.List.of(Destination.builder().id(1L).build()))
                 .basePrice(new BigDecimal("1000000"))
                 .currency("VND")
                 .durationDays(2)
@@ -368,7 +368,7 @@ class TourQueryServiceImplTest {
     @Test
     void searchTours_appliesActiveDestinationKeywordAndTagFilters() {
         TourSearchRequest request = TourSearchRequest.builder()
-                .destinationId(3L)
+                .destinationIds(java.util.List.of(3L))
                 .keyword("Da Nang")
                 .tagIds(List.of(10L, 11L))
                 .minPrice(new BigDecimal("900000"))
@@ -384,7 +384,7 @@ class TourQueryServiceImplTest {
                 .code("TOUR-015")
                 .name("Da Nang Discovery")
                 .slug("da-nang-discovery")
-                .destination(Destination.builder().id(3L).build())
+                .destinations(java.util.List.of(Destination.builder().id(3L).build()))
                 .basePrice(new BigDecimal("1000000"))
                 .currency("VND")
                 .status(com.wedservice.backend.module.tours.entity.TourStatus.ACTIVE)
@@ -405,6 +405,7 @@ class TourQueryServiceImplTest {
                         .recommendationScore(new BigDecimal("9.5"))
                         .build()
         ));
+        when(destinationRepository.findAllById(List.of(3L))).thenReturn(List.of(Destination.builder().id(3L).build()));
         when(tourRepository.findAll(any(com.querydsl.core.BooleanBuilder.class), any(PageRequest.class)))
                 .thenReturn(new PageImpl<>(List.of(tour), PageRequest.of(1, 5, Sort.by(Sort.Direction.ASC, "basePrice")), 1));
 
@@ -470,7 +471,7 @@ class TourQueryServiceImplTest {
                 .code("TOUR-016")
                 .name("Hue Family Tour")
                 .slug("hue-family-tour")
-                .destination(Destination.builder().id(4L).build())
+                .destinations(java.util.List.of(Destination.builder().id(4L).build()))
                 .basePrice(new BigDecimal("1200000"))
                 .currency("VND")
                 .isFeatured(true)
@@ -515,7 +516,7 @@ class TourQueryServiceImplTest {
                 .code("TOUR-017")
                 .name("Adventure Da Lat")
                 .slug("adventure-da-lat")
-                .destination(Destination.builder().id(5L).build())
+                .destinations(java.util.List.of(Destination.builder().id(5L).build()))
                 .basePrice(new BigDecimal("1800000"))
                 .currency("VND")
                 .difficultyLevel(3)
@@ -569,7 +570,7 @@ class TourQueryServiceImplTest {
                 .code("TOUR-018")
                 .name("Private Nha Trang Escape")
                 .slug("private-nha-trang-escape")
-                .destination(Destination.builder().id(6L).build())
+                .destinations(java.util.List.of(Destination.builder().id(6L).build()))
                 .basePrice(new BigDecimal("2200000"))
                 .currency("VND")
                 .tripMode("private")
@@ -613,7 +614,7 @@ class TourQueryServiceImplTest {
                 .code("TOUR-019")
                 .name("Premium Ha Giang Loop")
                 .slug("premium-ha-giang-loop")
-                .destination(Destination.builder().id(7L).build())
+                .destinations(java.util.List.of(Destination.builder().id(7L).build()))
                 .basePrice(new BigDecimal("3200000"))
                 .currency("VND")
                 .averageRating(new BigDecimal("4.80"))
@@ -667,7 +668,7 @@ class TourQueryServiceImplTest {
                 .code("TOUR-020")
                 .name("Beach escape")
                 .slug("beach-escape")
-                .destination(Destination.builder().id(8L).build())
+                .destinations(java.util.List.of(Destination.builder().id(8L).build()))
                 .basePrice(new BigDecimal("1000000"))
                 .currency("VND")
                 .status(com.wedservice.backend.module.tours.entity.TourStatus.ACTIVE)
@@ -700,7 +701,7 @@ class TourQueryServiceImplTest {
                 .code("TOUR-021")
                 .name("VN Tour")
                 .slug("vn-tour")
-                .destination(Destination.builder().id(1L).build())
+                .destinations(java.util.List.of(Destination.builder().id(1L).build()))
                 .basePrice(BigDecimal.ONE)
                 .currency("VND")
                 .status(com.wedservice.backend.module.tours.entity.TourStatus.ACTIVE)

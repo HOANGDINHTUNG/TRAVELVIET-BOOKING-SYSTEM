@@ -18,7 +18,7 @@ import {
   type BookingStatusHistory,
 } from "../../../api/server/Booking.api";
 import { paymentApi, type Payment } from "../../../api/server/Payment.api";
-import { formatCurrencyVnd } from "../../management/schedules/utils/currency";
+import { formatCurrencyVnd } from '@/utils/currency';
 import { BookingDetailPageSkeleton } from "../../../components/ui/skeletons/CustomerPageSkeletons";
 import { ErrorBlock } from "../../../components/common/ui/ErrorBlock";
 import { Footer } from "../../../components/Footer/Footer";

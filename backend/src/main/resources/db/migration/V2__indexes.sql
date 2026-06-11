@@ -10,7 +10,7 @@ CREATE INDEX idx_permissions_module_action ON permissions(module_name, action_na
 CREATE INDEX idx_users_member_level ON users(member_level); 
 CREATE INDEX idx_destinations_province ON destinations(province); 
 CREATE INDEX idx_destinations_region ON destinations(region); 
-CREATE INDEX idx_tours_destination_id ON tours(destination_id); 
+CREATE INDEX idx_tour_destinations_destination_id ON tour_destinations(destination_id);
 CREATE INDEX idx_tours_status_featured ON tours(status, is_featured); 
 CREATE INDEX idx_tour_tags_tag_id ON tour_tags(tag_id); 
 CREATE INDEX idx_tour_schedules_tour_id ON tour_schedules(tour_id); 
@@ -77,8 +77,8 @@ CREATE INDEX idx_bookings_paid_revenue
 CREATE INDEX idx_bookings_status_created
     ON bookings (status, deleted_at, created_at);
 
-CREATE INDEX idx_tours_dest_status_active
-    ON tours (destination_id, status, deleted_at);
+CREATE INDEX idx_tours_status_active
+    ON tours (status, deleted_at);
 
 CREATE INDEX idx_destinations_public_list
     ON destinations (status, is_active, deleted_at, parent_id, is_featured);

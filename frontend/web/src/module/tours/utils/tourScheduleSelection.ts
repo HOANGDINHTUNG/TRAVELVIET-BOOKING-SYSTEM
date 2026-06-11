@@ -1,4 +1,4 @@
-import { deriveEffectiveStatus } from '../../management/schedules/utils/scheduleStatus'
+import { deriveEffectiveStatus } from '@/utils/scheduleStatus'
 import { scheduleHasSeatAvailability } from './scheduleSeatAvailability'
 import type { TourScheduleResponse } from '../types/publicTour'
 

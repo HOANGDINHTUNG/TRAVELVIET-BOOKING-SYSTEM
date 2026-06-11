@@ -23,7 +23,7 @@ import {
   formatCurrencyVnd,
   formatDateTime,
   formatNumberVi,
-} from "../../management/schedules/utils/currency";
+} from '@/utils/currency';
 import { handleApiError } from "../../../lib/handleApiError";
 import {
   useBookingQuote,

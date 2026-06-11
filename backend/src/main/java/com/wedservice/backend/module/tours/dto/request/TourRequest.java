@@ -5,6 +5,7 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -30,8 +31,8 @@ public class TourRequest {
     @Size(max = 280, message = "Slug must not exceed 280 characters")
     private String slug;
 
-    @NotNull(message = "Destination id is required")
-    private Long destinationId;
+    @NotEmpty(message = "At least one destination is required")
+    private List<Long> destinationIds;
 
     private Long cancellationPolicyId;
 

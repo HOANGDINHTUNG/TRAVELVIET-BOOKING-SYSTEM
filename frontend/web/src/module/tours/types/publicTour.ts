@@ -12,13 +12,13 @@ export type {
   TourComboPackageOfferSummary,
   TourDepartureHubSummary,
   TourInclusionFlags,
-} from '../../management/tours/types/tour'
+} from '@/types/tour'
 
 export type {
   TourScheduleResponse,
   ScheduleStatus,
   PassengerType,
-} from '../../management/schedules/types/schedule'
+} from '@/types/schedule'
 
 /** Itinerary day public — nested vẫn `unknown` ở BE TourResponse, ta chuẩn hoá. */
 export type PublicItineraryDay = {

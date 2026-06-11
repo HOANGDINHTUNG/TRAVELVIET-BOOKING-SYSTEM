@@ -68,7 +68,7 @@ import {
 import '../styles/ToursCatalogCards.css'
 import '../styles/ToursCatalogLayout.css'
 
-import { formatCurrencyVnd } from '../../management/schedules/utils/currency'
+import { formatCurrencyVnd } from '@/utils/currency'
 import { OptimizedImage } from '../../../components/common/media/OptimizedImage'
 
 const TOUR_PAGE_SIZE = 20

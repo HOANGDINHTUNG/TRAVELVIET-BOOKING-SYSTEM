@@ -105,10 +105,12 @@ public class DestinationQueryServiceImpl implements DestinationQueryService {
                 lang
         );
         Map<Long, Long> activeTourCountByDestId = batchCountActiveTours(destinations);
+        Map<Long, String> coverImageByDestId = batchResolveCoverImages(destinations);
         return PageResponse.of(page.map(d -> toPublicResponse(
                 d,
                 byDestId.get(d.getId()),
-                activeTourCountByDestId.getOrDefault(d.getId(), 0L)
+                activeTourCountByDestId.getOrDefault(d.getId(), 0L),
+                coverImageByDestId.get(d.getId())
         )));
     }
 
@@ -205,7 +207,8 @@ public class DestinationQueryServiceImpl implements DestinationQueryService {
     private DestinationPublicResponse toPublicResponse(
             Destination destination,
             DestinationTranslation tr,
-            long activeTourCount
+            long activeTourCount,
+            String coverImageUrl
     ) {
         return DestinationPublicResponse.builder()
                 .id(destination.getId())
@@ -224,7 +227,7 @@ public class DestinationQueryServiceImpl implements DestinationQueryService {
                 .bestTimeToMonth(destination.getBestTimeToMonth())
                 .crowdLevelDefault(destination.getCrowdLevelDefault())
                 .isFeatured(destination.getIsFeatured())
-                .coverImageUrl(resolveCoverImage(destination))
+                .coverImageUrl(coverImageUrl)
                 .activeTourCount(activeTourCount)
                 .translationKey(destination.getSlug())
                 .parentUuid(destination.getParent() != null ? destination.getParent().getUuid() : null)
@@ -336,13 +339,27 @@ public class DestinationQueryServiceImpl implements DestinationQueryService {
         return out;
     }
 
-    private String resolveCoverImage(Destination destination) {
-        return destination.getMediaList().stream()
-                .filter(media -> Boolean.TRUE.equals(media.getIsActive()))
-                .sorted(Comparator.comparing(DestinationMedia::getSortOrder, Comparator.nullsLast(Integer::compareTo)))
-                .map(DestinationMedia::getMediaUrl)
-                .filter(Objects::nonNull)
-                .findFirst()
-                .orElse(null);
+    private Map<Long, String> batchResolveCoverImages(List<Destination> destinations) {
+        if (destinations == null || destinations.isEmpty()) {
+            return Map.of();
+        }
+        List<Long> ids = destinations.stream().map(Destination::getId).filter(Objects::nonNull).toList();
+        if (ids.isEmpty()) return Map.of();
+        
+        List<DestinationMedia> medias = destinationRepository.findActiveMediaByDestinationIds(ids);
+        
+        Map<Long, String> map = new HashMap<>();
+        for (Long id : ids) {
+            String url = medias.stream()
+                    .filter(m -> m.getDestination() != null && id.equals(m.getDestination().getId()))
+                    .map(DestinationMedia::getMediaUrl)
+                    .filter(Objects::nonNull)
+                    .findFirst()
+                    .orElse(null);
+            if (url != null) {
+                map.put(id, url);
+            }
+        }
+        return map;
     }
 }

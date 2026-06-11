@@ -30,6 +30,9 @@ class UserRepositoryTest {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private com.wedservice.backend.module.users.repository.RoleRepository roleRepository;
+
     @Test
     void existsByEmailIgnoreCase_returnsTrue_whenEmailExistsWithDifferentCase() {
         userRepository.save(buildUser("Nguyen Van A", "a@example.com", "0987654321", Status.ACTIVE, "CUSTOMER"));
@@ -91,9 +94,12 @@ class UserRepositoryTest {
                 .status(status)
                 .build();
         
+        Role role = roleRepository.findByCode(roleCode)
+                .orElseGet(() -> roleRepository.save(Role.builder().code(roleCode).name(roleCode.toLowerCase()).build()));
+        
         user.getUserRoles().add(UserRole.builder()
                 .user(user)
-                .role(Role.builder().code(roleCode).name(roleCode.toLowerCase()).build())
+                .role(role)
                 .isPrimary(true)
                 .build());
         

@@ -23,9 +23,7 @@ function App() {
   const location = useLocation();
   const { i18n } = useTranslation();
   const { theme, language } = useAppSelector((state) => state.preferences);
-  const isManagementPage =
-    location.pathname.startsWith("/management") ||
-    location.pathname.startsWith("/admin");
+  const isAdminPage = location.pathname.startsWith("/admin");
   const isTourPublicDetailPage = location.pathname.startsWith("/tour/");
   const isAuthPublicPage =
     location.pathname === "/login" || location.pathname === "/register";
@@ -78,7 +76,7 @@ function App() {
     <div
       className={`app-shell theme-${theme} ${theme === "dark" ? "dark" : ""} lang-${language} min-h-screen`}
     >
-      {isManagementPage ? (
+      {isAdminPage ? (
         <>
           <ScrollToTop />
           <main className="min-h-screen bg-transparent text-foreground">

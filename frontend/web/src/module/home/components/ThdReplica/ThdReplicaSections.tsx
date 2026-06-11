@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import type { Destination, Tour } from "../../database/interface/publicTravel";
 import { buildTourSlug } from "../../../tours/utils/slug";
-import { formatCurrencyVnd } from "../../../management/schedules/utils/currency";
+import { formatCurrencyVnd } from '@/utils/currency';
 import "./ThdReplicaSections.css";
 
 type ThdReplicaSectionsProps = {

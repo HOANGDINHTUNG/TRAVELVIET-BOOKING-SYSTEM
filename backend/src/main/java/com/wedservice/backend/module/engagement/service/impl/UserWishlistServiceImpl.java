@@ -94,7 +94,7 @@ public class UserWishlistServiceImpl implements UserWishlistCommandService, User
                 .tourCode(tour.getCode())
                 .tourName(tour.getName())
                 .tourSlug(tour.getSlug())
-                .destinationId(tour.getDestination() != null ? tour.getDestination().getId() : null)
+                .destinationId(tour.getDestinations() != null && !tour.getDestinations().isEmpty() ? tour.getDestinations().get(0).getId() : null)
                 .basePrice(tour.getBasePrice())
                 .currency(tour.getCurrency())
                 .durationDays(tour.getDurationDays())

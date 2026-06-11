@@ -12,7 +12,7 @@ import {
 import type { ReactNode } from "react";
 import type { TourResponse, PublicItineraryDay } from "../../types/publicTour";
 import { OptimizedImage } from "@/components/common/media/OptimizedImage";
-import { formatCurrencyVnd } from "../../../management/schedules/utils/currency";
+import { formatCurrencyVnd } from "@/utils/currency";
 import { TOUR_SCHEDULES_ANCHOR_ID } from "./tourPublicDetailConstants";
 import {
   resolveEsgScore,
@@ -383,8 +383,8 @@ export function TourPublicDetailShell({
                       </span>
                     </div>
                   </div>
-                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-2">
-                    <div className="flex items-end gap-2 shrink-0">
+                  <div className="flex flex-col items-start gap-4 mt-2">
+                    <div className="flex items-end gap-2 w-full">
                       <span className="text-[13px] text-slate-500 mb-1">
                         Giá từ:
                       </span>
@@ -392,7 +392,7 @@ export function TourPublicDetailShell({
                         {formatCurrencyVnd(displayPrice)}
                       </span>
                     </div>
-                    <div className="flex items-center gap-3 shrink-0 ml-auto">
+                    <div className="flex items-center gap-3 w-full">
                       <button
                         title="Gọi điện"
                         className="w-12 h-12 bg-blue-700 hover:bg-blue-800 text-white rounded-full flex items-center justify-center transition-colors shrink-0 shadow-sm"
@@ -400,7 +400,7 @@ export function TourPublicDetailShell({
                         <Phone size={20} />
                       </button>
                       <button
-                        className="bg-[#e11d27] hover:bg-red-700 text-white font-bold h-12 px-5 text-base rounded-full transition-colors shadow-sm"
+                        className="bg-[#e11d27] hover:bg-red-700 text-white font-bold h-12 flex-1 text-base rounded-full transition-colors shadow-sm"
                         onClick={() =>
                           document
                             .getElementById(TOUR_SCHEDULES_ANCHOR_ID)

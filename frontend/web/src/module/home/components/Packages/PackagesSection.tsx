@@ -5,7 +5,7 @@ import { FiArrowUpRight } from "react-icons/fi";
 import { Link, useNavigate } from "react-router-dom";
 import type { Tour } from "../../database/travelData";
 import { tourDetailPath } from "../../../tours/utils/slug";
-import { formatCurrencyVnd } from "../../../management/schedules/utils/currency";
+import { formatCurrencyVnd } from '@/utils/currency';
 import "./PackagesSection.css";
 
 type PackagesSectionProps = {

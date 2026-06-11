@@ -118,9 +118,12 @@ public class UserPassportService {
 
         if (booking != null && resolvedDestination != null) {
             Tour bookingTour = findTour(booking.getTourId());
-            Long bookingDestinationId = bookingTour.getDestination() == null ? null
-                    : bookingTour.getDestination().getId();
-            if (!resolvedDestination.getId().equals(bookingDestinationId)) {
+            boolean match = false;
+            if (bookingTour.getDestinations() != null) {
+                match = bookingTour.getDestinations().stream()
+                        .anyMatch(d -> d.getId().equals(resolvedDestination.getId()));
+            }
+            if (!match) {
                 throw BadRequestException.i18n("api.error.passport.destinationMismatch");
             }
         }
@@ -134,10 +137,10 @@ public class UserPassportService {
             destinationId = resolvedDestination.getId();
         } else if (booking != null) {
             Tour tour = findTour(booking.getTourId());
-            if (tour.getDestination() == null) {
+            if (tour.getDestinations() == null || tour.getDestinations().isEmpty()) {
                 throw new ResourceNotFoundException("Destination not found for tour with id: " + tour.getId());
             }
-            destinationId = tour.getDestination().getId();
+            destinationId = tour.getDestinations().get(0).getId();
         } else {
             throw BadRequestException.i18n("api.error.passport.bookingOrDestinationRequired");
         }
@@ -146,8 +149,9 @@ public class UserPassportService {
             UserCheckin existing = userCheckinRepository.findFirstByBookingIdAndUserId(booking.getId(), userId)
                     .orElse(null);
             if (existing != null) {
-                return mapCheckin(existing, booking, resolvedDestination != null ? resolvedDestination
-                        : findTour(booking.getTourId()).getDestination());
+                Destination finalDest = resolvedDestination != null ? resolvedDestination : 
+                    (findTour(booking.getTourId()).getDestinations().isEmpty() ? null : findTour(booking.getTourId()).getDestinations().get(0));
+                return mapCheckin(existing, booking, finalDest);
             }
         }
 

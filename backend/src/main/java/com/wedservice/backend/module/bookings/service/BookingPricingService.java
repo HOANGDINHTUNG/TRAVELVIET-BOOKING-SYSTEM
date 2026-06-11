@@ -282,8 +282,12 @@ public class BookingPricingService {
                 throw BadRequestException.i18n("api.error.bookingPricing.voucherNotTour");
             }
         } else if (voucher.getApplicableScope() == VoucherApplicableScope.DESTINATION) {
-            Long destinationId = tour.getDestination() == null ? null : tour.getDestination().getId();
-            if (destinationId == null || !destinationId.equals(voucher.getApplicableDestinationId())) {
+            boolean valid = false;
+            if (tour.getDestinations() != null) {
+                valid = tour.getDestinations().stream()
+                        .anyMatch(d -> d.getId().equals(voucher.getApplicableDestinationId()));
+            }
+            if (!valid) {
                 throw BadRequestException.i18n("api.error.bookingPricing.voucherNotDestination");
             }
         }

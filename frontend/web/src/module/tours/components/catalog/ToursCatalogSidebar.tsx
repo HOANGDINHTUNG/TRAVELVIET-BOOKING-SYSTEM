@@ -3,7 +3,7 @@ import {
   priceSliderStep,
   type TourLineFacet,
 } from '../../utils/tourCatalogFacets'
-import { formatCurrencyVnd } from '../../../management/schedules/utils/currency'
+import { formatCurrencyVnd } from '@/utils/currency'
 
 type ToursCatalogSidebarProps = {
   filters: TourCatalogUiFilters

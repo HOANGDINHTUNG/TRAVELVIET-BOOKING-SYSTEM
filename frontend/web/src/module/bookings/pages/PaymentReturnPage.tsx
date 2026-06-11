@@ -22,7 +22,7 @@ import {
 import { useVnpayCheckout } from '../../payments/hooks/useVnpay'
 import { useBookingPolling } from '../hooks/useBookingPolling'
 import { isPayable } from '../constants/bookingStatus'
-import { formatCurrencyVnd } from '../../management/schedules/utils/currency'
+import { formatCurrencyVnd } from '@/utils/currency'
 import BookingStatusBadge from '../components/BookingStatusBadge'
 import PaymentStatusBadge from '../components/PaymentStatusBadge'
 import { Footer } from '../../../components/Footer/Footer'

@@ -10,16 +10,18 @@ import lombok.*;
 import java.math.BigDecimal;
 import java.util.List;
 
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class TourSearchRequest {
-    private Long destinationId;
+    private List<Long> destinationIds;
 
     /**
-     * Khi {@code destinationId} được set: {@code true} (mặc định) — gồm tour của mọi điểm đến con theo {@code destination_path}.
+     * Khi {@code destinationIds} được set: {@code true} (mặc định) — gồm tour của mọi điểm đến con theo {@code destination_path}.
      */
     @Builder.Default
     private Boolean destinationSubtree = Boolean.TRUE;

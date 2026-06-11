@@ -13,7 +13,9 @@ const tourSchema = z.object({
   code: z.string().min(1, "Bắt buộc nhập Mã (VD: TOUR1)"),
   name: z.string().min(1, "Bắt buộc nhập tên Tour"),
   slug: z.string().min(1, "Bắt buộc nhập Slug URL liên kết"),
-  destinationId: z.coerce.number().min(1, "Vui lòng chọn Điểm đến"),
+  destinationIds: z
+    .array(z.number())
+    .min(1, "Vui lòng chọn ít nhất 1 Điểm đến"),
   basePrice: z.coerce.number().min(0, "Giá phải là số dương"),
   durationDays: z.coerce.number().min(1, "Ít nhất 1 ngày"),
   durationNights: z.coerce.number().min(0, "Không được nhỏ hơn 0"),
@@ -50,7 +52,7 @@ export function TourForm({ open, onOpenChange, tourToEdit }: TourFormProps) {
       code: "",
       name: "",
       slug: "",
-      destinationId: 0,
+      destinationIds: [],
       basePrice: 0,
       durationDays: 1,
       durationNights: 0,
@@ -74,7 +76,7 @@ export function TourForm({ open, onOpenChange, tourToEdit }: TourFormProps) {
           code: tourToEdit.code,
           name: tourToEdit.name,
           slug: tourToEdit.slug,
-          destinationId: tourToEdit.destinationId,
+          destinationIds: tourToEdit.destinations?.map((d) => d.id) || [],
           basePrice: tourToEdit.basePrice,
           durationDays: tourToEdit.durationDays,
           durationNights: tourToEdit.durationNights,
@@ -93,7 +95,7 @@ export function TourForm({ open, onOpenChange, tourToEdit }: TourFormProps) {
           code: "",
           name: "",
           slug: "",
-          destinationId: 0,
+          destinationIds: [],
           basePrice: 0,
           durationDays: 1,
           durationNights: 0,
@@ -242,22 +244,34 @@ export function TourForm({ open, onOpenChange, tourToEdit }: TourFormProps) {
                     <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
                       Điểm Đến Bản Đồ <span className="text-red-500">*</span>
                     </label>
-                    <select
-                      {...form.register("destinationId")}
-                      className="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50/50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium appearance-none"
-                    >
-                      <option value={0} disabled>
-                        -- Chọn Tỉnh/Thành Điểm Đến --
-                      </option>
-                      {destinations.map((d) => (
-                        <option key={d.id} value={d.id}>
-                          {d.name} ({d.code})
-                        </option>
-                      ))}
-                    </select>
-                    {form.formState.errors.destinationId && (
+                    <Controller
+                      name="destinationIds"
+                      control={form.control}
+                      render={({ field }) => (
+                        <select
+                          multiple
+                          size={4}
+                          value={field.value.map(String)}
+                          onChange={(e) => {
+                            const values = Array.from(
+                              e.target.selectedOptions,
+                              (option) => Number(option.value),
+                            );
+                            field.onChange(values);
+                          }}
+                          className="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50/50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium custom-scrollbar"
+                        >
+                          {destinations.map((d) => (
+                            <option key={d.id} value={d.id} className="p-1.5">
+                              {d.name} ({d.code})
+                            </option>
+                          ))}
+                        </select>
+                      )}
+                    />
+                    {form.formState.errors.destinationIds && (
                       <p className="text-xs text-red-500 font-medium">
-                        {form.formState.errors.destinationId.message}
+                        {form.formState.errors.destinationIds.message}
                       </p>
                     )}
                   </div>

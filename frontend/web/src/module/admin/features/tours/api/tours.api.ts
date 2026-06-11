@@ -16,8 +16,7 @@ export interface Tour {
   code: string;
   name: string;
   slug: string;
-  destinationId: number;
-  destinationName?: string;
+  destinations?: { id: number; name: string }[];
   basePrice: number;
   listPrice?: number;
   currency: string;
@@ -40,7 +39,7 @@ export interface TourRequest {
   code: string;
   name: string;
   slug: string;
-  destinationId: number;
+  destinationIds: number[];
   basePrice: number;
   durationDays: number;
   durationNights: number;

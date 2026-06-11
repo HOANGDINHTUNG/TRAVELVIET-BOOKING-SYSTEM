@@ -241,7 +241,7 @@ class BookingPricingServiceTest {
                 .code("COMBO-001")
                 .name("Adventure Combo")
                 .basePrice(new BigDecimal("250.00"))
-                .discountAmount(new BigDecimal("50.00"))
+                .discountValue(new BigDecimal("50.00"))
                 .isActive(true)
                 .build();
 

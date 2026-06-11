@@ -50,45 +50,7 @@ const lazyRequireManagerAccess = lazy(
   () => import("./guards/RequireManagerAccess"),
 );
 const lazyRequireRoles = lazy(() => import("./guards/RequireRoles"));
-const lazyManagementLayout = lazy(
-  () => import("../module/management/layouts/ManagementLayout"),
-);
-const lazyManagementLayoutNew = lazy(
-  () => import("../components/layout/ManagementLayout"),
-);
-const lazyManagementToursPage = lazy(
-  () => import("../module/management/tours/pages/ManagementToursPage"),
-);
-const lazyManagementHubPage = lazy(
-  () => import("../module/management/pages/ManagementHubPage"),
-);
-const lazyDashboardOverview = lazy(
-  () => import("../module/management/pages/DashboardOverview"),
-);
-const lazyManagementApiProbePage = lazy(
-  () => import("../module/management/pages/ManagementApiProbePage"),
-);
-const lazyManagementModulePage = lazy(
-  () => import("../module/management/pages/ManagementModulePage"),
-);
-const lazyManagementSystemPage = lazy(
-  () => import("../module/management/pages/ManagementSystemPage"),
-);
-const lazyManagementAuditPage = lazy(
-  () => import("../module/management/pages/ManagementAuditPage"),
-);
-const lazyManagementDestinationPage = lazy(
-  () => import("../module/management/pages/ManagementDestinationPage"),
-);
-const lazyManagementTourPage = lazy(
-  () => import("../module/management/pages/ManagementTourPage"),
-);
-const lazyManagementSupportPage = lazy(
-  () => import("../module/management/pages/ManagementSupportPage"),
-);
-const lazyManagementPromotionPage = lazy(
-  () => import("../module/management/pages/ManagementPromotionPage"),
-);
+
 const lazyTourPublicDetailPage = lazy(
   () => import("../module/tours/pages/TourPublicDetailPage"),
 );
@@ -141,9 +103,6 @@ const lazyFlightCheckoutPage = lazy(
 );
 const lazyFlightPaymentSuccessPage = lazy(
   () => import("../module/flights/pages/FlightPaymentSuccessPage"),
-);
-const lazyManagementBookingsPage = lazy(
-  () => import("../module/management/bookings/pages/ManagementBookingsPage"),
 );
 
 // Admin Module v3 (New Architecture)
@@ -338,158 +297,6 @@ const router = createBrowserRouter([
           {
             path: "register",
             element: withSuspense(createElement(lazyRegisterPage)),
-          },
-        ],
-      },
-      {
-        element: withSuspense(createElement(lazyRequireManagerAccess)),
-        children: [
-          {
-            path: "management",
-            element: withSuspense(createElement(lazyManagementLayout)),
-            children: [
-              {
-                index: true,
-                element: <Navigate to="dashboard" replace />,
-              },
-              {
-                path: "dashboard",
-                element: withSuspense(createElement(lazyDashboardOverview)),
-              },
-              {
-                path: "system-api-probe",
-                element: withSuspense(
-                  createElement(lazyManagementApiProbePage),
-                ),
-              },
-              {
-                path: "developer-hub",
-                element: withSuspense(createElement(lazyManagementHubPage)),
-              },
-              {
-                path: "users",
-                element: withSuspense(
-                  createElement(lazyManagementSystemPage, { pageId: "users" }),
-                ),
-              },
-              {
-                path: "roles",
-                element: withSuspense(
-                  createElement(lazyManagementSystemPage, { pageId: "roles" }),
-                ),
-              },
-              {
-                path: "permissions",
-                element: withSuspense(
-                  createElement(lazyManagementSystemPage, {
-                    pageId: "permissions",
-                  }),
-                ),
-              },
-              {
-                path: "audit-logs",
-                element: withSuspense(createElement(lazyManagementAuditPage)),
-              },
-              {
-                path: "destinations",
-                element: withSuspense(
-                  createElement(lazyManagementDestinationPage),
-                ),
-              },
-              {
-                path: "tours",
-                element: withSuspense(createElement(lazyManagementToursPage)),
-              },
-              {
-                path: "schedules",
-                element: withSuspense(
-                  createElement(lazyManagementTourPage, { mode: "schedules" }),
-                ),
-              },
-              {
-                path: "bookings",
-                element: withSuspense(
-                  createElement(lazyManagementBookingsPage),
-                ),
-              },
-              {
-                path: "payments",
-                element: withSuspense(
-                  createElement(lazyManagementModulePage, {
-                    pageId: "payments",
-                  }),
-                ),
-              },
-              {
-                path: "refunds",
-                element: withSuspense(
-                  createElement(lazyManagementModulePage, {
-                    pageId: "refunds",
-                  }),
-                ),
-              },
-              {
-                path: "support",
-                element: withSuspense(createElement(lazyManagementSupportPage)),
-              },
-              {
-                path: "promotions",
-                element: withSuspense(
-                  createElement(lazyManagementPromotionPage),
-                ),
-              },
-              {
-                path: "reviews",
-                element: withSuspense(
-                  createElement(lazyManagementModulePage, {
-                    pageId: "reviews",
-                  }),
-                ),
-              },
-              {
-                path: "notifications",
-                element: withSuspense(
-                  createElement(lazyManagementModulePage, {
-                    pageId: "notifications",
-                  }),
-                ),
-              },
-              {
-                path: "reports",
-                element: withSuspense(
-                  createElement(lazyManagementModulePage, {
-                    pageId: "reports",
-                  }),
-                ),
-              },
-              {
-                path: ":roleCode",
-                element: withSuspense(createElement(lazyManagementHubPage)),
-              },
-            ],
-          },
-        ],
-      },
-      {
-        // Backoffice v2 (Tailwind layout, tự bọc 2 lớp guard)
-        // Đặt ngoài cây `management/*` legacy để không phá routes hiện hữu.
-        path: "management/tours-v2",
-        element: withSuspense(createElement(lazyManagementLayoutNew)),
-        children: [
-          {
-            index: true,
-            element: withSuspense(createElement(lazyManagementToursPage)),
-          },
-        ],
-      },
-      {
-        // Phase 8 — Backoffice booking management (tự bọc guards)
-        path: "management/bookings-v2",
-        element: withSuspense(createElement(lazyManagementLayoutNew)),
-        children: [
-          {
-            index: true,
-            element: withSuspense(createElement(lazyManagementBookingsPage)),
           },
         ],
       },

@@ -43,7 +43,7 @@ export function pickLastMinuteDealTours(
   return out
 }
 
-export { formatCurrencyVnd as formatDealPriceVnd } from '@/module/management/schedules/utils/currency'
+export { formatCurrencyVnd as formatDealPriceVnd } from '@/utils/currency'
 
 export { resolveListPrice } from '@/module/tours/utils/tourSustainability'
 

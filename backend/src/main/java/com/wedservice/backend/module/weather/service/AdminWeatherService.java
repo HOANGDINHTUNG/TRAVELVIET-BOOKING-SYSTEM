@@ -297,8 +297,11 @@ public class AdminWeatherService {
         Tour tour = tourRepository.findById(schedule.getTourId())
                 .orElseThrow(() -> new ResourceNotFoundException("Tour not found with id: " + schedule.getTourId()));
 
-        Long tourDestinationId = tour.getDestination() == null ? null : tour.getDestination().getId();
-        if (!destination.getId().equals(tourDestinationId)) {
+        boolean matches = false;
+        if (tour.getDestinations() != null) {
+            matches = tour.getDestinations().stream().anyMatch(d -> d.getId().equals(destination.getId()));
+        }
+        if (!matches) {
             throw BadRequestException.i18n("api.error.weather.scheduleNotDestination");
         }
     }

@@ -9,8 +9,8 @@ CREATE OR REPLACE VIEW v_tour_public_summary AS
         t.code,
         t.name,
         t.slug,
-        d.name AS destination_name,
-        d.province,
+        GROUP_CONCAT(d.name SEPARATOR ', ') AS destination_name,
+        GROUP_CONCAT(d.province SEPARATOR ', ') AS province,
         t.duration_days,
         t.duration_nights,
         t.base_price,
@@ -26,8 +26,11 @@ CREATE OR REPLACE VIEW v_tour_public_summary AS
         t.status
     FROM
         tours t
-            JOIN
-        destinations d ON d.id = t.destination_id;
+            LEFT JOIN
+        tour_destinations td ON td.tour_id = t.id
+            LEFT JOIN
+        destinations d ON d.id = td.destination_id
+    GROUP BY t.id;
 
 CREATE OR REPLACE VIEW v_schedule_availability AS
     SELECT 

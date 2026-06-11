@@ -1,7 +1,7 @@
 import { useMemo, useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { CalendarRange, Loader2 } from "lucide-react";
-import { formatCurrencyVnd } from "../../management/schedules/utils/currency";
+import { formatCurrencyVnd } from '@/utils/currency';
 import type { TourScheduleResponse } from "../types/publicTour";
 import { listBookableSchedules } from "../utils/tourScheduleSelection";
 

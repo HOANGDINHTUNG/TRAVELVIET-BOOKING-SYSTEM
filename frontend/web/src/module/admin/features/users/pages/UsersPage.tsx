@@ -7,7 +7,7 @@ import { UserForm } from "../components/UserForm";
 import { UserPlus, Search, UsersRound } from "lucide-react";
 import type { PaginationState } from "@tanstack/react-table";
 import { useDebounce } from "../../../core/hooks/useDebounce";
-import { userStatusOptions } from "../../../../management/pages/system/systemShared";
+import { userStatusOptions } from '@/utils/systemShared';
 import { useGetRoles } from "../api/users.api";
 
 export default function UsersPage() {

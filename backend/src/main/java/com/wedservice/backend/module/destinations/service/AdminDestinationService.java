@@ -111,7 +111,25 @@ public class AdminDestinationService extends BaseService<Destination, Long>
 
         Page<Destination> page = destinationRepository.findAll(builder, pageable);
 
-        return PageResponse.of(page.map(destinationMapper::toDto));
+        List<Destination> destinations = page.getContent();
+        java.util.Set<Long> parentIds = destinations.stream()
+                .map(d -> d.getParent() != null ? d.getParent().getId() : null)
+                .filter(java.util.Objects::nonNull)
+                .collect(java.util.stream.Collectors.toSet());
+
+        java.util.Map<Long, java.util.UUID> parentUuidMap = new java.util.HashMap<>();
+        if (!parentIds.isEmpty()) {
+            destinationRepository.findAllById(parentIds)
+                    .forEach(p -> parentUuidMap.put(p.getId(), p.getUuid()));
+        }
+
+        return PageResponse.of(page.map(d -> {
+            DestinationResponse dto = destinationMapper.toDto(d);
+            if (d.getParent() != null) {
+                dto.setParentUuid(parentUuidMap.get(d.getParent().getId()));
+            }
+            return dto;
+        }));
     }
 
     @Transactional(readOnly = true)

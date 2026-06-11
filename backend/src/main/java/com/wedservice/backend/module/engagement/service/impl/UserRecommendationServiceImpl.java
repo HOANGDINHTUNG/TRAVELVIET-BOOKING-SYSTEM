@@ -229,7 +229,7 @@ public class UserRecommendationServiceImpl implements UserRecommendationCommandS
             score += 8;
             reasons.add("low_mobility_preference");
         }
-        if (tour.getDestination() != null && affinityDestinationIds.contains(tour.getDestination().getId())) {
+        if (tour.getDestinations() != null && tour.getDestinations().stream().anyMatch(d -> affinityDestinationIds.contains(d.getId()))) {
             score += 9;
             reasons.add("destination_affinity");
         }
@@ -315,7 +315,7 @@ public class UserRecommendationServiceImpl implements UserRecommendationCommandS
         }
         return tourRepository.findAllById(sourceTourIds).stream()
                 .filter(this::isRecommendationEligibleTour)
-                .map(Tour::getDestination)
+                .flatMap(tour -> tour.getDestinations() != null ? tour.getDestinations().stream() : java.util.stream.Stream.empty())
                 .filter(java.util.Objects::nonNull)
                 .map(destination -> destination.getId())
                 .collect(Collectors.toCollection(LinkedHashSet::new));
@@ -437,7 +437,7 @@ public class UserRecommendationServiceImpl implements UserRecommendationCommandS
                 .tourCode(tour.getCode())
                 .tourName(tour.getName())
                 .tourSlug(tour.getSlug())
-                .destinationId(tour.getDestination() != null ? tour.getDestination().getId() : null)
+                .destinationId(tour.getDestinations() != null && !tour.getDestinations().isEmpty() ? tour.getDestinations().get(0).getId() : null)
                 .basePrice(tour.getBasePrice())
                 .currency(tour.getCurrency())
                 .durationDays(tour.getDurationDays())

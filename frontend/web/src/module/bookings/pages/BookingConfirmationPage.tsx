@@ -11,7 +11,7 @@ import {
 } from 'lucide-react'
 import { handleApiError } from '../../../lib/handleApiError'
 import { useBookingDetail } from '../hooks/useBookingMutation'
-import { formatCurrencyVnd } from '../../management/schedules/utils/currency'
+import { formatCurrencyVnd } from '@/utils/currency'
 import { useVnpayCheckout } from '../../payments/hooks/useVnpay'
 import BookingStatusBadge from '../components/BookingStatusBadge'
 import PaymentStatusBadge from '../components/PaymentStatusBadge'

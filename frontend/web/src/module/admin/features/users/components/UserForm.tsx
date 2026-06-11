@@ -16,7 +16,7 @@ import {
   memberLevelOptions,
   userCategoryOptions,
   userStatusOptions,
-} from "../../../../management/pages/system/systemShared";
+} from '@/utils/systemShared';
 
 const userSchema = z.object({
   fullName: z.string().min(1, "Vui lòng nhập họ và tên"),

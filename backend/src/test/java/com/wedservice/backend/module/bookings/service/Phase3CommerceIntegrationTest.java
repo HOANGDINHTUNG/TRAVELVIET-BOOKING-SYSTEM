@@ -187,7 +187,7 @@ class Phase3CommerceIntegrationTest {
                 .code("TOUR-" + System.nanoTime())
                 .name("Coastal Escape")
                 .slug("coastal-escape-" + System.nanoTime())
-                .destination(destination)
+                .destinations(java.util.List.of(destination))
                 .basePrice(new BigDecimal("1000000"))
                 .currency("VND")
                 .durationDays(2)
@@ -224,7 +224,7 @@ class Phase3CommerceIntegrationTest {
                 .name("Adventure Combo")
                 .description("Snapshot combo")
                 .basePrice(new BigDecimal("150000"))
-                .discountAmount(new BigDecimal("50000"))
+                .discountValue(new BigDecimal("50000"))
                 .isActive(true)
                 .build();
 

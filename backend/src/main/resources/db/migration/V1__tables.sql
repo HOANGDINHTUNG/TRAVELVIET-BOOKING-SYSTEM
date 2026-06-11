@@ -512,7 +512,7 @@ CREATE TABLE IF NOT EXISTS tours (
     code VARCHAR(30) NOT NULL UNIQUE, -- mã tour
     name VARCHAR(255) NOT NULL, -- tên tour
     slug VARCHAR(280) NOT NULL UNIQUE, -- slug tour
-    destination_id BIGINT NOT NULL, -- id điểm đến
+
     cancellation_policy_id BIGINT NULL, -- id chính sách hủy
     short_description TEXT, -- mô tả ngắn
     description TEXT, -- mô tả đầy đủ
@@ -548,8 +548,7 @@ CREATE TABLE IF NOT EXISTS tours (
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, -- ngày tạo
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- ngày cập nhật
     deleted_at DATETIME NULL, -- ngày xóa
-    CONSTRAINT fk_tours_destination FOREIGN KEY (destination_id)
-        REFERENCES destinations (id),
+
     CONSTRAINT fk_tours_policy FOREIGN KEY (cancellation_policy_id)
         REFERENCES cancellation_policies (id),
     CONSTRAINT fk_tours_created_by FOREIGN KEY (created_by)
@@ -565,6 +564,20 @@ CREATE TABLE IF NOT EXISTS tours (
     CONSTRAINT chk_tours_esg_score CHECK (esg_score IS NULL OR (esg_score BETWEEN 0 AND 100)),
     CONSTRAINT chk_tours_lei_score CHECK (lei_score IS NULL OR (lei_score BETWEEN 0 AND 100))
 )  ENGINE=INNODB;
+
+CREATE TABLE IF NOT EXISTS tour_destinations (
+    tour_id BIGINT NOT NULL,
+    destination_id BIGINT NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (tour_id, destination_id),
+    CONSTRAINT fk_tour_destinations_tour FOREIGN KEY (tour_id)
+        REFERENCES tours (id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_tour_destinations_destination FOREIGN KEY (destination_id)
+        REFERENCES destinations (id)
+        ON DELETE CASCADE
+) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS tour_translations (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,

@@ -15,10 +15,7 @@ public class TourResponse {
     private String code;
     private String name;
     private String slug;
-    private Long destinationId;
-    private String destinationCountryCode;
-    private String destinationName;
-    private String destinationProvince;
+    private List<TourDestinationSummaryResponse> destinations;
     private Long cancellationPolicyId;
     private BigDecimal basePrice;
     private Integer esgScore;

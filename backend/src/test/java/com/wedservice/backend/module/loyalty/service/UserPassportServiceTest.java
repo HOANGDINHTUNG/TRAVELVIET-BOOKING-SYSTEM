@@ -184,7 +184,7 @@ class UserPassportServiceTest {
                 .build();
         Tour tour = Tour.builder()
                 .id(66L)
-                .destination(destination)
+                .destinations(java.util.List.of(destination))
                 .build();
         TravelPassport passport = TravelPassport.builder()
                 .id(88L)

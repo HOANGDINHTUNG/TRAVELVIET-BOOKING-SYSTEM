@@ -10,7 +10,7 @@ import {
 } from '../../database/travelData'
 import { GlassCard } from '../../../../components/ui/GlassCard'
 import { MotionSection } from '../../../../components/ui/MotionSection'
-import { formatCurrencyVnd } from '../../../management/schedules/utils/currency'
+import { formatCurrencyVnd } from '@/utils/currency'
 import { tourDetailPath } from '../../../tours/utils/slug'
 import './Hero.css'
 

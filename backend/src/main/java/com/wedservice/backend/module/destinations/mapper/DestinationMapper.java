@@ -38,7 +38,7 @@ public interface DestinationMapper extends BaseMapper<DestinationResponse, Desti
 
     @Override
     @Mapping(target = "id", source = "id")
-    @Mapping(target = "parentUuid", expression = "java(entity.getParent() == null ? null : entity.getParent().getUuid())")
+    @Mapping(target = "parentUuid", ignore = true)
     @Mapping(target = "level", source = "level")
     @Mapping(target = "path", source = "path")
     DestinationResponse toDto(Destination entity);

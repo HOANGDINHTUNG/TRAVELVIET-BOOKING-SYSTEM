@@ -32,9 +32,14 @@ public class Tour extends AuditableEntity {
     @Column(name = "slug", unique = true, nullable = false, length = 280)
     private String slug;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "destination_id", nullable = false)
-    private Destination destination;
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "tour_destinations",
+        joinColumns = @JoinColumn(name = "tour_id"),
+        inverseJoinColumns = @JoinColumn(name = "destination_id")
+    )
+    @Builder.Default
+    private List<Destination> destinations = new ArrayList<>();
 
     @Column(name = "cancellation_policy_id")
     private Long cancellationPolicyId;

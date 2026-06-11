@@ -1,0 +1,6 @@
+﻿version	description	success
+7	seed data	0
+6	triggers	1
+5	functions	1
+4	procedures	1
+3	views	1

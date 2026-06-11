@@ -144,7 +144,7 @@ class TourCommandServiceImplTest {
                 .code(" TOUR-001 ")
                 .name(" Ha Noi City Tour ")
                 .slug(" ha-noi-city-tour ")
-                .destinationId(5L)
+                .destinationIds(java.util.List.of(5L))
                 .basePrice(new BigDecimal("1250000"))
                 .currency("vnd")
                 .durationDays(3)
@@ -197,13 +197,13 @@ class TourCommandServiceImplTest {
         assertThat(savedTour.getCode()).isEqualTo("TOUR-001");
         assertThat(savedTour.getName()).isEqualTo("Ha Noi City Tour");
         assertThat(savedTour.getSlug()).isEqualTo("ha-noi-city-tour");
-        assertThat(savedTour.getDestination()).isSameAs(destination);
+        assertThat(savedTour.getDestinations()).containsExactly(destination);
         assertThat(savedTour.getCancellationPolicyId()).isEqualTo(1L);
         assertThat(savedTour.getCurrency()).isEqualTo("VND");
         assertThat(savedTour.getStatus()).isEqualTo(TourStatus.ACTIVE);
 
         assertThat(response.getId()).isEqualTo(11L);
-        assertThat(response.getDestinationId()).isEqualTo(5L);
+        assertThat(response.getDestinations().get(0).getId()).isEqualTo(5L);
         assertThat(response.getCurrency()).isEqualTo("VND");
     }
 
@@ -213,7 +213,7 @@ class TourCommandServiceImplTest {
                 .code("TOUR-003")
                 .name("Hue Heritage")
                 .slug("hue-heritage")
-                .destinationId(8L)
+                .destinationIds(java.util.List.of(8L))
                 .basePrice(new BigDecimal("1800000"))
                 .durationDays(2)
                 .durationNights(1)
@@ -383,7 +383,7 @@ class TourCommandServiceImplTest {
                 .code("TOUR-002")
                 .name("Da Nang Tour")
                 .slug("da-nang-tour")
-                .destinationId(7L)
+                .destinationIds(java.util.List.of(7L))
                 .basePrice(BigDecimal.ONE)
                 .durationDays(2)
                 .build();

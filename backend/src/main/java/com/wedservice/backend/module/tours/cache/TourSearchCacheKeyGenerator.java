@@ -31,7 +31,7 @@ public class TourSearchCacheKeyGenerator implements KeyGenerator {
 
     static String buildKeyBody(TourSearchRequest request) {
         StringBuilder sb = new StringBuilder(256);
-        append(sb, "dId", request.getDestinationId());
+        append(sb, "dIds", request.getDestinationIds() != null ? request.getDestinationIds().hashCode() : null);
         append(sb, "dSub", request.getDestinationSubtree());
         append(sb, "dCc", blankToEmpty(request.getDestinationCountryCode()));
         append(sb, "dom", request.getDomesticOnly());

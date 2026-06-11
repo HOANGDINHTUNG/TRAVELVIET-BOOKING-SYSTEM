@@ -98,14 +98,16 @@ public class TourCommandServiceImpl implements TourCommandService {
     @Transactional
     public TourResponse createTour(TourRequest request) {
         tourValidator.validateRequest(request);
-        Destination destination = findDestination(request.getDestinationId());
+        List<Destination> destinations = request.getDestinationIds().stream()
+                .map(this::findDestination)
+                .toList();
         CancellationPolicy cancellationPolicy = resolveCancellationPolicy(request.getCancellationPolicyId());
 
         Tour t = Tour.builder()
                 .code(request.getCode().trim())
                 .name(request.getName().trim())
                 .slug(request.getSlug().trim())
-                .destination(destination)
+                .destinations(destinations)
                 .cancellationPolicyId(cancellationPolicy.getId())
                 .basePrice(request.getBasePrice())
                 .esgScore(request.getEsgScore())
@@ -138,13 +140,15 @@ public class TourCommandServiceImpl implements TourCommandService {
         tourValidator.validateRequest(request);
         Tour t = tourRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Tour not found with id: " + id));
-        Destination destination = findDestination(request.getDestinationId());
+        List<Destination> destinations = request.getDestinationIds().stream()
+                .map(this::findDestination)
+                .toList();
         CancellationPolicy cancellationPolicy = resolveCancellationPolicy(request.getCancellationPolicyId());
 
         t.setCode(request.getCode().trim());
         t.setName(request.getName().trim());
         t.setSlug(request.getSlug().trim());
-        t.setDestination(destination);
+        t.setDestinations(destinations);
         t.setCancellationPolicyId(cancellationPolicy.getId());
         t.setBasePrice(request.getBasePrice());
         t.setEsgScore(request.getEsgScore());
@@ -608,26 +612,23 @@ public class TourCommandServiceImpl implements TourCommandService {
     }
 
     private TourResponse toResponse(Tour t, boolean includeContent) {
-        Long destinationId = null;
-        String destinationCountryCode = null;
-        String destinationName = null;
-        String destinationProvince = null;
-        if (t.getDestination() != null) {
-            var d = t.getDestination();
-            destinationId = d.getId();
-            destinationCountryCode = d.getCountryCode();
-            destinationName = d.getName();
-            destinationProvince = d.getProvince();
+        List<com.wedservice.backend.module.tours.dto.response.TourDestinationSummaryResponse> destinations = new java.util.ArrayList<>();
+        if (t.getDestinations() != null) {
+            destinations = t.getDestinations().stream()
+                .map(d -> com.wedservice.backend.module.tours.dto.response.TourDestinationSummaryResponse.builder()
+                        .id(d.getId())
+                        .countryCode(d.getCountryCode())
+                        .name(d.getName())
+                        .province(d.getProvince())
+                        .build())
+                .toList();
         }
         TourResponse.TourResponseBuilder builder = TourResponse.builder()
                 .id(t.getId())
                 .code(t.getCode())
                 .name(t.getName())
                 .slug(t.getSlug())
-                .destinationId(destinationId)
-                .destinationCountryCode(destinationCountryCode)
-                .destinationName(destinationName)
-                .destinationProvince(destinationProvince)
+                .destinations(destinations)
                 .cancellationPolicyId(t.getCancellationPolicyId())
                 .basePrice(t.getBasePrice())
                 .esgScore(t.getEsgScore())

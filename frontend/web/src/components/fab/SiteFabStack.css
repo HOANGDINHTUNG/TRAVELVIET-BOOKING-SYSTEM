@@ -10,8 +10,8 @@
 }
 
 .ai-chatbox.ai-chatbox--site-fab {
-  right: 22px;
-  bottom: calc(22px + 52px * 3 + 10px * 2);
+  right: calc(22px + 52px + 20px);
+  bottom: 22px;
   z-index: 2147483644;
 }
 
@@ -122,8 +122,8 @@
 
 @media (max-width: 640px) {
   .ai-chatbox.ai-chatbox--site-fab {
-    right: 16px;
-    bottom: calc(16px + 52px * 3 + 10px * 2);
+    right: calc(16px + 52px + 16px);
+    bottom: max(16px, env(safe-area-inset-bottom, 0px));
   }
 
   .ai-chatbox.ai-chatbox--site-fab .ai-chatbox-panel {

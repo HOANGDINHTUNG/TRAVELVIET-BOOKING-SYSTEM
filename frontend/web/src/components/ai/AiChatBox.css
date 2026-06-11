@@ -3,8 +3,9 @@
   right: 24px;
   bottom: 24px;
   z-index: 2147483645;
-  display: grid;
-  justify-items: end;
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: flex-end;
   gap: 14px;
   color: #283618;
 }

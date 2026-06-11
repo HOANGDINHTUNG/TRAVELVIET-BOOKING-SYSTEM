@@ -37,4 +37,11 @@ public interface DestinationRepository extends JpaRepository<Destination, Long>,
             DestinationStatus status);
 
     java.util.List<Destination> findByParent_IdAndDeletedAtIsNullOrderByNameAsc(Long parentId);
+
+    @org.springframework.data.jpa.repository.Query("SELECT m FROM DestinationMedia m WHERE m.destination.id IN :destinationIds AND m.isActive = true ORDER BY m.sortOrder ASC")
+    java.util.List<com.wedservice.backend.module.destinations.entity.DestinationMedia> findActiveMediaByDestinationIds(
+            @org.springframework.data.repository.query.Param("destinationIds") Collection<Long> destinationIds);
+
+    @org.springframework.data.jpa.repository.Query("SELECT MIN(d.uuid) FROM Destination d WHERE d.id = :id")
+    Optional<UUID> findUuidById(@org.springframework.data.repository.query.Param("id") Long id);
 }
