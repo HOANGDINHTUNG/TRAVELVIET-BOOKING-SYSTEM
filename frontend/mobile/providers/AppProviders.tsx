@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { PaperProvider, MD3LightTheme } from 'react-native-paper';
 import { AppBootstrap } from '@/providers/AppBootstrap';
 import { SnackbarProvider } from '@/providers/SnackbarProvider';
+import { AppSettingsProvider } from '@/providers/AppSettingsProvider';
 import { commerceDesk } from '@/theme/commerceDesk';
 
 const queryClient = new QueryClient({
@@ -27,7 +28,9 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
     <AppBootstrap>
       <QueryClientProvider client={queryClient}>
         <PaperProvider theme={paperTheme}>
-          <SnackbarProvider>{children}</SnackbarProvider>
+          <AppSettingsProvider>
+            <SnackbarProvider>{children}</SnackbarProvider>
+          </AppSettingsProvider>
         </PaperProvider>
       </QueryClientProvider>
     </AppBootstrap>
