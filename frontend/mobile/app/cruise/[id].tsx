@@ -371,7 +371,7 @@ export default function CruiseDetailScreen() {
         <View style={styles.content}>
           <View style={dynamicStyles.engagementPanel}>
             <View style={styles.ratingBlock}>
-              <Ionicons name="star" size={22} color="#dda15e" />
+              <Ionicons name="star" size={22} color="#FFB800" />
               <View>
                 <Text style={dynamicStyles.ratingValue}>{cruise.stars.toFixed(1)}</Text>
                 <Text style={dynamicStyles.ratingLabel}>

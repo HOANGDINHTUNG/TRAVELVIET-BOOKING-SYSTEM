@@ -386,13 +386,13 @@ export default function ToursScreen() {
 
           <View style={styles.metaContainer}>
             <View style={styles.metaRow}>
-              <Ionicons name="location-outline" size={12} color="#FF702A" />
+              <Ionicons name="location-outline" size={12} color="#FF5B22" />
               <Text style={[styles.metaText, isDark && { color: '#94A3B8' }]} numberOfLines={1}>
                 {item.departure} • {item.duration}
               </Text>
             </View>
             <View style={styles.metaRow}>
-              <Ionicons name="bus-outline" size={12} color="#FF702A" />
+              <Ionicons name="bus-outline" size={12} color="#FF5B22" />
               <Text style={[styles.metaText, isDark && { color: '#94A3B8' }]} numberOfLines={1}>
                 {item.transport} • {language === 'vi' ? 'Còn:' : 'Left:'} {item.slotsLeft} • ★ {item.rating} ({item.reviewCount})
               </Text>
@@ -437,7 +437,7 @@ export default function ToursScreen() {
             onPress={() => setIsSearchExpanded(!isSearchExpanded)}
             activeOpacity={0.9}
           >
-            <Ionicons name="search" size={20} color={isDark ? '#FF702A' : '#1D5A5A'} />
+            <Ionicons name="search" size={20} color={isDark ? '#FF5B22' : '#1D5A5A'} />
             <Text style={[styles.searchCardTitle, isDark && { color: '#FFFFFF' }]}>Tìm tour phù hợp</Text>
             <Ionicons
               name={isSearchExpanded ? 'chevron-up' : 'chevron-down'}
@@ -687,8 +687,8 @@ export default function ToursScreen() {
 
           <View style={styles.controlBarRight}>
             <TouchableOpacity style={[styles.filterDrawerBtn, isDark && { backgroundColor: '#1E293B', borderColor: '#334155' }]} onPress={() => setIsFilterVisible(true)}>
-              <Ionicons name="funnel-outline" size={15} color={isDark ? '#FF702A' : '#1D5A5A'} />
-              <Text style={[styles.filterDrawerBtnText, isDark && { color: '#FF702A' }]}>Bộ lọc</Text>
+              <Ionicons name="funnel-outline" size={15} color={isDark ? '#FF5B22' : '#1D5A5A'} />
+              <Text style={[styles.filterDrawerBtnText, isDark && { color: '#FF5B22' }]}>Bộ lọc</Text>
             </TouchableOpacity>
 
             {/* Sắp xếp dropdown toggler */}

@@ -6,7 +6,6 @@ import {
   ScrollView,
   Image,
   TouchableOpacity,
-  Dimensions,
   Linking,
 } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -31,6 +30,7 @@ interface MapPin {
   activities: string[];
   ticketPrices: string;
   services: string[];
+  icon: string;
 }
 
 const MAP_PINS: MapPin[] = [
@@ -48,6 +48,7 @@ const MAP_PINS: MapPin[] = [
     activities: ['Đi xe cáp treo', 'Tắm lá Dao đỏ', 'Ăn đồ nướng'],
     ticketPrices: 'Cáp treo Fansipan: 800.000đ. Vé Bản Cát Cát: 150.000đ.',
     services: ['Đưa đón KS', 'HDV bản địa', 'Nước suối'],
+    icon: '🏔️',
   },
   {
     id: 'pin2',
@@ -63,6 +64,7 @@ const MAP_PINS: MapPin[] = [
     activities: ['Xích lô Phố Cổ', 'Ăn phở Hà Nội', 'Uống cafe trứng'],
     ticketPrices: 'Văn Miếu: 30.000đ. Lăng Bác: Miễn phí.',
     services: ['Xe điện phố cổ', 'HDV thuyết minh', 'Nước uống'],
+    icon: '🏛️',
   },
   {
     id: 'pin3',
@@ -78,6 +80,7 @@ const MAP_PINS: MapPin[] = [
     activities: ['Chèo thuyền kayak', 'Tắm biển Ti Tốp', 'Ăn buffet hải sản'],
     ticketPrices: 'Vé Vịnh: 290.000đ. Cano/kayak: 50.000đ.',
     services: ['Du thuyền 5 sao', 'Ăn trưa buffet', 'Bảo hiểm'],
+    icon: '⛵',
   },
   {
     id: 'pin4',
@@ -93,6 +96,7 @@ const MAP_PINS: MapPin[] = [
     activities: ['Ca Huế sông Hương', 'Chụp ảnh cổ phục', 'Ăn bún bò Huế'],
     ticketPrices: 'Vé Đại Nội: 200.000đ. Vé lăng tẩm: 150.000đ.',
     services: ['Audio guide', 'Xe điện Đại Nội', 'Nón lá tặng'],
+    icon: '🏯',
   },
   {
     id: 'pin5',
@@ -108,6 +112,7 @@ const MAP_PINS: MapPin[] = [
     activities: ['Cáp treo Bà Nà', 'Ngắm Cầu Rồng', 'Leo Ngũ Hành Sơn'],
     ticketPrices: 'Vé Bà Nà Hills: 900.000đ. Ngũ Hành Sơn: 40.000đ.',
     services: ['Đưa đón trung tâm', 'Buffet trưa', 'HDV suốt tuyến'],
+    icon: '🌉',
   },
   {
     id: 'pin6',
@@ -123,6 +128,7 @@ const MAP_PINS: MapPin[] = [
     activities: ['Lặn ngắm san hô', 'Tắm bùn khoáng', 'Vui chơi vịnh phao'],
     ticketPrices: 'VinWonders: 800.000đ. Tắm bùn: 250.000đ.',
     services: ['Cano cao tốc', 'HDV lặn biển', 'Phao & kính lặn'],
+    icon: '🏖️',
   },
   {
     id: 'pin7',
@@ -138,6 +144,7 @@ const MAP_PINS: MapPin[] = [
     activities: ['Xe Jeep Langbiang', 'Săn mây sớm', 'Ăn lẩu gà lá é'],
     ticketPrices: 'Vé Langbiang: 50.000đ. Xe Jeep khứ hồi: 120.000đ.',
     services: ['Xe Jeep di chuyển', 'Nước uống', 'Vé vào cổng'],
+    icon: '🌲',
   },
   {
     id: 'pin8',
@@ -153,6 +160,7 @@ const MAP_PINS: MapPin[] = [
     activities: ['Bus 2 tầng Phố', 'Ăn cơm tấm đêm', 'Dạo phố đi bộ'],
     ticketPrices: 'Dinh Độc Lập: 65.000đ. Bus 2 tầng: 150.000đ.',
     services: ['Vé xe buýt 2 tầng', 'HDV thuyết minh', 'Bản đồ du lịch'],
+    icon: '🏙️',
   },
   {
     id: 'pin9',
@@ -168,6 +176,7 @@ const MAP_PINS: MapPin[] = [
     activities: ['Cáp treo Hòn Thơm', 'Show Tinh Hoa VN', 'Đi bộ dưới biển'],
     ticketPrices: 'Cáp treo: 600.000đ. Show diễn: 300.000đ.',
     services: ['Bus điện Grand World', 'Cano ra đảo', 'Kính lặn ống thở'],
+    icon: '🌴',
   },
   {
     id: 'pin10',
@@ -183,6 +192,7 @@ const MAP_PINS: MapPin[] = [
     activities: ['Check-in Shibuya', 'Mua sắm Akihabara', 'Thưởng thức Sushi'],
     ticketPrices: 'Skytree: 3000 JPY. Đền thờ: Miễn phí.',
     services: ['Thẻ tàu điện ngầm', 'HDV tiếng Việt', 'Wifi di động'],
+    icon: '🗼',
   },
   {
     id: 'pin11',
@@ -198,6 +208,7 @@ const MAP_PINS: MapPin[] = [
     activities: ['Mặc áo Hanbok', 'Ăn gà hầm sâm', 'Dạo chợ Myeongdong'],
     ticketPrices: 'Cung điện: 3000 KRW. Vé cáp treo: 15.000 KRW.',
     services: ['Thuê Hanbok free', 'Sim du lịch 4G', 'Bảo hiểm quốc tế'],
+    icon: '🍁',
   },
   {
     id: 'pin12',
@@ -213,6 +224,7 @@ const MAP_PINS: MapPin[] = [
     activities: ['Đi thuyền Chao Phraya', 'Massage Thái cổ truyền', 'Ăn Tom Yum'],
     ticketPrices: 'Vé Hoàng Cung: 500 THB. Vé đền Wat Arun: 100 THB.',
     services: ['Thuyền gỗ chợ nổi', 'HDV thuyết minh', 'Nước uống đóng chai'],
+    icon: '🛕',
   },
 ];
 
@@ -244,6 +256,16 @@ export default function MapScreen() {
   const [hasLocationPermission, setHasLocationPermission] = useState(false);
   const [mapType, setMapType] = useState<'standard' | 'satellite' | 'terrain' | 'hybrid'>('standard');
   const [showMapTypes, setShowMapTypes] = useState(false);
+  const [tracksViewChanges, setTracksViewChanges] = useState(true);
+
+  // Briefly re-enable tracksViewChanges when selectedPin changes to allow render transitions, then freeze
+  useEffect(() => {
+    setTracksViewChanges(true);
+    const timer = setTimeout(() => {
+      setTracksViewChanges(false);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [selectedPin]);
 
   const handleStreetView = (latitude: number, longitude: number) => {
     const streetViewUrl = `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${latitude},${longitude}`;
@@ -418,19 +440,29 @@ export default function MapScreen() {
                   e.stopPropagation();
                   setSelectedPin(pin);
                 }}
+                tracksViewChanges={tracksViewChanges}
               >
-                <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-                  <View style={[styles.mapPinDot, isSelected && styles.mapPinDotActive]}>
+                <View style={styles.customMarkerContainer}>
+                  {/* Bubble containing image & emoji badge */}
+                  <View style={[styles.customMarkerBubble, isSelected && styles.customMarkerBubbleActive]}>
                     <Image 
                       source={{ uri: pin.image }} 
-                      style={styles.mapPinImage} 
+                      style={styles.customMarkerImage} 
                       resizeMode="cover"
                     />
+                    <View style={styles.customMarkerBadge}>
+                      <Text style={styles.customMarkerBadgeText}>{pin.icon}</Text>
+                    </View>
                   </View>
-                  <View style={[styles.mapPinPulse, isSelected && styles.mapPinPulseActive]} />
-                  <Text style={[styles.mapPinLabel, isSelected && styles.mapPinLabelActive, { marginTop: 2 }]}>
-                    {pin.name}
-                  </Text>
+                  {/* Teardrop arrow pointing down */}
+                  <View style={[styles.customMarkerArrow, isSelected && styles.customMarkerArrowActive]} />
+                  
+                  {/* Label under the pin */}
+                  <View style={[styles.customMarkerLabel, isSelected && styles.customMarkerLabelActive]}>
+                    <Text style={[styles.customMarkerLabelText, isSelected && styles.customMarkerLabelTextActive]}>
+                      {pin.name}
+                    </Text>
+                  </View>
                 </View>
               </Marker>
             );
@@ -988,5 +1020,104 @@ const styles = StyleSheet.create({
     zIndex: 997,
     borderWidth: 1,
     borderColor: 'rgba(0, 0, 0, 0.05)',
+  },
+  customMarkerContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingBottom: 4,
+  },
+  customMarkerBubble: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+    backgroundColor: '#1E293B',
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    position: 'relative',
+    overflow: 'visible',
+  },
+  customMarkerBubbleActive: {
+    borderColor: '#FF5B22',
+    transform: [{ scale: 1.15 }],
+    borderWidth: 2.5,
+  },
+  customMarkerImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 19,
+  },
+  customMarkerBadge: {
+    position: 'absolute',
+    bottom: -3,
+    right: -3,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
+    width: 20,
+    height: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.3,
+    shadowRadius: 2,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    zIndex: 20,
+  },
+  customMarkerBadgeText: {
+    fontSize: 10,
+    textAlign: 'center',
+  },
+  customMarkerArrow: {
+    width: 0,
+    height: 0,
+    backgroundColor: 'transparent',
+    borderStyle: 'solid',
+    borderLeftWidth: 6,
+    borderRightWidth: 6,
+    borderTopWidth: 8,
+    borderLeftColor: 'transparent',
+    borderRightColor: 'transparent',
+    borderTopColor: '#FFFFFF',
+    alignSelf: 'center',
+    marginTop: -1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 1,
+    zIndex: 9,
+  },
+  customMarkerArrowActive: {
+    borderTopColor: '#FF5B22',
+    transform: [{ scale: 1.15 }],
+  },
+  customMarkerLabel: {
+    backgroundColor: 'rgba(15, 23, 42, 0.75)',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+    marginTop: 4,
+    borderWidth: 0.5,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
+    zIndex: 12,
+  },
+  customMarkerLabelActive: {
+    backgroundColor: '#FF5B22',
+    borderColor: '#FF5B22',
+  },
+  customMarkerLabelText: {
+    color: '#E2E8F0',
+    fontSize: 9,
+    fontWeight: '800',
+  },
+  customMarkerLabelTextActive: {
+    color: '#FFFFFF',
+    fontSize: 10,
   },
 });

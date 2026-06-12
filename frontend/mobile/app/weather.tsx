@@ -288,7 +288,7 @@ export default function WeatherScreen() {
       <StatusBar style={isDark ? 'light' : 'dark'} translucent />
       
       {/* Header Bar */}
-      <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
+      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
         <TouchableOpacity style={styles.backBtn} onPress={() => router.back()} activeOpacity={0.8}>
           <Ionicons name="chevron-back" size={24} color={isDark ? '#FFFFFF' : '#0F172A'} />
         </TouchableOpacity>
@@ -611,7 +611,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
-    height: 56,
+    paddingBottom: 12,
     zIndex: 10,
   },
   headerDark: {},

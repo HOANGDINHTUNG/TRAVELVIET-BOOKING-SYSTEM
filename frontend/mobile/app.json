@@ -10,7 +10,11 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.travelviet.commerce"
+      "bundleIdentifier": "com.travelviet.commerce",
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "Ứng dụng cần quyền truy cập microphone để ghi âm giọng nói và thực hiện tìm kiếm bằng giọng nói.",
+        "NSSpeechRecognitionUsageDescription": "Ứng dụng cần quyền nhận dạng giọng nói để chuyển lời nói của bạn thành từ khóa tìm kiếm."
+      }
     },
     "android": {
       "package": "com.travelviet.commerce",
@@ -21,7 +25,10 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "output": "static",
@@ -40,6 +47,13 @@
           "dark": {
             "backgroundColor": "#F8FAFC"
           }
+        }
+      ],
+      [
+        "expo-speech-recognition",
+        {
+          "microphonePermission": "Cho phép ứng dụng sử dụng microphone để ghi âm tìm kiếm bằng giọng nói.",
+          "speechRecognitionPermission": "Cho phép ứng dụng nhận diện giọng nói của bạn để thực hiện các tìm kiếm chuẩn xác."
         }
       ]
     ],
