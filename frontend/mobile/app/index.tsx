@@ -6,5 +6,5 @@ export default function Index() {
   if (!getAccessToken()) {
     return <Redirect href={asHref(AppRoutes.login)} />;
   }
-  return <Redirect href={asHref(AppRoutes.productTab)} />;
+  return <Redirect href={asHref(AppRoutes.tabs)} />;
 }

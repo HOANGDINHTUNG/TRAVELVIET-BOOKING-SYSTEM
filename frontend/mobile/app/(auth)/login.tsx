@@ -13,11 +13,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { styles } from '../styles/_login.styles';
 import { getApiBaseUrl } from '@/config/apiBaseUrl';
 import { loginCopy } from '@/constants/loginCopy';
-import { canViewCommerceDesk } from '@/features/auth/commercePermissions';
 import { loginWithEmail } from '@/services/authApi';
 import { setAiChatAccessTokenProvider } from '@/services/aiChatApi';
 import { establishSessionAfterLogin } from '@/services/authSession';
-import { clearAuthSession } from '@/services/authStorage';
+import { clearAuthSession, applyAccessContext } from '@/services/authStorage';
 import { commerceDesk } from '@/theme/commerceDesk';
 import { ApiError } from '@/types/api';
 import { AppRoutes, asHref } from '@/lib/navigation';
@@ -29,6 +28,45 @@ export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const handleMockLogin = () => {
+    try {
+      const mockAuth = {
+        user: {
+          id: 'mock-user-123',
+          email: email.trim() || 'user@travelviet.vn',
+          fullName: 'Trần Rio',
+          displayName: 'Rio',
+          role: 'USER',
+          roles: ['USER'],
+        },
+        accessToken: 'mock-access-token-xyz',
+        refreshToken: 'mock-refresh-token-xyz',
+        tokenType: 'Bearer',
+        expiresIn: 3600,
+      };
+
+      setAiChatAccessTokenProvider(() => mockAuth.accessToken);
+
+      const mockCtx = {
+        user: mockAuth.user,
+        roles: ['USER'],
+        permissions: ['voucher.view', 'promotion.campaign.view'],
+        managementRoles: [],
+        hasManagementAccess: false,
+        isSuperAdmin: false,
+      };
+
+      applyAccessContext(mockCtx, {
+        accessToken: mockAuth.accessToken,
+        refreshToken: mockAuth.refreshToken,
+      });
+
+      router.replace(asHref(AppRoutes.tabs));
+    } catch {
+      Alert.alert('Lỗi', 'Không thể khởi tạo phiên đăng nhập ngoại tuyến.');
+    }
+  };
+
   const handleLogin = async () => {
     if (!email || !password) {
       Alert.alert('Lỗi', 'Vui lòng nhập đầy đủ Email và Mật khẩu!');
@@ -39,25 +77,27 @@ export default function LoginScreen() {
     try {
       const auth = await loginWithEmail(email, password);
       setAiChatAccessTokenProvider(() => auth.accessToken);
-      const ctx = await establishSessionAfterLogin(auth);
-      if (!canViewCommerceDesk(ctx)) {
-        await clearAuthSession();
-        setAiChatAccessTokenProvider(null);
-        Alert.alert(
-          'Không có quyền',
-          'Tài khoản không có quyền voucher.view hoặc promotion.campaign.view để mở Commerce Desk.'
-        );
-        return;
-      }
-      router.replace(asHref(AppRoutes.productTab));
+      await establishSessionAfterLogin(auth);
+      router.replace(asHref(AppRoutes.tabs));
     } catch (err) {
       await clearAuthSession();
       setAiChatAccessTokenProvider(null);
       const message =
         err instanceof ApiError
           ? err.message
-          : 'Email hoặc mật khẩu không chính xác. Kiểm tra backend đang chạy.';
-      Alert.alert('Đăng nhập thất bại', message);
+          : 'Không thể kết nối máy chủ hoặc thông tin sai. Kiểm tra backend đang chạy.';
+      
+      Alert.alert(
+        'Đăng nhập thất bại',
+        `${message}\n\nBạn có muốn đăng nhập bằng Chế độ Thử nghiệm (Offline) không?`,
+        [
+          { text: 'Hủy', style: 'cancel' },
+          {
+            text: 'Đăng nhập Offline',
+            onPress: handleMockLogin,
+          },
+        ]
+      );
     } finally {
       setLoading(false);
     }
@@ -121,6 +161,14 @@ export default function LoginScreen() {
           ) : (
             <Text style={styles.loginButtonText}>{loginCopy.login}</Text>
           )}
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={{ marginTop: 16, alignItems: 'center' }}
+          onPress={handleMockLogin}>
+          <Text style={{ color: '#FF702A', fontWeight: '700', fontSize: 14 }}>
+            Đăng nhập Chế độ Thử nghiệm (Offline)
+          </Text>
         </TouchableOpacity>
 
         <Text style={styles.adminHint}>{loginCopy.adminHint}</Text>

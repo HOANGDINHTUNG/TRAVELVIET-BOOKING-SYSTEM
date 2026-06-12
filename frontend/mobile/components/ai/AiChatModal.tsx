@@ -5,32 +5,21 @@ import {
   Modal,
   Platform,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { sendAiMessage } from '@/services/aiChatApi';
 import type { AiChatMessage } from '@/types/aiChat';
+import { useAppSettings } from '@/providers/AppSettingsProvider';
 
 type AiChatModalProps = {
   visible: boolean;
   onClose: () => void;
-};
-
-const initialMessage: AiChatMessage = {
-  id: 'welcome',
-  role: 'ai',
-  text: 'Xin chào! Tôi hỗ trợ tra cứu nhanh tour, khuyến mãi và thông tin vận hành TravelViet khi bạn đang dùng Commerce Desk.',
-  createdAt: new Date(),
-  suggestions: [
-    'Liệt kê campaign đang bật',
-    'Gợi ý kiểm tra voucher sắp hết hạn',
-    'Tóm tắt quy trình bật/tắt sản phẩm trên desk',
-  ],
 };
 
 function createId() {
@@ -38,11 +27,50 @@ function createId() {
 }
 
 export function AiChatModal({ visible, onClose }: AiChatModalProps) {
-  const [messages, setMessages] = useState<AiChatMessage[]>([initialMessage]);
+  const { theme, language, t } = useAppSettings();
+  const isDark = theme === 'dark';
+  const insets = useSafeAreaInsets();
+
+  const [messages, setMessages] = useState<AiChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const listRef = useRef<FlatList<AiChatMessage> | null>(null);
+
+  // Initialize and dynamically update welcome message translation
+  useEffect(() => {
+    setMessages((current) => {
+      if (current.length === 0) {
+        return [
+          {
+            id: 'welcome',
+            role: 'ai',
+            text: t('assistant_welcome'),
+            createdAt: new Date(),
+            suggestions: [
+              t('assistant_suggest_1'),
+              t('assistant_suggest_2'),
+              t('assistant_suggest_3'),
+            ],
+          },
+        ];
+      }
+      return current.map((m) => {
+        if (m.id === 'welcome') {
+          return {
+            ...m,
+            text: t('assistant_welcome'),
+            suggestions: [
+              t('assistant_suggest_1'),
+              t('assistant_suggest_2'),
+              t('assistant_suggest_3'),
+            ],
+          };
+        }
+        return m;
+      });
+    });
+  }, [language, t]);
 
   useEffect(() => {
     if (!visible) {
@@ -95,14 +123,14 @@ export function AiChatModal({ visible, onClose }: AiChatModalProps) {
       const fallback =
         err instanceof Error
           ? err.message
-          : 'Xin lỗi, hệ thống AI đang gặp lỗi khi xử lý câu hỏi.';
+          : t('assistant_error');
       setError(fallback);
       setMessages((currentMessages) => [
         ...currentMessages,
         {
           id: createId(),
           role: 'ai',
-          text: 'Xin lỗi, hệ thống AI đang gặp lỗi khi xử lý câu hỏi.',
+          text: t('assistant_error'),
           createdAt: new Date(),
         },
       ]);
@@ -115,15 +143,15 @@ export function AiChatModal({ visible, onClose }: AiChatModalProps) {
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={styles.container}>
-        <View style={styles.header}>
+        style={[styles.container, isDark && styles.containerDark]}>
+        <View style={[styles.header, { paddingTop: Platform.OS === 'android' ? Math.max(insets.top, 14) : 14 }]}>
           <View style={styles.titleRow}>
             <View style={styles.avatar}>
               <Ionicons name="sparkles-outline" size={18} color="#283618" />
             </View>
             <Text style={styles.title}>AI Assistant</Text>
           </View>
-          <Pressable accessibilityLabel="Đóng chat" onPress={onClose} style={styles.iconButton}>
+          <Pressable accessibilityLabel={t('assistant_close')} onPress={onClose} style={styles.iconButton}>
             <Ionicons name="close" size={22} color="#FEFAE0" />
           </Pressable>
         </View>
@@ -134,16 +162,24 @@ export function AiChatModal({ visible, onClose }: AiChatModalProps) {
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.messageList}
           renderItem={({ item }) => (
-            <View style={[styles.messageBubble, item.role === 'user' ? styles.userBubble : styles.aiBubble]}>
-              <Text style={[styles.messageText, item.role === 'user' ? styles.userText : styles.aiText]}>
+            <View style={[
+              styles.messageBubble,
+              item.role === 'user' ? styles.userBubble : styles.aiBubble,
+              item.role === 'ai' && isDark ? styles.aiBubbleDark : null
+            ]}>
+              <Text style={[
+                styles.messageText,
+                item.role === 'user' ? styles.userText : styles.aiText,
+                item.role === 'ai' && isDark ? styles.aiTextDark : null
+              ]}>
                 {item.text}
               </Text>
             </View>
           )}
           ListFooterComponent={
             loading ? (
-              <View style={[styles.messageBubble, styles.aiBubble]}>
-                <Text style={styles.aiText}>AI đang trả lời...</Text>
+              <View style={[styles.messageBubble, styles.aiBubble, isDark && styles.aiBubbleDark]}>
+                <Text style={[styles.aiText, isDark && styles.aiTextDark]}>{t('assistant_typing')}</Text>
               </View>
             ) : null
           }
@@ -152,11 +188,7 @@ export function AiChatModal({ visible, onClose }: AiChatModalProps) {
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
         {latestSuggestions.length > 0 ? (
-          <ScrollView
-            horizontal
-            keyboardShouldPersistTaps="handled"
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.suggestions}>
+          <View style={styles.suggestionsContainer}>
             {latestSuggestions.map((suggestion) => (
               <Pressable
                 key={suggestion}
@@ -164,27 +196,40 @@ export function AiChatModal({ visible, onClose }: AiChatModalProps) {
                 onPress={() => void handleSend(suggestion)}
                 style={({ pressed }) => [
                   styles.suggestionChip,
+                  isDark && styles.suggestionChipDark,
                   pressed && !loading ? styles.suggestionPressed : null,
                   loading ? styles.disabled : null,
                 ]}>
-                <Text style={styles.suggestionText}>{suggestion}</Text>
+                <Ionicons
+                  name="bulb-outline"
+                  size={14}
+                  color={isDark ? '#FF702A' : '#0A7EA4'}
+                  style={{ marginRight: 8 }}
+                />
+                <Text style={[styles.suggestionText, isDark && styles.suggestionTextDark]}>
+                  {suggestion}
+                </Text>
               </Pressable>
             ))}
-          </ScrollView>
+          </View>
         ) : null}
 
-        <View style={styles.inputRow}>
+        <View style={[
+          styles.inputRow,
+          isDark && styles.inputRowDark,
+          { paddingBottom: Platform.OS === 'ios' ? Math.max(insets.bottom, 18) : 18 }
+        ]}>
           <TextInput
             value={input}
             onChangeText={setInput}
-            placeholder="Nhập câu hỏi..."
-            placeholderTextColor="#7A7A7A"
+            placeholder={t('assistant_placeholder')}
+            placeholderTextColor={isDark ? '#94A3B8' : '#7A7A7A'}
             maxLength={2000}
             multiline
-            style={styles.input}
+            style={[styles.input, isDark && styles.inputDark]}
           />
           <Pressable
-            accessibilityLabel="Gửi câu hỏi"
+            accessibilityLabel={t('assistant_send')}
             disabled={loading || !input.trim()}
             onPress={() => void handleSend()}
             style={({ pressed }) => [
@@ -204,6 +249,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F7F5EA',
+  },
+  containerDark: {
+    backgroundColor: '#0F172A',
   },
   header: {
     minHeight: 68,
@@ -266,6 +314,10 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 5,
     backgroundColor: '#FFFFFF',
   },
+  aiBubbleDark: {
+    backgroundColor: '#1E293B',
+    shadowColor: '#000000',
+  },
   messageText: {
     fontSize: 14,
     lineHeight: 20,
@@ -276,24 +328,33 @@ const styles = StyleSheet.create({
   aiText: {
     color: '#283618',
   },
+  aiTextDark: {
+    color: '#F1F5F9',
+  },
   errorText: {
     paddingHorizontal: 16,
     paddingBottom: 4,
     color: '#9B2226',
     fontSize: 13,
   },
-  suggestions: {
-    gap: 8,
+  suggestionsContainer: {
     paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingVertical: 8,
+    gap: 8,
   },
   suggestionChip: {
     borderWidth: 1,
     borderColor: 'rgba(10, 126, 164, 0.22)',
-    borderRadius: 999,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
     backgroundColor: '#EEF9FC',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  suggestionChipDark: {
+    backgroundColor: '#1E293B',
+    borderColor: '#334155',
   },
   suggestionPressed: {
     opacity: 0.78,
@@ -301,6 +362,12 @@ const styles = StyleSheet.create({
   suggestionText: {
     color: '#0A4D69',
     fontSize: 13,
+    fontWeight: '500',
+    flex: 1,
+    lineHeight: 18,
+  },
+  suggestionTextDark: {
+    color: '#E2E8F0',
   },
   inputRow: {
     flexDirection: 'row',
@@ -310,6 +377,11 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     paddingBottom: 18,
     backgroundColor: '#FFFEF7',
+  },
+  inputRowDark: {
+    backgroundColor: '#0F172A',
+    borderTopWidth: 1,
+    borderTopColor: '#1E293B',
   },
   input: {
     flex: 1,
@@ -322,6 +394,11 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     color: '#283618',
     backgroundColor: '#FFFFFF',
+  },
+  inputDark: {
+    color: '#FFFFFF',
+    backgroundColor: '#1E293B',
+    borderColor: '#334155',
   },
   sendButton: {
     width: 44,
