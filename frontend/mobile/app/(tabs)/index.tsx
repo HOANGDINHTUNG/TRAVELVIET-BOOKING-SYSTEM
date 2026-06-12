@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useRef } from 'react';
+import React, { useMemo, useState, useRef, useEffect } from 'react';
 import { useScrollToTop } from '@react-navigation/native';
 import {
   Image,
@@ -12,11 +12,41 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import * as SecureStore from 'expo-secure-store';
+
+import { VoiceSearchModal } from '@/components/ui/VoiceSearchModal';
 import { styles } from '../styles/_index.styles';
 import { useSnackbar } from '@/providers/SnackbarProvider';
 import { useAppSettings } from '@/providers/AppSettingsProvider';
 import { AppDrawer } from '@/components/ui/AppDrawer';
 import { TOURS_DATA } from '@/constants/Tours';
+
+interface Voucher {
+  id: string;
+  code: string;
+  discountVi: string;
+  discountEn: string;
+  titleVi: string;
+  titleEn: string;
+  expiryVi: string;
+  expiryEn: string;
+  type: 'tour' | 'flight' | 'hotel';
+}
+
+const MOCK_HOT_VOUCHERS: Voucher[] = [
+  { id: 'v1', code: 'THDTOUR200', discountVi: 'Giảm 200K', discountEn: '200K OFF', titleVi: 'Cho Tour Sa Pa, Hạ Long', titleEn: 'For Sapa, Halong Tours', expiryVi: 'Hạn: 30/06/2026', expiryEn: 'Exp: 30/06/2026', type: 'tour' },
+  { id: 'v2', code: 'THDFLIGHT15', discountVi: 'Giảm 15%', discountEn: '15% OFF', titleVi: 'Cho vé máy bay đi Phú Quốc', titleEn: 'For Phu Quoc Flights', expiryVi: 'Hạn: 15/07/2026', expiryEn: 'Exp: 15/07/2026', type: 'flight' },
+  { id: 'v3', code: 'THDHOTEL500', discountVi: 'Giảm 500K', discountEn: '500K OFF', titleVi: 'Cho khách sạn 4-5 sao', titleEn: 'For 4-5 Star Hotels', expiryVi: 'Hạn: 31/07/2026', expiryEn: 'Exp: 31/07/2026', type: 'hotel' }
+];
+
+const POPULAR_SUGGESTIONS = [
+  { name: 'Sa Pa', pinId: 'pin1', icon: 'trail-sign-outline' },
+  { name: 'Hạ Long', pinId: 'pin3', icon: 'boat-outline' },
+  { name: 'Phú Quốc', pinId: 'pin9', icon: 'sunny-outline' },
+  { name: 'Đà Lạt', pinId: 'pin7', icon: 'flower-outline' },
+  { name: 'Tokyo', pinId: 'pin10', icon: 'subway-outline' }
+];
 
 const MOCK_POPULAR_DESTINATIONS = [
   { 
@@ -127,12 +157,41 @@ export default function HomeScreen() {
   const [drawerVisible, setDrawerVisible] = useState(false);
   const router = useRouter();
   const { showSnackbar } = useSnackbar();
+  const insets = useSafeAreaInsets();
   
   const scrollViewRef = useRef<ScrollView>(null);
   useScrollToTop(scrollViewRef);
 
   const { theme, language, formatPrice, t } = useAppSettings();
   const isDark = theme === 'dark';
+
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const inputRef = useRef<TextInput>(null);
+  const [voiceModalVisible, setVoiceModalVisible] = useState(false);
+
+  const [claimedVouchers, setClaimedVouchers] = useState<string[]>([]);
+
+  useEffect(() => {
+    const loadClaimed = async () => {
+      try {
+        const val = await SecureStore.getItemAsync('travelviet.claimed_vouchers');
+        if (val) {
+          setClaimedVouchers(JSON.parse(val));
+        }
+      } catch {}
+    };
+    loadClaimed();
+  }, []);
+
+  const handleClaimVoucher = async (voucherId: string, code: string) => {
+    if (claimedVouchers.includes(voucherId)) return;
+    const next = [...claimedVouchers, voucherId];
+    setClaimedVouchers(next);
+    try {
+      await SecureStore.setItemAsync('travelviet.claimed_vouchers', JSON.stringify(next));
+    } catch {}
+    showSnackbar(language === 'vi' ? `Nhận thành công mã: ${code}!` : `Successfully claimed code: ${code}!`);
+  };
 
   const hotTours = useMemo(() => {
     const hotIds = ['t12', 't14', 't10', '4'];
@@ -182,16 +241,13 @@ export default function HomeScreen() {
     const query = searchQuery.trim().toLowerCase();
     if (!query) return [];
 
-    const allItems = [
-      ...MOCK_POPULAR_DESTINATIONS,
-      ...LAST_MINUTE_DEALS,
-    ];
-
-    return allItems.filter((item) => {
-      const matchText = 'name' in item 
-        ? `${item.name} ${item.region || ''}` 
-        : `${item.title}`;
-      return matchText.toLowerCase().includes(query);
+    return TOURS_DATA.filter((tour) => {
+      return (
+        tour.title.toLowerCase().includes(query) ||
+        tour.location.toLowerCase().includes(query) ||
+        tour.category.toLowerCase().includes(query) ||
+        tour.description.toLowerCase().includes(query)
+      );
     });
   }, [searchQuery]);
 
@@ -218,7 +274,7 @@ export default function HomeScreen() {
     router.push({ pathname: '/tour/[id]', params: { id: targetId } });
   };
 
-  const renderTourCard = (tour: typeof LAST_MINUTE_DEALS[0]) => (
+  const renderTourCard = (tour: any) => (
     <TouchableOpacity
       activeOpacity={0.9}
       key={tour.id}
@@ -231,7 +287,7 @@ export default function HomeScreen() {
           {tour.title}
         </Text>
         <Text style={[styles.tourMeta, isDark && { color: '#94A3B8' }]}>
-          {tour.duration}
+          {tour.duration || tour.days}
         </Text>
       </View>
       <View style={styles.tourRight}>
@@ -249,6 +305,7 @@ export default function HomeScreen() {
         ref={scrollViewRef}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
         {/* Santorini Header Background */}
         <ImageBackground
@@ -263,18 +320,33 @@ export default function HomeScreen() {
             {/* Top Header Row */}
             <View style={styles.headerRow}>
               <TouchableOpacity 
-                style={styles.transparentButton} 
+                style={[
+                  styles.transparentButton, 
+                  isDark && { 
+                    backgroundColor: 'rgba(30, 41, 59, 0.75)', 
+                    borderColor: 'rgba(255, 255, 255, 0.1)', 
+                    borderWidth: 1 
+                  }
+                ]} 
                 onPress={() => setDrawerVisible(true)}
               >
                 <Ionicons name="menu-outline" size={28} color={isDark ? '#FFFFFF' : '#1E293B'} />
               </TouchableOpacity>
 
               <TouchableOpacity 
-                style={[styles.transparentButton, styles.notificationContainer]} 
+                style={[
+                  styles.transparentButton, 
+                  styles.notificationContainer, 
+                  isDark && { 
+                    backgroundColor: 'rgba(30, 41, 59, 0.75)', 
+                    borderColor: 'rgba(255, 255, 255, 0.1)', 
+                    borderWidth: 1 
+                  }
+                ]} 
                 onPress={() => router.push('/notifications')}
               >
                 <Ionicons name="notifications-outline" size={26} color={isDark ? '#FFFFFF' : '#1E293B'} />
-                <View style={styles.badge} />
+                <View style={[styles.badge, isDark && { borderColor: '#1E293B' }]} />
               </TouchableOpacity>
             </View>
 
@@ -292,31 +364,35 @@ export default function HomeScreen() {
           </LinearGradient>
         </ImageBackground>
 
-        {/* Search Bar Floating Overlay */}
+        {/* Search Bar Dummy Trigger */}
         <View style={styles.searchContainer}>
-          <View style={[styles.searchBarWrapper, isDark && { backgroundColor: '#1E293B', borderColor: '#334155' }]}>
-            <Ionicons name="search-outline" size={20} color="#7D848D" style={styles.searchIcon} />
-            <TextInput
-              placeholder={language === 'vi' ? 'Bạn muốn đi đâu hôm nay?' : 'Where do you want to go?'}
-              placeholderTextColor="#7D848D"
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              style={[styles.searchPlaceholder, isDark && { color: '#FFFFFF' }]}
-            />
+          <TouchableOpacity 
+            activeOpacity={0.95}
+            onPress={() => setIsSearchFocused(true)}
+            style={[styles.searchBarWrapper, isDark && { backgroundColor: '#1E293B', borderColor: '#334155' }]}
+          >
             <TouchableOpacity 
-              style={styles.searchButton} 
-              activeOpacity={0.8}
+              activeOpacity={0.7}
               onPress={() => {
-                if (searchQuery) {
-                  showSnackbar(language === 'vi' ? `Đang tìm kiếm: ${searchQuery}` : `Searching: ${searchQuery}`);
-                } else {
-                  showSnackbar(language === 'vi' ? 'Hãy nhập từ khóa để tìm kiếm!' : 'Please enter search query!');
-                }
+                showSnackbar(language === 'vi' ? 'Đang mở bản đồ...' : 'Opening map...');
+                router.push('/map');
               }}
+              style={{ paddingRight: 8 }}
             >
-              <Ionicons name="search" size={18} color="#FFFFFF" />
+              <Ionicons name="location-outline" size={20} color="#FF5B22" style={styles.searchIcon} />
             </TouchableOpacity>
-          </View>
+            <Text style={[styles.searchPlaceholderText, isDark && { color: '#94A3B8' }]}>
+              {searchQuery || (language === 'vi' ? 'Bạn muốn đi đâu hôm nay?' : 'Where do you want to go?')}
+            </Text>
+            {searchQuery.length > 0 && (
+              <TouchableOpacity onPress={() => setSearchQuery('')} style={{ marginRight: 8 }}>
+                <Ionicons name="close-circle" size={18} color="#94A3B8" />
+              </TouchableOpacity>
+            )}
+            <View style={styles.searchButton}>
+              <Ionicons name="search" size={18} color="#FFFFFF" />
+            </View>
+          </TouchableOpacity>
         </View>
 
         {searchQuery.trim().length > 0 ? (
@@ -333,7 +409,7 @@ export default function HomeScreen() {
 
             {searchResults.length === 0 ? (
               <View style={[styles.emptyState, isDark && { backgroundColor: '#1E293B', borderColor: '#334155' }]}>
-                <Ionicons name="search-outline" size={34} color="#FF702A" />
+                <Ionicons name="search-outline" size={34} color="#FF5B22" />
                 <Text style={[styles.emptyTitle, isDark && { color: '#F1F5F9' }]}>
                   {language === 'vi' ? 'Không tìm thấy tour phù hợp' : 'No matching tours found'}
                 </Text>
@@ -406,6 +482,65 @@ export default function HomeScreen() {
               </View>
             </View>
 
+            {/* Voucher HOT Section */}
+            <View style={styles.voucherSection}>
+              <View style={styles.sectionHeader}>
+                <View style={styles.sectionTitleWrap}>
+                  <Text style={[styles.sectionTitle, isDark && { color: '#FFFFFF' }]}>
+                    {language === 'vi' ? 'Voucher HOT Hôm Nay' : 'Hot Vouchers Today'}
+                  </Text>
+                </View>
+                <TouchableOpacity onPress={() => router.push('/vouchers')}>
+                  <Text style={styles.viewAllText}>{t('view_all', 'Xem tất cả')}</Text>
+                </TouchableOpacity>
+              </View>
+
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.voucherScroll}
+              >
+                {MOCK_HOT_VOUCHERS.map((voucher) => {
+                  const isClaimed = claimedVouchers.includes(voucher.id);
+                  return (
+                    <View key={voucher.id} style={[styles.voucherCard, isDark && styles.voucherCardDark]}>
+                      {/* Left side: Discount */}
+                      <View style={[styles.voucherLeft, isDark && { backgroundColor: '#3B1A10' }]}>
+                        <Text style={styles.voucherDiscount}>
+                          {language === 'vi' ? voucher.discountVi : voucher.discountEn}
+                        </Text>
+                      </View>
+
+                      {/* Divider line */}
+                      <View style={[styles.voucherDivider, isDark && styles.voucherDividerDark]} />
+
+                      {/* Right side: details and claim button */}
+                      <View style={styles.voucherRight}>
+                        <Text style={[styles.voucherTitle, isDark && { color: '#F1F5F9' }]} numberOfLines={1}>
+                          {language === 'vi' ? voucher.titleVi : voucher.titleEn}
+                        </Text>
+                        <Text style={[styles.voucherExpiry, isDark && { color: '#94A3B8' }]}>
+                          {language === 'vi' ? voucher.expiryVi : voucher.expiryEn}
+                        </Text>
+                        <TouchableOpacity
+                          style={[styles.voucherBtn, isClaimed && styles.voucherBtnClaimed]}
+                          activeOpacity={0.8}
+                          onPress={() => handleClaimVoucher(voucher.id, voucher.code)}
+                          disabled={isClaimed}
+                        >
+                          <Text style={styles.voucherBtnText}>
+                            {isClaimed 
+                              ? (language === 'vi' ? 'Đã nhận' : 'Claimed') 
+                              : (language === 'vi' ? 'Nhận ngay' : 'Claim')}
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  );
+                })}
+              </ScrollView>
+            </View>
+
             {/* Popular Destinations */}
             <View style={{ marginBottom: 24 }}>
               <View style={styles.sectionHeader}>
@@ -414,7 +549,7 @@ export default function HomeScreen() {
                     {language === 'vi' ? 'Điểm Đến Ưa Thích' : 'Popular Destinations'}
                   </Text>
                 </View>
-                <TouchableOpacity onPress={() => router.push('/(tabs)/explore')}>
+                <TouchableOpacity onPress={() => router.push({ pathname: '/view-all', params: { type: 'popular-destinations' } })}>
                   <Text style={styles.viewAllText}>{t('view_all', 'Xem tất cả')}</Text>
                 </TouchableOpacity>
               </View>
@@ -455,7 +590,7 @@ export default function HomeScreen() {
                     {language === 'vi' ? 'Ưu Đãi Tốt Nhất' : 'Best Deals'}
                   </Text>
                 </View>
-                <TouchableOpacity onPress={() => router.push({ pathname: '/(tabs)/tours', params: { type: 'sale' } })}>
+                <TouchableOpacity onPress={() => router.push({ pathname: '/view-all', params: { type: 'best-deals' } })}>
                   <Text style={styles.viewAllText}>{t('view_all', 'Xem tất cả')}</Text>
                 </TouchableOpacity>
               </View>
@@ -499,7 +634,7 @@ export default function HomeScreen() {
                     {language === 'vi' ? 'Trải Nghiệm Hàng Đầu' : 'Top Experiences'}
                   </Text>
                 </View>
-                <TouchableOpacity onPress={() => router.push({ pathname: '/(tabs)/tours', params: { type: 'hot' } })}>
+                <TouchableOpacity onPress={() => router.push({ pathname: '/view-all', params: { type: 'top-experiences' } })}>
                   <Text style={styles.viewAllText}>{t('view_all', 'Xem tất cả')}</Text>
                 </TouchableOpacity>
               </View>
@@ -541,7 +676,7 @@ export default function HomeScreen() {
                     {language === 'vi' ? 'Tour HOT Bậc Nhất' : 'Super HOT Tours'}
                   </Text>
                 </View>
-                <TouchableOpacity onPress={() => router.push({ pathname: '/(tabs)/tours', params: { type: 'hot' } })}>
+                <TouchableOpacity onPress={() => router.push({ pathname: '/view-all', params: { type: 'hot-tours' } })}>
                   <Text style={styles.viewAllText}>{t('view_all', 'Xem tất cả')}</Text>
                 </TouchableOpacity>
               </View>
@@ -570,7 +705,7 @@ export default function HomeScreen() {
                       <View style={styles.hotCardBottom}>
                         <Text style={styles.hotCardPrice}>{tour.price}</Text>
                         <View style={styles.hotCardRating}>
-                          <Ionicons name="star" size={12} color="#DDA15E" />
+                          <Ionicons name="star" size={12} color="#FFB800" />
                           <Text style={[styles.hotCardRatingText, isDark && { color: '#94A3B8' }]}>
                             {tour.rating.toFixed(1)}
                           </Text>
@@ -590,7 +725,7 @@ export default function HomeScreen() {
                     {language === 'vi' ? 'Khuyến Mãi Siêu Khủng' : 'Mega Sales & Deals'}
                   </Text>
                 </View>
-                <TouchableOpacity onPress={() => router.push({ pathname: '/(tabs)/tours', params: { type: 'sale' } })}>
+                <TouchableOpacity onPress={() => router.push({ pathname: '/view-all', params: { type: 'mega-sales' } })}>
                   <Text style={styles.viewAllText}>{t('view_all', 'Xem tất cả')}</Text>
                 </TouchableOpacity>
               </View>
@@ -620,7 +755,7 @@ export default function HomeScreen() {
                         <View style={styles.hotCardBottom}>
                           <Text style={styles.hotCardPrice}>{tour.price}</Text>
                           <View style={styles.hotCardRating}>
-                            <Ionicons name="star" size={12} color="#DDA15E" />
+                            <Ionicons name="star" size={12} color="#FFB800" />
                             <Text style={[styles.hotCardRatingText, isDark && { color: '#94A3B8' }]}>
                               {tour.rating.toFixed(1)}
                             </Text>
@@ -641,7 +776,7 @@ export default function HomeScreen() {
                     {language === 'vi' ? 'Tour Mua Nhiều Nhất' : 'Most Purchased Tours'}
                   </Text>
                 </View>
-                <TouchableOpacity onPress={() => router.push({ pathname: '/(tabs)/tours', params: { type: 'purchased' } })}>
+                <TouchableOpacity onPress={() => router.push({ pathname: '/view-all', params: { type: 'most-purchased' } })}>
                   <Text style={styles.viewAllText}>{t('view_all', 'Xem tất cả')}</Text>
                 </TouchableOpacity>
               </View>
@@ -695,7 +830,7 @@ export default function HomeScreen() {
                     {language === 'vi' ? 'Tour Trong Nước' : 'Domestic Tours'}
                   </Text>
                 </View>
-                <TouchableOpacity onPress={() => router.push({ pathname: '/(tabs)/tours', params: { region: 'Trong nước' } })}>
+                <TouchableOpacity onPress={() => router.push({ pathname: '/view-all', params: { type: 'domestic-tours' } })}>
                   <Text style={styles.viewAllText}>{t('view_all', 'Xem tất cả')}</Text>
                 </TouchableOpacity>
               </View>
@@ -720,7 +855,7 @@ export default function HomeScreen() {
                       <View style={styles.hotCardBottom}>
                         <Text style={styles.hotCardPrice}>{tour.price}</Text>
                         <View style={styles.hotCardRating}>
-                          <Ionicons name="star" size={12} color="#DDA15E" />
+                          <Ionicons name="star" size={12} color="#FFB800" />
                           <Text style={[styles.hotCardRatingText, isDark && { color: '#94A3B8' }]}>
                             {tour.rating.toFixed(1)}
                           </Text>
@@ -740,7 +875,7 @@ export default function HomeScreen() {
                     {language === 'vi' ? 'Tour Nước Ngoài' : 'International Tours'}
                   </Text>
                 </View>
-                <TouchableOpacity onPress={() => router.push({ pathname: '/(tabs)/tours', params: { region: 'Nước ngoài' } })}>
+                <TouchableOpacity onPress={() => router.push({ pathname: '/view-all', params: { type: 'international-tours' } })}>
                   <Text style={styles.viewAllText}>{t('view_all', 'Xem tất cả')}</Text>
                 </TouchableOpacity>
               </View>
@@ -765,7 +900,7 @@ export default function HomeScreen() {
                       <View style={styles.hotCardBottom}>
                         <Text style={styles.hotCardPrice}>{tour.price}</Text>
                         <View style={styles.hotCardRating}>
-                          <Ionicons name="star" size={12} color="#DDA15E" />
+                          <Ionicons name="star" size={12} color="#FFB800" />
                           <Text style={[styles.hotCardRatingText, isDark && { color: '#94A3B8' }]}>
                             {tour.rating.toFixed(1)}
                           </Text>
@@ -806,7 +941,7 @@ export default function HomeScreen() {
                         <Text style={styles.testimonialRole}>{review.role}</Text>
                         <View style={styles.testimonialStars}>
                           {Array.from({ length: review.rating }).map((_, i) => (
-                            <Ionicons key={i} name="star" size={12} color="#DDA15E" />
+                            <Ionicons key={i} name="star" size={12} color="#FFB800" />
                           ))}
                         </View>
                       </View>
@@ -822,6 +957,129 @@ export default function HomeScreen() {
         )}
       </ScrollView>
       <AppDrawer visible={drawerVisible} onClose={() => setDrawerVisible(false)} />
+      <VoiceSearchModal
+        visible={voiceModalVisible}
+        onClose={() => setVoiceModalVisible(false)}
+        onSearch={(text) => {
+          setSearchQuery(text);
+        }}
+      />
+
+      {/* Fullscreen Active Search Overlay */}
+      {isSearchFocused && (
+        <View style={[styles.activeSearchOverlay, isDark && { backgroundColor: '#0F172A' }, { paddingTop: insets.top + 10 }]}>
+          {/* Active Search Bar Header */}
+          <View style={[styles.activeSearchBarHeader, isDark && { backgroundColor: '#1E293B', borderColor: '#334155' }]}>
+            {/* Left: Back button */}
+            <TouchableOpacity 
+              style={styles.activeSearchBackBtn}
+              onPress={() => setIsSearchFocused(false)}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="arrow-back-outline" size={22} color={isDark ? '#F1F5F9' : '#0F172A'} />
+            </TouchableOpacity>
+
+            {/* Middle: TextInput */}
+            <TextInput
+              ref={inputRef}
+              autoFocus
+              placeholder={language === 'vi' ? 'Bạn muốn đi đâu hôm nay?' : 'Where do you want to go?'}
+              placeholderTextColor="#7D848D"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              style={[styles.activeSearchInput, isDark && { color: '#FFFFFF' }]}
+            />
+
+            {/* Right: Mic & Magnifying Glass */}
+            <View style={styles.activeSearchRightActions}>
+              {searchQuery.length > 0 && (
+                <TouchableOpacity onPress={() => setSearchQuery('')} style={{ marginRight: 8 }}>
+                  <Ionicons name="close-circle" size={18} color="#94A3B8" />
+                </TouchableOpacity>
+              )}
+              {/* Mic button */}
+              <TouchableOpacity
+                style={styles.activeSearchMicBtn}
+                activeOpacity={0.7}
+                onPress={() => setVoiceModalVisible(true)}
+              >
+                <Ionicons 
+                  name="mic-outline" 
+                  size={20} 
+                  color={isDark ? '#94A3B8' : '#64748B'} 
+                />
+              </TouchableOpacity>
+
+              {/* Orange search glass button */}
+              <TouchableOpacity 
+                style={styles.activeSearchGlassBtn} 
+                activeOpacity={0.8}
+                onPress={() => {
+                  if (searchQuery) {
+                    showSnackbar(language === 'vi' ? `Đang tìm kiếm: ${searchQuery}` : `Searching: ${searchQuery}`);
+                  } else {
+                    showSnackbar(language === 'vi' ? 'Hãy nhập từ khóa để tìm kiếm!' : 'Please enter search query!');
+                  }
+                }}
+              >
+                <Ionicons name="search" size={16} color="#FFFFFF" />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Active Search Body */}
+          <ScrollView 
+            style={{ flex: 1 }}
+            contentContainerStyle={styles.activeSearchBodyContent}
+            keyboardShouldPersistTaps="handled"
+          >
+            {searchQuery.trim().length === 0 ? (
+              /* Suggestions list when query is empty */
+              <View style={styles.activeSuggestionContainer}>
+                <Text style={[styles.activeSuggestionTitle, isDark && { color: '#94A3B8' }]}>
+                  {language === 'vi' ? 'Gợi ý điểm đến phổ biến:' : 'Popular suggested places:'}
+                </Text>
+                <View style={styles.activeSuggestionRow}>
+                  {POPULAR_SUGGESTIONS.map((item) => (
+                    <TouchableOpacity
+                      key={item.name}
+                      style={[styles.suggestionChip, isDark && styles.suggestionChipDark]}
+                      activeOpacity={0.7}
+                      onPress={() => {
+                        setIsSearchFocused(false);
+                        showSnackbar(language === 'vi' ? `Đang mở chi tiết: ${item.name}` : `Opening details: ${item.name}`);
+                        router.push({ pathname: '/destination-detail', params: { pinId: item.pinId } });
+                      }}
+                    >
+                      <Ionicons name={item.icon as any} size={13} color="#FF5B22" style={{ marginRight: 4 }} />
+                      <Text style={[styles.suggestionChipText, isDark && { color: '#E2E8F0' }]}>{item.name}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+            ) : (
+              /* Search Results when query is typed */
+              <View style={styles.activeSearchResultsContainer}>
+                <Text style={[styles.searchResultsTitle, isDark && { color: '#94A3B8' }]}>
+                  {language === 'vi' ? `Kết quả tìm kiếm (${searchResults.length})` : `Search results (${searchResults.length})`}
+                </Text>
+                {searchResults.length === 0 ? (
+                  <View style={[styles.emptyState, isDark && { backgroundColor: '#1E293B', borderColor: '#334155' }]}>
+                    <Ionicons name="search-outline" size={34} color="#FF5B22" />
+                    <Text style={[styles.emptyTitle, isDark && { color: '#F1F5F9' }]}>
+                      {language === 'vi' ? 'Không tìm thấy tour phù hợp' : 'No matching tours found'}
+                    </Text>
+                  </View>
+                ) : (
+                  <View style={styles.tourList}>
+                    {searchResults.map((item) => renderTourCard(item))}
+                  </View>
+                )}
+              </View>
+            )}
+          </ScrollView>
+        </View>
+      )}
     </View>
   );
 }
