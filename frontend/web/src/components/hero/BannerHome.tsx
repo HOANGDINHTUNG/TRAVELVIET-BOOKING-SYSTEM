@@ -168,7 +168,7 @@ const BannerHome: FC<BannerHomeProps> = ({
         if (!existingAccent) {
           const accent = document.createElement("span");
           accent.className =
-            "absolute w-[26px] h-0.5 md:w-[34px] md:h-[3px] rounded-full bg-[#ff6600] left-0 top-0";
+            "absolute w-[26px] h-0.5 md:w-[34px] md:h-[3px] rounded-full bg-[var(--color-accent)] left-0 top-0";
           place.insertBefore(accent, place.firstChild);
         }
 
@@ -586,7 +586,7 @@ const BannerHome: FC<BannerHomeProps> = ({
       {/* Thanh cam indicator (cùng tông nút Tìm kiếm HomeSearchBar) */}
       <div
         ref={indicatorRef}
-        className="indicator fixed left-0 right-0 top-0 h-[5px] bg-[#ff6600] z-40"
+        className="indicator fixed left-0 right-0 top-0 h-[5px] bg-[var(--color-accent)] z-40"
         aria-hidden
       />
 
@@ -661,7 +661,7 @@ const BannerHome: FC<BannerHomeProps> = ({
                     <button
                       type="button"
                       aria-label={t("hero.bookmark")}
-                      className="bookmark w-8 h-8 md:w-9 md:h-9 rounded-full bg-[#ff6600] text-white grid place-items-center border-none shadow-[0_8px_18px_rgba(255,102,0,0.45)] transition-transform hover:scale-105 active:scale-95"
+                      className="bookmark w-8 h-8 md:w-9 md:h-9 rounded-full bg-[var(--color-accent)] text-white grid place-items-center border-none shadow-[0_8px_18px_rgba(255,102,0,0.45)] transition-transform hover:scale-105 active:scale-95"
                     >
                       <span className="text-[16px] md:text-[18px] leading-none">
                         ★
@@ -750,7 +750,7 @@ const BannerHome: FC<BannerHomeProps> = ({
             <div className="progress-sub-background w-full h-[3px] bg-white/25 rounded-full overflow-hidden">
               <div
                 ref={progressRef}
-                className="progress-sub-foreground h-[3px] bg-[#ff6600]"
+                className="progress-sub-foreground h-[3px] bg-[var(--color-accent)]"
               />
             </div>
           </div>
@@ -791,7 +791,7 @@ const DetailsBlock: FC<{
   >
     <div className="place-box min-h-[40px] overflow-hidden relative">
       <div className="text pt-3 text-[12px] md:text-[14px] tracking-[0.18em] uppercase font-medium text-white/85 flex flex-wrap items-center gap-2">
-        <span className="absolute w-[26px] h-0.5 md:w-[34px] md:h-[3px] rounded-full bg-[#ff6600] left-0 top-0" />
+        <span className="absolute w-[26px] h-0.5 md:w-[34px] md:h-[3px] rounded-full bg-[var(--color-accent)] left-0 top-0" />
       </div>
     </div>
     <div className="title-box-1 mt-2 min-h-[96px] md:min-h-[132px] lg:min-h-[168px] max-h-[min(42vh,380px)] overflow-hidden">
@@ -804,7 +804,7 @@ const DetailsBlock: FC<{
     <div className="cta mt-7 flex items-center max-w-[500px] gap-4">
       <button
         type="button"
-        className="bookmark w-10 h-10 rounded-full bg-[#ff6600] text-white grid place-items-center border-none shadow-[0_10px_24px_rgba(255,102,0,0.35)] hover:scale-110 transition-transform duration-300"
+        className="bookmark w-10 h-10 rounded-full bg-[var(--color-accent)] text-white grid place-items-center border-none shadow-[0_10px_24px_rgba(255,102,0,0.35)] hover:scale-110 transition-transform duration-300"
       >
         <span className="text-[18px] leading-none">★</span>
       </button>

@@ -247,7 +247,7 @@ export function HeaderAccountMenu({
                 className={cn(
                   "rounded-full px-2 py-1 text-[11px] font-semibold uppercase tracking-wider transition-colors",
                   theme === "light"
-                    ? "bg-[#ff6600] text-white shadow-sm"
+                    ? "bg-[var(--color-accent)] text-white shadow-sm"
                     : "text-muted-foreground hover:text-foreground",
                 )}
               >
@@ -260,7 +260,7 @@ export function HeaderAccountMenu({
                 className={cn(
                   "rounded-full px-2 py-1 text-[11px] font-semibold uppercase tracking-wider transition-colors",
                   theme === "dark"
-                    ? "bg-[#ff6600] text-white shadow-sm"
+                    ? "bg-[var(--color-accent)] text-white shadow-sm"
                     : "text-muted-foreground hover:text-foreground",
                 )}
               >
@@ -282,7 +282,7 @@ export function HeaderAccountMenu({
                 className={cn(
                   "rounded-full px-2 py-1 text-[11px] font-semibold uppercase tracking-wider transition-colors",
                   language === "vi"
-                    ? "bg-[#ff6600] text-white shadow-sm"
+                    ? "bg-[var(--color-accent)] text-white shadow-sm"
                     : "text-muted-foreground hover:text-foreground",
                 )}
               >
@@ -294,7 +294,7 @@ export function HeaderAccountMenu({
                 className={cn(
                   "rounded-full px-2 py-1 text-[11px] font-semibold uppercase tracking-wider transition-colors",
                   language === "en"
-                    ? "bg-[#ff6600] text-white shadow-sm"
+                    ? "bg-[var(--color-accent)] text-white shadow-sm"
                     : "text-muted-foreground hover:text-foreground",
                 )}
               >

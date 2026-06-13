@@ -44,12 +44,12 @@ function useNavLabelTone(
   const useLightNavText = isOverlay || appearance === "solid-dark";
 
   const labelTone = isPageActive
-    ? "!text-[#ff6600]"
+    ? "!text-[var(--color-accent)]"
     : useLightNavText
       ? "!text-white"
       : "!text-[var(--color-text)]";
 
-  return { labelTone, underlineTone: "!bg-[#ff6600]" };
+  return { labelTone, underlineTone: "!bg-[var(--color-accent)]" };
 }
 
 type SimpleNavItemProps = {
@@ -271,7 +271,7 @@ export const ProductItem: React.FC<ProductItemProps> = ({
           </div>
         ) : (
           <>
-            <h4 className="mb-1 text-xl font-bold text-black transition-colors duration-300 group-hover:text-[#ff6600] dark:text-white">
+            <h4 className="mb-1 text-xl font-bold text-black transition-colors duration-300 group-hover:text-[var(--color-accent)] dark:text-white">
               {title}
             </h4>
             <p className="max-w-40 text-sm text-neutral-700 dark:text-neutral-300">
@@ -330,7 +330,7 @@ export const HoveredLink: React.FC<HoveredLinkProps> = ({
   skeletonWidthClass = "w-36",
 }) => {
   const tone =
-    "block rounded-md px-2 py-1.5 text-[13px] font-medium text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 hover:text-[#ff6600] dark:hover:bg-neutral-800/70 transition-colors";
+    "block rounded-md px-2 py-1.5 text-[13px] font-medium text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 hover:text-[var(--color-accent)] dark:hover:bg-neutral-800/70 transition-colors";
 
   if (forceLoading) {
     return (

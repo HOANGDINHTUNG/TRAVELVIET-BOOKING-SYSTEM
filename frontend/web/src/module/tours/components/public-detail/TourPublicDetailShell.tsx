@@ -48,6 +48,7 @@ type TourPublicDetailShellProps = {
   tour: TourResponse;
   scheduleSelector: ReactNode;
   selectedDate?: string | null;
+  selectedScheduleCode?: string | null;
   onClearDate?: () => void;
   onCheckout?: () => void;
 };
@@ -56,6 +57,7 @@ export function TourPublicDetailShell({
   tour,
   scheduleSelector,
   selectedDate,
+  selectedScheduleCode,
   onClearDate,
   onCheckout,
 }: TourPublicDetailShellProps) {
@@ -73,7 +75,10 @@ export function TourPublicDetailShell({
 
   const displayPrice = tour.basePrice || 8990000;
   const title = tour.name || "—";
-  const destination = tour.destinationName || "Hạ Long, Bái Đính, Tràng An";
+  const destination =
+    tour.destinations && tour.destinations.length > 0
+      ? tour.destinations.map((d) => d.name).join(", ")
+      : "Hạ Long, Bái Đính, Tràng An";
 
   const esg = resolveEsgScore(tour);
   const lei = resolveLeiScore(tour);
@@ -176,9 +181,11 @@ export function TourPublicDetailShell({
                   <div className="text-blue-500 mb-2 flex items-center font-bold text-sm relative z-10">
                     <span className="mr-2 text-lg">📍</span> Điểm tham quan
                   </div>
-                  <div className="text-xs text-slate-500 leading-relaxed font-medium relative z-10">
-                    {tour.destinationName ||
-                      "Hạ Long, Bái Đính, Tràng An, Yên Tử, Hà Nội"}
+                  <div
+                    className="text-xs text-slate-500 leading-relaxed font-medium relative z-10 truncate"
+                    title={destination}
+                  >
+                    {destination}
                   </div>
                 </div>
                 <div className="bg-white p-4 rounded-2xl shadow-[0px_2px_8px_rgba(0,0,0,0.04)] border border-slate-50 relative overflow-hidden group">
@@ -441,10 +448,10 @@ export function TourPublicDetailShell({
                     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center text-slate-700 font-medium">
                       <span className="flex items-center gap-2">
                         <span className="text-slate-400 font-serif">🎫</span> Mã
-                        tour:
+                        chuyến:
                       </span>
                       <span className="text-blue-600 sm:text-right mt-1 sm:mt-0 max-w-[200px] truncate">
-                        {tour.code || "NDDNG2640-007-020726VU-V"}
+                        {selectedScheduleCode || tour.code || "NDDNG2640-007"}
                       </span>
                     </div>
                     <div className="flex justify-between text-slate-700 font-medium">

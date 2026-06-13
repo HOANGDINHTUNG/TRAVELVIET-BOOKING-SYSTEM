@@ -13,7 +13,7 @@ const STATUS_TONE: Record<PaymentStatus, string> = {
   failed: 'bg-rose-100 text-rose-900 ring-1 ring-rose-200',
   refunded: 'bg-violet-100 text-violet-900 ring-1 ring-violet-200',
   partially_refunded:
-    'bg-fuchsia-100 text-fuchsia-900 ring-1 ring-fuchsia-200',
+    'bg-accentuchsia-100 text-fuchsia-900 ring-1 ring-fuchsia-200',
 }
 
 const UNKNOWN_TONE = 'bg-slate-100 text-slate-700 ring-1 ring-slate-200'

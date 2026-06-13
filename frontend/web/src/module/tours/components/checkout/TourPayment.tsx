@@ -248,7 +248,7 @@ export default function TourPayment({
                     Ngày đi:{" "}
                     <span className="font-bold text-slate-700">05/06/2026</span>
                   </div>
-                  <div className="text-orange-500 font-bold flex items-center gap-1 text-xs">
+                  <div className="text-accent font-bold flex items-center gap-1 text-xs">
                     <Bus size={14} /> Xe khách
                   </div>
                 </div>
@@ -274,7 +274,7 @@ export default function TourPayment({
                     Ngày về:{" "}
                     <span className="font-bold text-slate-700">07/06/2026</span>
                   </div>
-                  <div className="text-orange-500 font-bold flex items-center gap-1 text-xs">
+                  <div className="text-accent font-bold flex items-center gap-1 text-xs">
                     <Bus size={14} /> Xe khách
                   </div>
                 </div>

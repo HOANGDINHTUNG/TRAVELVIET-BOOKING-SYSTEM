@@ -15,6 +15,7 @@ import {
   Bus,
 } from "lucide-react";
 import { OptimizedImage } from "@/components/common/media/OptimizedImage";
+import { useAuthStore } from "@/stores/authStore";
 
 function formatMoney(amount: number) {
   return new Intl.NumberFormat("vi-VN").format(amount) + "đ";
@@ -27,15 +28,24 @@ export default function TourCheckoutForm({
   session: TourCheckoutSession;
   onNext: (bookingId: number) => void;
 }) {
-  const [adults, setAdults] = useState(2);
-  const [children, setChildren] = useState(1);
-  const [toddlers, setToddlers] = useState(1);
+  const [adults, setAdults] = useState(1);
+  const [children, setChildren] = useState(0);
   const [infants, setInfants] = useState(0);
+  const [adultSingleFlags, setAdultSingleFlags] = useState<boolean[]>([]);
 
-  const [contactName, setContactName] = useState("");
-  const [contactPhone, setContactPhone] = useState("");
-  const [contactEmail, setContactEmail] = useState("");
+  const user = useAuthStore((s: any) => s.user);
+  const [contactName, setContactName] = useState(user?.fullName || "");
+  const [contactPhone, setContactPhone] = useState(user?.phoneNumber || "");
+  const [contactEmail, setContactEmail] = useState(user?.email || "");
   const [specialRequests, setSpecialRequests] = useState("");
+
+  const toggleSingleRoom = (index: number) => {
+    setAdultSingleFlags((prev) => {
+      const next = [...prev];
+      next[index] = !next[index];
+      return next;
+    });
+  };
 
   const createMutation = useCreateBooking();
 
@@ -60,7 +70,7 @@ export default function TourCheckoutForm({
         scheduleId: session.scheduleId,
         TourId: session.tourId,
         adults,
-        children: children + toddlers, // Toddlers are combined into children for backend
+        children: children,
         infants,
         contactName,
         contactPhone,
@@ -86,10 +96,13 @@ export default function TourCheckoutForm({
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Derive simple total costs
+  const singleSupplementPrice = session.adultPrice * 0.25;
+  const singleRoomsCount = adultSingleFlags.slice(0, adults).filter(Boolean).length;
+  
   const totalCost =
     adults * session.adultPrice +
     children * session.childPrice +
-    toddlers * session.infantPrice; // Infant (em bé) is 0
+    singleRoomsCount * singleSupplementPrice; // infantPrice is usually 0
 
   return (
     <div className="flex flex-col lg:flex-row gap-8">
@@ -189,16 +202,10 @@ export default function TourCheckoutForm({
                 setter: setChildren,
                 min: 0,
               },
-              {
-                label: "Trẻ nhỏ",
-                sub: "Từ 2 - 4 tuổi",
-                val: toddlers,
-                setter: setToddlers,
-                min: 0,
-              },
+              
               {
                 label: "Em bé",
-                sub: "Dưới 2 tuổi",
+                sub: "Dưới 4 tuổi",
                 val: infants,
                 setter: setInfants,
                 min: 0,
@@ -251,7 +258,7 @@ export default function TourCheckoutForm({
                 </div>
                 <p className="text-blue-500 text-xs font-medium mb-4">
                   Phòng đơn dành cho khách hàng từ 12 tuổi trở lên, giá phòng
-                  đơn là: 0đ / phòng
+                  đơn là: {formatMoney(singleSupplementPrice)} / phòng
                 </p>
 
                 <div className="space-y-4">
@@ -283,10 +290,22 @@ export default function TourCheckoutForm({
                         <div className="relative inline-block w-10 align-middle select-none transition duration-200 ease-in">
                           <input
                             type="checkbox"
-                            className="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer border-slate-300"
-                            style={{ top: "1px", left: "1px" }}
+                            checked={!!adultSingleFlags[i]}
+                            onChange={() => toggleSingleRoom(i)}
+                            className="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer transition-transform duration-200"
+                            style={{
+                              top: "1px",
+                              left: "1px",
+                              borderColor: adultSingleFlags[i] ? "#2563eb" : "#cbd5e1",
+                              transform: adultSingleFlags[i] ? "translateX(100%)" : "translateX(0)"
+                            }}
                           />
-                          <label className="toggle-label block overflow-hidden h-6 rounded-full bg-slate-300 cursor-pointer"></label>
+                          <label 
+                            className={`toggle-label block overflow-hidden h-6 rounded-full cursor-pointer transition-colors duration-200 ${
+                              adultSingleFlags[i] ? "bg-blue-600" : "bg-slate-300"
+                            }`}
+                            onClick={() => toggleSingleRoom(i)}
+                          ></label>
                         </div>
                       </div>
                     </div>
@@ -334,7 +353,7 @@ export default function TourCheckoutForm({
             )}
 
             {/* Trẻ nhỏ */}
-            {toddlers > 0 && (
+            {false /* toddlers > 0 */ && (
               <div>
                 <div className="font-bold text-blue-600 flex items-center gap-2 mb-4">
                   <UserCircle size={18} /> Trẻ nhỏ{" "}
@@ -457,7 +476,7 @@ export default function TourCheckoutForm({
                           05/06/2026
                         </span>
                       </div>
-                      <div className="text-orange-500 font-bold flex items-center gap-1 text-xs">
+                      <div className="text-accent font-bold flex items-center gap-1 text-xs">
                         <Bus size={14} /> Xe khách
                       </div>
                     </div>
@@ -485,7 +504,7 @@ export default function TourCheckoutForm({
                           07/06/2026
                         </span>
                       </div>
-                      <div className="text-orange-500 font-bold flex items-center gap-1 text-xs">
+                      <div className="text-accent font-bold flex items-center gap-1 text-xs">
                         <Bus size={14} /> Xe khách
                       </div>
                     </div>
@@ -541,16 +560,27 @@ export default function TourCheckoutForm({
                     </span>
                   </div>
                 )}
-                {toddlers > 0 && (
+                {false /* toddlers > 0 */ && (
                   <div className="flex justify-between items-center">
                     <span className="text-slate-600">Trẻ nhỏ</span>
                     <span className="text-slate-800">
-                      <span className="text-slate-400 mr-2">{toddlers} x</span>{" "}
+                      <span className="text-slate-400 mr-2">{0} x</span>{" "}
                       {formatMoney(session.infantPrice)}
                     </span>
                   </div>
                 )}
+                
+                {singleRoomsCount > 0 && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-600">Phụ thu phòng đơn</span>
+                    <span className="text-slate-800">
+                      <span className="text-slate-400 mr-2">{singleRoomsCount} x</span>{" "}
+                      {formatMoney(singleSupplementPrice)}
+                    </span>
+                  </div>
+                )}
                 {infants > 0 && (
+
                   <div className="flex justify-between items-center">
                     <span className="text-slate-600">Em bé</span>
                     <span className="text-slate-800">
@@ -647,7 +677,7 @@ export default function TourCheckoutForm({
                 Phòng đơn dành cho khách hàng từ 12 tuổi trở lên, giá phòng đơn
                 là:{" "}
                 <a href="#" className="font-bold underline hover:text-blue-700">
-                  0đ / phòng
+                  {formatMoney(singleSupplementPrice)} / phòng
                 </a>
               </div>
 
@@ -860,7 +890,7 @@ export default function TourCheckoutForm({
               )}
 
               {/* Trẻ nhỏ */}
-              {toddlers > 0 && (
+              {false /* toddlers > 0 */ && (
                 <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 border-dashed">
                   <div className="font-bold text-blue-600 flex items-center gap-2 mb-6">
                     <UserCircle size={18} /> Trẻ nhỏ{" "}

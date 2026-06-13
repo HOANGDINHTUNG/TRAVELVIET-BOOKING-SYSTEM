@@ -1,7 +1,7 @@
 import { useMemo, useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { CalendarRange, Loader2 } from "lucide-react";
-import { formatCurrencyVnd } from '@/utils/currency';
+import { formatCurrencyVnd } from "@/utils/currency";
 import type { TourScheduleResponse } from "../types/publicTour";
 import { listBookableSchedules } from "../utils/tourScheduleSelection";
 
@@ -231,7 +231,7 @@ export function TourScheduleSelector(props: TourScheduleSelectorProps) {
                         <div>
                           <div className="font-bold text-slate-800">Em bé</div>
                           <div className="text-slate-400 text-xs text-left">
-                            (Dưới 2 tuổi)
+                            (Dưới 4 tuổi)
                           </div>
                         </div>
                         <div className="text-[#e11d27] font-bold">
@@ -254,20 +254,7 @@ export function TourScheduleSelector(props: TourScheduleSelectorProps) {
                           Phụ thu phòng đơn
                         </div>
                         <div className="text-[#e11d27] font-bold">
-                          1.200.000đ
-                        </div>
-                      </div>
-                      <div className="flex justify-between items-center pr-4">
-                        <div>
-                          <div className="font-bold text-slate-800">
-                            Trẻ nhỏ
-                          </div>
-                          <div className="text-slate-400 text-xs text-left">
-                            (Từ 2 - 4 tuổi)
-                          </div>
-                        </div>
-                        <div className="text-[#e11d27] font-bold">
-                          4.495.000đ
+                          {formatCurrencyVnd((schedule.adultPrice || 0) * 0.25)}
                         </div>
                       </div>
                     </div>

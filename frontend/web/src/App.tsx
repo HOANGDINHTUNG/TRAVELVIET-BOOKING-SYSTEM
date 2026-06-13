@@ -9,7 +9,6 @@ import { PublicCommandPalette } from "./components/command/PublicCommandPalette"
 import { LoginWelcomeAnimation } from "./module/auth/components/LoginWelcome/LoginWelcomeAnimation";
 import { useAppSelector } from "./hooks/reduxHooks";
 import { LenisProvider } from "./providers/LenisProvider";
-import { resolveHeaderVariant } from "./components/header/headerVariant";
 import { syncBrowserTabTitle } from "./stores/aiChatNotificationStore";
 
 /**
@@ -27,8 +26,6 @@ function App() {
   const isTourPublicDetailPage = location.pathname.startsWith("/tour/");
   const isAuthPublicPage =
     location.pathname === "/login" || location.pathname === "/register";
-  const isHeaderOverlayPage =
-    resolveHeaderVariant(location.pathname) === "over-hero";
 
   useEffect(() => {
     document.documentElement.lang = language;
@@ -50,11 +47,15 @@ function App() {
         className={
           isAuthPublicPage
             ? "min-h-screen"
-            : isHeaderOverlayPage
-              ? "min-h-[90vh]"
-              : isTourPublicDetailPage
-                ? "min-h-[90vh] pt-12 md:pt-14"
-                : "min-h-[90vh] pt-[var(--site-header-height)]"
+            : `min-h-[90vh] ${
+                isTourPublicDetailPage
+                  ? "pt-[var(--site-header-height)]" // Explicit padding to push content down below header
+                  : ["/", "/tours", "/flights", "/hotels", "/combos"].includes(
+                        location.pathname,
+                      )
+                    ? "" // Exact root hero pages get full bleed
+                    : "pt-[var(--site-header-height)]" // All subpages get padding clearance
+              }`
         }
       >
         <Outlet />
@@ -68,7 +69,7 @@ function App() {
       {!isAuthPublicPage && <Header />}
       <LenisProvider>{mainContent}</LenisProvider>
       <SiteMotion />
-      <SiteFabStack />
+      {!isAuthPublicPage && <SiteFabStack />}
     </>
   );
 

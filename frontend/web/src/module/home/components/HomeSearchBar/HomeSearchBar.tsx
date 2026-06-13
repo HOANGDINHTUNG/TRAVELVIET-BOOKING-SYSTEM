@@ -17,11 +17,11 @@ const fieldShellClass = cn(
   "group relative flex min-h-[46px] flex-1 cursor-pointer items-center overflow-hidden",
   "rounded-lg border border-[var(--home-search-field-border)] bg-[var(--home-search-field-bg)]",
   "shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-colors duration-150",
-  "focus-within:border-[#ff6600] focus-within:shadow-[0_0_0_2px_rgba(255,102,0,0.18)]",
+  "focus-within:border-[var(--color-accent)] focus-within:shadow-[0_0_0_2px_rgba(255,102,0,0.18)]",
 );
 
 const fieldIconClass =
-  "pointer-events-none absolute left-2.5 z-[2] flex items-center text-[var(--home-search-icon,#ff6600)]";
+  "pointer-events-none absolute left-2.5 z-[2] flex items-center text-[var(--home-search-icon,var(--color-accent))]";
 
 const fieldControlClass = cn(
   "h-full min-h-[46px] w-full appearance-none bg-transparent pl-9 pr-8 text-sm",
@@ -232,10 +232,10 @@ export function HomeSearchBar() {
             onClick={handleSearch}
             className={cn(
               "inline-flex min-h-[46px] flex-shrink-0 items-center justify-center gap-2",
-              "rounded-lg bg-[#ff6600] px-[clamp(18px,3vw,28px)] text-[15px] font-extrabold tracking-wide text-white whitespace-nowrap",
+              "rounded-lg bg-[var(--color-accent)] px-[clamp(18px,3vw,28px)] text-[15px] font-extrabold tracking-wide text-white whitespace-nowrap",
               "shadow-[0_2px_8px_rgba(255,102,0,0.35)] transition-all duration-150",
               "hover:bg-[#e65c00] active:scale-[0.98]",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff6600]/55 focus-visible:ring-offset-2",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]/55 focus-visible:ring-offset-2",
               "max-md:w-full max-md:min-h-[48px]",
             )}
           >

@@ -32,14 +32,25 @@
   --color-danger: #b91c1c;
 
   --color-border: color-mix(in srgb, var(--color-primary) 22%, #94a3b8 78%);
-  --color-border-subtle: color-mix(in srgb, var(--color-border) 55%, transparent);
+  --color-border-subtle: color-mix(
+    in srgb,
+    var(--color-border) 55%,
+    transparent
+  );
 
-  --shadow-card: 0 10px 36px color-mix(in srgb, var(--color-text) 12%, transparent);
-  --shadow-card-hover: 0 18px 48px color-mix(in srgb, var(--color-text) 16%, transparent);
+  --shadow-card: 0 10px 36px
+    color-mix(in srgb, var(--color-text) 12%, transparent);
+  --shadow-card-hover: 0 18px 48px
+    color-mix(in srgb, var(--color-text) 16%, transparent);
   --shadow-lift-y: -6px;
 
   /* Motion tokens — premium UX (Phase 0) */
-  --ease-premium: cubic-bezier(0.16, 1, 0.3, 1); /* expo.out — dùng cho reveal/stagger */
+  --ease-premium: cubic-bezier(
+    0.16,
+    1,
+    0.3,
+    1
+  ); /* expo.out — dùng cho reveal/stagger */
   --ease-hover: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-smooth: cubic-bezier(0.32, 0.72, 0, 1); /* dùng cho dropdown/sheet */
   --duration-fast: 0.18s;
@@ -58,20 +69,38 @@
   /* Glass — higher surface opacity on cards for ≥4.5:1 body text */
   --glass-blur: 18px;
   --glass-bg: color-mix(in srgb, var(--color-surface) 88%, transparent);
-  --glass-bg-solid: color-mix(in srgb, var(--color-surface) 96%, var(--color-page-tint) 4%);
+  --glass-bg-solid: color-mix(
+    in srgb,
+    var(--color-surface) 96%,
+    var(--color-page-tint) 4%
+  );
   --glass-border: color-mix(in srgb, var(--color-primary) 18%, transparent);
-  --glass-shadow-outer: 0 20px 50px color-mix(in srgb, var(--color-text) 10%, transparent);
-  --glass-shadow-inset: inset 0 1px 0 color-mix(in srgb, #ffffff 55%, transparent);
+  --glass-shadow-outer: 0 20px 50px
+    color-mix(in srgb, var(--color-text) 10%, transparent);
+  --glass-shadow-inset: inset 0 1px 0
+    color-mix(in srgb, #ffffff 55%, transparent);
 
-  --focus-ring-color: color-mix(in srgb, var(--color-aqua) 85%, var(--color-primary) 15%);
+  --focus-ring-color: color-mix(
+    in srgb,
+    var(--color-aqua) 85%,
+    var(--color-primary) 15%
+  );
 
-  --nav-glass-bg-rest: color-mix(in srgb, rgba(6, 40, 48, 0.78) 88%, transparent);
+  --nav-glass-bg-rest: color-mix(
+    in srgb,
+    rgba(6, 40, 48, 0.78) 88%,
+    transparent
+  );
   --nav-glass-bg-scrolled-light: color-mix(
     in srgb,
     var(--color-surface) 92%,
     var(--color-page-tint) 8%
   );
-  --nav-glass-bg-scrolled-dark: color-mix(in srgb, #0f172a 88%, rgba(0, 0, 0, 0.35));
+  --nav-glass-bg-scrolled-dark: color-mix(
+    in srgb,
+    #0f172a 88%,
+    rgba(0, 0, 0, 0.35)
+  );
 
   /* Header surfaces */
   --header-surface-light: color-mix(in srgb, #ffffff 96%, #f0f8ff 4%);
@@ -82,7 +111,12 @@
 
   /* Home search band */
   --home-search-outer: linear-gradient(180deg, #f8fcff 0%, #eef6fc 100%);
-  --home-search-panel: linear-gradient(165deg, #f6fbff 0%, #e9f4fc 48%, #e4f1fa 100%);
+  --home-search-panel: linear-gradient(
+    165deg,
+    #f6fbff 0%,
+    #e9f4fc 48%,
+    #e4f1fa 100%
+  );
   --home-search-field-bg: #ffffff;
   --home-search-field-border: #c5d5e5;
   --home-search-field-text: #334155;
@@ -152,9 +186,9 @@
   --color-primary-hover: #2dd4bf;
   --color-aqua: #22d3ee;
   --color-ocean: #38bdf8;
-  --color-accent: #fb923c;
-  --color-accent-hover: #fdba74;
-  --color-accent-foreground: #ffedd5;
+  --color-accent: #2dd4bf; /* Swapped to Teal-400 */
+  --color-accent-hover: #5eead4; /* Teal-300 */
+  --color-accent-foreground: #042f2e; /* Teal-900 */
   --color-danger: #fca5a5;
 
   --color-border: color-mix(in srgb, var(--color-neon-blue) 35%, transparent);
@@ -165,14 +199,31 @@
 
   --glass-bg: color-mix(in srgb, var(--color-surface) 82%, transparent);
   --glass-bg-solid: color-mix(in srgb, var(--color-surface) 94%, #0f172a 6%);
-  --glass-border: color-mix(in srgb, var(--color-neon-blue) 42%, var(--color-neon-purple) 22%);
+  --glass-border: color-mix(
+    in srgb,
+    var(--color-neon-blue) 42%,
+    var(--color-neon-purple) 22%
+  );
   --glass-shadow-outer: 0 24px 70px rgba(0, 0, 0, 0.55);
-  --glass-shadow-inset: inset 0 1px 0 color-mix(in srgb, #ffffff 12%, transparent);
+  --glass-shadow-inset: inset 0 1px 0
+    color-mix(in srgb, #ffffff 12%, transparent);
 
-  --focus-ring-color: color-mix(in srgb, var(--color-neon-blue) 70%, var(--color-neon-purple) 30%);
+  --focus-ring-color: color-mix(
+    in srgb,
+    var(--color-neon-blue) 70%,
+    var(--color-neon-purple) 30%
+  );
 
-  --nav-glass-bg-rest: color-mix(in srgb, rgba(8, 14, 28, 0.88) 90%, transparent);
-  --nav-glass-bg-scrolled-dark: color-mix(in srgb, #1a2a42 92%, rgba(0, 0, 0, 0.35));
+  --nav-glass-bg-rest: color-mix(
+    in srgb,
+    rgba(8, 14, 28, 0.88) 90%,
+    transparent
+  );
+  --nav-glass-bg-scrolled-dark: color-mix(
+    in srgb,
+    #1a2a42 92%,
+    rgba(0, 0, 0, 0.35)
+  );
 
   --header-surface-light: color-mix(in srgb, #ffffff 96%, #f0f8ff 4%);
   --header-surface-dark: color-mix(in srgb, #2a3f5e 92%, #354d72 8%);

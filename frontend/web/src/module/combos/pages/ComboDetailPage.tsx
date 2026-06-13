@@ -184,7 +184,7 @@ export default function ComboDetailPage() {
           <div className="flex-1 w-full space-y-8">
             {/* Title */}
             <h1 className="text-2xl md:text-3xl font-bold text-slate-800 leading-tight">
-              {tour.name}
+              {title}
             </h1>
             {/* Giới thiệu & Vị trí - 2 Columns */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -196,7 +196,7 @@ export default function ComboDetailPage() {
                 <div
                   className="flex-1 text-sm text-slate-600 leading-relaxed overflow-y-auto pr-2 custom-scrollbar"
                   dangerouslySetInnerHTML={{
-                    __html: tour.description || "Chưa có bài viết giới thiệu.",
+                    __html: description,
                   }}
                 />
               </div>
@@ -219,7 +219,7 @@ export default function ComboDetailPage() {
                       className="text-[#e11d27] mb-2 drop-shadow-md"
                     />
                     <div className="bg-white/90 backdrop-blur px-3 py-1.5 rounded-full text-xs font-bold text-slate-700 shadow-sm">
-                      {tour.destinationName || "Ninh Thuận"}
+                      {destination}
                     </div>
                   </div>
                   <button className="absolute bottom-3 right-3 bg-white p-1.5 rounded-full shadow-sm text-slate-500 hover:text-slate-800 pointer-events-auto">
@@ -325,7 +325,7 @@ export default function ComboDetailPage() {
                             <div className="w-full sm:w-1/3">
                               <div className="flex justify-between text-slate-500 mb-1">
                                 <span>Ngày đi: {dateStr}</span>
-                                <span className="text-orange-500 flex items-center gap-1 font-medium">
+                                <span className="text-accent flex items-center gap-1 font-medium">
                                   <Bus size={14} /> Xe khách
                                 </span>
                               </div>
@@ -350,7 +350,7 @@ export default function ComboDetailPage() {
                                       ).toLocaleDateString("vi-VN")
                                     : dateStr}
                                 </span>
-                                <span className="text-orange-500 flex items-center gap-1 font-medium">
+                                <span className="text-accent flex items-center gap-1 font-medium">
                                   <Bus size={14} /> Xe khách
                                 </span>
                               </div>
@@ -416,7 +416,7 @@ export default function ComboDetailPage() {
                         </div>
 
                         {/* Extra info */}
-                        <div className="bg-orange-50/50 rounded-xl p-4 border border-orange-100/50 mt-2">
+                        <div className="bg-accent/10 rounded-xl p-4 border border-accent/30 mt-2">
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm mb-4">
                             <div>
                               <div className="font-bold text-slate-800 mb-1">
@@ -436,7 +436,7 @@ export default function ComboDetailPage() {
                               </p>
                             </div>
                           </div>
-                          <div className="text-xs text-orange-600 bg-orange-100/40 p-3 rounded-lg leading-relaxed">
+                          <div className="text-xs text-accent bg-accent/20/40 p-3 rounded-lg leading-relaxed">
                             Combo không hoàn, hủy, không đổi. Giá áp dụng tối
                             thiểu cho 2 khách/ booking. Quý khách cần mang theo
                             CCCD/Passport gốc còn hạn để làm thủ tục nhận phòng.

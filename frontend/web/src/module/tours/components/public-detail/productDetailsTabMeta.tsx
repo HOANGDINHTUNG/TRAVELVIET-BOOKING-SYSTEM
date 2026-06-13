@@ -42,7 +42,7 @@ export const PRODUCT_TAB_META: Record<ProductTabKey, ProductTabMeta> = {
       'border-amber-300 bg-amber-500 text-white shadow-md shadow-amber-500/25',
     tabIdle:
       'border-amber-100 bg-amber-50/90 text-amber-950 hover:border-amber-300 hover:bg-amber-100',
-    panelGradient: 'from-amber-50/90 via-white to-orange-50/35',
+    panelGradient: 'from-amber-50/90 via-white to-accent/10/35',
     accentText: 'text-amber-900',
   },
   inclusions: {

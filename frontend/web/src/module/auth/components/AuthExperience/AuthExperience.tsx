@@ -91,22 +91,37 @@ export function AuthExperience() {
         <span className="auth-orb auth-orb--three" />
       </div>
 
-      <header className="auth-liquid-topbar">
-        <Link className="auth-brand-link" to="/" aria-label="TravelViet home">
-          <ArrowLeft aria-hidden="true" />
-          <span>TravelViet</span>
-        </Link>
-      </header>
-
-      <div className="auth-liquid-shell">
-        <aside
+      <div className={`auth-liquid-shell auth-liquid-shell--${mode}`}>
+        <motion.aside
+          layout
+          transition={{ type: "spring", stiffness: 320, damping: 35 }}
           className="auth-liquid-visual"
-          style={{ "--auth-bg-visual": `url(${isLogin ? halongBg : hoianBg})` } as React.CSSProperties}
+          style={
+            {
+              "--auth-bg-visual": `url(${isLogin ? halongBg : hoianBg})`,
+            } as React.CSSProperties
+          }
           aria-hidden="true"
         >
-          <span className="auth-visual-ring">
+          <span className="auth-visual-ring auth-visual-ring--top">
             <MapPinned />
           </span>
+
+          <div className="auth-visual-badges-container">
+            <span className="auth-visual-chip">
+              <Sparkles aria-hidden="true" />
+              {isLogin
+                ? t("visual.badgeOneLogin")
+                : t("visual.badgeOneRegister")}
+            </span>
+            <span className="auth-visual-chip">
+              <ShieldCheck aria-hidden="true" />
+              {isLogin
+                ? t("visual.badgeTwoLogin")
+                : t("visual.badgeTwoRegister")}
+            </span>
+          </div>
+
           <p className="auth-visual-kicker">{t("visual.kicker")}</p>
           <h2 className="auth-visual-title">
             {isLogin ? t("visual.loginTitle") : t("visual.registerTitle")}
@@ -119,21 +134,23 @@ export function AuthExperience() {
             </dt>
             <dd>{isLogin ? "23" : "24/7"}</dd>
           </dl>
-          <span className="auth-visual-chip auth-visual-chip--one">
-            <Sparkles aria-hidden="true" />
-            {isLogin ? t("visual.badgeOneLogin") : t("visual.badgeOneRegister")}
-          </span>
-          <span className="auth-visual-chip auth-visual-chip--two">
-            <ShieldCheck aria-hidden="true" />
-            {isLogin ? t("visual.badgeTwoLogin") : t("visual.badgeTwoRegister")}
-          </span>
-        </aside>
+        </motion.aside>
 
-        <div
+        <motion.div
+          layout
+          transition={{ type: "spring", stiffness: 320, damping: 35 }}
           className={`auth-liquid-card ${shake ? "auth-liquid-card--shake" : ""}`}
           data-auth-mode={mode}
         >
           <header className="auth-card-head">
+            <Link
+              className="auth-brand-link-inside"
+              to="/"
+              aria-label="TravelViet home"
+            >
+              <ArrowLeft aria-hidden="true" size={18} />
+              <span>TravelViet</span>
+            </Link>
             <h1 id="auth-panel-title" className="auth-card-sr-title">
               {isLogin ? t("tabs.login") : t("tabs.register")}
             </h1>
@@ -246,7 +263,7 @@ export function AuthExperience() {
               </>
             )}
           </p>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

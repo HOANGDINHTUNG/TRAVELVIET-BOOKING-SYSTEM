@@ -11,14 +11,14 @@ export function resolveHeaderVariant(pathname: string): HeaderVariant {
   if (pathname === "/") return "over-hero";
   if (pathname === "/tours") return "over-hero";
   if (pathname === "/flights") return "over-hero";
-  if (pathname === "/flights/search") return "solid";
+  if (pathname === "/flights/search") return "over-hero";
   if (pathname === "/flights/checkout" || pathname === "/flights/success")
-    return "solid";
+    return "over-hero";
   if (pathname === "/hotels") return "over-hero";
-  if (pathname === "/hotels/search") return "solid";
+  if (pathname === "/hotels/search") return "over-hero";
   if (pathname === "/combos") return "over-hero";
 
-  if (pathname.startsWith("/tour/")) return "solid";
+  if (pathname.startsWith("/tour/")) return "over-hero";
 
   if (
     pathname === "/destinations" ||
@@ -40,5 +40,5 @@ export function resolveHeaderVariant(pathname: string): HeaderVariant {
     return "over-hero";
   }
 
-  return "solid";
+  return "over-hero";
 }

@@ -313,7 +313,7 @@ export default function HotelDetailPage() {
                                 {plan.inclusionTags.map((tag, tIdx) => (
                                   <li
                                     key={tIdx}
-                                    className={`flex items-start gap-1.5 ${tag.includes("bữa sáng") ? "text-orange-600 font-medium" : "text-slate-600"}`}
+                                    className={`flex items-start gap-1.5 ${tag.includes("bữa sáng") ? "text-accent font-medium" : "text-slate-600"}`}
                                   >
                                     {tag.includes("chưa") ||
                                     tag.includes("Không hoàn") ? (
@@ -325,7 +325,7 @@ export default function HotelDetailPage() {
                                         size={16}
                                         className={
                                           tag.includes("bữa sáng")
-                                            ? "text-orange-500 shrink-0"
+                                            ? "text-accent shrink-0"
                                             : "text-green-500 shrink-0"
                                         }
                                       />
@@ -345,7 +345,7 @@ export default function HotelDetailPage() {
                             </td>
                             <td className="p-4 border-r border-slate-100 align-middle text-right">
                               {plan.promoTag && (
-                                <div className="inline-block bg-orange-100 text-orange-600 text-xs font-semibold px-2 py-0.5 rounded mb-2">
+                                <div className="inline-block bg-accent/20 text-accent text-xs font-semibold px-2 py-0.5 rounded mb-2">
                                   {plan.promoTag}
                                 </div>
                               )}

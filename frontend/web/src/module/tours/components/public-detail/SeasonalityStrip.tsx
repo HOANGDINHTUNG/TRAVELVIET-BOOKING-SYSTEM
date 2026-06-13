@@ -13,7 +13,7 @@ export function SeasonalityStrip({ tour }: SeasonalityStripProps) {
   if (rows.length === 0) return null
 
   return (
-    <section className="rounded-3xl border border-amber-200/70 bg-gradient-to-br from-amber-50/70 via-white to-orange-50/40 p-5 shadow-lg ring-1 ring-amber-100/50 backdrop-blur-md md:p-6">
+    <section className="rounded-3xl border border-amber-200/70 bg-gradient-to-br from-amber-50/70 via-white to-accent/10/40 p-5 shadow-lg ring-1 ring-amber-100/50 backdrop-blur-md md:p-6">
       <div className="flex items-center gap-2 text-amber-900">
         <SunMedium className="h-5 w-5" aria-hidden />
         <h2 className="font-serif text-lg font-semibold">{String(t('detail.seasonalityTitle'))}</h2>

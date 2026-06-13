@@ -121,7 +121,7 @@ export function MobileNav({
                 cn(
                   'block rounded-lg px-3 py-2.5 text-[13px] font-medium tracking-wide transition-colors',
                   isActive
-                    ? 'bg-[#ff6600] text-white shadow-md shadow-[#ff6600]/35'
+                    ? 'bg-[var(--color-accent)] text-white shadow-md shadow-[var(--color-accent)]/35'
                     : 'bg-white/5 text-white/85 hover:bg-white/10',
                 )
               }
@@ -136,7 +136,7 @@ export function MobileNav({
             <SheetClose asChild>
               <Link
                 to="/login"
-                className="mb-3 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#ff6600] px-4 py-2.5 text-[12px] font-semibold uppercase tracking-wider text-white shadow-md shadow-[#ff6600]/30 transition-transform hover:scale-[1.02] active:scale-[0.98]"
+                className="mb-3 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[var(--color-accent)] px-4 py-2.5 text-[12px] font-semibold uppercase tracking-wider text-white shadow-md shadow-[var(--color-accent)]/30 transition-transform hover:scale-[1.02] active:scale-[0.98]"
               >
                 <LogIn className="h-4 w-4" aria-hidden />
                 {t('header.login')}

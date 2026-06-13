@@ -252,7 +252,7 @@ export default function Header() {
       >
         <Link
           to="/"
-          className="hidden md:inline-flex shrink-0 items-center gap-2.5 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ff6600]/50"
+          className="hidden md:inline-flex shrink-0 items-center gap-2.5 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]/50"
         >
           <HeaderBrandWordmark logoSizeClass={logoSizeClass} />
         </Link>

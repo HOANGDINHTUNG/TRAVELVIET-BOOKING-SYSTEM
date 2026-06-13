@@ -73,7 +73,7 @@ export function HeaderUtilityActions({
 
   const utilityBtnClass = cn(
     'inline-flex h-9 max-w-[11rem] items-center gap-1.5 rounded-lg px-1.5 text-[12.5px] font-semibold transition-colors',
-    'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ff6600]/50',
+    'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]/50',
     useLightText
       ? 'text-white/95 hover:bg-white/10'
       : 'text-[var(--color-text)] hover:bg-[color-mix(in_srgb,var(--color-primary)_8%,var(--color-surface))]',
@@ -141,16 +141,16 @@ export function HeaderUtilityActions({
           to={HEADER_NAV_LINKS.login}
           className={cn(
             'inline-flex h-9 shrink-0 items-center gap-2 whitespace-nowrap rounded-full px-2.5 pl-1.5 text-[12px] font-semibold transition-colors lg:text-[12.5px]',
-            'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ff6600]',
+            'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]',
             useLightText
               ? 'bg-white/15 text-white hover:bg-white/25'
-              : 'bg-[color-mix(in_srgb,#ff6600_10%,var(--color-surface))] text-[#ff6600] hover:bg-[#ff6600] hover:text-white',
+              : 'bg-[color-mix(in_srgb,var(--color-accent)_10%,var(--color-surface))] text-[var(--color-accent)] hover:bg-[var(--color-accent)] hover:text-white',
           )}
         >
           <span
             className={cn(
               'flex h-7 w-7 shrink-0 items-center justify-center rounded-full',
-              useLightText ? 'bg-white text-[#ff6600]' : 'bg-[#ff6600] text-white',
+              useLightText ? 'bg-white text-[var(--color-accent)]' : 'bg-[var(--color-accent)] text-white',
             )}
             aria-hidden
           >

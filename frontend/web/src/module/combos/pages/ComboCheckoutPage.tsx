@@ -30,8 +30,8 @@ export default function ComboCheckoutPage() {
   return (
     <div className="bg-[#f5f8fa] min-h-screen font-sans flex flex-col">
       {/* Header Stepper Navigation */}
-      <div className="bg-white border-b border-slate-200">
-        <div className="max-w-[1240px] mx-auto px-4 h-16 flex items-center gap-4 text-sm font-medium overflow-x-auto whitespace-nowrap">
+      <div className="bg-transparent border-b border-slate-200">
+        <div className="max-w-[1240px] mx-auto px-4 h-16 flex items-center justify-end gap-4 text-sm font-medium overflow-x-auto whitespace-nowrap">
           <div
             className={`flex items-center gap-2 ${
               currentStep >= 1 ? "text-blue-600" : "text-slate-400"

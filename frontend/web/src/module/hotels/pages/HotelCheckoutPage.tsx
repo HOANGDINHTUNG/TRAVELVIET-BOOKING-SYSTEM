@@ -540,7 +540,7 @@ export default function HotelCheckoutPage() {
 
                   <div style={{ padding: "0 0 16px 0", fontSize: "14px" }}>
                     Mã đặt chỗ:{" "}
-                    <strong style={{ color: "#f97316" }}>
+                    <strong style={{ color: "var(--color-accent)" }}>
                       Đang chờ xác nhận
                     </strong>
                     <p
