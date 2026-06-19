@@ -59,7 +59,8 @@
   flex-shrink: 0;
 }
 
-.tour-public-product-tabs__tab:not([aria-selected='true']) .tour-public-product-tabs__tab-icon {
+.tour-public-product-tabs__tab:not([aria-selected="true"])
+  .tour-public-product-tabs__tab-icon {
   opacity: 0.92;
 }
 
@@ -88,7 +89,7 @@
   gap: 0.65rem;
   font-size: 0.9375rem;
   line-height: 1.55;
-  color: rgb(30 41 59);
+  color: var(--color-text);
 }
 
 .tour-public-product-tabs__list-marker {
@@ -106,7 +107,7 @@
   margin: 0;
   font-size: 0.9375rem;
   line-height: 1.65;
-  color: rgb(30 41 59);
+  color: color-mix(in srgb, var(--color-text) 85%, var(--color-muted));
   white-space: pre-line;
 }
 
@@ -116,6 +117,10 @@
   align-items: flex-start;
   padding: 0.85rem 1rem;
   border-radius: 1rem;
-  border: 1px solid color-mix(in srgb, currentColor 12%, transparent);
-  background: color-mix(in srgb, currentColor 6%, white);
+  border: 1px solid color-mix(in srgb, currentColor 18%, transparent);
+  background: color-mix(
+    in srgb,
+    currentColor 8%,
+    var(--glass-bg-solid, transparent)
+  );
 }

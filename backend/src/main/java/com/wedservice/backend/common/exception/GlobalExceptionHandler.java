@@ -21,7 +21,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.util.StringUtils;
 
@@ -42,9 +42,7 @@ public class GlobalExceptionHandler {
         this.messageSource = messageSource != null ? messageSource : createDefaultMessageSource();
     }
 
-    /**
-     * MockMvc tests without a Spring {@link MessageSource} bean.
-     */
+
     public static GlobalExceptionHandler standalone() {
         return new GlobalExceptionHandler(null);
     }

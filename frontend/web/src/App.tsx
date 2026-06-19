@@ -42,7 +42,7 @@ function App() {
   }, []);
 
   const mainContent = (
-    <main className="min-h-screen bg-background text-foreground">
+    <main className="min-h-screen">
       <div
         className={
           isAuthPublicPage
@@ -80,7 +80,7 @@ function App() {
       {isAdminPage ? (
         <>
           <ScrollToTop />
-          <main className="min-h-screen bg-transparent text-foreground">
+          <main className="min-h-screen">
             <Outlet />
           </main>
         </>

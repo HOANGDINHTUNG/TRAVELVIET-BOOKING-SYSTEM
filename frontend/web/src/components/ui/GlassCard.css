@@ -39,35 +39,31 @@
 .tv-glass-card--liquid {
   border-radius: var(--radius-glass, 16px);
   padding: clamp(16px, 2vw, 24px);
-  border: 1px solid transparent;
-  background:
-    linear-gradient(
-        var(--color-surface),
-        var(--color-surface)
-      )
-      padding-box,
-    linear-gradient(
-        125deg,
-        color-mix(in srgb, var(--color-aqua) 55%, transparent),
-        color-mix(in srgb, var(--color-accent) 45%, transparent),
-        color-mix(in srgb, var(--color-ocean) 50%, transparent)
-      )
-      border-box;
-  background-clip: padding-box, border-box;
-  backdrop-filter: blur(calc(var(--glass-blur) + 6px)) saturate(1.2);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--glass-bg-solid) 85%, transparent),
+    color-mix(in srgb, var(--color-surface-soft) 80%, transparent)
+  );
+  backdrop-filter: blur(12px) saturate(1.2);
   box-shadow: var(--glass-shadow-outer), var(--glass-shadow-inset);
+  transition:
+    transform var(--duration-hover) var(--ease-hover),
+    box-shadow var(--duration-hover) var(--ease-hover);
 }
 
-.app-shell.theme-dark .tv-glass-card--liquid {
-  background:
-    linear-gradient(var(--color-surface), var(--color-surface)) padding-box,
-    linear-gradient(
-      125deg,
-      color-mix(in srgb, var(--color-neon-blue) 70%, transparent),
-      color-mix(in srgb, var(--color-neon-purple) 65%, transparent),
-      color-mix(in srgb, var(--color-neon-blue) 40%, transparent)
-    ) border-box;
-  background-clip: padding-box, border-box;
+.tv-glass-card--liquid:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-card-hover);
+}
+
+.theme-dark .tv-glass-card--liquid {
+  background: var(--glass-bg);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    var(--glass-shadow-outer),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 0 15px color-mix(in srgb, var(--color-neon-purple) 25%, transparent);
 }
 
 /* Home navbar — ghép với .site-nav trong Navbar.css */

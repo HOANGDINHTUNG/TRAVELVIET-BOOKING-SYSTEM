@@ -21,6 +21,8 @@ public class ItineraryItemResponse {
     private String itemType;
     private String title;
     private String description;
+    private String imageUrl;
+    private String imageCaption;
     private Long destinationId;
     private String locationName;
     private String address;

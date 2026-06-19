@@ -43,7 +43,6 @@ public class TwoLevelCache implements Cache {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public <T> T get(Object key, Class<T> type) {
         T hit = l1.get(key, type);
         if (hit != null) {

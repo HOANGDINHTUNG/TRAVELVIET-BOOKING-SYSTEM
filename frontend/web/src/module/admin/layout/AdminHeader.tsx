@@ -9,6 +9,8 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { cn } from "../../../lib/utils";
+import { useAppDispatch, useAppSelector } from "../../../hooks/reduxHooks";
+import { setTheme } from "../../../stores/slices/preferencesSlice";
 
 interface AdminHeaderProps {
   sidebarOpen: boolean;
@@ -21,11 +23,12 @@ export default function AdminHeader({
   toggleSidebar,
   toggleMobileSidebar,
 }: AdminHeaderProps) {
-  const [isDark, setIsDark] = React.useState(false); // In reality, bind this to global theme state
+  const dispatch = useAppDispatch();
+  const theme = useAppSelector((state) => state.preferences.theme);
+  const isDark = theme === "dark";
 
   const toggleTheme = () => {
-    setIsDark(!isDark);
-    document.documentElement.classList.toggle("dark");
+    dispatch(setTheme(isDark ? "light" : "dark"));
   };
 
   return (

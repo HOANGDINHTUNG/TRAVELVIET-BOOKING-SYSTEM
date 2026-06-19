@@ -19,6 +19,7 @@ public class TourItineraryDayResponse {
     private Integer dayNumber;
     private String title;
     private String description;
+    private String dayImageUrl;
     private Long overnightDestinationId;
     private List<ItineraryItemResponse> items;
 }

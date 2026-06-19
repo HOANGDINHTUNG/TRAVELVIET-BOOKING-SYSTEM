@@ -15,26 +15,36 @@ import { SmoothCarouselTrack } from "../../../../components/ui/SmoothCarousel/Sm
 import { useSmoothInfiniteCarousel } from "../../../../components/ui/SmoothCarousel/useSmoothInfiniteCarousel";
 import { tourDetailPath } from "../../../tours/utils/slug";
 import { inclusionBadgeLabels } from "../../../tours/utils/tourInclusionBadges";
-import {
-  savingTierForHomeTour,
-} from "../../../tours/utils/relatedTourCard";
+import { savingTierForHomeTour } from "../../../tours/utils/relatedTourCard";
+import { formatCatalogDepartureDate } from "../../../tours/utils/tourListingDisplay";
+import { displaySeatsLeft } from "../LastMinuteDeals/lastMinuteDealsUtils";
 import "./HomeTourRows.css";
 
 const MAX_TOURS = 8;
 const VISIBLE_SLOTS = 4;
-const HOME_ROW_TIERS: TourCardSavingTier[] = ["gia_tot", "tieu_chuan", "tiet_kiem"];
+const HOME_ROW_TIERS: TourCardSavingTier[] = [
+  "gia_tot",
+  "tieu_chuan",
+  "tiet_kiem",
+];
 
 function cornerLabelsForTour(tour: Tour): string[] {
   const labels: string[] = [...inclusionBadgeLabels(tour.inclusionFlags)];
-  if (tour.category?.trim() && labels.length < 3) labels.push(tour.category.trim());
+  if (tour.category?.trim() && labels.length < 3)
+    labels.push(tour.category.trim());
   const h = tour.highlights?.[0]?.trim();
-  if (h && labels.length < 3) labels.push(h.length > 26 ? `${h.slice(0, 26)}…` : h);
+  if (h && labels.length < 3)
+    labels.push(h.length > 26 ? `${h.slice(0, 26)}…` : h);
   return labels.slice(0, 3);
 }
 
 function homeSavingTierForCard(tour: Tour): TourCardSavingTier {
   const fromData = savingTierForHomeTour(tour);
-  if (fromData === "gia_tot" || fromData === "tieu_chuan" || fromData === "tiet_kiem") {
+  if (
+    fromData === "gia_tot" ||
+    fromData === "tieu_chuan" ||
+    fromData === "tiet_kiem"
+  ) {
     return fromData;
   }
   const index = Math.abs(Number(tour.id ?? 0)) % HOME_ROW_TIERS.length;
@@ -170,12 +180,18 @@ function TourRowCarousel({
                     title={translateTourField(tour, "title", tour.title)}
                     detailPath={tourDetailPath(tour.id, tour.title)}
                     imageUrl={tour.image}
-                    location={translateTourField(tour, "location", tour.location)}
+                    location={translateTourField(
+                      tour,
+                      "location",
+                      tour.location,
+                    )}
                     duration={translateTourField(tour, "days", tour.days)}
                     price={tour.price}
                     savingTier={tier}
                     cornerLabels={cornerLabelsForTour(tour)}
                     brandLogoUrl={null}
+                    nextDepartureDate={formatCatalogDepartureDate(tour)}
+                    availableSeats={displaySeatsLeft(tour)}
                     className="home-tour-card"
                     onQuickView={() => onQuickViewTour(tour, tier)}
                   />
@@ -190,14 +206,12 @@ function TourRowCarousel({
 }
 
 type HomeTourRowsProps = {
-  domesticTours: Tour[];
-  internationalTours: Tour[];
+  dynamicRows: import("../store/homeSlice").DynamicTourRow[];
   loading?: boolean;
 };
 
 export function HomeTourRows({
-  domesticTours,
-  internationalTours,
+  dynamicRows,
   loading = false,
 }: HomeTourRowsProps) {
   const { t, i18n } = useTranslation();
@@ -249,30 +263,35 @@ export function HomeTourRows({
       aria-label={t("homeTourRows.sectionAria")}
     >
       <div className="home-tour-rows-inner">
-        <TourRowCarousel
-          title={t("homeTourRows.domesticTitle")}
-          tours={domesticTours}
-          loading={loading}
-          emptyHint={t("homeTourRows.emptyDomestic")}
-          viewMoreTo={catalogTourLinks.domesticBeachFeatured}
-          viewMoreLabel={t("homeTourRows.viewMore")}
-          ariaPrev={t("homeTourRows.prev")}
-          ariaNext={t("homeTourRows.next")}
-          translateTourField={translateTourField}
-          onQuickViewTour={openQuickView}
-        />
-        <TourRowCarousel
-          title={t("homeTourRows.internationalTitle")}
-          tours={internationalTours}
-          loading={loading}
-          emptyHint={t("homeTourRows.emptyInternational")}
-          viewMoreTo={catalogTourLinks.internationalFeatured}
-          viewMoreLabel={t("homeTourRows.viewMore")}
-          ariaPrev={t("homeTourRows.prev")}
-          ariaNext={t("homeTourRows.next")}
-          translateTourField={translateTourField}
-          onQuickViewTour={openQuickView}
-        />
+        {dynamicRows.map((row) => (
+          <TourRowCarousel
+            key={row.tagCode}
+            title={row.title}
+            tours={row.tours}
+            loading={loading}
+            emptyHint={t("homeTourRows.emptyDomestic")}
+            viewMoreTo={`/catalog?tag=${row.tagCode}`}
+            viewMoreLabel={t("homeTourRows.viewMore")}
+            ariaPrev={t("homeTourRows.prev")}
+            ariaNext={t("homeTourRows.next")}
+            translateTourField={translateTourField}
+            onQuickViewTour={openQuickView}
+          />
+        ))}
+        {dynamicRows.length === 0 && loading && (
+          <TourRowCarousel
+            title=""
+            tours={[]}
+            loading={true}
+            emptyHint={t("homeTourRows.emptyDomestic")}
+            viewMoreTo={`/catalog`}
+            viewMoreLabel={t("homeTourRows.viewMore")}
+            ariaPrev={t("homeTourRows.prev")}
+            ariaNext={t("homeTourRows.next")}
+            translateTourField={translateTourField}
+            onQuickViewTour={openQuickView}
+          />
+        )}
       </div>
 
       <TourQuickViewDialog

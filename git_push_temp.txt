@@ -1,0 +1,95 @@
+﻿git : remote: error: GH013: 
+Repository rule violations 
+found for refs/heads/update-
+project-fixes.        
+At line:1 char:1
++ git push origin 
+update-project-fixes 2>&1 | 
+Out-File -Encoding utf8 g 
+...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
+    + CategoryInfo          
+    : NotSpecified: (remot  
+  e: error: ...-fixes.      
+      :String) [], Remot    
+eException
+    + FullyQualifiedErrorId 
+    : NativeCommandError
+ 
+remote: 
+remote: - GITHUB PUSH 
+PROTECTION        
+remote:   ΓÇöΓÇöΓÇöΓÇöΓÇöΓÇö
+ΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓ
+ÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇ
+öΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇö
+ΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇö       
+ 
+remote:     Resolve the 
+following violations before 
+pushing again        
+remote: 
+remote:     - Push cannot 
+contain secrets        
+remote: 
+remote:             
+remote:      (?) Learn how 
+to resolve a blocked push   
+     
+remote:      https://docs.gi
+thub.com/code-security/secre
+t-scanning/working-with-secr
+et-scanning-and-push-protect
+ion/working-with-push-protec
+tion-from-the-command-line#r
+esolving-a-blocked-push     
+   
+remote:             
+remote:             
+remote:       ΓÇöΓÇö Aiven 
+Service Password ΓÇöΓÇöΓÇöΓÇ
+öΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇö
+ΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓ
+ÇöΓÇöΓÇöΓÇöΓÇöΓÇö        
+remote:        locations:   
+     
+remote:          - commit: b
+97c2fdbb5dfb0d7b77b6bb9c0e40
+781f836ef13        
+remote:            path: 
+backend/.env.example:87     
+   
+remote:          - commit: b
+97c2fdbb5dfb0d7b77b6bb9c0e40
+781f836ef13        
+remote:            path: 
+backend/.env.example:92     
+   
+remote:             
+remote:        (?) To push, 
+remove secret from 
+commit(s) or follow this 
+URL to allow the secret.    
+    
+remote:        https://githu
+b.com/HOANGDINHTUNG/TRAVELVI
+ET-BOOKING-SYSTEM/security/s
+ecret-scanning/unblock-secre
+t/3FKnxWIUCjyoeLhtG9FFr4JdMn
+r        
+remote:             
+remote: 
+remote: 
+To https://github.com/HOANGD
+INHTUNG/TRAVELVIET-BOOKING-S
+YSTEM.git
+ ! [remote rejected] 
+update-project-fixes -> 
+update-project-fixes (push 
+declined due to repository 
+rule violations)
+error: failed to push some 
+refs to 'https://github.com/
+HOANGDINHTUNG/TRAVELVIET-BOO
+KING-SYSTEM.git'

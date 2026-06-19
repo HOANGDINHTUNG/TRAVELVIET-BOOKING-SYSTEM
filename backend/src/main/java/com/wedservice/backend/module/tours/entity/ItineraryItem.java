@@ -34,6 +34,12 @@ public class ItineraryItem extends AuditableEntity {
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
+    @Column(name = "image_url", columnDefinition = "TEXT")
+    private String imageUrl;
+
+    @Column(name = "image_caption", length = 255)
+    private String imageCaption;
+
     @Column(name = "destination_id")
     private Long destinationId;
 

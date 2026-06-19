@@ -21,29 +21,8 @@
   height: 100%;
   min-height: clamp(360px, 42vw, 410px);
   overflow: hidden;
-  border-radius: 16px;
-  border: 1px solid rgba(15, 23, 42, 0.05);
-  background: #ffffff;
-  box-shadow:
-    0 1px 2px rgba(15, 23, 42, 0.06),
-    0 8px 24px rgba(15, 23, 42, 0.08),
-    0 0 0 1px rgba(15, 23, 42, 0.05);
-  transition:
-    box-shadow 0.28s var(--ease-hover, ease),
-    transform 0.28s var(--ease-hover, ease),
-    border-color 0.28s ease;
-}
-
-.tours-catalog-card:hover,
-.tours-catalog-card:focus-within {
-  box-shadow: var(--shadow-card-hover, 0 18px 48px rgba(15, 23, 42, 0.14));
-  transform: translateY(-4px);
-  border-color: color-mix(in srgb, var(--color-ocean) 35%, #cbd5e1);
-}
-
-.theme-dark .tours-catalog-card {
-  background: var(--color-surface-elevated);
-  border-color: color-mix(in srgb, #ffffff 12%, transparent);
+  padding: 0 !important;
+  /* GlassCard natively provides borders, shadows, background, hover-lifts */
 }
 
 .tours-catalog-card__media {
@@ -158,11 +137,10 @@
   bottom: auto;
   z-index: 1;
   padding: 12px 12px 10px;
-  background: #ffffff;
-  border-top: 1px solid #e8edf5;
+  background: var(--glass-bg-solid);
+  border-top: 1px solid var(--color-border);
   display: grid;
   gap: 8px;
-  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.12), 0 2px 8px rgba(15, 23, 42, 0.06);
   transition:
     transform 0.38s var(--ease-hover, cubic-bezier(0.22, 1, 0.36, 1)),
     opacity 0.32s ease;
@@ -177,8 +155,7 @@
   width: 310px;
   height: 410px;
   min-height: 410px;
-  border-radius: 16px;
-  background: #c5cbd3;
+  background: var(--color-surface-soft);
 }
 
 .tours-vt-grid.is-grid .tours-catalog-card__media {
@@ -199,8 +176,13 @@
 
 .tours-vt-grid.is-grid .tours-catalog-card:hover .tours-catalog-card__cover,
 .tours-vt-grid.is-grid .tours-catalog-card:hover .tours-catalog-card__media img,
-.tours-vt-grid.is-grid .tours-catalog-card:focus-within .tours-catalog-card__cover,
-.tours-vt-grid.is-grid .tours-catalog-card:focus-within .tours-catalog-card__media img {
+.tours-vt-grid.is-grid
+  .tours-catalog-card:focus-within
+  .tours-catalog-card__cover,
+.tours-vt-grid.is-grid
+  .tours-catalog-card:focus-within
+  .tours-catalog-card__media
+  img {
   transform: scale(1.06);
 }
 
@@ -211,10 +193,11 @@
 }
 
 .tours-vt-grid.is-grid .tours-catalog-card__panel {
-  min-height: calc(100% * var(--tv-grid-info-parts) / var(--tv-grid-total-parts));
-  border: 1px solid #e7eef8;
+  min-height: calc(
+    100% * var(--tv-grid-info-parts) / var(--tv-grid-total-parts)
+  );
+  border: 1px solid var(--color-border);
   border-radius: 14px;
-  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.1);
 }
 
 .tours-vt-grid.is-grid .tours-catalog-card__title {
@@ -240,9 +223,8 @@
 }
 
 .theme-dark .tours-catalog-card__panel {
-  background: var(--color-surface);
+  background: var(--glass-bg-solid);
   border-top-color: rgba(255, 255, 255, 0.08);
-  box-shadow: 0 -16px 48px rgba(0, 0, 0, 0.45);
 }
 
 .tours-catalog-card__title {
@@ -425,7 +407,7 @@
   position: relative;
   inset: auto;
   min-height: 260px;
-  border-radius: 16px 0 0 16px;
+  border-radius: 16px; /* Let it have rounded corners so the overlap looks floating against its own backdrop */
   overflow: hidden;
 }
 
@@ -460,25 +442,27 @@
 
 .tours-vt-grid.is-list .tours-catalog-card__panel {
   position: relative;
+  z-index: 2;
   left: auto;
   right: auto;
   bottom: auto;
-  height: calc(100% - 20px);
+  height: calc(100% - 32px);
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 14px 16px 12px;
-  margin: 10px 10px 10px -20px;
+  padding: 18px 24px;
+  margin: 16px 16px 16px -32px; /* Overlap by 32px on the left */
   border-top: none;
-  border-left: 1px solid color-mix(in srgb, #e2e8f0 88%, var(--color-border));
-  border-radius: 12px;
-  background: #ffffff;
-  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.1);
-  width: 100%;
+  border: 1px solid color-mix(in srgb, var(--color-border) 60%, transparent);
+  border-radius: 16px; /* Floating panel rounded corners */
+  background: var(--glass-bg-solid);
+  backdrop-filter: blur(12px);
+  box-shadow: -4px 8px 24px rgba(0, 0, 0, 0.08); /* Cast shadow onto the image */
+  width: auto;
   flex: 1 1 auto;
   min-width: 0;
   box-sizing: border-box;
-  align-self: stretch;
+  align-self: center;
 }
 
 .tours-vt-grid.is-list .tours-catalog-card__title {
@@ -570,9 +554,11 @@
   }
 
   .tours-vt-grid.is-list .tours-catalog-card__panel {
-    margin: 0;
-    border-left: none;
-    border-radius: 0 0 16px 16px;
-    box-shadow: none;
+    margin: -32px 16px 16px 16px; /* Overlap from the top instead of left */
+    border-left: 1px solid
+      color-mix(in srgb, var(--color-border) 60%, transparent);
+    border-radius: 16px;
+    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.08);
+    height: auto;
   }
 }

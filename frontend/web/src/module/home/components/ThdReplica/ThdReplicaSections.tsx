@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
 import type { Destination, Tour } from "../../database/interface/publicTravel";
 import { buildTourSlug } from "../../../tours/utils/slug";
-import { formatCurrencyVnd } from '@/utils/currency';
+import { formatCurrencyVnd } from "@/utils/currency";
+import { formatCatalogDepartureDate } from "../../../tours/utils/tourListingDisplay";
 import "./ThdReplicaSections.css";
 
 type ThdReplicaSectionsProps = {
@@ -49,10 +50,17 @@ const testimonials = [
 ];
 
 const handbookStories: StoryItem[] = [
-  { title: "5 Hoạt Động Teambuilding Giúp Gắn Kết Đội Ngũ Hiệu Quả", date: "12/05/2026" },
-  { title: "Kết Hợp Teambuilding Trong Tour Hè: Nên Hay Không?", date: "11/05/2026" },
   {
-    title: "Cách Chọn Công Ty Du Lịch Uy Tín Cho Tour Đoàn Lớn (Checklist Quan Trọng 2026)",
+    title: "5 Hoạt Động Teambuilding Giúp Gắn Kết Đội Ngũ Hiệu Quả",
+    date: "12/05/2026",
+  },
+  {
+    title: "Kết Hợp Teambuilding Trong Tour Hè: Nên Hay Không?",
+    date: "11/05/2026",
+  },
+  {
+    title:
+      "Cách Chọn Công Ty Du Lịch Uy Tín Cho Tour Đoàn Lớn (Checklist Quan Trọng 2026)",
     date: "05/05/2026",
   },
   {
@@ -62,11 +70,26 @@ const handbookStories: StoryItem[] = [
 ];
 
 const companyStories: StoryItem[] = [
-  { title: "ON Team Trip – Khám Phá Đà Lạt, Tái Tạo Năng Lượng", date: "31/03/2026" },
-  { title: "VILAI Team Trip – Trải Nghiệm Thiên Nhiên Tây Bắc", date: "31/03/2026" },
-  { title: "Hành Trình Của HN Media: Trải Nghiệm & Thư Giãn", date: "31/03/2026" },
-  { title: "Company Trip LITEON: Đồ Sơn – Bãi Cháy – Tuần Châu", date: "31/03/2026" },
-  { title: "Team TAL – Hành Trình Gắn Kết tại Flamingo Đại Lải", date: "31/03/2026" },
+  {
+    title: "ON Team Trip – Khám Phá Đà Lạt, Tái Tạo Năng Lượng",
+    date: "31/03/2026",
+  },
+  {
+    title: "VILAI Team Trip – Trải Nghiệm Thiên Nhiên Tây Bắc",
+    date: "31/03/2026",
+  },
+  {
+    title: "Hành Trình Của HN Media: Trải Nghiệm & Thư Giãn",
+    date: "31/03/2026",
+  },
+  {
+    title: "Company Trip LITEON: Đồ Sơn – Bãi Cháy – Tuần Châu",
+    date: "31/03/2026",
+  },
+  {
+    title: "Team TAL – Hành Trình Gắn Kết tại Flamingo Đại Lải",
+    date: "31/03/2026",
+  },
 ];
 
 function formatPrice(price: number) {
@@ -82,12 +105,22 @@ function TourCard({ tour }: { tour: Tour }) {
 
   return (
     <article className="thd-card">
-      <img className="thd-card-image" src={tour.image} alt={tour.title} loading="lazy" />
+      <img
+        className="thd-card-image"
+        src={tour.image}
+        alt={tour.title}
+        loading="lazy"
+      />
       <div className="thd-card-body">
         <h3>{tour.title}</h3>
         <p className="thd-card-rating">★ {tour.rating ?? 4.9}</p>
         <p className="thd-card-days">{tour.days}</p>
-        <p className="thd-card-from">Khởi hành: {tour.location || "Liên hệ tư vấn"}</p>
+        <p className="thd-card-from">
+          Nơi xuất phát: {tour.location || "Liên hệ tư vấn"}
+        </p>
+        <p className="thd-card-from">
+          Ngày đi: {formatCatalogDepartureDate(tour)}
+        </p>
         <p className="thd-card-price">{formatPrice(tour.price)}</p>
         <Link to={`/tour/${slug}`} className="thd-card-link">
           Xem chi tiết
@@ -115,7 +148,9 @@ export function ThdReplicaSections({
   internationalTours,
   destinations,
 }: ThdReplicaSectionsProps) {
-  const gallery = destinations.filter((item) => Boolean(item.image)).slice(0, 5);
+  const gallery = destinations
+    .filter((item) => Boolean(item.image))
+    .slice(0, 5);
   const domestic = domesticTours.slice(0, 6);
   const international = internationalTours.slice(0, 6);
 
@@ -209,7 +244,13 @@ export function ThdReplicaSections({
       <section className="thd-section">
         <h2>Khách hàng doanh nghiệp tiêu biểu</h2>
         <div className="thd-brand-row">
-          {["LITEON", "ON Việt Nam", "Happy Money", "HN Media", "Electrolux"].map((brand) => (
+          {[
+            "LITEON",
+            "ON Việt Nam",
+            "Happy Money",
+            "HN Media",
+            "Electrolux",
+          ].map((brand) => (
             <span key={brand}>{brand}</span>
           ))}
         </div>

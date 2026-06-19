@@ -22,14 +22,14 @@ spring:
       - org.springframework.boot.data.redis.autoconfigure.health.DataRedisHealthContributorAutoConfiguration
   data:
     redis:
-      host: ${REDIS_HOST:127.0.0.1}
-      port: ${REDIS_PORT:6379}
-      password: ${REDIS_PASSWORD:}
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      password: ${REDIS_PASSWORD}
   datasource:
     # Chỉ dùng khi tắt app.datasource.failover.enabled
     url: jdbc:mysql://127.0.0.1:3307/wedservice?useSSL=false&serverTimezone=Asia/Ho_Chi_Minh&allowPublicKeyRetrieval=true
     username: wed_app_user
-    password: "123456"
+    password: ${AIVEN_DB_PASSWORD}
   flyway:
     enabled: true
     locations: classpath:db/migration
@@ -62,12 +62,12 @@ logging:
 app:
   api:
     failover:
-      enabled: ${API_FAILOVER_ENABLED:true}
-      prefer-public: ${API_PREFER_PUBLIC:false}
+      enabled: ${API_FAILOVER_ENABLED}
+      prefer-public: ${API_PREFER_PUBLIC}
       probe-timeout-ms: 8000
       # Hai URL: public (Render) | local (máy dev) — giữ default vì là 2 trường hợp failover
-      public-base-url: ${APP_API_PUBLIC_BASE_URL:https://travelviet-booking-system.onrender.com/api/v1}
-      local-base-url: ${APP_API_LOCAL_BASE_URL:http://localhost:8088/api/v1}
+      public-base-url: ${APP_API_PUBLIC_BASE_URL}
+      local-base-url: ${APP_API_LOCAL_BASE_URL}
   datasource:
     failover:
       enabled: ${DB_FAILOVER_ENABLED}
@@ -88,7 +88,7 @@ app:
         port: 3307
         database: wedservice
         username: wed_app_user
-        password: "123456"
+        password: ${AIVEN_DB_PASSWORD}
         use-ssl: false
   security:
     whitelist:
@@ -101,6 +101,6 @@ app:
       - "/system/health"
       - "/payments/vnpay/ipn"
     jwt:
-      secret: local-dev-jwt-secret-change-via-env-min-32-chars-ok
+      secret: ${JWT_SECRET}
       expiration: 3600000
       refresh-expiration: 2592000000

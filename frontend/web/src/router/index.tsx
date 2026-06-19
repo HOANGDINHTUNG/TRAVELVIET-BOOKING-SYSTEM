@@ -3,7 +3,6 @@ import type { ReactElement } from "react";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import AdminPageSkeleton from "../module/admin/layout/AdminPageSkeleton";
 import App from "../App";
-import { LegacyModuleWrapper } from "../module/admin/core/components/LegacyModuleWrapper";
 
 const lazyHomePage = lazy(() => import("../module/home/pages/HomePage"));
 const lazyDestinationDetailPage = lazy(
@@ -123,6 +122,10 @@ const lazyAdminCombosPage = lazy(
 );
 const lazyAdminDestinationsPage = lazy(
   () => import("../module/admin/features/destinations/pages/DestinationPage"),
+);
+const lazyAdminDestinationComplexDetailPage = lazy(
+  () =>
+    import("../module/admin/features/destinations/pages/DestinationComplexDetailPage"),
 );
 const lazyAdminToursPage = lazy(
   () => import("../module/admin/features/tours/pages/ToursPage"),
@@ -315,6 +318,12 @@ const router = createBrowserRouter([
               {
                 path: "destinations",
                 element: withSuspense(createElement(lazyAdminDestinationsPage)),
+              },
+              {
+                path: "destinations/:uuid/details",
+                element: withSuspense(
+                  createElement(lazyAdminDestinationComplexDetailPage),
+                ),
               },
               {
                 path: "tours",

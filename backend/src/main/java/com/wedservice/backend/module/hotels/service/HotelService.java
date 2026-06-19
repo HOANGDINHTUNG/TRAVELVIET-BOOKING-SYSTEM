@@ -26,7 +26,6 @@ import com.wedservice.backend.module.hotels.dto.response.RoomRatePlanResponse;
 import com.wedservice.backend.module.hotels.dto.request.HotelRoomTypeRequest;
 import com.wedservice.backend.module.hotels.dto.response.HotelRoomTypeDto;
 import java.util.Arrays;
-import java.util.ArrayList;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

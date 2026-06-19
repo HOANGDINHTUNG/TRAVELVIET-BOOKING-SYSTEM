@@ -5,7 +5,7 @@ import com.wedservice.backend.common.exception.BadRequestException;
 import com.wedservice.backend.common.exception.ResourceNotFoundException;
 import com.wedservice.backend.common.i18n.LocaleTagUtil;
 import com.wedservice.backend.module.commerce.entity.ComboPackage;
-import com.wedservice.backend.module.commerce.repository.ComboPackageRepository;
+// import com.wedservice.backend.module.commerce.repository.ComboPackageRepository;
 import com.wedservice.backend.module.destinations.entity.Destination;
 import com.wedservice.backend.module.destinations.repository.DestinationRepository;
 import com.wedservice.backend.module.tours.dto.request.TourSearchRequest;
@@ -26,6 +26,7 @@ import com.wedservice.backend.module.tours.dto.response.TourSchedulePickupPointR
 import com.wedservice.backend.module.tours.dto.response.TourScheduleResponse;
 import com.wedservice.backend.module.tours.dto.response.TourSeasonalityResponse;
 import com.wedservice.backend.module.tours.entity.QTour;
+import com.wedservice.backend.module.tours.entity.QTourSchedule;
 import com.wedservice.backend.module.tours.entity.CancellationPolicy;
 import com.wedservice.backend.module.tours.entity.CancellationPolicyRule;
 import com.wedservice.backend.module.tours.entity.Guide;
@@ -69,6 +70,7 @@ import com.wedservice.backend.module.tours.repository.TourTranslationRepository;
 import com.wedservice.backend.module.tours.service.query.TourQueryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import com.querydsl.jpa.JPAExpressions;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -131,7 +133,6 @@ public class TourQueryServiceImpl implements TourQueryService {
     private final TourDepartureHubRepository tourDepartureHubRepository;
     private final TourInclusionFlagsRepository tourInclusionFlagsRepository;
     private final TourComboPackageLinkRepository tourComboPackageLinkRepository;
-    private final ComboPackageRepository comboPackageRepository;
     private final TourSchedulePickupPointRepository tourSchedulePickupPointRepository;
     private final TourScheduleGuideRepository tourScheduleGuideRepository;
     private final TourTranslationRepository tourTranslationRepository;
@@ -160,6 +161,15 @@ public class TourQueryServiceImpl implements TourQueryService {
         builder.and(qTour.deletedAt.isNull());
         if (publicOnly) {
             builder.and(qTour.status.eq(TourStatus.ACTIVE));
+            QTourSchedule qSchedule = QTourSchedule.tourSchedule;
+            builder.and(JPAExpressions.selectOne()
+                    .from(qSchedule)
+                    .where(qSchedule.tourId.eq(qTour.id)
+                            .and(qSchedule.deletedAt.isNull())
+                            .and(qSchedule.status.eq(TourScheduleStatus.OPEN))
+                            .and(qSchedule.departureAt.goe(LocalDateTime.now()))
+                            .and(qSchedule.capacityTotal.subtract(qSchedule.bookedSeats).gt(0)))
+                    .exists());
         } else if (StringUtils.hasText(request.getStatus())) {
             builder.and(qTour.status.eq(TourStatus.fromValue(request.getStatus().trim())));
         }
@@ -309,6 +319,7 @@ public class TourQueryServiceImpl implements TourQueryService {
                         tagsByTour.getOrDefault(t.getId(), List.of()),
                         destsByTour.getOrDefault(t.getId(), List.of())))
                 .toList();
+        enrichPublicListRows(adminRows);
         return new PageImpl<>(adminRows, pr, page.getTotalElements());
     }
 
@@ -342,7 +353,9 @@ public class TourQueryServiceImpl implements TourQueryService {
     public TourResponse getAdminTour(Long id) {
         try {
             Tour tour = findActiveTour(id);
-            return toResponse(tour, true, null, null);
+            TourResponse response = toResponse(tour, true, null, null);
+            enrichTourDetail(response);
+            return response;
         } catch (ResourceNotFoundException e) {
             throw e;
         } catch (Exception e) {
@@ -950,60 +963,60 @@ public class TourQueryServiceImpl implements TourQueryService {
                 .build();
     }
 
-    private List<TourSchedulePickupPointResponse> loadSchedulePickupPoints(Long scheduleId) {
-        try {
-            return tourSchedulePickupPointRepository
-                    .findByScheduleIdOrderBySortOrder(scheduleId)
-                    .stream()
-                    .filter(pickupPoint -> pickupPoint.getDeletedAt() == null)
-                    .map(pickupPoint -> TourSchedulePickupPointResponse.builder()
-                            .id(pickupPoint.getId())
-                            .pointName(pickupPoint.getPointName())
-                            .address(pickupPoint.getAddress())
-                            .latitude(pickupPoint.getLatitude())
-                            .longitude(pickupPoint.getLongitude())
-                            .pickupAt(pickupPoint.getPickupAt())
-                            .sortOrder(pickupPoint.getSortOrder())
-                            .build())
-                    .toList();
-        } catch (Exception e) {
-            log.warn("Could not load pickup points for schedule {}: {}", scheduleId, e.getMessage());
-            return List.of();
-        }
-    }
+    // private List<TourSchedulePickupPointResponse> loadSchedulePickupPoints(Long scheduleId) {
+    //     try {
+    //         return tourSchedulePickupPointRepository
+    //                 .findByScheduleIdOrderBySortOrder(scheduleId)
+    //                 .stream()
+    //                 .filter(pickupPoint -> pickupPoint.getDeletedAt() == null)
+    //                 .map(pickupPoint -> TourSchedulePickupPointResponse.builder()
+    //                         .id(pickupPoint.getId())
+    //                         .pointName(pickupPoint.getPointName())
+    //                         .address(pickupPoint.getAddress())
+    //                         .latitude(pickupPoint.getLatitude())
+    //                         .longitude(pickupPoint.getLongitude())
+    //                         .pickupAt(pickupPoint.getPickupAt())
+    //                         .sortOrder(pickupPoint.getSortOrder())
+    //                         .build())
+    //                 .toList();
+    //     } catch (Exception e) {
+    //         log.warn("Could not load pickup points for schedule {}: {}", scheduleId, e.getMessage());
+    //         return List.of();
+    //     }
+    // }
 
-    private List<TourScheduleGuideResponse> loadScheduleGuides(Long scheduleId) {
-        try {
-            List<TourScheduleGuide> assignedGuides = tourScheduleGuideRepository.findByScheduleId(scheduleId).stream()
-                    .filter(guide -> guide.getDeletedAt() == null)
-                    .toList();
-            Map<Long, Guide> guideMap = loadGuideMap(assignedGuides.stream().map(TourScheduleGuide::getGuideId).toList());
-            String lang = LocaleTagUtil.currentLanguageTag();
-            Map<Long, GuideTranslation> guideTr = loadGuideTranslations(guideMap.keySet(), lang);
-            return assignedGuides
-                    .stream()
-                    .map(guide -> {
-                        Guide guideProfile = guideMap.get(guide.getGuideId());
-                        GuideTranslation tr = guide.getGuideId() != null ? guideTr.get(guide.getGuideId()) : null;
-                        return TourScheduleGuideResponse.builder()
-                                .id(guide.getId())
-                                .guideId(guide.getGuideId())
-                                .guideCode(guideProfile != null ? guideProfile.getCode() : null)
-                                .guideFullName(resolveGuideFullName(guideProfile, tr))
-                                .guidePhone(guideProfile != null ? guideProfile.getPhone() : null)
-                                .guideEmail(guideProfile != null ? guideProfile.getEmail() : null)
-                                .guideStatus(guideProfile != null ? guideProfile.getStatus() : null)
-                                .isLocalGuide(guideProfile != null ? guideProfile.getIsLocalGuide() : null)
-                                .guideRole(guide.getGuideRole())
-                                .assignedAt(guide.getAssignedAt())
-                                .build();
-                    })
-                    .toList();
-        } catch (Exception e) {
-            log.warn("Could not load guide assignments for schedule {}: {}", scheduleId, e.getMessage());
-            return List.of();
-        }
-    }
+    // private List<TourScheduleGuideResponse> loadScheduleGuides(Long scheduleId) {
+    //     try {
+    //         List<TourScheduleGuide> assignedGuides = tourScheduleGuideRepository.findByScheduleId(scheduleId).stream()
+    //                 .filter(guide -> guide.getDeletedAt() == null)
+    //                 .toList();
+    //         Map<Long, Guide> guideMap = loadGuideMap(assignedGuides.stream().map(TourScheduleGuide::getGuideId).toList());
+    //         String lang = LocaleTagUtil.currentLanguageTag();
+    //         Map<Long, GuideTranslation> guideTr = loadGuideTranslations(guideMap.keySet(), lang);
+    //         return assignedGuides
+    //                 .stream()
+    //                 .map(guide -> {
+    //                     Guide guideProfile = guideMap.get(guide.getGuideId());
+    //                     GuideTranslation tr = guide.getGuideId() != null ? guideTr.get(guide.getGuideId()) : null;
+    //                     return TourScheduleGuideResponse.builder()
+    //                             .id(guide.getId())
+    //                             .guideId(guide.getGuideId())
+    //                             .guideCode(guideProfile != null ? guideProfile.getCode() : null)
+    //                             .guideFullName(resolveGuideFullName(guideProfile, tr))
+    //                             .guidePhone(guideProfile != null ? guideProfile.getPhone() : null)
+    //                             .guideEmail(guideProfile != null ? guideProfile.getEmail() : null)
+    //                             .guideStatus(guideProfile != null ? guideProfile.getStatus() : null)
+    //                             .isLocalGuide(guideProfile != null ? guideProfile.getIsLocalGuide() : null)
+    //                             .guideRole(guide.getGuideRole())
+    //                             .assignedAt(guide.getAssignedAt())
+    //                             .build();
+    //                 })
+    //                 .toList();
+    //     } catch (Exception e) {
+    //         log.warn("Could not load guide assignments for schedule {}: {}", scheduleId, e.getMessage());
+    //         return List.of();
+    //     }
+    // }
 
     private List<TourMediaResponse> loadMediaResponses(Long tourId) {
         return tourMediaRepository.findByTourIdOrderBySortOrder(tourId).stream()
@@ -1059,6 +1072,7 @@ public class TourQueryServiceImpl implements TourQueryService {
                         .title(day.getTitle())
                         .description(day.getDescription())
                         .overnightDestinationId(day.getOvernightDestinationId())
+                        .dayImageUrl(day.getDayImageUrl())
                         .items(itineraryItemRepository.findByItineraryDayIdOrderBySequenceNo(day.getId()).stream()
                                 .filter(item -> item.getDeletedAt() == null)
                                 .map(item -> ItineraryItemResponse.builder()
@@ -1076,6 +1090,8 @@ public class TourQueryServiceImpl implements TourQueryService {
                                         .startTime(item.getStartTime())
                                         .endTime(item.getEndTime())
                                         .travelMinutesEstimated(item.getTravelMinutesEstimated())
+                                        .imageUrl(item.getImageUrl())
+                                        .imageCaption(item.getImageCaption())
                                         .build())
                                 .toList())
                         .build())

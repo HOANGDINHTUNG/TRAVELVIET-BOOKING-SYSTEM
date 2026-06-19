@@ -1551,11 +1551,52 @@ SELECT COUNT(*) AS invalid_tour_destination FROM tours t LEFT JOIN tour_destinat
 SELECT COUNT(*) AS duplicate_destination_slug FROM (SELECT slug FROM destinations GROUP BY slug HAVING COUNT(*) > 1) x;
 SELECT COUNT(*) AS duplicate_tour_slug FROM (SELECT slug FROM tours GROUP BY slug HAVING COUNT(*) > 1) x;
 
--- ADDED TO FIX MISSING HOME PAGE TAGS
+-- ADDED TO FIX MISSING HOME PAGE TAGS AND ENHANCE CATEGORY DIVERSITY
+-- 1) Cấp HOME_HOT_INTL cho các tour quốc tế (ID >= 300 hoặc theo tên)
 INSERT IGNORE INTO tour_tags (tour_id, tag_id)
 SELECT t.id, tg.id
 FROM tours t
-JOIN tags tg ON tg.code IN ('HOME_BEACH_VN', 'HOME_FLASH_SALE')
-WHERE t.id IN (5, 6, 37, 48, 53, 73, 76, 80);
+JOIN tags tg ON tg.code = 'HOME_HOT_INTL'
+WHERE t.id >= 300 OR t.name LIKE '%Bali%' OR t.name LIKE '%Thái Lan%' OR t.name LIKE '%Singapore%' OR t.name LIKE '%Hàn Quốc%' OR t.name LIKE '%Nhật Bản%';
+
+-- 2) Cấp HOME_BEACH_VN cho các tour biển
+INSERT IGNORE INTO tour_tags (tour_id, tag_id)
+SELECT t.id, tg.id
+FROM tours t
+JOIN tags tg ON tg.code = 'HOME_BEACH_VN'
+WHERE t.name LIKE '%Phú Quốc%' OR t.name LIKE '%Nha Trang%' OR t.name LIKE '%Quy Nhơn%' OR t.name LIKE '%Vũng Tàu%' OR t.name LIKE '%Đảo%' OR t.name LIKE '%Biển%';
+
+-- 3) Cấp HOME_FLASH_SALE
+INSERT IGNORE INTO tour_tags (tour_id, tag_id)
+SELECT t.id, tg.id
+FROM tours t
+JOIN tags tg ON tg.code = 'HOME_FLASH_SALE'
+WHERE t.id IN (5, 6, 37, 48, 53, 73, 76, 80) OR (t.id MOD 17 = 0);
+
+-- 4) Cấp 15-20 distinct categories ngẫu nhiên nhưng đa dạng cho toàn bộ tours
+INSERT IGNORE INTO tour_tags (tour_id, tag_id)
+SELECT t.id, tg.id
+FROM tours t
+JOIN tags tg ON 
+    (t.id MOD 20 = 0 AND tg.code = 'MAO_HIEM') OR
+    (t.id MOD 20 = 1 AND tg.code = 'SANG_TRONG') OR
+    (t.id MOD 20 = 2 AND tg.code = 'GIA_DINH') OR
+    (t.id MOD 20 = 3 AND tg.code = 'SINH_THAI') OR
+    (t.id MOD 20 = 4 AND tg.code = 'NGHI_DUONG') OR
+    (t.id MOD 20 = 5 AND tg.code = 'VAN_HOA') OR
+    (t.id MOD 20 = 6 AND tg.code = 'AM_THUC') OR
+    (t.id MOD 20 = 7 AND tg.code = 'LICH_SU') OR
+    (t.id MOD 20 = 8 AND tg.code = 'TAM_LINH') OR
+    (t.id MOD 20 = 9 AND tg.code = 'CHUA_LANH') OR
+    (t.id MOD 20 = 10 AND tg.code = 'GIAI_TRI') OR
+    (t.id MOD 20 = 11 AND tg.code = 'CAP_DOI') OR
+    (t.id MOD 20 = 12 AND tg.code = 'CHECKIN') OR
+    (t.id MOD 20 = 13 AND tg.code = 'WILDLIFE') OR
+    (t.id MOD 20 = 14 AND tg.code = 'THE_THAO_NUOC') OR
+    (t.id MOD 20 = 15 AND tg.code = 'NIGHTLIFE') OR
+    (t.id MOD 20 = 16 AND tg.code = 'LE_HOI') OR
+    (t.id MOD 20 = 17 AND tg.code = 'TREKKING') OR
+    (t.id MOD 20 = 18 AND tg.code = 'CAMPING') OR
+    (t.id MOD 20 = 19 AND tg.code = 'VISA_FREE');
 
 SET FOREIGN_KEY_CHECKS = 1;

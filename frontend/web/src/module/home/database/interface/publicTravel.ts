@@ -38,7 +38,7 @@ export type TourComboPackageOffer = {
   basePrice?: number | string;
   discountAmount?: number | string;
   finalPrice?: number | string;
-  packageRole?: 'included' | 'optional' | 'recommended' | string;
+  packageRole?: "included" | "optional" | "recommended" | string;
   isDefault?: boolean;
   sortOrder?: number;
 };
@@ -249,6 +249,7 @@ export type BackendItineraryDay = {
   dayNumber: number;
   title: string;
   description?: string;
+  dayImageUrl?: string;
   items?: BackendItineraryItem[];
 };
 
@@ -258,6 +259,8 @@ export type BackendItineraryItem = {
   itemType: string;
   title: string;
   description?: string;
+  imageUrl?: string;
+  imageCaption?: string;
   locationName?: string;
   address?: string;
   startTime?: string;

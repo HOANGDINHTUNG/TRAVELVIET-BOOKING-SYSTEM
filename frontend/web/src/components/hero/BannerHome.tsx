@@ -58,522 +58,545 @@ const BannerHome: FC<BannerHomeProps> = ({
   useEffect(() => {
     if (!slides.length) return undefined;
 
-    return scheduleIdleTask(() => {
-    const demoEl = demoRef.current;
-    const demoCardsEl = demoCardsRef.current;
-    const slideNumbersEl = slideNumbersRef.current;
-    const detailsEvenEl = detailsEvenRef.current;
-    const detailsOddEl = detailsOddRef.current;
-    const indicatorEl = indicatorRef.current;
-    const progressBarEl = progressRef.current;
-    const arrowLeft = arrowLeftRef.current;
-    const arrowRight = arrowRightRef.current;
+    return scheduleIdleTask(
+      () => {
+        const demoEl = demoRef.current;
+        const demoCardsEl = demoCardsRef.current;
+        const slideNumbersEl = slideNumbersRef.current;
+        const detailsEvenEl = detailsEvenRef.current;
+        const detailsOddEl = detailsOddRef.current;
+        const indicatorEl = indicatorRef.current;
+        const progressBarEl = progressRef.current;
+        const arrowLeft = arrowLeftRef.current;
+        const arrowRight = arrowRightRef.current;
 
-    if (
-      !demoEl ||
-      !demoCardsEl ||
-      !slideNumbersEl ||
-      !detailsEvenEl ||
-      !detailsOddEl ||
-      !indicatorEl ||
-      !progressBarEl
-    )
-      return;
-
-    const isMobile = window.innerWidth < 768;
-    const ease = "power3.out"; // ===== Movizone DNA easing =====
-    const STAGGER = 0.1; // ===== Movizone DNA stagger =====
-    const REVEAL_DURATION = 0.9;
-
-    let isCancelled = false;
-    /** Tạm dừng lượt slide + parallax khi banner không trong viewport hoặc tab ẩn */
-    let loopPaused = false;
-    const sleep = (ms: number) =>
-      new Promise<void>((r) => {
-        setTimeout(r, ms);
-      });
-
-    const ctx = gsap.context(() => {
-      // Phase 1: thay innerHTML injection bằng React JSX (xem return bên dưới).
-      // GSAP vẫn select bằng id `#card{i}` / `#card-content-{i}` / `#slide-item-{i}`
-      // ⇒ logic loop/parallax không đổi, nhưng đã sạch XSS và dễ a11y.
-
-      const range = (n: number) => Array(n).fill(0).map((_, j) => j);
-      const getBannerMetrics = () => ({
-        width: demoEl.clientWidth || window.innerWidth,
-        height: demoEl.clientHeight || window.innerHeight,
-      });
-      const set = gsap.set;
-      const getCard = (i: number) => `#card${i}`;
-      const getCardContent = (i: number) => `#card-content-${i}`;
-      const getSliderItem = (i: number) => `#slide-item-${i}`;
-
-      function animate(
-        target: gsap.TweenTarget | null,
-        duration: number,
-        props: gsap.TweenVars,
-      ) {
-        if (!target) return Promise.resolve();
-        return new Promise<void>((res) => {
-          gsap.to(target, { ...props, duration, onComplete: () => res() });
-        });
-      }
-
-      const order = range(slides.length);
-      let detailsEven = true;
-
-      // CTA click -> navigate
-      // Card-content CTA buttons có React `onClick` đã gắn (xem JSX render).
-      // Còn 2 khối DetailsBlock (`#details-even`, `#details-odd`) vẫn dùng
-      // querySelectorAll vì nội dung text được tween qua `updateDetails()`
-      // và CTA ở DetailsBlock cần phản ánh slide hiện tại (order[0]).
-      const detailsCtaCleanups: Array<() => void> = [];
-      demoEl
-        .querySelectorAll<HTMLButtonElement>(
-          "#details-even .discover, #details-odd .discover",
+        if (
+          !demoEl ||
+          !demoCardsEl ||
+          !slideNumbersEl ||
+          !detailsEvenEl ||
+          !detailsOddEl ||
+          !indicatorEl ||
+          !progressBarEl
         )
-        .forEach((btn) => {
-          const onClick = () => {
-            const idx = order[0];
-            if (slides[idx]?.detailPath) navigate(slides[idx].detailPath);
-          };
-          btn.addEventListener("click", onClick);
-          detailsCtaCleanups.push(() =>
-            btn.removeEventListener("click", onClick),
-          );
-        });
+          return;
 
-      let offsetTop = 200;
-      let offsetLeft = 700;
-      const cardWidth = isMobile ? 110 : 130;
-      const cardHeight = isMobile ? 170 : 200;
-      const gap = 16;
-      const numberSize = 50;
-      let isAnimating = false;
+        const isMobile = window.innerWidth < 768;
+        const ease = "power3.out"; // ===== Movizone DNA easing =====
+        const STAGGER = 0.1; // ===== Movizone DNA stagger =====
+        const REVEAL_DURATION = 0.9;
 
-      function updateDetails(detailsEl: HTMLElement | null, index: number) {
-        if (!detailsEl) return;
-        const s = slides[index];
-        const place = detailsEl.querySelector<HTMLDivElement>(".place-box .text");
-        const t1 = detailsEl.querySelector<HTMLDivElement>(".title-1");
-        const t2 = detailsEl.querySelector<HTMLDivElement>(".title-2");
-        const desc = detailsEl.querySelector<HTMLDivElement>(".desc");
-        if (!s || !place || !t1 || !t2 || !desc) return;
+        let isCancelled = false;
+        /** Tạm dừng lượt slide + parallax khi banner không trong viewport hoặc tab ẩn */
+        let loopPaused = false;
+        const sleep = (ms: number) =>
+          new Promise<void>((r) => {
+            setTimeout(r, ms);
+          });
 
-        // An toàn XSS — dùng textContent / createElement thay innerHTML.
-        place.textContent = s.place;
+        const ctx = gsap.context(() => {
+          // Phase 1: thay innerHTML injection bằng React JSX (xem return bên dưới).
+          // GSAP vẫn select bằng id `#card{i}` / `#card-content-{i}` / `#slide-item-{i}`
+          // ⇒ logic loop/parallax không đổi, nhưng đã sạch XSS và dễ a11y.
 
-        // Giữ nguyên dấu accent bar (Movizone DNA): render lại span đầu tiên.
-        const existingAccent = place.querySelector("span");
-        if (!existingAccent) {
-          const accent = document.createElement("span");
-          accent.className =
-            "absolute w-[26px] h-0.5 md:w-[34px] md:h-[3px] rounded-full bg-[var(--color-accent)] left-0 top-0";
-          place.insertBefore(accent, place.firstChild);
-        }
+          const range = (n: number) =>
+            Array(n)
+              .fill(0)
+              .map((_, j) => j);
+          const getBannerMetrics = () => ({
+            width: demoEl.clientWidth || window.innerWidth,
+            height: demoEl.clientHeight || window.innerHeight,
+          });
+          const set = gsap.set;
+          const getCard = (i: number) => `#card${i}`;
+          const getCardContent = (i: number) => `#card-content-${i}`;
+          const getSliderItem = (i: number) => `#slide-item-${i}`;
 
-        if (s.logoImage) {
-          while (t1.firstChild) t1.removeChild(t1.firstChild);
-          const img = document.createElement("img");
-          img.src = s.logoImage;
-          img.alt = s.title || "";
-          img.className =
-            "max-h-[52px] md:max-h-[72px] w-auto object-contain drop-shadow-[0_10px_30px_rgba(0,0,0,0.9)]";
-          t1.appendChild(img);
-        } else {
-          t1.textContent = s.title;
-        }
-        t2.textContent = s.subtitle;
-        desc.textContent = s.description;
-      }
-
-      function staggerRevealDetails(detailsActive: HTMLElement, baseDelay = 0.25) {
-        const sel = detailsActive.querySelectorAll.bind(detailsActive);
-        gsap.to(sel(".text"), {
-          y: 0,
-          opacity: 1,
-          delay: baseDelay + STAGGER * 0,
-          duration: REVEAL_DURATION,
-          ease,
-        });
-        gsap.to(sel(".title-1"), {
-          y: 0,
-          opacity: 1,
-          delay: baseDelay + STAGGER * 1,
-          duration: REVEAL_DURATION,
-          ease,
-        });
-        gsap.to(sel(".title-2"), {
-          y: 0,
-          opacity: 1,
-          delay: baseDelay + STAGGER * 2,
-          duration: REVEAL_DURATION,
-          ease,
-        });
-        gsap.to(sel(".desc"), {
-          y: 0,
-          opacity: 1,
-          delay: baseDelay + STAGGER * 3,
-          duration: REVEAL_DURATION,
-          ease,
-        });
-        gsap.to(sel(".cta"), {
-          y: 0,
-          opacity: 1,
-          delay: baseDelay + STAGGER * 4,
-          duration: REVEAL_DURATION,
-          ease,
-        });
-      }
-
-      function resetDetailsInitial(detailsEl: HTMLElement) {
-        set(detailsEl.querySelectorAll(".text"), { y: 100, opacity: 0 });
-        set(detailsEl.querySelectorAll(".title-1"), { y: 100, opacity: 0 });
-        set(detailsEl.querySelectorAll(".title-2"), { y: 100, opacity: 0 });
-        set(detailsEl.querySelectorAll(".desc"), { y: 50, opacity: 0 });
-        set(detailsEl.querySelectorAll(".cta"), { y: 60, opacity: 0 });
-      }
-
-      function init() {
-        const [active, ...rest] = order;
-        const detailsActive = detailsEven ? detailsEvenEl : detailsOddEl;
-        const detailsInactive = detailsEven ? detailsOddEl : detailsEvenEl;
-        const { height, width } = getBannerMetrics();
-
-        offsetTop = height - cardHeight - 32;
-        offsetLeft = width - (cardWidth + gap) * rest.length - 32;
-
-        set(getCard(active), { x: 0, y: 0, width, height, borderRadius: 0 });
-        set(getCardContent(active), { x: 0, y: 0, opacity: 0 });
-
-        if (detailsActive && detailsInactive) {
-          set(detailsActive, { opacity: 0, zIndex: 22, x: -200 });
-          set(detailsInactive, { opacity: 0, zIndex: 12 });
-          resetDetailsInitial(detailsInactive);
-          resetDetailsInitial(detailsActive);
-        }
-
-        set(progressBarEl, {
-          width: 260 * (1 / order.length) * (active + 1),
-        });
-        set(indicatorEl, { x: -window.innerWidth });
-
-        if (!isMobile) {
-          rest.forEach((i, idx) => {
-            const x = offsetLeft + idx * (cardWidth + gap);
-            set(getCard(i), {
-              x,
-              y: offsetTop,
-              width: cardWidth,
-              height: cardHeight,
-              zIndex: 30,
-              borderRadius: 14,
+          function animate(
+            target: gsap.TweenTarget | null,
+            duration: number,
+            props: gsap.TweenVars,
+          ) {
+            if (!target) return Promise.resolve();
+            return new Promise<void>((res) => {
+              gsap.to(target, { ...props, duration, onComplete: () => res() });
             });
-            set(getCardContent(i), { x, y: offsetTop, zIndex: 40 });
-            set(getSliderItem(i), { x: (idx + 1) * numberSize });
-          });
-        } else {
-          rest.forEach((i) => {
-            set(getCard(i), { opacity: 0, pointerEvents: "none" });
-            set(getCardContent(i), { opacity: 0, pointerEvents: "none" });
-            set(getSliderItem(i), { opacity: 0 });
-          });
-          set(slideNumbersEl, { opacity: 0 });
-        }
-
-        if (detailsActive) {
-          gsap.to(detailsActive, { opacity: 1, x: 0, ease, delay: 0.15 });
-          staggerRevealDetails(detailsActive, 0.25);
-        }
-
-        updateDetails(detailsActive, order[0]);
-      }
-
-      function step(): Promise<void> {
-        if (isAnimating || isCancelled) return Promise.resolve();
-        isAnimating = true;
-
-        return new Promise<void>((resolve) => {
-          order.push(order.shift() as number);
-          detailsEven = !detailsEven;
-
-          const detailsActive = detailsEven ? detailsEvenEl : detailsOddEl;
-          const detailsInactive = detailsEven ? detailsOddEl : detailsEvenEl;
-
-          updateDetails(detailsActive, order[0]);
-
-          if (detailsActive && detailsInactive) {
-            set(detailsActive, { zIndex: 22 });
-            gsap.to(detailsActive, { opacity: 1, delay: 0.15, ease });
-            staggerRevealDetails(detailsActive, 0.15);
-            set(detailsInactive, { zIndex: 12 });
           }
 
-          const [active, ...rest] = order;
-          const prv = rest[rest.length - 1];
-          const { width, height } = getBannerMetrics();
-          const offsetTopLocal = height - cardHeight - 32;
-          const offsetLeftLocal = width - (cardWidth + gap) * rest.length - 32;
+          const order = range(slides.length);
+          let detailsEven = true;
 
-          set(getCard(active), { opacity: 1, pointerEvents: "auto" });
-          set(getCard(prv), { zIndex: 10 });
-          set(getCard(active), { zIndex: 20 });
-          gsap.to(getCard(prv), { scale: 1.5, ease });
+          // CTA click -> navigate
+          // Card-content CTA buttons có React `onClick` đã gắn (xem JSX render).
+          // Còn 2 khối DetailsBlock (`#details-even`, `#details-odd`) vẫn dùng
+          // querySelectorAll vì nội dung text được tween qua `updateDetails()`
+          // và CTA ở DetailsBlock cần phản ánh slide hiện tại (order[0]).
+          const detailsCtaCleanups: Array<() => void> = [];
+          demoEl
+            .querySelectorAll<HTMLButtonElement>(
+              "#details-even .discover, #details-odd .discover",
+            )
+            .forEach((btn) => {
+              const onClick = () => {
+                const idx = order[0];
+                if (slides[idx]?.detailPath) navigate(slides[idx].detailPath);
+              };
+              btn.addEventListener("click", onClick);
+              detailsCtaCleanups.push(() =>
+                btn.removeEventListener("click", onClick),
+              );
+            });
 
-          gsap.to(getCardContent(active), { opacity: 0, duration: 0.3, ease });
-          gsap.to(getSliderItem(active), { x: 0, ease });
-          gsap.to(getSliderItem(prv), { x: -numberSize, ease });
-          gsap.to(progressBarEl, {
-            width: 260 * (1 / order.length) * (active + 1),
-            ease,
-          });
+          let offsetTop = 200;
+          let offsetLeft = 700;
+          const cardWidth = isMobile ? 110 : 130;
+          const cardHeight = isMobile ? 170 : 200;
+          const gap = 16;
+          const numberSize = 50;
+          let isAnimating = false;
 
-          gsap.to(getCard(active), {
-            x: 0,
-            y: 0,
-            ease,
-            width,
-            height,
-            borderRadius: 0,
-            onComplete: () => {
-              if (!isMobile) {
-                const xNew =
-                  offsetLeftLocal + (rest.length - 1) * (cardWidth + gap);
-                set(getCard(prv), {
-                  x: xNew,
-                  y: offsetTopLocal,
+          function updateDetails(detailsEl: HTMLElement | null, index: number) {
+            if (!detailsEl) return;
+            const s = slides[index];
+            const place =
+              detailsEl.querySelector<HTMLDivElement>(".place-box .text");
+            const t1 = detailsEl.querySelector<HTMLDivElement>(".title-1");
+            const t2 = detailsEl.querySelector<HTMLDivElement>(".title-2");
+            const desc = detailsEl.querySelector<HTMLDivElement>(".desc");
+            if (!s || !place || !t1 || !t2 || !desc) return;
+
+            // An toàn XSS — dùng textContent / createElement thay innerHTML.
+            place.textContent = s.place;
+
+            // Giữ nguyên dấu accent bar (Movizone DNA): render lại span đầu tiên.
+            const existingAccent = place.querySelector("span");
+            if (!existingAccent) {
+              const accent = document.createElement("span");
+              accent.className =
+                "absolute w-[26px] h-0.5 md:w-[34px] md:h-[3px] rounded-full bg-[var(--color-accent)] left-0 top-0";
+              place.insertBefore(accent, place.firstChild);
+            }
+
+            if (s.logoImage) {
+              while (t1.firstChild) t1.removeChild(t1.firstChild);
+              const img = document.createElement("img");
+              img.src = s.logoImage;
+              img.alt = s.title || "";
+              img.className =
+                "max-h-[52px] md:max-h-[72px] w-auto object-contain drop-shadow-[0_10px_30px_rgba(0,0,0,0.9)]";
+              t1.appendChild(img);
+            } else {
+              t1.textContent = s.title;
+            }
+            t2.textContent = s.subtitle;
+            desc.textContent = s.description;
+          }
+
+          function staggerRevealDetails(
+            detailsActive: HTMLElement,
+            baseDelay = 0.25,
+          ) {
+            const sel = detailsActive.querySelectorAll.bind(detailsActive);
+            gsap.to(sel(".text"), {
+              y: 0,
+              opacity: 1,
+              delay: baseDelay + STAGGER * 0,
+              duration: REVEAL_DURATION,
+              ease,
+            });
+            gsap.to(sel(".title-1"), {
+              y: 0,
+              opacity: 1,
+              delay: baseDelay + STAGGER * 1,
+              duration: REVEAL_DURATION,
+              ease,
+            });
+            gsap.to(sel(".title-2"), {
+              y: 0,
+              opacity: 1,
+              delay: baseDelay + STAGGER * 2,
+              duration: REVEAL_DURATION,
+              ease,
+            });
+            gsap.to(sel(".desc"), {
+              y: 0,
+              opacity: 1,
+              delay: baseDelay + STAGGER * 3,
+              duration: REVEAL_DURATION,
+              ease,
+            });
+            gsap.to(sel(".cta"), {
+              y: 0,
+              opacity: 1,
+              delay: baseDelay + STAGGER * 4,
+              duration: REVEAL_DURATION,
+              ease,
+            });
+          }
+
+          function resetDetailsInitial(detailsEl: HTMLElement) {
+            set(detailsEl.querySelectorAll(".text"), { y: 100, opacity: 0 });
+            set(detailsEl.querySelectorAll(".title-1"), { y: 100, opacity: 0 });
+            set(detailsEl.querySelectorAll(".title-2"), { y: 100, opacity: 0 });
+            set(detailsEl.querySelectorAll(".desc"), { y: 50, opacity: 0 });
+            set(detailsEl.querySelectorAll(".cta"), { y: 60, opacity: 0 });
+          }
+
+          function init() {
+            const [active, ...rest] = order;
+            const detailsActive = detailsEven ? detailsEvenEl : detailsOddEl;
+            const detailsInactive = detailsEven ? detailsOddEl : detailsEvenEl;
+            const { height, width } = getBannerMetrics();
+
+            offsetTop = height - cardHeight - 32;
+            offsetLeft = width - (cardWidth + gap) * rest.length - 32;
+
+            set(getCard(active), {
+              x: 0,
+              y: 0,
+              width,
+              height,
+              borderRadius: 0,
+            });
+            set(getCardContent(active), { x: 0, y: 0, opacity: 0 });
+
+            if (detailsActive && detailsInactive) {
+              set(detailsActive, { opacity: 0, zIndex: 22, x: -200 });
+              set(detailsInactive, { opacity: 0, zIndex: 12 });
+              resetDetailsInitial(detailsInactive);
+              resetDetailsInitial(detailsActive);
+            }
+
+            set(progressBarEl, {
+              width: 260 * (1 / order.length) * (active + 1),
+            });
+            set(indicatorEl, { x: -window.innerWidth });
+
+            if (!isMobile) {
+              rest.forEach((i, idx) => {
+                const x = offsetLeft + idx * (cardWidth + gap);
+                set(getCard(i), {
+                  x,
+                  y: offsetTop,
                   width: cardWidth,
                   height: cardHeight,
                   zIndex: 30,
                   borderRadius: 14,
-                  scale: 1,
                 });
-                set(getCardContent(prv), {
-                  x: xNew,
-                  y: offsetTopLocal,
-                  opacity: 1,
-                  zIndex: 40,
-                });
-                set(getSliderItem(prv), { x: rest.length * numberSize });
-              } else {
-                set(getCard(prv), { opacity: 0, pointerEvents: "none" });
-                set(getCardContent(prv), {
-                  opacity: 0,
-                  pointerEvents: "none",
-                });
+                set(getCardContent(i), { x, y: offsetTop, zIndex: 40 });
+                set(getSliderItem(i), { x: (idx + 1) * numberSize });
+              });
+            } else {
+              rest.forEach((i) => {
+                set(getCard(i), { opacity: 0, pointerEvents: "none" });
+                set(getCardContent(i), { opacity: 0, pointerEvents: "none" });
+                set(getSliderItem(i), { opacity: 0 });
+              });
+              set(slideNumbersEl, { opacity: 0 });
+            }
+
+            if (detailsActive) {
+              gsap.to(detailsActive, { opacity: 1, x: 0, ease, delay: 0.15 });
+              staggerRevealDetails(detailsActive, 0.25);
+            }
+
+            updateDetails(detailsActive, order[0]);
+          }
+
+          function step(): Promise<void> {
+            if (isAnimating || isCancelled) return Promise.resolve();
+            isAnimating = true;
+
+            return new Promise<void>((resolve) => {
+              order.push(order.shift() as number);
+              detailsEven = !detailsEven;
+
+              const detailsActive = detailsEven ? detailsEvenEl : detailsOddEl;
+              const detailsInactive = detailsEven
+                ? detailsOddEl
+                : detailsEvenEl;
+
+              updateDetails(detailsActive, order[0]);
+
+              if (detailsActive && detailsInactive) {
+                set(detailsActive, { zIndex: 22 });
+                gsap.to(detailsActive, { opacity: 1, delay: 0.15, ease });
+                staggerRevealDetails(detailsActive, 0.15);
+                set(detailsInactive, { zIndex: 12 });
               }
 
-              if (detailsInactive) {
-                set(detailsInactive, { opacity: 0 });
-                resetDetailsInitial(detailsInactive);
-              }
-              isAnimating = false;
-              resolve();
-            },
-          });
+              const [active, ...rest] = order;
+              const prv = rest[rest.length - 1];
+              const { width, height } = getBannerMetrics();
+              const offsetTopLocal = height - cardHeight - 32;
+              const offsetLeftLocal =
+                width - (cardWidth + gap) * rest.length - 32;
 
-          if (!isMobile) {
-            rest.forEach((i, idx) => {
-              if (i !== prv) {
-                const xNew = offsetLeftLocal + idx * (cardWidth + gap);
-                set(getCard(i), { zIndex: 30 });
-                gsap.to(getCard(i), {
-                  x: xNew,
-                  y: offsetTopLocal,
-                  width: cardWidth,
-                  height: cardHeight,
-                  borderRadius: 14,
-                  ease,
-                  delay: 0.05 * (idx + 1),
-                });
-                gsap.to(getCardContent(i), {
-                  x: xNew,
-                  y: offsetTopLocal,
-                  opacity: 1,
-                  zIndex: 40,
-                  ease,
-                  delay: 0.05 * (idx + 1),
-                });
-                gsap.to(getSliderItem(i), {
-                  x: (idx + 1) * numberSize,
-                  ease,
+              set(getCard(active), { opacity: 1, pointerEvents: "auto" });
+              set(getCard(prv), { zIndex: 10 });
+              set(getCard(active), { zIndex: 20 });
+              gsap.to(getCard(prv), { scale: 1.5, ease });
+
+              gsap.to(getCardContent(active), {
+                opacity: 0,
+                duration: 0.3,
+                ease,
+              });
+              gsap.to(getSliderItem(active), { x: 0, ease });
+              gsap.to(getSliderItem(prv), { x: -numberSize, ease });
+              gsap.to(progressBarEl, {
+                width: 260 * (1 / order.length) * (active + 1),
+                ease,
+              });
+
+              gsap.to(getCard(active), {
+                x: 0,
+                y: 0,
+                ease,
+                width,
+                height,
+                borderRadius: 0,
+                onComplete: () => {
+                  if (!isMobile) {
+                    const xNew =
+                      offsetLeftLocal + (rest.length - 1) * (cardWidth + gap);
+                    set(getCard(prv), {
+                      x: xNew,
+                      y: offsetTopLocal,
+                      width: cardWidth,
+                      height: cardHeight,
+                      zIndex: 30,
+                      borderRadius: 14,
+                      scale: 1,
+                    });
+                    set(getCardContent(prv), {
+                      x: xNew,
+                      y: offsetTopLocal,
+                      opacity: 1,
+                      zIndex: 40,
+                    });
+                    set(getSliderItem(prv), { x: rest.length * numberSize });
+                  } else {
+                    set(getCard(prv), { opacity: 0, pointerEvents: "none" });
+                    set(getCardContent(prv), {
+                      opacity: 0,
+                      pointerEvents: "none",
+                    });
+                  }
+
+                  if (detailsInactive) {
+                    set(detailsInactive, { opacity: 0 });
+                    resetDetailsInitial(detailsInactive);
+                  }
+                  isAnimating = false;
+                  resolve();
+                },
+              });
+
+              if (!isMobile) {
+                rest.forEach((i, idx) => {
+                  if (i !== prv) {
+                    const xNew = offsetLeftLocal + idx * (cardWidth + gap);
+                    set(getCard(i), { zIndex: 30 });
+                    gsap.to(getCard(i), {
+                      x: xNew,
+                      y: offsetTopLocal,
+                      width: cardWidth,
+                      height: cardHeight,
+                      borderRadius: 14,
+                      ease,
+                      delay: 0.05 * (idx + 1),
+                    });
+                    gsap.to(getCardContent(i), {
+                      x: xNew,
+                      y: offsetTopLocal,
+                      opacity: 1,
+                      zIndex: 40,
+                      ease,
+                      delay: 0.05 * (idx + 1),
+                    });
+                    gsap.to(getSliderItem(i), {
+                      x: (idx + 1) * numberSize,
+                      ease,
+                    });
+                  }
                 });
               }
             });
           }
-        });
-      }
 
-      async function loop() {
-        while (!isCancelled) {
-          while (loopPaused && !isCancelled) {
-            await sleep(200);
+          async function loop() {
+            while (!isCancelled) {
+              while (loopPaused && !isCancelled) {
+                await sleep(200);
+              }
+              if (isCancelled) break;
+
+              const { width } = getBannerMetrics();
+              await animate(indicatorEl, 2, { x: 0 });
+              if (isCancelled) break;
+
+              while (loopPaused && !isCancelled) {
+                await sleep(200);
+              }
+              if (isCancelled) break;
+
+              await animate(indicatorEl, 0.8, { x: width, delay: 0.3 });
+              if (isCancelled) break;
+
+              while (loopPaused && !isCancelled) {
+                await sleep(200);
+              }
+              if (isCancelled) break;
+
+              gsap.set(indicatorEl, { x: -width });
+              await step();
+            }
           }
-          if (isCancelled) break;
 
-          const { width } = getBannerMetrics();
-          await animate(indicatorEl, 2, { x: 0 });
-          if (isCancelled) break;
-
-          while (loopPaused && !isCancelled) {
-            await sleep(200);
+          function loadImage(src: string) {
+            return new Promise<HTMLImageElement>((res, rej) => {
+              const img = new Image();
+              img.onload = () => res(img);
+              img.onerror = rej;
+              img.src = src;
+            });
           }
-          if (isCancelled) break;
+          /**
+           * IMPORTANT (TravelViet integration):
+           * BannerHome không được "đứng yên" chỉ vì 1 ảnh lỗi/404/CORS.
+           * Nếu Promise.all reject -> init() không chạy -> UI chồng lên nhau.
+           * Vì vậy ta dùng allSettled và luôn proceed init.
+           */
+          const loadImages = () =>
+            Promise.allSettled(slides.map((s) => loadImage(s.image)));
 
-          await animate(indicatorEl, 0.8, { x: width, delay: 0.3 });
-          if (isCancelled) break;
+          const handleNext = () => {
+            if (!isAnimating && !isCancelled) void step();
+          };
+          const handlePrev = () => {
+            if (isAnimating || order.length <= 1 || isCancelled) return;
+            const a = order.pop();
+            if (a !== undefined) order.unshift(a);
+            const b = order.pop();
+            if (b !== undefined) order.unshift(b);
+            void step();
+          };
 
-          while (loopPaused && !isCancelled) {
-            await sleep(200);
+          arrowRight?.addEventListener("click", handleNext);
+          arrowLeft?.addEventListener("click", handlePrev);
+
+          // ============ PARALLAX (scrub 1.5) — chỉ text; KHÔNG dịch cả lớp ảnh (yPercent)
+          // vì sẽ lộ nền đen dưới trong overflow-hidden.
+          const parallaxTriggers: ScrollTrigger[] = [];
+
+          const textTargets = [detailsEvenEl, detailsOddEl].filter(
+            Boolean,
+          ) as HTMLElement[];
+          if (textTargets.length) {
+            const fg = gsap.to(textTargets, {
+              yPercent: -15,
+              opacity: 0.85,
+              ease: "none",
+              scrollTrigger: {
+                trigger: demoEl,
+                start: "top top",
+                end: "bottom top",
+                scrub: 1.5,
+                invalidateOnRefresh: true,
+              },
+            });
+            if (fg.scrollTrigger) parallaxTriggers.push(fg.scrollTrigger);
           }
-          if (isCancelled) break;
 
-          gsap.set(indicatorEl, { x: -width });
-          await step();
-        }
-      }
+          const setParallaxEnabled = (on: boolean) => {
+            parallaxTriggers.forEach((t) => {
+              if (on) {
+                t.enable(false);
+              } else {
+                t.disable(false);
+              }
+            });
+          };
 
-      function loadImage(src: string) {
-        return new Promise<HTMLImageElement>((res, rej) => {
-          const img = new Image();
-          img.onload = () => res(img);
-          img.onerror = rej;
-          img.src = src;
-        });
-      }
-      /**
-       * IMPORTANT (TravelViet integration):
-       * BannerHome không được "đứng yên" chỉ vì 1 ảnh lỗi/404/CORS.
-       * Nếu Promise.all reject -> init() không chạy -> UI chồng lên nhau.
-       * Vì vậy ta dùng allSettled và luôn proceed init.
-       */
-      const loadImages = () =>
-        Promise.allSettled(slides.map((s) => loadImage(s.image)));
+          const syncPauseFromVisibility = () => {
+            if (document.hidden) {
+              loopPaused = true;
+              setParallaxEnabled(false);
+              return;
+            }
+            const r = demoEl.getBoundingClientRect();
+            const vh = window.innerHeight || 0;
+            const visible =
+              r.bottom > 0 && r.top < vh && r.width > 0 && r.height > 0;
+            loopPaused = !visible;
+            setParallaxEnabled(visible);
+          };
 
-      const handleNext = () => {
-        if (!isAnimating && !isCancelled) void step();
-      };
-      const handlePrev = () => {
-        if (isAnimating || order.length <= 1 || isCancelled) return;
-        const a = order.pop();
-        if (a !== undefined) order.unshift(a);
-        const b = order.pop();
-        if (b !== undefined) order.unshift(b);
-        void step();
-      };
+          const io = new IntersectionObserver(
+            ([e]) => {
+              if (document.hidden) {
+                loopPaused = true;
+                setParallaxEnabled(false);
+                return;
+              }
+              loopPaused = !e.isIntersecting;
+              setParallaxEnabled(e.isIntersecting);
+            },
+            { threshold: 0.12, rootMargin: "0px 0px -8% 0px" },
+          );
+          io.observe(demoEl);
 
-      arrowRight?.addEventListener("click", handleNext);
-      arrowLeft?.addEventListener("click", handlePrev);
+          const onVisibility = () => {
+            syncPauseFromVisibility();
+            if (!document.hidden) {
+              ScrollTrigger.refresh();
+            }
+          };
+          document.addEventListener("visibilitychange", onVisibility);
 
-      // ============ PARALLAX (scrub 1.5) — chỉ text; KHÔNG dịch cả lớp ảnh (yPercent)
-      // vì sẽ lộ nền đen dưới trong overflow-hidden.
-      const parallaxTriggers: ScrollTrigger[] = [];
+          const handleResize = () => {
+            if (!isAnimating) init();
+            ScrollTrigger.refresh();
+          };
+          window.addEventListener("resize", handleResize);
 
-      const textTargets = [detailsEvenEl, detailsOddEl].filter(
-        Boolean,
-      ) as HTMLElement[];
-      if (textTargets.length) {
-        const fg = gsap.to(textTargets, {
-          yPercent: -15,
-          opacity: 0.85,
-          ease: "none",
-          scrollTrigger: {
-            trigger: demoEl,
-            start: "top top",
-            end: "bottom top",
-            scrub: 1.5,
-            invalidateOnRefresh: true,
-          },
-        });
-        if (fg.scrollTrigger) parallaxTriggers.push(fg.scrollTrigger);
-      }
+          async function start() {
+            try {
+              syncPauseFromVisibility();
 
-      const setParallaxEnabled = (on: boolean) => {
-        parallaxTriggers.forEach((t) => {
-          if (on) {
-            t.enable(false);
-          } else {
-            t.disable(false);
+              // Init ngay để layout không bị chồng lớp.
+              init();
+              ScrollTrigger.refresh();
+
+              // Load ảnh xong (thành công hay thất bại) đều refresh lại để parallax/height chuẩn.
+              await loadImages();
+              ScrollTrigger.refresh();
+              await loop();
+            } catch (e) {
+              console.error(e);
+            }
           }
-        });
-      };
+          void start();
 
-      const syncPauseFromVisibility = () => {
-        if (document.hidden) {
-          loopPaused = true;
-          setParallaxEnabled(false);
-          return;
-        }
-        const r = demoEl.getBoundingClientRect();
-        const vh = window.innerHeight || 0;
-        const visible =
-          r.bottom > 0 && r.top < vh && r.width > 0 && r.height > 0;
-        loopPaused = !visible;
-        setParallaxEnabled(visible);
-      };
+          return () => {
+            io.disconnect();
+            document.removeEventListener("visibilitychange", onVisibility);
+            window.removeEventListener("resize", handleResize);
+            arrowRight?.removeEventListener("click", handleNext);
+            arrowLeft?.removeEventListener("click", handlePrev);
+            parallaxTriggers.forEach((t) => t.kill());
+            detailsCtaCleanups.forEach((cleanup) => cleanup());
+          };
+        }, demoRef);
 
-      const io = new IntersectionObserver(
-        ([e]) => {
-          if (document.hidden) {
-            loopPaused = true;
-            setParallaxEnabled(false);
-            return;
-          }
-          loopPaused = !e.isIntersecting;
-          setParallaxEnabled(e.isIntersecting);
-        },
-        { threshold: 0.12, rootMargin: "0px 0px -8% 0px" },
-      );
-      io.observe(demoEl);
-
-      const onVisibility = () => {
-        syncPauseFromVisibility();
-        if (!document.hidden) {
-          ScrollTrigger.refresh();
-        }
-      };
-      document.addEventListener("visibilitychange", onVisibility);
-
-      const handleResize = () => {
-        if (!isAnimating) init();
-        ScrollTrigger.refresh();
-      };
-      window.addEventListener("resize", handleResize);
-
-      async function start() {
-        try {
-          syncPauseFromVisibility();
-
-          // Init ngay để layout không bị chồng lớp.
-          init();
-          ScrollTrigger.refresh();
-
-          // Load ảnh xong (thành công hay thất bại) đều refresh lại để parallax/height chuẩn.
-          await loadImages();
-          ScrollTrigger.refresh();
-          await loop();
-        } catch (e) {
-          console.error(e);
-        }
-      }
-      void start();
-
-      return () => {
-        io.disconnect();
-        document.removeEventListener("visibilitychange", onVisibility);
-        window.removeEventListener("resize", handleResize);
-        arrowRight?.removeEventListener("click", handleNext);
-        arrowLeft?.removeEventListener("click", handlePrev);
-        parallaxTriggers.forEach((t) => t.kill());
-        detailsCtaCleanups.forEach((cleanup) => cleanup());
-      };
-    }, demoRef);
-
-    return () => {
-      isCancelled = true;
-      ctx.revert();
-    };
-    }, { timeout: 2_000 });
+        return () => {
+          isCancelled = true;
+          ctx.revert();
+        };
+      },
+      { timeout: 2_000 },
+    );
   }, [slides, navigate, resolvedCtaLabel]);
 
   return (
@@ -628,10 +651,16 @@ const BannerHome: FC<BannerHomeProps> = ({
                 alt={s.title}
                 width={1920}
                 height={1080}
-                decoding="async"
+                decoding={i === 0 ? "sync" : "async"}
                 {...(i === 0
-                  ? { fetchPriority: "high" as const, loading: "eager" as const }
-                  : { fetchPriority: "low" as const, loading: "lazy" as const })}
+                  ? {
+                      fetchPriority: "high" as const,
+                      loading: "eager" as const,
+                    }
+                  : {
+                      fetchPriority: "low" as const,
+                      loading: "lazy" as const,
+                    })}
                 className="pointer-events-none absolute inset-0 h-full w-full object-cover select-none"
               />
             </div>
@@ -819,4 +848,3 @@ const DetailsBlock: FC<{
 );
 
 export default BannerHome;
-

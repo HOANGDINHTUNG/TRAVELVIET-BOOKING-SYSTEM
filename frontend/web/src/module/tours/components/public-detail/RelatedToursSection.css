@@ -1,13 +1,9 @@
 .related-tours-section {
   border-radius: 1.5rem;
-  border: 1px solid color-mix(in srgb, var(--color-border, #d8dee8) 70%, transparent);
-  background: linear-gradient(
-    145deg,
-    color-mix(in srgb, #fff 92%, transparent),
-    color-mix(in srgb, var(--color-surface-soft, #f0fdfa) 55%, transparent)
-  );
+  border: 1px solid var(--color-border);
+  background: var(--glass-bg-solid);
   padding: clamp(20px, 3vw, 28px);
-  box-shadow: 0 18px 42px rgba(15, 31, 61, 0.06);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.06);
 }
 
 .related-tours-head {

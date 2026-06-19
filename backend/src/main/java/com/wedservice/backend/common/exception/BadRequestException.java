@@ -1,14 +1,9 @@
 package com.wedservice.backend.common.exception;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Arrays;
 
-/**
- * Business-layer bad request. Prefer {@link #i18n(String, Object...)} with {@code api.*} keys
- * resolved via {@link org.springframework.context.MessageSource}; legacy {@link #BadRequestException(String)}
- * keeps the string as a literal API message when it is not an {@code api.*} / {@code validation.*} key.
- */
 public class BadRequestException extends RuntimeException {
 
     private final Object[] i18nArgs;
@@ -36,11 +31,7 @@ public class BadRequestException extends RuntimeException {
     public boolean isI18n() {
         return i18n;
     }
-
-    /**
-     * Arguments for {@link org.springframework.context.MessageSource#getMessage(String, Object[], java.util.Locale)}.
-     * {@code null} when not created via {@link #i18n(String, Object...)}.
-     */
+    
     @Nullable
     public Object[] getI18nArgs() {
         return i18nArgs;

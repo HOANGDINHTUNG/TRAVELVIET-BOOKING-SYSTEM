@@ -30,11 +30,16 @@ function destinationImageMatching(
 
 export type HeaderMegaMenuImages = typeof HEADER_MEGA_IMAGES;
 
+type DynamicTourRow = {
+  title: string;
+  tagCode: string;
+  tours: Tour[];
+};
+
 type MegaMenuHomeSlice = {
   destinations: Destination[];
   tours: Tour[];
-  toursDomesticBeach: Tour[];
-  toursInternationalHot: Tour[];
+  dynamicRows?: DynamicTourRow[];
   toursLastMinuteDeals: Tour[];
 };
 
@@ -42,13 +47,12 @@ type MegaMenuHomeSlice = {
 export function resolveHeaderMegaMenuImages(
   home: MegaMenuHomeSlice,
 ): Record<keyof HeaderMegaMenuImages, string> {
-  const {
-    destinations,
-    tours,
-    toursDomesticBeach,
-    toursInternationalHot,
-    toursLastMinuteDeals,
-  } = home;
+  const { destinations, tours, dynamicRows = [], toursLastMinuteDeals } = home;
+
+  const toursDomesticBeach =
+    dynamicRows.length > 0 ? dynamicRows[0]?.tours || [] : [];
+  const toursInternationalHot =
+    dynamicRows.length > 1 ? dynamicRows[1]?.tours || [] : [];
 
   const beach = firstTourImage(toursDomesticBeach);
   const intl = firstTourImage(toursInternationalHot);

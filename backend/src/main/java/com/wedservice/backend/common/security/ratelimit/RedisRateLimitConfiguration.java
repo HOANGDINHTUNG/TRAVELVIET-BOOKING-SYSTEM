@@ -1,6 +1,7 @@
 package com.wedservice.backend.common.security.ratelimit;
 
 import io.github.bucket4j.distributed.ExpirationAfterWriteStrategy;
+import io.github.bucket4j.distributed.proxy.ClientSideConfig;
 import io.github.bucket4j.distributed.proxy.ProxyManager;
 import io.github.bucket4j.redis.lettuce.cas.LettuceBasedProxyManager;
 import io.lettuce.core.RedisClient;
@@ -32,10 +33,12 @@ public class RedisRateLimitConfiguration {
                 RedisCodec.of(StringCodec.UTF8, ByteArrayCodec.INSTANCE)
         );
         return LettuceBasedProxyManager.builderFor(connection)
-                .withExpirationStrategy(
-                        ExpirationAfterWriteStrategy.basedOnTimeForRefillingBucketUpToMax(Duration.ofMinutes(2))
-                )
-                .build();
+        .withClientSideConfig(ClientSideConfig.getDefault()
+            .withExpirationAfterWriteStrategy(
+                ExpirationAfterWriteStrategy.basedOnTimeForRefillingBucketUpToMax(Duration.ofMinutes(2))
+            )
+        )
+        .build();
     }
 
     @Bean

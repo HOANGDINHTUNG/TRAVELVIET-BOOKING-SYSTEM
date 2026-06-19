@@ -1,6 +1,7 @@
 package com.wedservice.backend.config.cache;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
 import com.wedservice.backend.config.AppCacheProperties;
 import com.wedservice.backend.config.CacheConfig;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -14,7 +15,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
@@ -37,7 +38,7 @@ public class DistributedRedisCacheConfig {
             RedisConnectionFactory connectionFactory,
             AppCacheProperties props
     ) {
-        GenericJackson2JsonRedisSerializer serializer = redisSerializer();
+        Jackson2JsonRedisSerializer<Object> serializer = redisSerializer();
 
         Map<String, org.springframework.data.redis.cache.RedisCacheConfiguration> redisConfigs = new HashMap<>();
         redisConfigs.put(
@@ -90,7 +91,7 @@ public class DistributedRedisCacheConfig {
     private static org.springframework.data.redis.cache.RedisCacheConfiguration redisCacheConfig(
             AppCacheProperties props,
             String cacheName,
-            GenericJackson2JsonRedisSerializer serializer
+            Jackson2JsonRedisSerializer<Object> serializer
     ) {
         return org.springframework.data.redis.cache.RedisCacheConfiguration.defaultCacheConfig()
                 .entryTtl(CacheSpecFactory.ttlFor(cacheName, props))
@@ -103,9 +104,16 @@ public class DistributedRedisCacheConfig {
                 .disableCachingNullValues();
     }
 
-    private static GenericJackson2JsonRedisSerializer redisSerializer() {
+    private static Jackson2JsonRedisSerializer<Object> redisSerializer() {
         ObjectMapper mapper = new ObjectMapper();
         mapper.findAndRegisterModules();
-        return new GenericJackson2JsonRedisSerializer(mapper);
+        
+        // Kích hoạt nhận diện Type tự động (Thay thế cơ chế hoạt động cũ của GenericJackson2JsonRedisSerializer)
+        mapper.activateDefaultTyping(
+                LaissezFaireSubTypeValidator.instance,
+                ObjectMapper.DefaultTyping.NON_FINAL
+        );
+        
+        return new Jackson2JsonRedisSerializer<>(mapper, Object.class);
     }
 }

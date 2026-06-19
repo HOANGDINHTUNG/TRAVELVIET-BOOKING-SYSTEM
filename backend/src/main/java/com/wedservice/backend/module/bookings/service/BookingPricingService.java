@@ -122,7 +122,11 @@ public class BookingPricingService {
 
         Map<Long, Integer> merged = new LinkedHashMap<>();
         for (BookingProductLineRequest line : rawLines) {
-            merged.merge(line.getProductId(), line.getQuantity(), Integer::sum);
+            merged.merge(
+                line.getProductId(), 
+                line.getQuantity(), 
+                (oldVal, newVal) -> (oldVal == null ? 0 : oldVal) + (newVal == null ? 0 : newVal)
+            );
         }
 
         List<Long> ids = new ArrayList<>(merged.keySet());

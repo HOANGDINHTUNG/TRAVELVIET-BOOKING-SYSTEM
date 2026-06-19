@@ -12,18 +12,20 @@ export type {
   TourComboPackageOfferSummary,
   TourDepartureHubSummary,
   TourInclusionFlags,
-} from '@/types/tour'
+} from "@/types/tour";
 
 export type {
   TourScheduleResponse,
   ScheduleStatus,
   PassengerType,
-} from '@/types/schedule'
+} from "@/types/schedule";
 
 /** Itinerary day public — nested vẫn `unknown` ở BE TourResponse, ta chuẩn hoá. */
 export type PublicItineraryDay = {
-  dayNumber: number | null
-  title: string | null
-  description: string | null
-  overnightDestinationId?: number | null
-}
+  dayNumber: number | null;
+  title: string | null;
+  description: string | null;
+  dayImageUrl?: string | null;
+  overnightDestinationId?: number | null;
+  items?: any[];
+};

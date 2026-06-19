@@ -3,6 +3,49 @@ import { apiClient } from "../../../../../lib/apiClient";
 import type { PageResponse } from "../../../../../types/api";
 import { useCrudMutation } from "../../../core/hooks/useCrudMutation";
 
+export interface DestinationMedia {
+  id?: number;
+  mediaType: string;
+  mediaUrl: string;
+  altText?: string;
+  sortOrder: number;
+  isActive: boolean;
+}
+
+export interface DestinationFood {
+  id?: number;
+  foodName: string;
+  description?: string;
+  isFeatured: boolean;
+}
+
+export interface DestinationSpecialty {
+  specialtyName: string;
+  description?: string;
+}
+
+export interface DestinationActivity {
+  activityName: string;
+  description?: string;
+  activityScore: number;
+}
+
+export interface DestinationTip {
+  tipTitle: string;
+  tipContent: string;
+  sortOrder: number;
+}
+
+export interface DestinationEvent {
+  eventName: string;
+  eventType?: string;
+  description?: string;
+  startsAt?: string;
+  endsAt?: string;
+  notifyAllFollowers?: boolean;
+  isActive?: boolean;
+}
+
 export interface Destination {
   id: number;
   uuid: string;
@@ -24,7 +67,15 @@ export interface Destination {
   isFeatured: boolean;
   isActive: boolean;
   status: string;
+  rejectionReason?: string;
   isOfficial: boolean;
+  parentId?: number;
+  mediaList?: DestinationMedia[];
+  foods?: DestinationFood[];
+  specialties?: DestinationSpecialty[];
+  activities?: DestinationActivity[];
+  tips?: DestinationTip[];
+  events?: DestinationEvent[];
 }
 
 export interface DestinationRequest {
@@ -38,12 +89,21 @@ export interface DestinationRequest {
   address?: string;
   shortDescription?: string;
   description?: string;
+  latitude?: number;
+  longitude?: number;
   bestTimeFromMonth?: number;
   bestTimeToMonth?: number;
   crowdLevelDefault?: string;
   isFeatured: boolean;
   isActive: boolean;
   isOfficial: boolean;
+  parentId?: number;
+  mediaList?: DestinationMedia[];
+  foods?: DestinationFood[];
+  specialties?: DestinationSpecialty[];
+  activities?: DestinationActivity[];
+  tips?: DestinationTip[];
+  events?: DestinationEvent[];
 }
 
 export const DESTINATION_QUERY_KEY = ["admin-destinations"];
@@ -68,6 +128,18 @@ export const useGetDestinations = (
   });
 };
 
+export const useGetDestinationByUuid = (uuid: string) => {
+  return useQuery({
+    queryKey: [...DESTINATION_QUERY_KEY, "detail", uuid],
+    queryFn: async () => {
+      const { data } = await apiClient.get<Destination>(
+        `/admin/destinations/${uuid}`,
+      );
+      return data;
+    },
+    enabled: !!uuid,
+  });
+};
 export const useCreateDestination = () => {
   return useCrudMutation<Destination, DestinationRequest>({
     mutationFn: (request) => apiClient.post("/admin/destinations", request),
@@ -76,10 +148,13 @@ export const useCreateDestination = () => {
   });
 };
 
-export const useUpdateDestination = (uuid: string | null) => {
-  return useCrudMutation<Destination, DestinationRequest>({
+export const useUpdateDestination = () => {
+  return useCrudMutation<
+    Destination,
+    { uuid: string; data: DestinationRequest }
+  >({
     mutationFn: (request) =>
-      apiClient.put(`/admin/destinations/${uuid}`, request),
+      apiClient.put(`/admin/destinations/${request.uuid}`, request.data),
     successMessage: "Đã sửa đổi Điểm Đến thành công!",
     queryKeyToInvalidate: DESTINATION_QUERY_KEY,
   });

@@ -16,14 +16,12 @@ import java.util.Locale;
 @Configuration
 public class LocaleConfig {
 
-    /**
-     * Default Vietnamese; client may override with {@code Accept-Language: en} (or {@code en-US}).
-     */
+
     @Bean
     public LocaleResolver localeResolver() {
         AcceptHeaderLocaleResolver resolver = new AcceptHeaderLocaleResolver();
-        resolver.setDefaultLocale(new Locale("vi"));
-        resolver.setSupportedLocales(List.of(new Locale("vi"), Locale.ENGLISH));
+        resolver.setDefaultLocale(Locale.of("vi"));
+        resolver.setSupportedLocales(List.of(Locale.of("vi"), Locale.ENGLISH));
         return resolver;
     }
 
@@ -38,10 +36,7 @@ public class LocaleConfig {
         return source;
     }
 
-    /**
-     * Aligns Bean Validation ({@code @NotBlank}, {@code @Email}, …) with the same {@link MessageSource}
-     * as REST i18n (e.g. {@code message = "{validation.email.NotBlank}"} on constraints).
-     */
+
     @Bean
     @Primary
     public LocalValidatorFactoryBean localValidatorFactoryBean(MessageSource messageSource) {

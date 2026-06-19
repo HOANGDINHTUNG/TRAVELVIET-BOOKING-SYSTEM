@@ -29,6 +29,9 @@ public class TourItineraryDay extends AuditableEntity {
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
+    @Column(name = "day_image_url", columnDefinition = "TEXT")
+    private String dayImageUrl;
+
     @Column(name = "overnight_destination_id")
     private Long overnightDestinationId;
 }

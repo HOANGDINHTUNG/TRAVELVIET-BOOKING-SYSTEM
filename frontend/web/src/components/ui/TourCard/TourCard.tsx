@@ -1,88 +1,91 @@
-import { Link } from 'react-router-dom'
-import { useTranslation } from 'react-i18next'
-import { Clock, MapPin, PlayCircle } from 'lucide-react'
+import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { Clock, MapPin, PlayCircle } from "lucide-react";
 
-import { cn } from '@/lib/utils'
-import { showInfo } from '@/lib/toast'
-import { TruncatedTextTooltip } from '@/components/ui/TruncatedTextTooltip'
-import { TravelOfferCardFrame } from '@/components/ui/TravelOfferCard'
-import { useDisplayMoney } from '@/hooks/useDisplayMoney'
+import { cn } from "@/lib/utils";
+import { showInfo } from "@/lib/toast";
+import { TruncatedTextTooltip } from "@/components/ui/TruncatedTextTooltip";
+import { TravelOfferCardFrame } from "@/components/ui/TravelOfferCard";
+import { useDisplayMoney } from "@/hooks/useDisplayMoney";
 
-import './TourCard.css'
+import "./TourCard.css";
 
 /**
  * 4 mức "savingTier" — map từ chính sách marketing.
  * Khi không truyền, badge top-left sẽ ẩn.
  */
 export type TourCardSavingTier =
-  | 'gia_tot'
-  | 'tiet_kiem'
-  | 'tieu_chuan'
-  | 'cao_cap'
-  | 'hang_sang'
+  | "gia_tot"
+  | "tiet_kiem"
+  | "tieu_chuan"
+  | "cao_cap"
+  | "hang_sang";
 
 export type TourCardProps = {
-  title: string
-  detailPath: string
-  imageUrl?: string | null
-  location: string
-  duration: string
-  price: number
-  savingTier?: TourCardSavingTier
+  title: string;
+  detailPath: string;
+  imageUrl?: string | null;
+  location: string;
+  duration: string;
+  price: number;
+  savingTier?: TourCardSavingTier;
   /** Thêm pill nhỏ bên dưới badge saving (VD: loại tour, tag) — tối đa ~2 dòng */
-  cornerLabels?: string[]
+  cornerLabels?: string[];
   /**
    * string: hiển thị ảnh logo; undefined: dùng fallback brand mark; null: ẩn hoàn toàn phần brand mark/logo.
    */
-  brandLogoUrl?: string | null
-  priorityImage?: boolean
-  onQuickView?: () => void
-  className?: string
-}
+  brandLogoUrl?: string | null;
+  priorityImage?: boolean;
+  nextDepartureDate?: string; // [NEW] Added for departure date
+  availableSeats?: number;
+  onQuickView?: () => void;
+  className?: string;
+  linkState?: Record<string, unknown> | null;
+};
 
 type SavingTierStyle = {
-  bg: string
-  text: string
-  ring?: string
-}
+  bg: string;
+  text: string;
+  ring?: string;
+};
 
 const SAVING_TIER_STYLES: Record<TourCardSavingTier, SavingTierStyle> = {
   gia_tot: {
-    bg: 'rgba(254, 240, 138, 0.96)',
-    text: '#854D0E',
-    ring: 'rgba(217, 119, 6, 0.28)',
+    bg: "rgba(254, 240, 138, 0.96)",
+    text: "#854D0E",
+    ring: "rgba(217, 119, 6, 0.28)",
   },
   tiet_kiem: {
-    bg: 'rgba(168, 132, 244, 0.18)',
-    text: '#1B1B4D',
-    ring: 'rgba(168, 132, 244, 0.32)',
+    bg: "rgba(168, 132, 244, 0.18)",
+    text: "#1B1B4D",
+    ring: "rgba(168, 132, 244, 0.32)",
   },
   tieu_chuan: {
-    bg: 'rgba(244, 246, 251, 0.95)',
-    text: '#1B1B4D',
-    ring: 'rgba(15, 31, 61, 0.10)',
+    bg: "rgba(244, 246, 251, 0.95)",
+    text: "#1B1B4D",
+    ring: "rgba(15, 31, 61, 0.10)",
   },
   cao_cap: {
-    bg: 'rgba(255, 222, 145, 0.92)',
-    text: '#7A4A0F',
-    ring: 'rgba(204, 134, 26, 0.32)',
+    bg: "rgba(255, 222, 145, 0.92)",
+    text: "#7A4A0F",
+    ring: "rgba(204, 134, 26, 0.32)",
   },
   hang_sang: {
-    bg: '#0F1F3D',
-    text: '#FFFFFF',
-    ring: 'rgba(255, 255, 255, 0.22)',
+    bg: "#0F1F3D",
+    text: "#FFFFFF",
+    ring: "rgba(255, 255, 255, 0.22)",
   },
-}
+};
 
 function normalizeOverlayText(value: string): string {
   return value
-    .replace(/[\u200B-\u200D\u2060\uFEFF]/g, '')
-    .replace(/\s+/g, ' ')
-    .trim()
+    .replace(/[\u200B-\u200D\u2060\uFEFF]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function hasVisibleLabelContent(value: string): boolean {
-  return value.length > 0 && /[\p{L}\p{N}]/u.test(value)
+  return value.length > 0 && /[\p{L}\p{N}]/u.test(value);
 }
 
 /**
@@ -97,58 +100,69 @@ export function TourCard({
   price,
   savingTier,
   cornerLabels,
-  brandLogoUrl = '/icons.svg',
+  brandLogoUrl = "/icons.svg",
   priorityImage = false,
+  nextDepartureDate,
+  availableSeats,
   onQuickView,
   className,
+  linkState,
 }: TourCardProps) {
-  const { t } = useTranslation('translation')
-  const priceLabel = useDisplayMoney(price > 0 ? price : null)
-  const ariaLabel = t('tourCard.ariaLabel', { title, price: priceLabel })
-  const badgeLabelRaw = savingTier ? t(`tourCard.savingTier.${savingTier}`) : ''
+  const { t } = useTranslation("translation");
+  const priceLabel = useDisplayMoney(price > 0 ? price : null);
+  const ariaLabel = t("tourCard.ariaLabel", { title, price: priceLabel });
+  const badgeLabelRaw = savingTier
+    ? t(`tourCard.savingTier.${savingTier}`)
+    : "";
   const badgeLabel =
-    typeof badgeLabelRaw === 'string' ? normalizeOverlayText(badgeLabelRaw) : ''
+    typeof badgeLabelRaw === "string"
+      ? normalizeOverlayText(badgeLabelRaw)
+      : "";
   const isBadgeLabelValid =
     hasVisibleLabelContent(badgeLabel) &&
-    !badgeLabel.startsWith('tourCard.savingTier.')
-  const badgeStyle = savingTier ? SAVING_TIER_STYLES[savingTier] : null
-  const showBadge = Boolean(savingTier && isBadgeLabelValid && badgeStyle)
+    !badgeLabel.startsWith("tourCard.savingTier.");
+  const badgeStyle = savingTier ? SAVING_TIER_STYLES[savingTier] : null;
+  const showBadge = Boolean(savingTier && isBadgeLabelValid && badgeStyle);
 
   const handleQuickView = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault()
-    event.stopPropagation()
+    event.preventDefault();
+    event.stopPropagation();
     if (onQuickView) {
-      onQuickView()
-      return
+      onQuickView();
+      return;
     }
-    showInfo('tourCard.quickViewComingSoon')
-  }
+    showInfo("tourCard.quickViewComingSoon");
+  };
 
   const extraLabels = (cornerLabels ?? [])
     .map((s) => normalizeOverlayText(s))
     .filter((s) => hasVisibleLabelContent(s) && s.length >= 2)
-    .slice(0, 3)
+    .slice(0, 3);
 
   const quickViewButton = (
     <button
       type="button"
       onClick={handleQuickView}
       className={cn(
-        'absolute right-0 z-[11] inline-flex items-center gap-1 rounded-full',
-        'bottom-[calc(100%+10px)]',
-        'px-2 py-1 text-[11px] font-bold leading-none tracking-tight',
-        'text-[#E8C547]',
-        'bg-[rgba(26,26,26,0.78)] shadow-[0_2px_8px_rgba(0,0,0,0.35)]',
-        'ring-1 ring-white/10 backdrop-blur-[2px]',
-        'transition-[transform,background-color] duration-200 ease-out',
-        'motion-safe:hover:bg-[rgba(26,26,26,0.9)] motion-safe:active:scale-[0.98]',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E8C547] focus-visible:ring-offset-2 focus-visible:ring-offset-transparent',
+        "absolute right-0 z-[11] inline-flex items-center gap-1 rounded-full",
+        "bottom-[calc(100%+10px)]",
+        "px-2 py-1 text-[11px] font-bold leading-none tracking-tight",
+        "text-[#E8C547]",
+        "bg-[rgba(26,26,26,0.78)] shadow-[0_2px_8px_rgba(0,0,0,0.35)]",
+        "ring-1 ring-white/10 backdrop-blur-[2px]",
+        "transition-[transform,background-color] duration-200 ease-out",
+        "motion-safe:hover:bg-[rgba(26,26,26,0.9)] motion-safe:active:scale-[0.98]",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E8C547] focus-visible:ring-offset-2 focus-visible:ring-offset-transparent",
       )}
     >
-      <PlayCircle className="h-3.5 w-3.5 shrink-0" strokeWidth={2.25} aria-hidden />
-      <span className="pr-0.5">{t('tourCard.quickView')}</span>
+      <PlayCircle
+        className="h-3.5 w-3.5 shrink-0"
+        strokeWidth={2.25}
+        aria-hidden
+      />
+      <span className="pr-0.5">{t("tourCard.quickView")}</span>
     </button>
-  )
+  );
 
   const topOverlay =
     showBadge || extraLabels.length > 0 ? (
@@ -185,7 +199,7 @@ export function TourCard({
           </div>
         ) : null} */}
       </div>
-    ) : null
+    ) : null;
 
   return (
     <TravelOfferCardFrame
@@ -196,11 +210,13 @@ export function TourCard({
       widthMode="fixed"
       topOverlay={topOverlay}
       panelAction={quickViewButton}
-      priceLabel={t('tourCard.priceFrom')}
+      priceLabel={t("tourCard.priceFrom")}
       priceValue={priceLabel}
       ctaVariant="blue"
       cta={
-        <Link to={detailPath}>{t('tourCard.viewDetail')}</Link>
+        <Link to={detailPath} state={linkState}>
+          {t("tourCard.viewDetail")}
+        </Link>
       }
     >
       <div className="flex items-start gap-2.5">
@@ -218,7 +234,7 @@ export function TourCard({
             aria-hidden
             className="mt-px inline-flex h-[26px] w-[26px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-[linear-gradient(135deg,#D4A84B_0%,#9A6B2E_100%)] text-[10px] font-bold text-white shadow-[0_2px_5px_rgba(154,107,46,0.35)] ring-1 ring-[#E8C878]/50"
           >
-            {t('tourCard.brandMark')}
+            {t("tourCard.brandMark")}
           </span>
         )}
         <TruncatedTextTooltip
@@ -254,7 +270,33 @@ export function TourCard({
         </span>
       </div>
 
+      {nextDepartureDate != null || availableSeats != null ? (
+        <div className="mt-1.5 flex items-center gap-1.5 text-[12px] font-semibold">
+          {nextDepartureDate && (
+            <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-500">
+              <Clock className="h-[13px] w-[13px]" aria-hidden />
+              <span>Khởi hành: {nextDepartureDate}</span>
+            </div>
+          )}
+          {nextDepartureDate && availableSeats != null && (
+            <span className="text-muted-foreground mr-1 ml-1">•</span>
+          )}
+          {availableSeats != null && (
+            <div
+              className={cn(
+                "flex items-center gap-1.5",
+                availableSeats < 5
+                  ? "text-red-500 dark:text-red-400"
+                  : "text-emerald-600 dark:text-emerald-500",
+              )}
+            >
+              <span>Còn {availableSeats} chỗ</span>
+            </div>
+          )}
+        </div>
+      ) : null}
+
       <div className="mt-3 h-px bg-border" aria-hidden />
     </TravelOfferCardFrame>
-  )
+  );
 }

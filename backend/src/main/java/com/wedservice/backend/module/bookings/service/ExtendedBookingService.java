@@ -20,7 +20,7 @@ import com.wedservice.backend.module.commerce.entity.ComboPackage;
 import com.wedservice.backend.module.commerce.repository.ComboPackageRepository;
 import com.wedservice.backend.module.flights.entity.FlightClass;
 import com.wedservice.backend.module.flights.repository.FlightClassRepository;
-import com.wedservice.backend.module.hotels.entity.HotelRoomInventory;
+// import com.wedservice.backend.module.hotels.entity.HotelRoomInventory;
 import com.wedservice.backend.module.hotels.entity.HotelRoomType;
 import com.wedservice.backend.module.hotels.repository.HotelRoomInventoryRepository;
 import com.wedservice.backend.module.hotels.repository.HotelRoomTypeRepository;
@@ -220,8 +220,8 @@ public class ExtendedBookingService {
             throw BadRequestException.i18n("api.error.hotel.roomTypeMismatch");
         }
         for (LocalDate d = checkinDate; d.isBefore(checkoutDate); d = d.plusDays(1)) {
-            HotelRoomInventory inventory = hotelRoomInventoryRepository.findByRoomTypeIdAndStayDate(roomType.getId(), d)
-                    .orElseThrow(() -> BadRequestException.i18n("api.error.hotel.inventoryMissing"));
+            // HotelRoomInventory inventory = hotelRoomInventoryRepository.findByRoomTypeIdAndStayDate(roomType.getId(), d)
+            //         .orElseThrow(() -> BadRequestException.i18n("api.error.hotel.inventoryMissing"));
                     
             int updated = hotelRoomInventoryRepository.decrementInventory(roomType.getId(), d, request.getRooms());
             if (updated == 0) {

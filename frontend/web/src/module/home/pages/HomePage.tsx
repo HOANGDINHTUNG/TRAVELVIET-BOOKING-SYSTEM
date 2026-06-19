@@ -16,10 +16,7 @@ import { LatestPromotionsSection } from "../components/Promotions/LatestPromotio
 import { TourHotSection } from "../components/TourHotSection/TourHotSection";
 import { HomeTourRows } from "../components/HomeTourRows/HomeTourRows";
 import { HomeLowerSections } from "../components/HomeLowerSections/HomeLowerSections";
-import {
-  fetchHomePublicData,
-  selectHome,
-} from "../store/homeSlice";
+import { fetchHomePublicData, selectHome } from "../store/homeSlice";
 import { LazyWhenVisible } from "../../../components/common/ux/LazyWhenVisible";
 
 function HomePage() {
@@ -28,8 +25,7 @@ function HomePage() {
   const {
     destinations,
     tours,
-    toursDomesticBeach,
-    toursInternationalHot,
+    dynamicRows,
     toursLastMinuteDeals,
     loading,
     error,
@@ -57,8 +53,7 @@ function HomePage() {
     if (
       destinations.length > 0 ||
       tours.length > 0 ||
-      toursDomesticBeach.length > 0 ||
-      toursInternationalHot.length > 0 ||
+      dynamicRows.length > 0 ||
       toursLastMinuteDeals.length > 0 ||
       error
     ) {
@@ -79,8 +74,7 @@ function HomePage() {
     error,
     loading,
     tours.length,
-    toursDomesticBeach.length,
-    toursInternationalHot.length,
+    dynamicRows.length,
     toursLastMinuteDeals.length,
   ]);
 
@@ -155,7 +149,10 @@ function HomePage() {
       return {
         place,
         title: tour.title,
-        subtitle: tour.category || tour.location || t("homePage.bannerSubtitleFallback"),
+        subtitle:
+          tour.category ||
+          tour.location ||
+          t("homePage.bannerSubtitleFallback"),
         description,
         image: tour.image,
         detailPath,
@@ -163,7 +160,10 @@ function HomePage() {
     });
   }, [heroTours, t]);
 
-  if ((loading && destinations.length === 0 && tours.length === 0) || (error && destinations.length === 0 && tours.length === 0)) {
+  if (
+    (loading && destinations.length === 0 && tours.length === 0) ||
+    (error && destinations.length === 0 && tours.length === 0)
+  ) {
     return (
       <>
         <HomePageSkeleton />
@@ -192,11 +192,7 @@ function HomePage() {
         tours={tours}
         loading={loading}
       />
-      <HomeTourRows
-        domesticTours={toursDomesticBeach}
-        internationalTours={toursInternationalHot}
-        loading={loading}
-      />
+      <HomeTourRows dynamicRows={dynamicRows} loading={loading} />
       <LazyWhenVisible minHeight={420}>
         <HomeLowerSections destinations={destinations} />
       </LazyWhenVisible>

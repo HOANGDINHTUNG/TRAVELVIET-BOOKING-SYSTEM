@@ -33,7 +33,6 @@ import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -236,23 +235,23 @@ public class DestinationQueryServiceImpl implements DestinationQueryService {
                 .build();
     }
 
-    private Long countActiveTours(Destination destination) {
-        try {
-            String pathPrefix = StringUtils.hasText(destination.getPath())
-                    ? destination.getPath()
-                    : "/" + destination.getId() + "/";
-            if (!pathPrefix.endsWith("/")) {
-                pathPrefix = pathPrefix + "/";
-            }
-            return tourRepository.countActiveToursInDestinationSubtree(
-                    destination.getId(),
-                    pathPrefix,
-                    TourStatus.ACTIVE
-            );
-        } catch (Exception e) {
-            return 0L;
-        }
-    }
+    // private Long countActiveTours(Destination destination) {
+    //     try {
+    //         String pathPrefix = StringUtils.hasText(destination.getPath())
+    //                 ? destination.getPath()
+    //                 : "/" + destination.getId() + "/";
+    //         if (!pathPrefix.endsWith("/")) {
+    //             pathPrefix = pathPrefix + "/";
+    //         }
+    //         return tourRepository.countActiveToursInDestinationSubtree(
+    //                 destination.getId(),
+    //                 pathPrefix,
+    //                 TourStatus.ACTIVE
+    //         );
+    //     } catch (Exception e) {
+    //         return 0L;
+    //     }
+    // }
 
     private DestinationPublicDetailResponse toPublicDetailResponse(
             Destination destination,

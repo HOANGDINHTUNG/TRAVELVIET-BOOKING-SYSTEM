@@ -170,6 +170,7 @@ function TourPublicDetailPage() {
             scheduleSelector={scheduleSelector}
             selectedDate={selectedDateStr}
             selectedScheduleCode={selectedSchedule?.scheduleCode || null}
+            selectedRemainingSeats={selectedSchedule?.remainingSeats}
             onClearDate={() => setSelectedScheduleId(null)}
             onCheckout={handleCheckout}
           />

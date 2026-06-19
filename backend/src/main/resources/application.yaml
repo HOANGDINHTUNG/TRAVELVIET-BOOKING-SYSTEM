@@ -10,8 +10,8 @@ app:
       prefer-public: false
       probe-timeout-ms: 8000
       # Hai URL: public | local — giữ default cho 2 trường hợp
-      public-base-url: ${APP_API_PUBLIC_BASE_URL:https://travelviet-booking-system.onrender.com/api/v1}
-      local-base-url: ${APP_API_LOCAL_BASE_URL:http://localhost:8088/api/v1}
+      public-base-url: ${APP_API_PUBLIC_BASE_URL}
+      local-base-url: ${APP_API_LOCAL_BASE_URL}
       health-path: /system/health
   cache:
     # mode: caffeine | redis | hybrid (use profile k8s for hybrid + Redis)
@@ -64,8 +64,8 @@ app:
 
 minio:
   url: http://127.0.0.1:9000
-  accessKey: minioadmin
-  secretKey: minioadmin
+  accessKey: ${MINIO_ACCESS_KEY}
+  secretKey: ${MINIO_SECRET_KEY}
   bucketName: tour-images
 
 weatherapi:
@@ -84,9 +84,9 @@ gemini:
 spring:
   data:
     redis:
-      host: ${REDIS_HOST:127.0.0.1}
-      port: ${REDIS_PORT:6379}
-      password: ${REDIS_PASSWORD:}
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      password: ${REDIS_PASSWORD}
   datasource:
     hikari:
       maximum-pool-size: 10

@@ -47,7 +47,30 @@ VALUES
     ('TOUR_LINE_CAO_CAP', 'Cao cấp', 'tour_line', 'Tour premium hoặc mức giá cao.'),
     ('TOUR_LINE_TIEU_CHUAN', 'Tiêu chuẩn', 'tour_line', 'Tour cân bằng giữa trải nghiệm và ngân sách.'),
     ('TOUR_LINE_TIET_KIEM', 'Tiết kiệm', 'tour_line', 'Tour tối ưu chi phí hoặc có giá niêm yết cao hơn giá bán.'),
-    ('TOUR_LINE_GIA_TOT', 'Giá tốt', 'tour_line', 'Tour có mức giá tốt cho đa số người dùng.');
+    ('TOUR_LINE_GIA_TOT', 'Giá tốt', 'tour_line', 'Tour có mức giá tốt cho đa số người dùng.'),
+    ('HOME_BEACH_VN', 'Kệ trang chủ: Biển đảo VN', 'home_row', ''),
+    ('HOME_FLASH_SALE', 'Kệ trang chủ: Giờ chót', 'home_row', ''),
+    ('HOME_HOT_INTL', 'Kệ trang chủ: Quốc tế', 'home_row', ''),
+    ('MAO_HIEM', 'Khám Phá Mạo Hiểm', 'category', 'Du lịch cảm giác mạnh và thử thách'),
+    ('SANG_TRONG', 'Trải Nghiệm Sang Trọng', 'category', 'Kỳ nghỉ dưỡng xa hoa đẳng cấp'),
+    ('GIA_DINH', 'Du Lịch Gia Đình', 'category', 'Phù hợp cho mọi độ tuổi trong gia đình'),
+    ('SINH_THAI', 'Du Lịch Sinh Thái', 'category', 'Hoà mình vào thiên nhiên hoang sơ'),
+    ('NGHI_DUONG', 'Nghỉ Dưỡng Thư Giãn', 'category', 'Nạp năng lượng và chữa lành'),
+    ('VAN_HOA', 'Văn Hóa Bản Địa', 'category', 'Trải nghiệm văn hoá và con người địa phương'),
+    ('AM_THUC', 'Khám Phá Ẩm Thực', 'category', 'Hành trình di sản ẩm thực vùng miền'),
+    ('LICH_SU', 'Hành Trình Lịch Sử', 'category', 'Tìm hiểu về các cột mốc lịch sử'),
+    ('TAM_LINH', 'Hành Hương Tâm Linh', 'category', 'Du lịch đền chùa và các địa điểm tâm linh'),
+    ('CHUA_LANH', 'Du Lịch Chữa Lành', 'category', 'Wellness retreat, thiền và yoga'),
+    ('GIAI_TRI', 'Vui Chơi Sôi Động', 'category', 'Công viên giải trí và hoạt động nhóm'),
+    ('CAP_DOI', 'Lãng Mạn Cặp Đôi', 'category', 'Phù hợp cho tuần trăng mật và hẹn hò'),
+    ('CHECKIN', 'Góc Nhìn Check-in', 'category', 'Địa điểm sống ảo cực chill'),
+    ('WILDLIFE', 'Động Vật Hoang Dã', 'category', 'Thám hiểm thế giới hoang dã tự nhiên'),
+    ('THE_THAO_NUOC', 'Thể Thao Dưới Nước', 'category', 'Lặn ngắm san hô, chèo thuyền kayak'),
+    ('NIGHTLIFE', 'Vui Chơi Về Đêm', 'category', 'Cuộc sống sôi động khi màn đêm buông xuống'),
+    ('LE_HOI', 'Nhịp Điệu Lễ Hội', 'category', 'Tham gia các lễ hội lớn trong năm'),
+    ('TREKKING', 'Trải Nghiệm Trekking', 'category', 'Băng rừng vượt suối chinh phục đỉnh cao'),
+    ('CAMPING', 'Cắm Trại & Lửa Trại', 'category', 'Bữa tối BBQ và cắm trại ngoài trời'),
+    ('VISA_FREE', 'Du Lịch Miễn Visa', 'category', 'Thoải mái xách vali lên và đi');
 
 
 INSERT IGNORE INTO products (

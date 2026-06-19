@@ -17,7 +17,7 @@ import com.wedservice.backend.module.destinations.dto.response.DestinationTransl
 import com.wedservice.backend.module.destinations.entity.DestinationTranslation;
 import com.wedservice.backend.module.destinations.repository.DestinationRepository;
 import com.wedservice.backend.module.destinations.repository.DestinationTranslationRepository;
-import com.wedservice.backend.module.destinations.service.DestinationHierarchyService;
+// import com.wedservice.backend.module.destinations.service.DestinationHierarchyService;
 import com.wedservice.backend.module.destinations.service.command.AdminDestinationCommandService;
 import com.wedservice.backend.module.destinations.service.query.AdminDestinationQueryService;
 import com.wedservice.backend.module.destinations.validator.DestinationValidator;
