@@ -136,6 +136,8 @@ public class SecurityConfig {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider(customUserDetailsService);
         // Nơi để cấu hình PasswordEncoder (cái dùng để mã hóa mật khẩu)
         provider.setPasswordEncoder(passwordEncoder());
+        // Phải bật cờ này thì Spring Security mới ném UsernameNotFoundException thay vì gom vào BadCredentialsException
+        provider.setHideUserNotFoundExceptions(false);
         // Trả cái bộ máy xác thực đó cho Spring quản lý.
         return provider;
     }

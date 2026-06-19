@@ -26,8 +26,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -46,7 +49,18 @@ public class FlightService {
                 predicate,
                 PageRequest.of(request.getPage(), request.getSize(), Sort.by(Sort.Direction.ASC, "departureTimeLocal"))
         );
-        List<FlightResponse> content = page.getContent().stream().map(this::enrich).toList();
+        
+        List<Flight> flights = page.getContent();
+        List<Long> flightIds = flights.stream().map(Flight::getId).toList();
+        
+        List<FlightClass> allClasses = flightIds.isEmpty() ? Collections.emptyList() : flightClassRepository.findByFlightIdIn(flightIds);
+        Map<Long, List<FlightClass>> classMap = allClasses.stream()
+                .collect(Collectors.groupingBy(fc -> fc.getFlight().getId()));
+
+        List<FlightResponse> content = flights.stream()
+                .map(f -> enrichWithClasses(f, classMap.getOrDefault(f.getId(), Collections.emptyList())))
+                .toList();
+
         return PageResponse.<FlightResponse>builder()
                 .content(content)
                 .page(page.getNumber())
@@ -91,8 +105,12 @@ public class FlightService {
      * Gia toi thieu va seat availability duoc dung cho man hinh search tong quan.
      */
     private FlightResponse enrich(Flight flight) {
-        FlightResponse base = flightMapper.toResponse(flight);
         List<FlightClass> classes = flightClassRepository.findByFlightId(flight.getId());
+        return enrichWithClasses(flight, classes);
+    }
+    
+    private FlightResponse enrichWithClasses(Flight flight, List<FlightClass> classes) {
+        FlightResponse base = flightMapper.toResponse(flight);
         BigDecimal minPrice = classes.stream()
                 .map(fc -> fc.getBasePrice().add(fc.getTaxAmount()))
                 .min(Comparator.naturalOrder())

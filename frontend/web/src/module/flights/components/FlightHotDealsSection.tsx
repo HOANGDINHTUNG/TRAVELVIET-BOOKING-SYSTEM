@@ -135,13 +135,54 @@ function FlightDealCardSkeleton() {
   );
 }
 
-function FlightDealCard({ flight }: { flight: FlightResponse }) {
+const AIRLINE_LOGOS: Record<string, string> = {
+  VJ: "https://res.ivivu.com/flight/inbound/images/compact/VietJetAir.png",
+  BL: "https://res.ivivu.com/flight/inbound/images/compact/BL.gif",
+  VN: "https://res.ivivu.com/flight/inbound/images/compact/VietnamAirlines.png",
+  QH: "https://res.ivivu.com/flight/inbound/images/compact/BambooAirways.png",
+  VU: "https://res.ivivu.com/flight/inbound/images/compact/VietravelAirlines.png",
+  MH: "https://res.ivivu.com/flight/inbound/images/compact/MH.png",
+  WE: "https://res.ivivu.com/flight/inbound/images/compact/WE.gif",
+  CZ: "https://res.ivivu.com/flight/inbound/images/compact/CZ.gif",
+};
+
+function FlightDealCard({
+  flight,
+  tripType,
+}: {
+  flight: FlightResponse;
+  tripType?: "round-trip" | "one-way";
+}) {
   const { t } = useTranslation("translation", { keyPrefix: "flightsPage" });
 
   // Format date
-  const dateStr = flight.departureTimeLocal
-    ? new Date(flight.departureTimeLocal).toLocaleDateString("vi-VN")
-    : "15/06/2026";
+  let dateStr = "15/06/2026";
+  if (flight.departureTimeLocal) {
+    const depDate = new Date(flight.departureTimeLocal);
+    dateStr = depDate.toLocaleDateString("vi-VN", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+
+    if (tripType === "round-trip") {
+      const returnDate = new Date(depDate);
+      returnDate.setDate(returnDate.getDate() + 3);
+      const returnDateStr = returnDate.toLocaleDateString("vi-VN", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      });
+      dateStr = `${dateStr} - ${returnDateStr}`;
+    }
+  }
+
+  const displayPrice =
+    tripType === "round-trip" ? flight.minPrice * 2 : flight.minPrice;
+
+  const logoSrc =
+    AIRLINE_LOGOS[flight.airlineCode] ||
+    `https://ui-avatars.com/api/?name=${flight.airlineCode}&background=random&color=fff&rounded=true&font-size=0.4`;
 
   return (
     <div className="fh-card">
@@ -156,16 +197,15 @@ function FlightDealCard({ flight }: { flight: FlightResponse }) {
         </div>
 
         <div className="fh-card__middle">
-          {/* Logo mock - replace with actual mapped logos if possible */}
           <img
-            src={`https://ui-avatars.com/api/?name=${flight.airlineCode}&background=random&color=fff&rounded=true&font-size=0.4`}
+            src={logoSrc}
             alt={flight.airlineName}
             className="fh-card__logo"
           />
           <span className="fh-card__date">{dateStr}</span>
         </div>
 
-        <div className="fh-card__location" style={{ textAlign: "right" }}>
+        <div className="fh-card__location fh-card__location--right">
           <span className="fh-card__location-code">
             {flight.destinationAirportCode}
           </span>
@@ -179,7 +219,7 @@ function FlightDealCard({ flight }: { flight: FlightResponse }) {
         <div className="fh-card__price">
           {t("dealSections.priceFrom")}{" "}
           <span className="fh-card__price-val">
-            {new Intl.NumberFormat("vi-VN").format(flight.minPrice)}₫
+            {new Intl.NumberFormat("vi-VN").format(displayPrice)}₫
           </span>
         </div>
 
@@ -194,20 +234,80 @@ function FlightDealCard({ flight }: { flight: FlightResponse }) {
   );
 }
 
+const FILTER_MAP: Record<string, string[]> = {
+  "Đà Nẵng": ["DAD"],
+  "Đà Lạt": ["DLI"],
+  "Hà Nội": ["HAN"],
+  "TP HCM": ["SGN"],
+  "Cần Thơ": ["VCA"],
+  "Nha Trang": ["CXR"],
+  "Phú Quốc": ["PQC"],
+  Bangkok: ["BKK", "DMK"],
+  Hayden: ["HDN"],
+  Washington: ["IAD", "DCA", "BWI"],
+  Seoul: ["ICN", "GMP"],
+  "Thượng Hải": ["PVG", "SHA"],
+  Singapore: ["SIN"],
+  "Đài Bắc": ["TPE", "TSA"],
+  Tokyo: ["HND", "NRT"],
+  Paris: ["CDG", "ORY"],
+  London: ["LHR", "LGW"],
+};
+
 function FlightCarouselSection({
   title,
   filters,
-  flights,
-  loading,
+  tripType,
 }: {
   title: string;
   filters: string[];
-  flights: FlightResponse[];
-  loading: boolean;
+  tripType: "round-trip" | "one-way";
 }) {
   const { t } = useTranslation("translation", { keyPrefix: "flightsPage" });
   const [activeFilter, setActiveFilter] = useState(filters[0]);
+  const [cache, setCache] = useState<Record<string, FlightResponse[]>>({});
+  const [loading, setLoading] = useState(false);
   const carouselRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    let active = true;
+    if (cache[activeFilter]) {
+      return;
+    }
+    const loadFlightsByFilter = async () => {
+      setLoading(true);
+      try {
+        const targetCodes = FILTER_MAP[activeFilter] || [];
+        // Support fallback if mapping doesn't exist
+        if (targetCodes.length === 0) {
+          const res = await fetchPublicFlights({ size: 30 });
+          if (active) {
+            setCache((prev) => ({ ...prev, [activeFilter]: res.slice(0, 30) }));
+          }
+          return;
+        }
+
+        // Fetch each destination code in parallel map
+        const fetchPromises = targetCodes.map((code) =>
+          fetchPublicFlights({ destinationCode: code, size: 30 }),
+        );
+        const results = await Promise.all(fetchPromises);
+        const combined = results.flat().slice(0, 30);
+        if (active) {
+          setCache((prev) => ({ ...prev, [activeFilter]: combined }));
+        }
+      } catch (e) {
+        console.error(e);
+      } finally {
+        if (active) setLoading(false);
+      }
+    };
+
+    loadFlightsByFilter();
+    return () => {
+      active = false;
+    };
+  }, [activeFilter, cache]);
 
   const scrollCarousel = (dir: "left" | "right") => {
     if (carouselRef.current) {
@@ -219,26 +319,18 @@ function FlightCarouselSection({
     }
   };
 
-  const displayFlights = useMemo(() => {
-    return flights
-      .filter(
-        (f) =>
-          (f.destinationAirportName &&
-            f.destinationAirportName.includes(activeFilter)) ||
-          activeFilter === "Tất cả" ||
-          true,
-      )
-      .slice(0, 30); // show a large chunk!
-  }, [flights, activeFilter]);
+  const displayFlights = cache[activeFilter] || [];
 
-  if (!loading && flights.length === 0) return null;
+  if (!loading && displayFlights.length === 0) return null;
 
   return (
     <div className="flight-hot-deals__section">
       <div className="flight-hot-deals__header">
         <h2 className="flight-hot-deals__title">{title}</h2>
         <span className="flight-hot-deals__badge">
-          {t("dealSections.oneWayBadge")}
+          {tripType === "round-trip"
+            ? t("dealSections.roundTripBadge")
+            : t("dealSections.oneWayBadge")}
         </span>
       </div>
 
@@ -269,7 +361,7 @@ function FlightCarouselSection({
                 <FlightDealCardSkeleton key={i} />
               ))
             : displayFlights.map((f) => (
-                <FlightDealCard key={f.id} flight={f} />
+                <FlightDealCard key={f.id} flight={f} tripType={tripType} />
               ))}
         </div>
 
@@ -285,31 +377,15 @@ function FlightCarouselSection({
   );
 }
 
-export function FlightHotDealsSection() {
+export function FlightHotDealsSection({
+  tripType,
+}: {
+  tripType: "round-trip" | "one-way";
+}) {
   const { t } = useTranslation("translation", { keyPrefix: "flightsPage" });
-  const [flights, setFlights] = useState<FlightResponse[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let active = true;
-    fetchPublicFlights({ size: 100 })
-      .then((res) => {
-        if (active) {
-          setFlights(res);
-        }
-      })
-      .catch(console.error)
-      .finally(() => {
-        if (active) setLoading(false);
-      });
-    return () => {
-      active = false;
-    };
-  }, []);
 
   const domesticFilters = [
     "Đà Nẵng",
-    "Đà Lạt",
     "Hà Nội",
     "TP HCM",
     "Cần Thơ",
@@ -318,17 +394,13 @@ export function FlightHotDealsSection() {
   ];
   const intlFilters = [
     "Bangkok",
-    "Hayden",
-    "Washington",
-    "Seoul",
-    "Thượng Hải",
     "Singapore",
+    "Seoul",
+    "Tokyo",
     "Đài Bắc",
+    "Paris",
+    "London",
   ];
-
-  // Mock split
-  const domesticFlights = flights.slice(0, Math.ceil(flights.length / 2));
-  const intlFlights = flights.slice(Math.ceil(flights.length / 2));
 
   return (
     <section className="flight-hot-deals">
@@ -336,14 +408,12 @@ export function FlightHotDealsSection() {
         <FlightCarouselSection
           title={t("dealSections.domesticTitle")}
           filters={domesticFilters}
-          flights={domesticFlights}
-          loading={loading}
+          tripType={tripType}
         />
         <FlightCarouselSection
           title={t("dealSections.internationalTitle")}
           filters={intlFilters}
-          flights={intlFlights}
-          loading={loading}
+          tripType={tripType}
         />
       </div>
     </section>

@@ -3,7 +3,7 @@ import { SafeAreaView, Text, TouchableOpacity, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { loginCopy } from '@/constants/loginCopy';
-import { styles } from '../styles/_login.styles';
+import { styles } from '@/styles/login.styles';
 import { commerceDesk } from '@/theme/commerceDesk';
 import { AppRoutes, asHref } from '@/lib/navigation';
 

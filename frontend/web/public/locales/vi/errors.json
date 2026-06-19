@@ -5,6 +5,8 @@
     "REFRESH_REJECTED": "Máy chủ không chấp nhận làm mới phiên. Vui lòng đăng nhập lại.",
     "REFRESH_FAILED": "Không thể làm mới phiên đăng nhập. Vui lòng thử lại hoặc đăng nhập lại.",
     "NETWORK_ERROR": "Không kết nối được tới máy chủ. Kiểm tra mạng và thử lại.",
-    "HTTP_ERROR": "Yêu cầu không thành công. Vui lòng thử lại sau."
+    "HTTP_ERROR": "Yêu cầu không thành công. Vui lòng thử lại sau.",
+    "USER_NOT_FOUND": "Tài khoản không tồn tại.",
+    "BAD_CREDENTIALS": "Sai mật khẩu đăng nhập. Vui lòng kiểm tra lại."
   }
 }

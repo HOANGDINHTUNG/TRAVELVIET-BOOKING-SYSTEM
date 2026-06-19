@@ -201,7 +201,9 @@ apiClient.interceptors.response.use(
     if (
       !originalRequest ||
       originalRequest._retry ||
-      requestUrl.includes('auth/refresh')
+      requestUrl.includes('auth/refresh') ||
+      requestUrl.includes('auth/login') ||
+      requestUrl.includes('auth/register')
     ) {
       return Promise.reject(ApiClientError.fromAxiosError(error))
     }

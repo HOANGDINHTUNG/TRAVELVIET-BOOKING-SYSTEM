@@ -37,7 +37,6 @@ type PassengerCounts = {
 
 function defaultDepartIso(): string {
   const d = new Date();
-  d.setDate(d.getDate() + 14);
   return d.toISOString().slice(0, 10);
 }
 
@@ -47,12 +46,21 @@ function defaultReturnIso(departIso: string): string {
   return d.toISOString().slice(0, 10);
 }
 
-export function FlightSearchHero() {
+export function FlightSearchHero({
+  tripType,
+  onTripTypeChange,
+}: {
+  tripType: TripType;
+  onTripTypeChange: (val: TripType) => void;
+}) {
   const { t } = useTranslation("translation", { keyPrefix: "flightsPage" });
   const navigate = useNavigate();
   const passengerRef = useRef<HTMLDivElement>(null);
+  const passengerBtnRef = useRef<HTMLButtonElement>(null);
+  const fromInputRef = useRef<HTMLInputElement>(null);
+  const toInputRef = useRef<HTMLInputElement>(null);
+  const datePickerRef = useRef<React.ElementRef<typeof FlightDatePicker>>(null);
 
-  const [tripType, setTripType] = useState<TripType>("round-trip");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [departDate, setDepartDate] = useState(defaultDepartIso);
@@ -60,7 +68,7 @@ export function FlightSearchHero() {
     defaultReturnIso(defaultDepartIso()),
   );
   const [passengers, setPassengers] = useState<PassengerCounts>({
-    adults: 2,
+    adults: 1,
     children: 0,
     infants: 0,
   });
@@ -100,6 +108,16 @@ export function FlightSearchHero() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!from) {
+      fromInputRef.current?.focus();
+      return;
+    }
+    if (!to) {
+      toInputRef.current?.focus();
+      return;
+    }
+
     const payload: FlightSearchParams = {
       fromIata: extractIataFromLabel(from, "SGN"),
       toIata: extractIataFromLabel(to, "HAN"),
@@ -183,7 +201,7 @@ export function FlightSearchHero() {
                   type="radio"
                   name="tripType"
                   checked={tripType === "round-trip"}
-                  onChange={() => setTripType("round-trip")}
+                  onChange={() => onTripTypeChange("round-trip")}
                 />
                 <span className="flight-radio__dot" aria-hidden />
                 <span>{t("search.tripRoundTrip")}</span>
@@ -193,7 +211,7 @@ export function FlightSearchHero() {
                   type="radio"
                   name="tripType"
                   checked={tripType === "one-way"}
-                  onChange={() => setTripType("one-way")}
+                  onChange={() => onTripTypeChange("one-way")}
                 />
                 <span className="flight-radio__dot" aria-hidden />
                 <span>{t("search.tripOneWay")}</span>
@@ -207,6 +225,7 @@ export function FlightSearchHero() {
               <button
                 type="button"
                 className="flight-passengers__trigger"
+                ref={passengerBtnRef}
                 aria-expanded={passengerOpen}
                 aria-haspopup="dialog"
                 onClick={() => setPassengerOpen((o) => !o)}
@@ -310,7 +329,13 @@ export function FlightSearchHero() {
                   label={t("search.fromLabel")}
                   placeholder={t("search.fromPlaceholder")}
                   value={from}
-                  onChange={(v) => setFrom(v)}
+                  inputRef={fromInputRef}
+                  onChange={(v, opt) => {
+                    setFrom(v);
+                    if (opt) {
+                      setTimeout(() => toInputRef.current?.focus(), 50);
+                    }
+                  }}
                   clearAria={t("search.clearField")}
                   listAria={t("search.airportListAria")}
                   excludeValue={to}
@@ -331,7 +356,13 @@ export function FlightSearchHero() {
                   label={t("search.toLabel")}
                   placeholder={t("search.toPlaceholder")}
                   value={to}
-                  onChange={(v) => setTo(v)}
+                  inputRef={toInputRef}
+                  onChange={(v, opt) => {
+                    setTo(v);
+                    if (opt) {
+                      setTimeout(() => datePickerRef.current?.openDepart(), 50);
+                    }
+                  }}
                   clearAria={t("search.clearField")}
                   listAria={t("search.airportListAria")}
                   excludeValue={from}
@@ -340,11 +371,16 @@ export function FlightSearchHero() {
             </div>
 
             <FlightDatePicker
+              ref={datePickerRef}
               tripType={tripType}
               departDate={departDate}
               returnDate={returnDate}
               onDepartChange={setDepartDate}
               onReturnChange={setReturnDate}
+              onComplete={() => {
+                setPassengerOpen(true);
+                setTimeout(() => passengerBtnRef.current?.focus(), 50);
+              }}
             />
 
             <button type="submit" className="flight-search-submit">

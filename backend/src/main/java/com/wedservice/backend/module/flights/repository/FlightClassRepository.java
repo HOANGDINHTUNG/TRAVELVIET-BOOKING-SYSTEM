@@ -10,6 +10,7 @@ import java.util.List;
 
 public interface FlightClassRepository extends JpaRepository<FlightClass, Long> {
     List<FlightClass> findByFlightId(Long flightId);
+    List<FlightClass> findByFlightIdIn(List<Long> flightIds);
 
     @Modifying
     @Query("UPDATE FlightClass f SET f.seatAvailable = f.seatAvailable - :seats WHERE f.id = :flightClassId AND f.seatAvailable >= :seats")

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -7,24 +7,24 @@ import {
   SafeAreaView,
   Alert,
   ActivityIndicator,
-} from 'react-native';
-import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { styles } from '../styles/_login.styles';
-import { getApiBaseUrl } from '@/config/apiBaseUrl';
-import { loginCopy } from '@/constants/loginCopy';
-import { loginWithEmail } from '@/services/authApi';
-import { setAiChatAccessTokenProvider } from '@/services/aiChatApi';
-import { establishSessionAfterLogin } from '@/services/authSession';
-import { clearAuthSession, applyAccessContext } from '@/services/authStorage';
-import { commerceDesk } from '@/theme/commerceDesk';
-import { ApiError } from '@/types/api';
-import { AppRoutes, asHref } from '@/lib/navigation';
+} from "react-native";
+import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { styles } from "@/styles/login.styles";
+import { getApiBaseUrl } from "@/config/apiBaseUrl";
+import { loginCopy } from "@/constants/loginCopy";
+import { loginWithEmail } from "@/services/authApi";
+import { setAiChatAccessTokenProvider } from "@/services/aiChatApi";
+import { establishSessionAfterLogin } from "@/services/authSession";
+import { clearAuthSession, applyAccessContext } from "@/services/authStorage";
+import { commerceDesk } from "@/theme/commerceDesk";
+import { ApiError } from "@/types/api";
+import { AppRoutes, asHref } from "@/lib/navigation";
 
 export default function LoginScreen() {
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -32,16 +32,16 @@ export default function LoginScreen() {
     try {
       const mockAuth = {
         user: {
-          id: 'mock-user-123',
-          email: email.trim() || 'user@travelviet.vn',
-          fullName: 'Trần Rio',
-          displayName: 'Rio',
-          role: 'USER',
-          roles: ['USER'],
+          id: "mock-user-123",
+          email: email.trim() || "user@travelviet.vn",
+          fullName: "Trần Rio",
+          displayName: "Rio",
+          role: "USER",
+          roles: ["USER"],
         },
-        accessToken: 'mock-access-token-xyz',
-        refreshToken: 'mock-refresh-token-xyz',
-        tokenType: 'Bearer',
+        accessToken: "mock-access-token-xyz",
+        refreshToken: "mock-refresh-token-xyz",
+        tokenType: "Bearer",
         expiresIn: 3600,
       };
 
@@ -49,8 +49,8 @@ export default function LoginScreen() {
 
       const mockCtx = {
         user: mockAuth.user,
-        roles: ['USER'],
-        permissions: ['voucher.view', 'promotion.campaign.view'],
+        roles: ["USER"],
+        permissions: ["voucher.view", "promotion.campaign.view"],
         managementRoles: [],
         hasManagementAccess: false,
         isSuperAdmin: false,
@@ -63,13 +63,13 @@ export default function LoginScreen() {
 
       router.replace(asHref(AppRoutes.tabs));
     } catch {
-      Alert.alert('Lỗi', 'Không thể khởi tạo phiên đăng nhập ngoại tuyến.');
+      Alert.alert("Lỗi", "Không thể khởi tạo phiên đăng nhập ngoại tuyến.");
     }
   };
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('Lỗi', 'Vui lòng nhập đầy đủ Email và Mật khẩu!');
+      Alert.alert("Lỗi", "Vui lòng nhập đầy đủ Email và Mật khẩu!");
       return;
     }
 
@@ -85,18 +85,18 @@ export default function LoginScreen() {
       const message =
         err instanceof ApiError
           ? err.message
-          : 'Không thể kết nối máy chủ hoặc thông tin sai. Kiểm tra backend đang chạy.';
-      
+          : "Không thể kết nối máy chủ hoặc thông tin sai. Kiểm tra backend đang chạy.";
+
       Alert.alert(
-        'Đăng nhập thất bại',
+        "Đăng nhập thất bại",
         `${message}\n\nBạn có muốn đăng nhập bằng Chế độ Thử nghiệm (Offline) không?`,
         [
-          { text: 'Hủy', style: 'cancel' },
+          { text: "Hủy", style: "cancel" },
           {
-            text: 'Đăng nhập Offline',
+            text: "Đăng nhập Offline",
             onPress: handleMockLogin,
           },
-        ]
+        ],
       );
     } finally {
       setLoading(false);
@@ -114,7 +114,12 @@ export default function LoginScreen() {
         </Text>
 
         <View style={styles.inputContainer}>
-          <Ionicons name="mail-outline" size={20} color={commerceDesk.textMuted} style={styles.icon} />
+          <Ionicons
+            name="mail-outline"
+            size={20}
+            color={commerceDesk.textMuted}
+            style={styles.icon}
+          />
           <TextInput
             style={styles.input}
             placeholder={loginCopy.emailPlaceholder}
@@ -145,7 +150,7 @@ export default function LoginScreen() {
           />
           <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
             <Ionicons
-              name={showPassword ? 'eye-outline' : 'eye-off-outline'}
+              name={showPassword ? "eye-outline" : "eye-off-outline"}
               size={20}
               color={commerceDesk.textMuted}
             />
@@ -155,7 +160,8 @@ export default function LoginScreen() {
         <TouchableOpacity
           style={styles.loginButton}
           onPress={() => void handleLogin()}
-          disabled={loading}>
+          disabled={loading}
+        >
           {loading ? (
             <ActivityIndicator color="#fff" />
           ) : (
@@ -164,9 +170,10 @@ export default function LoginScreen() {
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={{ marginTop: 16, alignItems: 'center' }}
-          onPress={handleMockLogin}>
-          <Text style={{ color: '#FF702A', fontWeight: '700', fontSize: 14 }}>
+          style={{ marginTop: 16, alignItems: "center" }}
+          onPress={handleMockLogin}
+        >
+          <Text style={{ color: "#FF702A", fontWeight: "700", fontSize: 14 }}>
             Đăng nhập Chế độ Thử nghiệm (Offline)
           </Text>
         </TouchableOpacity>

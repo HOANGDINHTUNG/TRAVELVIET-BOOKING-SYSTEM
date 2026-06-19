@@ -3295,3 +3295,429 @@ GET http://localhost:8088/api/v1/tours?keyword=Da+Nang&destinationId=1&tagIds=4&
 7. `POST /reviews`
 8. `GET /reviews/me`
 9. `POST /destinations/{uuid}/follow`
+
+---
+
+## 15. Flights (Chuyến Bay)
+
+> **Base URL:** `http://localhost:8088/api/v1`
+> **Auth:** Flights API hoàn toàn **PUBLIC** — không cần Bearer token để search.
+
+### Tóm tắt Endpoints
+
+| Method | Path | Access | Mô tả |
+|--------|------|--------|-------|
+| `GET` | `/flights` | PUBLIC | Tìm kiếm chuyến bay theo filter |
+| `GET` | `/flights/{id}` | PUBLIC | Lấy chi tiết một chuyến bay |
+| `POST` | `/admin/flights` | `tour.create` | Admin tạo chuyến bay mới |
+| `PUT` | `/admin/flights/{id}` | `tour.update` | Admin cập nhật chuyến bay |
+
+---
+
+### `GET /flights` — Tìm Kiếm Chuyến Bay
+
+**Query Parameters** (tất cả đều tùy chọn):
+
+| Param | Kiểu | Mô tả | Ví dụ |
+|-------|------|--------|-------|
+| `originCode` | `string` | IATA sân bay khởi hành | `HAN`, `SGN` |
+| `destinationCode` | `string` | IATA sân bay đến | `DAD`, `PQC` |
+| `originDestinationId` | `Long` | ID Destination khởi hành (thay thế cho `originCode`) | `1` |
+| `destinationId` | `Long` | ID Destination đến (thay thế cho `destinationCode`) | `2` |
+| `departureDate` | `date` | Ngày bay (format: `yyyy-MM-dd`) | `2026-07-01` |
+| `cabinClass` | `string` | Hạng vé | `economy`, `business` |
+| `minPrice` | `decimal` | Giá tối thiểu (VND) | `500000` |
+| `maxPrice` | `decimal` | Giá tối đa (VND) | `5000000` |
+| `passengers` | `int` | Số hành khách (min 1, default 1) | `2` |
+| `page` | `int` | Trang (default 0) | `0` |
+| `size` | `int` | Số bản ghi/trang (min 1, max 2000, default 12) | `12` |
+
+**Các ví dụ curl test thực tế:**
+
+```bash
+# 1. Lấy tất cả chuyến bay (trang đầu)
+curl "http://localhost:8088/api/v1/flights?size=10&page=0"
+
+# 2. Tìm chuyến bay Hà Nội → Đà Nẵng ngày 01/07/2026
+curl "http://localhost:8088/api/v1/flights?originCode=HAN&destinationCode=DAD&departureDate=2026-07-01"
+
+# 3. Tìm chuyến Hồ Chí Minh → Phú Quốc
+curl "http://localhost:8088/api/v1/flights?originCode=SGN&destinationCode=PQC"
+
+# 4. Tìm theo khoảng giá
+curl "http://localhost:8088/api/v1/flights?originCode=HAN&minPrice=500000&maxPrice=2000000"
+
+# 5. Tìm chuyến hạng thương gia
+curl "http://localhost:8088/api/v1/flights?cabinClass=business&size=5"
+
+# 6. Tìm chuyến bay quốc tế HAN → BKK
+curl "http://localhost:8088/api/v1/flights?originCode=HAN&destinationCode=BKK"
+
+# 7. Load nhiều kết quả (Hot Deals style)
+curl "http://localhost:8088/api/v1/flights?destinationCode=DAD&size=30&page=0"
+```
+
+**Response mẫu:**
+```json
+{
+  "success": true,
+  "message": "Success",
+  "data": {
+    "content": [
+      {
+        "id": 1,
+        "flightNo": "VN2601",
+        "status": "scheduled",
+        "airlineId": 1,
+        "airlineCode": "VN",
+        "airlineName": "Vietnam Airlines",
+        "originAirportId": 1,
+        "originAirportCode": "HAN",
+        "originAirportName": "Sân bay Nội Bài",
+        "destinationAirportId": 3,
+        "destinationAirportCode": "SGN",
+        "destinationAirportName": "Sân bay Tân Sơn Nhất",
+        "departureTimeLocal": "2026-07-01T06:00:00",
+        "arrivalTimeLocal": "2026-07-01T08:15:00",
+        "durationMinutes": 135,
+        "recommendedCabinClass": "economy",
+        "minPrice": 890000.00,
+        "availableSeats": 45,
+        "createdAt": "2026-06-01T00:00:00",
+        "updatedAt": "2026-06-01T00:00:00"
+      }
+    ],
+    "page": 0,
+    "size": 12,
+    "totalElements": 85,
+    "totalPages": 8,
+    "last": false
+  }
+}
+```
+
+---
+
+### `GET /flights/{id}` — Chi Tiết Chuyến Bay
+
+```bash
+# Lấy chi tiết chuyến bay ID = 1
+curl "http://localhost:8088/api/v1/flights/1"
+
+# Lấy chi tiết chuyến bay ID = 5
+curl "http://localhost:8088/api/v1/flights/5"
+```
+
+**Response:** Cùng shape `FlightResponse` như từng item trong mảng `content` bên trên.
+
+---
+
+### `POST /admin/flights` — Admin Tạo Chuyến Bay
+
+- **Permission:** `tour.create`
+- **Auth:** `Authorization: Bearer <ADMIN_TOKEN>`
+
+**Request Body:**
+```http
+POST http://localhost:8088/api/v1/admin/flights
+Authorization: Bearer <ACCESS_TOKEN>
+Content-Type: application/json
+```
+
+```json
+{
+  "airlineId": 1,
+  "flightNo": "VN9999",
+  "originAirportId": 1,
+  "destinationAirportId": 3,
+  "departureTimeLocal": "2026-08-01T07:00:00",
+  "arrivalTimeLocal": "2026-08-01T09:15:00",
+  "durationMinutes": 135,
+  "status": "scheduled"
+}
+```
+
+**Rules:**
+- `airlineId`: bắt buộc, ID của hãng bay trong bảng `airlines`
+- `flightNo`: bắt buộc, không được để trống
+- `originAirportId`, `destinationAirportId`: bắt buộc, ID sân bay từ bảng `airports`
+- `departureTimeLocal`, `arrivalTimeLocal`: bắt buộc, format ISO datetime
+- `durationMinutes`: bắt buộc, số phút bay
+- `status`: tùy chọn, mặc định `scheduled` (giá trị: `scheduled`, `active`, `cancelled`, `completed`)
+
+---
+
+### `PUT /admin/flights/{id}` — Admin Cập Nhật Chuyến Bay
+
+- **Permission:** `tour.update`
+
+```http
+PUT http://localhost:8088/api/v1/admin/flights/1
+Authorization: Bearer <ACCESS_TOKEN>
+Content-Type: application/json
+```
+
+```json
+{
+  "airlineId": 1,
+  "flightNo": "VN2601",
+  "originAirportId": 1,
+  "destinationAirportId": 3,
+  "departureTimeLocal": "2026-07-01T06:30:00",
+  "arrivalTimeLocal": "2026-07-01T08:45:00",
+  "durationMinutes": 135,
+  "status": "scheduled"
+}
+```
+
+---
+
+### Enum Tham Khảo — Flights
+
+```text
+Flight status:    scheduled | active | cancelled | completed
+Cabin class:      economy | premium_economy | business | first
+
+Mã IATA Airport nội địa:
+  HAN  — Nội Bài (Hà Nội)
+  SGN  — Tân Sơn Nhất (TP.HCM)
+  DAD  — Đà Nẵng
+  DLI  — Liên Khương (Đà Lạt)
+  CXR  — Cam Ranh (Nha Trang)
+  PQC  — Phú Quốc
+  VCA  — Cần Thơ
+  VII  — Vinh
+  HUI  — Phú Bài (Huế)
+  VDH  — Đồng Hới (Quảng Bình)
+
+Mã IATA Airport quốc tế phổ biến:
+  BKK  — Suvarnabhumi (Bangkok)
+  SIN  — Changi (Singapore)
+  ICN  — Incheon (Seoul)
+  HND  — Haneda (Tokyo)
+  NRT  — Narita (Tokyo)
+  TPE  — Taoyuan (Đài Bắc)
+  CDG  — Charles de Gaulle (Paris)
+  LHR  — Heathrow (London)
+  PVG  — Pudong (Thượng Hải)
+
+Airline codes:
+  VN   — Vietnam Airlines
+  VJ   — Vietjet Air
+  QH   — Bamboo Airways
+  BL   — Pacific Airlines
+```
+
+---
+
+## 16. Hotels (Khách Sạn)
+
+> **Lưu ý:** Backend đã dựng đầy đủ. Frontend chưa kết nối. Dùng cURL/Postman để test trực tiếp.
+
+### Tóm tắt Endpoints
+
+| Method | Path | Access | Mô tả |
+|--------|------|--------|-------|
+| `GET` | `/hotels` | PUBLIC | Tìm kiếm khách sạn theo filter |
+| `GET` | `/hotels/{id}` | PUBLIC | Chi tiết khách sạn kèm phòng còn trống |
+| `GET` | `/hotels/{id}/detail` | PUBLIC | Chi tiết đầy đủ (Room Types + Inventory) |
+| `POST` | `/admin/hotels` | `hotel.create` | Admin tạo khách sạn mới |
+| `PUT` | `/admin/hotels/{id}` | `hotel.update` | Admin cập nhật khách sạn |
+
+---
+
+### `GET /hotels` — Tìm Kiếm Khách Sạn
+
+**Query Parameters:**
+
+| Param | Kiểu | Mô tả | Ví dụ |
+|-------|------|--------|-------|
+| `destinationId` | `Long` | ID điểm đến (lọc theo địa điểm) | `1` |
+| `keyword` | `string` | Tìm theo tên khách sạn | `Marriott` |
+| `minStar` | `decimal` | Số sao tối thiểu | `3` |
+| `maxStar` | `decimal` | Số sao tối đa | `5` |
+| `minPrice` | `decimal` | Giá phòng tối thiểu/đêm (VND) | `500000` |
+| `maxPrice` | `decimal` | Giá phòng tối đa/đêm (VND) | `5000000` |
+| `checkinDate` | `date` | Ngày nhận phòng (`yyyy-MM-dd`) | `2026-07-10` |
+| `checkoutDate` | `date` | Ngày trả phòng (`yyyy-MM-dd`) | `2026-07-12` |
+| `rooms` | `int` | Số phòng (min 1, default 1) | `2` |
+| `adults` | `int` | Số người lớn (min 0, default 1) | `2` |
+| `children` | `int` | Số trẻ em (min 0, default 0) | `1` |
+| `page` | `int` | Trang (default 0) | `0` |
+| `size` | `int` | Số bản ghi/trang (max 100, default 12) | `10` |
+
+**Ví dụ curl test:**
+
+```bash
+# 1. Lấy tất cả khách sạn
+curl "http://localhost:8088/api/v1/hotels?size=10"
+
+# 2. Tìm khách sạn tại Destination ID=1 (Đà Nẵng)
+curl "http://localhost:8088/api/v1/hotels?destinationId=1"
+
+# 3. Tìm theo từ khóa tên
+curl "http://localhost:8088/api/v1/hotels?keyword=Marriott"
+
+# 4. Lọc khách sạn 4-5 sao
+curl "http://localhost:8088/api/v1/hotels?minStar=4&maxStar=5"
+
+# 5. Lọc theo giá trung bình (1-3 triệu/đêm)
+curl "http://localhost:8088/api/v1/hotels?minPrice=1000000&maxPrice=3000000"
+
+# 6. Tìm phòng còn trống theo ngày cụ thể (2 người lớn)
+curl "http://localhost:8088/api/v1/hotels?checkinDate=2026-07-10&checkoutDate=2026-07-12&adults=2&rooms=1"
+
+# 7. Kết hợp nhiều filter
+curl "http://localhost:8088/api/v1/hotels?destinationId=1&minStar=4&checkinDate=2026-07-10&checkoutDate=2026-07-12"
+```
+
+---
+
+### `GET /hotels/{id}` — Tổng Quan Khách Sạn
+
+```bash
+# Chi tiết khách sạn ID = 1, kiểm tra phòng trống ngày 10-12/7
+curl "http://localhost:8088/api/v1/hotels/1?checkinDate=2026-07-10&checkoutDate=2026-07-12"
+
+# Không cần truyền ngày nếu chỉ xem thông tin cơ bản
+curl "http://localhost:8088/api/v1/hotels/1"
+```
+
+---
+
+### `GET /hotels/{id}/detail` — Chi Tiết Đầy Đủ (Room Types + Inventory)
+
+```bash
+# Chi tiết đầy đủ khách sạn ID = 1, gồm Room Types và số phòng còn
+curl "http://localhost:8088/api/v1/hotels/1/detail?checkinDate=2026-07-10&checkoutDate=2026-07-12"
+```
+
+**Response mẫu (HotelDetailResponse):**
+```json
+{
+  "success": true,
+  "message": "Success",
+  "data": {
+    "id": 1,
+    "name": "Marriott Danang Resort & Spa",
+    "slug": "marriott-danang-resort-spa",
+    "starRating": 5,
+    "description": "Resort 5 sao bên bờ biển Mỹ Khê...",
+    "address": "Đường Võ Nguyên Giáp, Mỹ An, Ngũ Hành Sơn, Đà Nẵng",
+    "destinationId": 1,
+    "checkinTime": "14:00",
+    "checkoutTime": "12:00",
+    "amenitiesJson": "[\"Pool\", \"Spa\", \"Gym\", \"Beach Access\"]",
+    "roomTypes": [
+      {
+        "id": 1,
+        "name": "Deluxe Ocean View",
+        "description": "Phòng hướng biển với ban công riêng",
+        "basePrice": 2500000.00,
+        "maxOccupancy": 2,
+        "availableRooms": 8
+      },
+      {
+        "id": 2,
+        "name": "Junior Suite",
+        "description": "Suite rộng với phòng khách riêng",
+        "basePrice": 4500000.00,
+        "maxOccupancy": 3,
+        "availableRooms": 3
+      }
+    ]
+  }
+}
+```
+
+---
+
+### Enum Tham Khảo — Hotels
+
+```text
+Hotel status:  active | inactive | maintenance | closed
+Star rating:   1.0 ~ 5.0 (decimal, vd: 4.5)
+Room amenities (amenitiesJson examples):
+  Pool | Spa | Gym | Beach Access | Free Wifi | Breakfast Included
+  Airport Transfer | Pet Friendly | Kids Area | Restaurant
+```
+
+---
+
+## 17. Flow Test Tổng Hợp — Đặt Vé Máy Bay
+
+Luồng end-to-end đầy đủ (cURL):
+
+```bash
+# BƯỚC 1: Đăng nhập lấy token
+curl -s -X POST http://localhost:8088/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"login":"an.nguyen+api@gmail.com","passwordHash":"Password@123"}' \
+  | python -c "import sys,json; d=json.load(sys.stdin); print(d['data']['accessToken'])"
+
+# BƯỚC 2: Tìm chuyến bay HAN → SGN ngày 01/07
+curl "http://localhost:8088/api/v1/flights?originCode=HAN&destinationCode=SGN&departureDate=2026-07-01" \
+  | python -m json.tool
+
+# BƯỚC 3: Đặt vé (thay FLIGHT_ID bằng id lấy từ bước 2)
+curl -X POST http://localhost:8088/api/v1/bookings/flights \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "flightId": 1,
+    "contactName": "Nguyễn Văn An",
+    "contactPhone": "+84901234567",
+    "contactEmail": "an.nguyen+api@gmail.com",
+    "adults": 1
+  }'
+
+# BƯỚC 4: Thanh toán (thay YOUR_BOOKING_ID)
+curl -X POST http://localhost:8088/api/v1/payments \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "bookingId": YOUR_BOOKING_ID,
+    "amount": 890000,
+    "paymentMethod": "bank_transfer"
+  }'
+```
+
+---
+
+## 18. Postman Environment Đầy Đủ (Import JSON)
+
+Copy đoạn JSON dưới đây vào **Postman > Environments > Import**:
+
+```json
+{
+  "id": "travelviet-local",
+  "name": "TravelViet Local",
+  "values": [
+    { "key": "baseUrl", "value": "http://localhost:8088/api/v1", "enabled": true },
+    { "key": "ACCESS_TOKEN", "value": "", "enabled": true },
+    { "key": "REFRESH_TOKEN", "value": "", "enabled": true },
+    { "key": "USER_ID", "value": "", "enabled": true },
+    { "key": "FLIGHT_ID", "value": "1", "enabled": true },
+    { "key": "HOTEL_ID", "value": "1", "enabled": true },
+    { "key": "TOUR_ID", "value": "1", "enabled": true },
+    { "key": "SCHEDULE_ID", "value": "1", "enabled": true },
+    { "key": "BOOKING_ID", "value": "", "enabled": true },
+    { "key": "PAYMENT_ID", "value": "", "enabled": true },
+    { "key": "REFUND_ID", "value": "", "enabled": true },
+    { "key": "DESTINATION_UUID", "value": "", "enabled": true },
+    { "key": "REVIEW_ID", "value": "", "enabled": true }
+  ]
+}
+```
+
+**Gợi ý Pre-request Script** (tự động đính token):
+
+Trong Postman Collection → Edit → Pre-request Script:
+
+```javascript
+const token = pm.environment.get("ACCESS_TOKEN");
+if (token) {
+    pm.request.headers.add({ key: "Authorization", value: `Bearer ${token}` });
+}
+```
+

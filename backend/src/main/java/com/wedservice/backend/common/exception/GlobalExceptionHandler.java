@@ -177,6 +177,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ErrorResponse> handleAuthentication(AuthenticationException ex) {
+        if (ex instanceof org.springframework.security.core.userdetails.UsernameNotFoundException) {
+            return buildErrorResponse(HttpStatus.UNAUTHORIZED, message("api.error.unauthorized.userNotFound"), "USER_NOT_FOUND", null);
+        }
+        if (ex instanceof org.springframework.security.authentication.BadCredentialsException) {
+            return buildErrorResponse(HttpStatus.UNAUTHORIZED, message("api.error.unauthorized.badCredentials"), "BAD_CREDENTIALS", null);
+        }
+
         String msg = ex instanceof DisabledException
                 ? message("api.error.unauthorized.inactive")
                 : message("api.error.unauthorized.invalidLogin");

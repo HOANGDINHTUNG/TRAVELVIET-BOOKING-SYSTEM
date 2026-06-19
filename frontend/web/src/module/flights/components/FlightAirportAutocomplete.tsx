@@ -5,6 +5,7 @@ import {
   formatAirportLabel,
   type FlightAirportOption,
 } from "../data/flightAirportData";
+import { extractIataFromLabel } from "../utils/flightSearchParams";
 
 type FlightAirportAutocompleteProps = {
   label: string;
@@ -14,6 +15,7 @@ type FlightAirportAutocompleteProps = {
   clearAria: string;
   listAria: string;
   excludeValue?: string;
+  inputRef?: React.RefObject<HTMLInputElement>;
 };
 
 function HighlightMatch({ text, query }: { text: string; query: string }) {
@@ -44,16 +46,19 @@ export function FlightAirportAutocomplete({
   clearAria,
   listAria,
   excludeValue,
+  inputRef: externalInputRef,
 }: FlightAirportAutocompleteProps) {
   const listboxId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const internalInputRef = useRef<HTMLInputElement>(null);
+  const inputRef = externalInputRef || internalInputRef;
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
 
-  // Extract IATA from excludeValue like "SGN - Ho Chi Minh" -> "SGN"
-  const getIata = (v?: string) => (v ? v.split(" - ")[0] : null);
-  const excludedIata = getIata(excludeValue);
+  // Extract IATA from excludeValue like "TP. Hồ Chí Minh (SGN)" -> "SGN"
+  const excludedIata = excludeValue
+    ? extractIataFromLabel(excludeValue, "")
+    : null;
 
   const suggestions = filterFlightAirports(value).filter(
     (s) => s.iata !== excludedIata,

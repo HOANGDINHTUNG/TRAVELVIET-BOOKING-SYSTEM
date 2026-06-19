@@ -1,0 +1,38 @@
+-- ============================================================
+-- REORGANIZED V7 SEED DATA - THỨ TỰ CHẠY ĐỀ XUẤT
+-- ============================================================
+-- Bộ file này được chia lại từ các file seed cũ để tránh lộn nhóm dữ liệu.
+-- Nguyên tắc chia:
+-- 1) Dữ liệu nào có khả năng dài/mở rộng nhiều về sau thì tách riêng.
+-- 2) Dữ liệu ngắn, thuộc master/base data thì gộp chung.
+-- 3) Phần flights dùng bộ sân bay thật + ngày tương lai thay cho dữ liệu flight cũ.
+-- 4) Flight booking đã tách rõ 1 chiều / khứ hồi bằng trip_type:
+--    - one_way: flight_id có dữ liệu, return_flight_id NULL.
+--    - round_trip: flight_id và return_flight_id đều có dữ liệu nếu tìm được chuyến ngược lại.
+-- 5) Chuyến đầy được suy ra từ flight_classes.seat_available = 0.
+--
+-- THỨ TỰ CHẠY:
+-- 01. V7_01A__seed_core_base_users_permissions.sql
+-- 02. V7_01B__seed_destinations_master.sql
+-- 03. V7_02A__seed_tours_catalog.sql
+-- 04. V7_02B__seed_tour_schedules_resources.sql
+-- 05. V7_03A__seed_hotels_rooms_inventory.sql
+-- 06. V7_03B__seed_flights_airports_oneway_roundtrip.sql
+-- 07. V7_04A__seed_combos_promotions_vouchers.sql
+-- 08. V7_04B__seed_bookings_orders_trip_oneway_roundtrip.sql
+-- 09. V7_04C__seed_payments_refunds_invoices_payouts.sql
+-- 10. V7_04D__seed_customer_interactions_ops.sql
+--
+-- Query kiểm tra chuyến bay đầy:
+-- SELECT f.id, f.flight_no, SUM(fc.seat_available) AS total_available,
+--        CASE WHEN SUM(fc.seat_available) = 0 THEN 'FULL' ELSE 'AVAILABLE' END AS capacity_status
+-- FROM flights f
+-- JOIN flight_classes fc ON fc.flight_id = f.id
+-- GROUP BY f.id, f.flight_no;
+--
+-- Query kiểm tra booking 1 chiều / khứ hồi:
+-- SELECT trip_type, COUNT(*) total,
+--        SUM(return_flight_id IS NOT NULL) AS has_return_flight
+-- FROM flight_bookings
+-- GROUP BY trip_type;
+-- ============================================================

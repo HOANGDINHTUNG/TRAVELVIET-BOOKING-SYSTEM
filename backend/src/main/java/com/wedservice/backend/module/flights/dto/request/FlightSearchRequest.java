@@ -26,7 +26,7 @@ public class FlightSearchRequest {
     @Min(0)
     private int page = 0;
     @Min(1)
-    @Max(100)
+    @Max(2000)
     private int size = 12;
 }
 
