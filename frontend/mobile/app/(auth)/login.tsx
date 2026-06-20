@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,10 +8,11 @@ import {
   Alert,
   ActivityIndicator,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { styles } from "@/styles/login.styles";
 import { getApiBaseUrl } from "@/config/apiBaseUrl";
+import { useAppSettings } from "@/providers/AppSettingsProvider";
 import { loginCopy } from "@/constants/loginCopy";
 import { loginWithEmail } from "@/services/authApi";
 import { setAiChatAccessTokenProvider } from "@/services/aiChatApi";
@@ -23,10 +24,18 @@ import { AppRoutes, asHref } from "@/lib/navigation";
 
 export default function LoginScreen() {
   const router = useRouter();
+  const { reloadProfile } = useAppSettings();
+  const { email: registeredEmail } = useLocalSearchParams<{ email?: string }>();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (registeredEmail) {
+      setEmail(registeredEmail);
+    }
+  }, [registeredEmail]);
 
   const handleMockLogin = () => {
     try {
@@ -78,26 +87,31 @@ export default function LoginScreen() {
       const auth = await loginWithEmail(email, password);
       setAiChatAccessTokenProvider(() => auth.accessToken);
       await establishSessionAfterLogin(auth);
+      await reloadProfile();
       router.replace(asHref(AppRoutes.tabs));
     } catch (err) {
       await clearAuthSession();
       setAiChatAccessTokenProvider(null);
-      const message =
-        err instanceof ApiError
-          ? err.message
-          : "Không thể kết nối máy chủ hoặc thông tin sai. Kiểm tra backend đang chạy.";
+      if (err instanceof ApiError && err.status >= 400 && err.status < 500) {
+        Alert.alert("Đăng nhập thất bại", err.message);
+      } else {
+        const message =
+          err instanceof ApiError
+            ? err.message
+            : "Không thể kết nối máy chủ. Kiểm tra backend đang chạy.";
 
-      Alert.alert(
-        "Đăng nhập thất bại",
-        `${message}\n\nBạn có muốn đăng nhập bằng Chế độ Thử nghiệm (Offline) không?`,
-        [
-          { text: "Hủy", style: "cancel" },
-          {
-            text: "Đăng nhập Offline",
-            onPress: handleMockLogin,
-          },
-        ],
-      );
+        Alert.alert(
+          "Đăng nhập thất bại",
+          `${message}\n\nBạn có muốn đăng nhập bằng Chế độ Thử nghiệm (Offline) không?`,
+          [
+            { text: "Hủy", style: "cancel" },
+            {
+              text: "Đăng nhập Offline",
+              onPress: handleMockLogin,
+            },
+          ],
+        );
+      }
     } finally {
       setLoading(false);
     }
@@ -175,6 +189,15 @@ export default function LoginScreen() {
         >
           <Text style={{ color: "#FF702A", fontWeight: "700", fontSize: 14 }}>
             Đăng nhập Chế độ Thử nghiệm (Offline)
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.registerLink}
+          onPress={() => router.push(asHref(AppRoutes.register))}
+        >
+          <Text style={styles.registerText}>
+            Chưa có tài khoản? <Text style={styles.registerTextBold}>Đăng ký ngay</Text>
           </Text>
         </TouchableOpacity>
 

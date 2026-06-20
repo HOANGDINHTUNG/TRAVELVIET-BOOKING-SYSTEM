@@ -38,6 +38,8 @@ public class UpdateMyProfileRequest {
     private LocalDate dateOfBirth;
 
     private String avatarUrl;
+    private String coverImageUrl;
+
 
     @AssertTrue(message = "At least email or phone must be provided")
     public boolean isContactProvided() {

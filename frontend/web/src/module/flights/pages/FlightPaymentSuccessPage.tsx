@@ -1,7 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { FlightCheckoutStepper } from "../components/FlightCheckoutStepper";
 import { useQuery } from "@tanstack/react-query";
-import { PublicBookingsApi } from "../../../bookings/api/publicBookings.api";
+import { PublicBookingsApi } from "../../bookings/api/publicBookings.api";
 import "./FlightPaymentSuccessPage.css";
 
 export default function FlightPaymentSuccessPage() {

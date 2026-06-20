@@ -9,6 +9,7 @@ export interface UserResponse {
   gender: string;
   dateOfBirth: string | null;
   avatarUrl: string | null;
+  coverImageUrl: string | null;
   userCategory: string;
   role: string;
   roles: string[];
@@ -24,6 +25,8 @@ export interface UpdateMyProfileRequest {
   phone?: string;
   gender?: string;
   dateOfBirth?: string;
+  avatarUrl?: string;
+  coverImageUrl?: string;
 }
 
 export async function fetchMyProfile() {
@@ -37,4 +40,33 @@ export async function updateMyProfile(data: UpdateMyProfileRequest) {
     method: "PUT",
     body: data,
   });
+}
+
+export async function uploadMedia(fileUri: string): Promise<string> {
+  const formData = new FormData();
+  
+  // Resolve filename and file extension/mimetype
+  const uriParts = fileUri.split("/");
+  const fileName = uriParts[uriParts.length - 1] || "photo.jpg";
+  const fileExtension = fileName.split(".").pop()?.toLowerCase();
+  
+  let type = "image/jpeg";
+  if (fileExtension === "png") {
+    type = "image/png";
+  } else if (fileExtension === "gif") {
+    type = "image/gif";
+  }
+
+  formData.append("file", {
+    uri: fileUri,
+    name: fileName,
+    type,
+  } as any);
+
+  const res = await apiRequest<{ url: string }>("/media/upload", {
+    method: "POST",
+    body: formData,
+  });
+  
+  return res.url;
 }

@@ -11,6 +11,7 @@ export function asHref(path: string): Href {
 
 export const AppRoutes = {
   login: '/(auth)/login',
+  register: '/(auth)/register',
   productTab: '/(tabs)/products',
   tabs: '/(tabs)',
 } as const;

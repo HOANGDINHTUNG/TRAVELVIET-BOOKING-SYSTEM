@@ -70,6 +70,10 @@ public class User extends AuditableEntity {
     @Column(name = "avatar_url", columnDefinition = "TEXT")
     private String avatarUrl;
 
+    @Column(name = "cover_image_url", columnDefinition = "TEXT")
+    private String coverImageUrl;
+
+
     @Convert(converter = MemberLevelConverter.class)
     @Column(name = "member_level", nullable = false, length = 20)
     @Builder.Default

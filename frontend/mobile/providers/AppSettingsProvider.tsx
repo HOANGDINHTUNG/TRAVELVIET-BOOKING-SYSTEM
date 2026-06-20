@@ -34,6 +34,7 @@ interface AppSettingsContextType {
   setUserGender: (gender: string) => void;
   userCoverImage: string;
   setUserCoverImage: (url: string) => void;
+  reloadProfile: () => Promise<void>;
 }
 
 const AppSettingsContext = createContext<AppSettingsContextType | undefined>(
@@ -358,6 +359,20 @@ const TRANSLATIONS: Record<string, { vi: string; en: string }> = {
   cruises_rating: { vi: "đánh giá", en: "reviews" },
 };
 
+function formatDobForDisplay(dobString: string | null | undefined): string {
+  if (!dobString) return "";
+  const cleaned = dobString.trim();
+  const YmdRegex = /^(\d{4})[/\-](\d{1,2})[/\-](\d{1,2})$/;
+  const match = cleaned.match(YmdRegex);
+  if (match) {
+    const [_, year, month, day] = match;
+    const paddedDay = day.padStart(2, '0');
+    const paddedMonth = month.padStart(2, '0');
+    return `${paddedDay}/${paddedMonth}/${year}`;
+  }
+  return cleaned;
+}
+
 export const AppSettingsProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
@@ -397,13 +412,13 @@ export const AppSettingsProvider: React.FC<{ children: React.ReactNode }> = ({
         if (getAccessToken()) {
           try {
             const res = await fetchMyProfile();
-            if (res?.data) {
-              const p = res.data;
+            if (res) {
+              const p = res;
               setUserFullName(p.fullName || "");
               setUserDisplayName(p.displayName || p.fullName || "");
               setUserPhone(p.phone || "");
               setUserEmail(p.email || "");
-              setUserDob(p.dateOfBirth || "");
+              setUserDob(formatDobForDisplay(p.dateOfBirth));
 
               // Handle Java Enum casing for Gender
               setUserGender(
@@ -417,6 +432,9 @@ export const AppSettingsProvider: React.FC<{ children: React.ReactNode }> = ({
               if (p.avatarUrl) {
                 setUserAvatar(p.avatarUrl);
               }
+              if (p.coverImageUrl) {
+                setUserCoverImage(p.coverImageUrl);
+              }
             }
           } catch (e) {
             console.log("Failed to load user profile on mount:", e);
@@ -428,6 +446,38 @@ export const AppSettingsProvider: React.FC<{ children: React.ReactNode }> = ({
     };
     loadSettings();
   }, []);
+
+  const reloadProfile = async () => {
+    if (!getAccessToken()) return;
+    try {
+      const res = await fetchMyProfile();
+      if (res) {
+        setUserFullName(res.fullName || "");
+        setUserDisplayName(res.displayName || res.fullName || "");
+        setUserPhone(res.phone || "");
+        setUserEmail(res.email || "");
+        setUserDob(formatDobForDisplay(res.dateOfBirth));
+
+        // Handle Java Enum casing for Gender
+        setUserGender(
+          res.gender === "MALE"
+            ? "Nam"
+            : res.gender === "FEMALE"
+              ? "Nữ"
+              : "Khác",
+        );
+
+        if (res.avatarUrl) {
+          setUserAvatar(res.avatarUrl);
+        }
+        if (res.coverImageUrl) {
+          setUserCoverImage(res.coverImageUrl);
+        }
+      }
+    } catch (e) {
+      console.log("Failed to reload user profile:", e);
+    }
+  };
 
   const setTheme = async (next: ThemeMode) => {
     setThemeState(next);
@@ -492,6 +542,7 @@ export const AppSettingsProvider: React.FC<{ children: React.ReactNode }> = ({
         setUserGender,
         userCoverImage,
         setUserCoverImage,
+        reloadProfile,
       }}
     >
       {children}

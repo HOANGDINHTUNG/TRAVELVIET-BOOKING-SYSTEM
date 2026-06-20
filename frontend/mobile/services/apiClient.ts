@@ -37,7 +37,9 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
     Accept: 'application/json',
   };
 
-  if (body !== undefined) {
+  const isFormData = body !== undefined && (body instanceof FormData || (body !== null && typeof body === 'object' && 'append' in body && typeof (body as any).append === 'function'));
+
+  if (body !== undefined && !isFormData) {
     headers['Content-Type'] = 'application/json';
   }
 
@@ -46,15 +48,33 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
     headers.Authorization = `Bearer ${token}`;
   }
 
+  const requestUrl = `${getApiBaseUrl()}${path}${buildQuery(query)}`;
+  const isLocal =
+    requestUrl.includes("localhost") ||
+    requestUrl.includes("127.0.0.1") ||
+    requestUrl.includes("10.0.2.2") ||
+    requestUrl.includes("192.168.");
+  const timeoutMs = isLocal ? 12000 : 60000;
+  const timeoutSeconds = Math.round(timeoutMs / 1000);
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
   let response: Response;
   try {
-    response = await fetch(`${getApiBaseUrl()}${path}${buildQuery(query)}`, {
+    response = await fetch(requestUrl, {
       method,
       headers,
-      body: body !== undefined ? JSON.stringify(body) : undefined,
+      body: body !== undefined ? (isFormData ? (body as any) : JSON.stringify(body)) : undefined,
+      signal: controller.signal,
     });
-  } catch {
-    throw new ApiError('Không thể kết nối máy chủ. Kiểm tra mạng và URL API.', 0);
+    clearTimeout(timeoutId);
+  } catch (err: any) {
+    clearTimeout(timeoutId);
+    if (err.name === 'AbortError') {
+      throw new ApiError(`Kết nối máy chủ quá hạn (Timeout ${timeoutSeconds}s) khi gửi yêu cầu tới ${requestUrl}.`, 0);
+    }
+    throw new ApiError(`Không thể kết nối máy chủ tại ${requestUrl}. Vui lòng kiểm tra mạng/VPN hoặc cấu hình IP.`, 0);
   }
 
   let payload: ApiResponse<T> | null = null;
@@ -77,6 +97,9 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
         await clearAuthSession();
         throw new ApiError('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.', 401);
       }
+    }
+    if (isAuthEndpoint(path)) {
+      throw new ApiError(payload?.message || 'Thông tin đăng nhập không chính xác. Vui lòng thử lại.', 401);
     }
     await clearAuthSession();
     throw new ApiError('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.', 401);

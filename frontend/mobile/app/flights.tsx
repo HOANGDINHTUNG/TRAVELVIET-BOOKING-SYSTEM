@@ -579,8 +579,8 @@ export default function FlightsScreen() {
       try {
         setLoading(true);
         const res = await fetchPublicFlights({ size: 50 });
-        if (active && res.data?.content) {
-          const mapped: Flight[] = res.data.content.map((f) => {
+        if (active && res?.content) {
+          const mapped: Flight[] = res.content.map((f) => {
             const departTimeStr = new Date(
               f.departureTimeLocal,
             ).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });

@@ -6,8 +6,9 @@ import { ComboSearchFlightBlock } from '../components/ComboSearchFlightBlock'
 import { ComboSearchHotelBlock } from '../components/ComboSearchHotelBlock'
 import { ComboSearchLoadingSkeleton } from '../components/ComboSearchLoadingSkeleton'
 import { ComboSearchSummaryBanner } from '../components/ComboSearchSummaryBanner'
-import { getMockComboFlightLegs } from '../data/comboSearchFlightMock'
-import { getMockComboHotelResults } from '../data/comboSearchHotelMock'
+// Sửa dòng 9 và 10 thành đường dẫn tuyệt đối bắt đầu bằng @/
+import { getMockComboFlightLegs } from "@/module/combos/data/comboSearchFlightMock";
+import { getMockComboHotelResults } from "@/module/combos/data/comboSearchHotelMock";
 import { useComboSearchLoading } from '../hooks/useComboSearchLoading'
 import {
   buildComboSearchQuery,

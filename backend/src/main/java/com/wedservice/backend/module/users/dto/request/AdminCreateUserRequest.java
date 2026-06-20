@@ -56,6 +56,8 @@ public class AdminCreateUserRequest {
     private LocalDate dateOfBirth;
 
     private String avatarUrl;
+    private String coverImageUrl;
+
 
     private MemberLevel memberLevel = MemberLevel.BRONZE;
 

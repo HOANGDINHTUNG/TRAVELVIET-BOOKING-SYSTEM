@@ -262,7 +262,11 @@ export default function BookingsScreen() {
     const statusDetails = getStatusDetails(item.status);
 
     return (
-      <View style={[styles.card, isDark && styles.cardDark]}>
+      <TouchableOpacity
+        style={[styles.card, isDark && styles.cardDark]}
+        activeOpacity={0.9}
+        onPress={() => setSelectedBooking(item)}
+      >
         <Image source={{ uri: item.tourImage }} style={styles.cardImage} />
         <View style={styles.cardContent}>
           <View style={styles.cardHeader}>
@@ -321,7 +325,7 @@ export default function BookingsScreen() {
             </TouchableOpacity>
           </View>
         </View>
-      </View>
+      </TouchableOpacity>
     );
   };
 
@@ -698,7 +702,7 @@ export default function BookingsScreen() {
                     style={[styles.infoValue, isDark && styles.infoValueDark]}
                   >
                     {MOCK_BOOKING_DETAILS[selectedBooking.id]?.priceBreakdown
-                      .base || selectedBooking.price}
+                      ?.base || selectedBooking.price}
                   </Text>
                 </View>
                 <View style={styles.infoRow}>
@@ -711,7 +715,7 @@ export default function BookingsScreen() {
                     style={[styles.infoValue, isDark && styles.infoValueDark]}
                   >
                     {MOCK_BOOKING_DETAILS[selectedBooking.id]?.priceBreakdown
-                      .tax || "0đ"}
+                      ?.tax || "0đ"}
                   </Text>
                 </View>
                 <View

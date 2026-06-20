@@ -84,7 +84,7 @@ app:
       local:
         enabled: true
         host: 127.0.0.1
-        port: 3307
+        port: 3306
         database: wedservice
         username: wed_app_user
         password: 123456
