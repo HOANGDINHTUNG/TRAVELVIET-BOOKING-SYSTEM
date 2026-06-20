@@ -19,3 +19,17 @@ export async function refreshAuthSession(refreshToken: string) {
     skipAuthRefresh: true,
   });
 }
+
+export async function registerUser(payload: {
+  fullName: string;
+  email?: string;
+  phone?: string;
+  passwordHash: string;
+  displayName?: string;
+}) {
+  return apiRequest<AuthData>('/auth/register', {
+    method: 'POST',
+    body: payload,
+    skipAuthRefresh: true,
+  });
+}

@@ -180,11 +180,11 @@ export default function CheckoutScreen() {
 
   const [tourDetails, setTourDetails] = useState<any>(null);
 
-  useEffect(() => {
-    if (!isCruise && id) {
+  React.useEffect(() => {
+    if (!isCruise && id && !isNaN(Number(id))) {
       fetchTourDetails(Number(id))
         .then((res) => {
-          if (res.data) setTourDetails(res.data);
+          if (res) setTourDetails(res);
         })
         .catch((err) => console.log("Tour fetch error", err));
     }
@@ -324,35 +324,49 @@ export default function CheckoutScreen() {
   };
 
   // Coupon verify
-  const handleApplyCoupon = () => {
+  const handleApplyCoupon = async () => {
     const code = couponCode.trim().toUpperCase();
     if (!code) {
       showSnackbar("Vui lòng nhập mã giảm giá");
       return;
     }
 
-    if (code === "DALAT15") {
-      const discount = Math.round(subtotal * 0.15);
-      setDiscountAmount(discount);
-      setAppliedCoupon(code);
-      showSnackbar("Áp dụng mã giảm giá 15% thành công!");
-    } else if (code === "CHUANBAY") {
-      const discount = Math.round(subtotal * 0.1);
-      setDiscountAmount(discount);
-      setAppliedCoupon(code);
-      showSnackbar("Áp dụng mã giảm giá 10% thành công!");
-    } else if (code === "SAVING99") {
-      const discount = 99000;
-      setDiscountAmount(discount);
-      setAppliedCoupon(code);
-      showSnackbar("Áp dụng mã giảm giá 99.000đ thành công!");
-    } else if (code === "TRAVELVIET") {
-      const discount = 200000;
-      setDiscountAmount(discount);
-      setAppliedCoupon(code);
-      showSnackbar("Áp dụng mã giảm giá 200.000đ thành công!");
-    } else {
-      showSnackbar("Mã giảm giá không hợp lệ hoặc đã hết hạn");
+    try {
+      const res = await fetchBookingQuote({
+        tourId: Number(id),
+        scheduleId: Number(scheduleId),
+        adults: adultCount,
+        children: childCount,
+        voucherCode: code,
+      });
+
+      if (res && res.voucherDiscountAmount !== undefined) {
+        const discountVal = Number(res.voucherDiscountAmount);
+        if (discountVal > 0) {
+          setDiscountAmount(discountVal);
+          setAppliedCoupon(code);
+          showSnackbar(
+            language === "vi"
+              ? `Áp dụng voucher ${code} thành công!`
+              : `Applied voucher ${code} successfully!`
+          );
+        } else {
+          showSnackbar(
+            language === "vi"
+              ? "Voucher không đủ điều kiện áp dụng cho đơn hàng này."
+              : "Voucher conditions not met for this booking."
+          );
+        }
+      } else {
+        showSnackbar("Mã giảm giá không hợp lệ hoặc đã hết hạn");
+      }
+    } catch (err: any) {
+      const errMsg = err.response?.data?.message || err.message || "";
+      showSnackbar(
+        language === "vi"
+          ? `Lỗi áp dụng voucher: ${errMsg}`
+          : `Error applying voucher: ${errMsg}`
+      );
     }
   };
 

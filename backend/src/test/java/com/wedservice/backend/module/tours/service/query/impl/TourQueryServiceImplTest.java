@@ -153,7 +153,6 @@ class TourQueryServiceImplTest {
                 tourDepartureHubRepository,
                 tourInclusionFlagsRepository,
                 tourComboPackageLinkRepository,
-                comboPackageRepository,
                 tourSchedulePickupPointRepository,
                 tourScheduleGuideRepository,
                 tourTranslationRepository,

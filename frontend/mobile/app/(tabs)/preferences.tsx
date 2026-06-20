@@ -23,11 +23,12 @@ import { getApiBaseUrl } from "@/config/apiBaseUrl";
 import { adminPreferencesCopy } from "@/constants/adminPreferencesCopy";
 import { clearAuthSession, getAuthSession } from "@/services/authStorage";
 import { setAiChatAccessTokenProvider } from "@/services/aiChatApi";
+import { claimVoucher } from "@/services/promotionApi";
 import { AppRoutes, asHref } from "@/lib/navigation";
 import { useSnackbar } from "@/providers/SnackbarProvider";
 import { LinearGradient } from "expo-linear-gradient";
 import { useAppSettings } from "@/providers/AppSettingsProvider";
-import { updateMyProfile } from "@/services/profileApi";
+import { updateMyProfile, uploadMedia } from "@/services/profileApi";
 
 interface ProfileInputProps {
   label: string;
@@ -144,6 +145,28 @@ const SettingsCard: React.FC<SettingsCardProps> = ({
   );
 };
 
+function formatDobForBackend(dobString: string): string | undefined {
+  if (!dobString) return undefined;
+  const cleaned = dobString.trim();
+  const dmYRegex = /^(\d{1,2})[/\-](\d{1,2})[/\-](\d{4})$/;
+  const match = cleaned.match(dmYRegex);
+  if (match) {
+    const [_, day, month, year] = match;
+    const paddedDay = day.padStart(2, '0');
+    const paddedMonth = month.padStart(2, '0');
+    return `${year}-${paddedMonth}-${paddedDay}`;
+  }
+  const YmdRegex = /^(\d{4})[/\-](\d{1,2})[/\-](\d{1,2})$/;
+  const matchYmd = cleaned.match(YmdRegex);
+  if (matchYmd) {
+    const [_, year, month, day] = matchYmd;
+    const paddedDay = day.padStart(2, '0');
+    const paddedMonth = month.padStart(2, '0');
+    return `${year}-${paddedMonth}-${paddedDay}`;
+  }
+  return cleaned;
+}
+
 export default function PreferencesScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -258,6 +281,16 @@ export default function PreferencesScreen() {
           onPress: async () => {
             await clearAuthSession();
             setAiChatAccessTokenProvider(null);
+
+            // Reset context profile values to defaults on logout
+            setUserFullName("Công Trứ Nguyễn");
+            setUserDisplayName("Công Trứ Nguyễn");
+            setUserPhone("0987654321");
+            setUserEmail("congtru@gmail.com");
+            setUserDob("15/10/1995");
+            setUserGender("Nam");
+            setUserAvatar("https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200");
+
             router.replace(asHref(AppRoutes.login));
           },
         },
@@ -269,18 +302,36 @@ export default function PreferencesScreen() {
     try {
       const mappedGender =
         gender === "Nam" ? "MALE" : gender === "Nữ" ? "FEMALE" : "OTHER";
+
+      let avatarUrl = tempAvatar;
+      if (tempAvatar && (tempAvatar.startsWith("file:/") || tempAvatar.startsWith("content:/") || tempAvatar.startsWith("ph:/"))) {
+        avatarUrl = await uploadMedia(tempAvatar);
+      }
+
+      let coverImageUrl = tempCover;
+      if (tempCover && (tempCover.startsWith("file:/") || tempCover.startsWith("content:/") || tempCover.startsWith("ph:/"))) {
+        coverImageUrl = await uploadMedia(tempCover);
+      }
+
       await updateMyProfile({
         fullName,
         displayName,
         phone,
         gender: mappedGender,
+        dateOfBirth: formatDobForBackend(dob),
+        avatarUrl,
+        coverImageUrl,
       });
+
       setUserFullName(fullName);
       setUserDisplayName(displayName);
       setUserPhone(phone);
       setUserEmail(email);
       setUserDob(dob);
       setUserGender(gender);
+      setUserAvatar(avatarUrl);
+      setUserCoverImage(coverImageUrl);
+
       showSnackbar(
         language === "vi"
           ? "Đã lưu hồ sơ cá nhân thành công!"
@@ -301,8 +352,9 @@ export default function PreferencesScreen() {
     );
   };
 
-  const handleApplyVoucher = () => {
-    if (!voucherCode.trim()) {
+  const handleApplyVoucher = async () => {
+    const code = voucherCode.trim().toUpperCase();
+    if (!code) {
       Alert.alert(
         language === "vi" ? "Thông báo" : "Notification",
         language === "vi"
@@ -311,12 +363,33 @@ export default function PreferencesScreen() {
       );
       return;
     }
-    showSnackbar(
-      language === "vi"
-        ? `Áp dụng voucher ${voucherCode.trim()} thành công!`
-        : `Applied voucher ${voucherCode.trim()} successfully!`,
-    );
-    setVoucherCode("");
+
+    const session = getAuthSession();
+    if (!session) {
+      showSnackbar(
+        language === "vi"
+          ? "Vui lòng đăng nhập để nhận voucher."
+          : "Please log in to claim vouchers."
+      );
+      return;
+    }
+
+    try {
+      await claimVoucher(code);
+      showSnackbar(
+        language === "vi"
+          ? `Nhận thành công mã voucher: ${code}!`
+          : `Successfully claimed voucher code: ${code}!`
+      );
+      setVoucherCode("");
+    } catch (err: any) {
+      const errMsg = err.response?.data?.message || err.message || "";
+      showSnackbar(
+        language === "vi"
+          ? `Lỗi nhận voucher: ${errMsg}`
+          : `Error claiming voucher: ${errMsg}`
+      );
+    }
   };
 
   const handleSavePreferences = () => {
@@ -331,22 +404,38 @@ export default function PreferencesScreen() {
     try {
       const mappedGender =
         gender === "Nam" ? "MALE" : gender === "Nữ" ? "FEMALE" : "OTHER";
+
+      let avatarUrl = tempAvatar;
+      if (tempAvatar && (tempAvatar.startsWith("file:/") || tempAvatar.startsWith("content:/") || tempAvatar.startsWith("ph:/"))) {
+        avatarUrl = await uploadMedia(tempAvatar);
+      }
+
+      let coverImageUrl = tempCover;
+      if (tempCover && (tempCover.startsWith("file:/") || tempCover.startsWith("content:/") || tempCover.startsWith("ph:/"))) {
+        coverImageUrl = await uploadMedia(tempCover);
+      }
+
       await updateMyProfile({
         fullName,
         displayName,
         phone,
         gender: mappedGender,
+        dateOfBirth: formatDobForBackend(dob),
+        avatarUrl,
+        coverImageUrl,
       });
+
       setUserFullName(fullName);
       setUserDisplayName(displayName);
       setUserPhone(phone);
       setUserEmail(email);
       setUserDob(dob);
       setUserGender(gender);
-      setUserAvatar(tempAvatar);
-      setUserCoverImage(tempCover);
+      setUserAvatar(avatarUrl);
+      setUserCoverImage(coverImageUrl);
       setIsEditModalOpen(false);
       setShowEditPen(false);
+
       showSnackbar(
         language === "vi"
           ? "Đã cập nhật thông tin cá nhân thành công!"

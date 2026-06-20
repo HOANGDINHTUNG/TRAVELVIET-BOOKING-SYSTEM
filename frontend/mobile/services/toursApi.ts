@@ -18,6 +18,8 @@ export interface TourResponse {
   destinations: { destinationId: number; destinationName: string }[];
   itineraryDays: { dayNumber: number; title: string; description: string }[];
   media: { url: string; isPrimary: boolean }[];
+  description?: string;
+  nextOpenSchedule?: { scheduleId: number; scheduleCode?: string; departureAt?: string; [key: string]: any } | null;
 }
 
 export interface TourSearchRequest {
@@ -30,6 +32,38 @@ export interface TourSearchRequest {
   maxPrice?: number;
   sortBy?: string;
   sortDir?: string;
+}
+
+export interface TourWishlistItem {
+  id: number;
+  userId: string;
+  tourId: number;
+  createdAt: string;
+  tour?: {
+    id: number;
+    code: string;
+    name: string;
+    shortDescription: string;
+    thumbnailUrl: string | null;
+    basePrice: number;
+    averageRating: number;
+    totalReviews: number;
+  };
+}
+
+export interface TourViewLog {
+  id: number;
+  userId: string;
+  tourId: number;
+  viewedAt: string;
+  tour?: {
+    id: number;
+    code: string;
+    name: string;
+    shortDescription: string;
+    thumbnailUrl: string | null;
+    basePrice: number;
+  };
 }
 
 export async function fetchPublicTours(params: TourSearchRequest = {}) {
@@ -54,4 +88,26 @@ export async function fetchTourDetails(id: string | number) {
   return apiRequest<TourResponse>(`/tours/${id}`, {
     method: "GET",
   });
+}
+
+// User Wishlist Tour endpoints
+export async function fetchMyWishlistTours() {
+  return apiRequest<TourWishlistItem[]>('/users/me/wishlist/tours');
+}
+
+export async function addTourToWishlist(tourId: number) {
+  return apiRequest<TourWishlistItem>(`/users/me/wishlist/tours/${tourId}`, {
+    method: 'POST',
+  });
+}
+
+export async function removeTourFromWishlist(tourId: number) {
+  return apiRequest<{ success: boolean; message: string }>(`/users/me/wishlist/tours/${tourId}`, {
+    method: 'DELETE',
+  });
+}
+
+// User Tour View Logs
+export async function fetchMyRecentTourViews() {
+  return apiRequest<TourViewLog[]>('/users/me/tour-views');
 }

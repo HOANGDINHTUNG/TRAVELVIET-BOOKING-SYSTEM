@@ -19,11 +19,15 @@ export interface BookingQuoteResponse {
   children: number;
   infants: number;
   seniors: number;
-  subtotal: number;
-  discount: number;
-  taxes: number;
-  totalPrice: number;
+  subtotal?: number;
+  discount?: number;
+  taxes?: number;
+  totalPrice?: number;
   voucherCode?: string;
+  subtotalAmount?: number;
+  discountAmount?: number;
+  voucherDiscountAmount?: number;
+  finalAmount?: number;
 }
 
 export interface CreatePassengerRequest {

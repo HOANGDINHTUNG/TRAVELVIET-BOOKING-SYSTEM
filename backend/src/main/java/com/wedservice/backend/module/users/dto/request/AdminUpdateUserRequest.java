@@ -56,6 +56,8 @@ public class AdminUpdateUserRequest {
     private LocalDate dateOfBirth;
 
     private String avatarUrl;
+    private String coverImageUrl;
+
 
     @NotNull(message = "Member level is required")
     private MemberLevel memberLevel;

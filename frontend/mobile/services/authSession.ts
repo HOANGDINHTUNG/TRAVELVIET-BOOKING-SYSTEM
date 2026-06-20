@@ -7,11 +7,22 @@ import {
   getAccessToken,
   getAuthSession,
   hydrateAuthSession,
+  setAuthSession,
 } from '@/services/authStorage';
 import { setAiChatAccessTokenProvider } from '@/services/aiChatApi';
 import type { AuthData } from '@/types/auth';
 
 export async function establishSessionAfterLogin(auth: AuthData) {
+  // Set temporary auth session so fetchMyAccessContext can access getAccessToken()
+  setAuthSession({
+    accessToken: auth.accessToken,
+    refreshToken: auth.refreshToken,
+    user: auth.user || null,
+    permissions: [],
+    isSuperAdmin: false,
+    hasManagementAccess: false,
+  });
+
   const ctx = await fetchMyAccessContext();
   applyAccessContext(ctx, {
     accessToken: auth.accessToken,

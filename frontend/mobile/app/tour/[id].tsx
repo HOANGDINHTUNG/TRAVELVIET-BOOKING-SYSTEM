@@ -37,11 +37,12 @@ export default function TourDetailScreen() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!id || isNaN(Number(id))) return;
     let active = true;
     fetchTourDetails(id)
       .then((res) => {
-        if (active && res.data) {
-          setTour(res.data);
+        if (active && res) {
+          setTour(res);
         }
       })
       .catch((err) => {

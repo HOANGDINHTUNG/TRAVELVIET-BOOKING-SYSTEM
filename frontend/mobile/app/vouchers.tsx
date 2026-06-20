@@ -15,6 +15,9 @@ import { useAppSettings } from '@/providers/AppSettingsProvider';
 import { useSnackbar } from '@/providers/SnackbarProvider';
 import { StatusBar } from 'expo-status-bar';
 import * as SecureStore from 'expo-secure-store';
+import { fetchMyVouchers, claimVoucher } from '@/services/promotionApi';
+import { getAuthSession } from '@/services/authStorage';
+
 
 interface Voucher {
   id: string;
@@ -61,10 +64,13 @@ export default function VouchersScreen() {
   // Load claimed list on mount
   useEffect(() => {
     const loadClaimed = async () => {
+      const session = getAuthSession();
+      if (!session) return;
       try {
-        const val = await SecureStore.getItemAsync('travelviet.claimed_vouchers');
-        if (val) {
-          setClaimedVouchers(JSON.parse(val));
+        const claims = await fetchMyVouchers();
+        if (claims && Array.isArray(claims)) {
+          const codes = claims.map((c) => c.voucherCode);
+          setClaimedVouchers(codes);
         }
       } catch {}
     };
@@ -73,13 +79,21 @@ export default function VouchersScreen() {
 
   // Claim voucher handler
   const handleClaim = async (voucherId: string, code: string) => {
-    if (claimedVouchers.includes(voucherId)) return;
-    const next = [...claimedVouchers, voucherId];
-    setClaimedVouchers(next);
+    const session = getAuthSession();
+    if (!session) {
+      showSnackbar(isVi ? 'Vui lòng đăng nhập để nhận voucher.' : 'Please log in to claim vouchers.');
+      return;
+    }
+    if (claimedVouchers.includes(code)) return;
     try {
-      await SecureStore.setItemAsync('travelviet.claimed_vouchers', JSON.stringify(next));
-    } catch {}
-    showSnackbar(isVi ? `Nhận thành công mã: ${code}!` : `Successfully claimed code: ${code}!`);
+      await claimVoucher(code);
+      const next = [...claimedVouchers, code];
+      setClaimedVouchers(next);
+      showSnackbar(isVi ? `Nhận thành công mã: ${code}!` : `Successfully claimed code: ${code}!`);
+    } catch (err: any) {
+      const errMsg = err.response?.data?.message || err.message || '';
+      showSnackbar(isVi ? `Lỗi nhận voucher: ${errMsg}` : `Error claiming voucher: ${errMsg}`);
+    }
   };
 
   // Filter vouchers
@@ -209,7 +223,7 @@ export default function VouchersScreen() {
             </View>
           ) : (
             filteredVouchers.map((voucher) => {
-              const isClaimed = claimedVouchers.includes(voucher.id);
+              const isClaimed = claimedVouchers.includes(voucher.code);
               const tagColors = getTagColor(voucher.type);
               const tagBg = isDark ? tagColors.dark : tagColors.light;
 

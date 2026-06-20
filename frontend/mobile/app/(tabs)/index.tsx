@@ -22,6 +22,8 @@ import { useAppSettings } from "@/providers/AppSettingsProvider";
 import { AppDrawer } from "@/components/ui/AppDrawer";
 import { TOURS_DATA } from "@/constants/Tours";
 import { fetchPublicTours, TourResponse } from "@/services/toursApi";
+import { fetchMyVouchers, claimVoucher } from "@/services/promotionApi";
+import { getAuthSession } from "@/services/authStorage";
 
 interface Voucher {
   id: string;
@@ -221,12 +223,13 @@ export default function HomeScreen() {
 
   useEffect(() => {
     const loadClaimed = async () => {
+      const session = getAuthSession();
+      if (!session) return;
       try {
-        const val = await SecureStore.getItemAsync(
-          "travelviet.claimed_vouchers",
-        );
-        if (val) {
-          setClaimedVouchers(JSON.parse(val));
+        const claims = await fetchMyVouchers();
+        if (claims && Array.isArray(claims)) {
+          const codes = claims.map((c) => c.voucherCode);
+          setClaimedVouchers(codes);
         }
       } catch {}
     };
@@ -234,20 +237,33 @@ export default function HomeScreen() {
   }, []);
 
   const handleClaimVoucher = async (voucherId: string, code: string) => {
-    if (claimedVouchers.includes(voucherId)) return;
-    const next = [...claimedVouchers, voucherId];
-    setClaimedVouchers(next);
-    try {
-      await SecureStore.setItemAsync(
-        "travelviet.claimed_vouchers",
-        JSON.stringify(next),
+    const session = getAuthSession();
+    if (!session) {
+      showSnackbar(
+        language === "vi"
+          ? "Vui lòng đăng nhập để nhận voucher."
+          : "Please log in to claim vouchers.",
       );
-    } catch {}
-    showSnackbar(
-      language === "vi"
-        ? `Nhận thành công mã: ${code}!`
-        : `Successfully claimed code: ${code}!`,
-    );
+      return;
+    }
+    if (claimedVouchers.includes(code)) return;
+    try {
+      await claimVoucher(code);
+      const next = [...claimedVouchers, code];
+      setClaimedVouchers(next);
+      showSnackbar(
+        language === "vi"
+          ? `Nhận thành công mã: ${code}!`
+          : `Successfully claimed code: ${code}!`,
+      );
+    } catch (err: any) {
+      const errMsg = err.response?.data?.message || err.message || "";
+      showSnackbar(
+        language === "vi"
+          ? `Lỗi nhận voucher: ${errMsg}`
+          : `Error claiming voucher: ${errMsg}`,
+      );
+    }
   };
 
   const [hotTours, setHotTours] = useState<TourResponse[]>([]);
@@ -270,14 +286,14 @@ export default function HomeScreen() {
           fetchPublicTours({ internationalOnly: true, size: 5 }),
         ]);
         if (active) {
-          if (hotRes?.data?.content) {
-            setHotTours(hotRes.data.content);
+          if (hotRes?.content) {
+            setHotTours(hotRes.content);
           }
-          if (domRes?.data?.content) {
-            setDomesticTours(domRes.data.content);
+          if (domRes?.content) {
+            setDomesticTours(domRes.content);
           }
-          if (intRes?.data?.content) {
-            setInternationalTours(intRes.data.content);
+          if (intRes?.content) {
+            setInternationalTours(intRes.content);
           }
         }
       } catch (err) {
@@ -347,9 +363,9 @@ export default function HomeScreen() {
     }
   };
 
-  const handleTourPress = (tourId: string) => {
-    let targetId = tourId;
-    if (tourId === "1")
+  const handleTourPress = (tourId: string | number) => {
+    let targetId = String(tourId);
+    if (targetId === "1")
       targetId = "3"; // Ha Long
     else if (tourId === "2")
       targetId = "2"; // Da Lat
@@ -723,7 +739,7 @@ export default function HomeScreen() {
                 contentContainerStyle={styles.voucherScroll}
               >
                 {MOCK_HOT_VOUCHERS.map((voucher) => {
-                  const isClaimed = claimedVouchers.includes(voucher.id);
+                  const isClaimed = claimedVouchers.includes(voucher.code);
                   return (
                     <View
                       key={voucher.id}
@@ -1100,7 +1116,7 @@ export default function HomeScreen() {
                               isDark && { color: "#94A3B8" },
                             ]}
                           >
-                            {tour.rating?.toFixed(1) || "5.0"}
+                            {tour.averageRating?.toFixed(1) || "5.0"}
                           </Text>
                         </View>
                       </View>
@@ -1192,7 +1208,7 @@ export default function HomeScreen() {
                                 isDark && { color: "#94A3B8" },
                               ]}
                             >
-                              {tour.rating?.toFixed(1) || "5.0"}
+                              {tour.averageRating?.toFixed(1) || "5.0"}
                             </Text>
                           </View>
                         </View>
@@ -1271,7 +1287,7 @@ export default function HomeScreen() {
                           isDark && { color: "#94A3B8" },
                         ]}
                       >
-                        {tour.durationDays} days • {tour.route || "Various"}
+                        {tour.durationDays} days • {tour.destinations?.[0]?.destinationName || "Various"}
                       </Text>
                       <View
                         style={[
@@ -1391,7 +1407,7 @@ export default function HomeScreen() {
                               isDark && { color: "#94A3B8" },
                             ]}
                           >
-                            {tour.rating?.toFixed(1) || "5.0"}
+                            {tour.averageRating?.toFixed(1) || "5.0"}
                           </Text>
                         </View>
                       </View>
@@ -1478,7 +1494,7 @@ export default function HomeScreen() {
                               isDark && { color: "#94A3B8" },
                             ]}
                           >
-                            {tour.rating?.toFixed(1) || "5.0"}
+                            {tour.averageRating?.toFixed(1) || "5.0"}
                           </Text>
                         </View>
                       </View>

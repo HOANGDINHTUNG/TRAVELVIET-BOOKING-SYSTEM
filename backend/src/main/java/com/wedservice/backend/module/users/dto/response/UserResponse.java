@@ -24,6 +24,8 @@ public class UserResponse {
     private Gender gender;
     private LocalDate dateOfBirth;
     private String avatarUrl;
+    private String coverImageUrl;
+
     private UserCategory userCategory;
     private String role; // Primary role code
     private java.util.List<String> roles; // All role codes

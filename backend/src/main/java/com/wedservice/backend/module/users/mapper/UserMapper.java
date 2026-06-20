@@ -46,6 +46,7 @@ public interface UserMapper extends BaseMapper<UserResponse, User> {
     @Mapping(target = "status", expression = "java(defaultStatus(request.getStatus()))")
     @Mapping(target = "gender", expression = "java(defaultGender(request.getGender()))")
     @Mapping(target = "avatarUrl", expression = "java(DataNormalizer.normalize(request.getAvatarUrl()))")
+    @Mapping(target = "coverImageUrl", expression = "java(DataNormalizer.normalize(request.getCoverImageUrl()))")
     @Mapping(target = "memberLevel", expression = "java(defaultMemberLevel(request.getMemberLevel()))")
     @Mapping(target = "loyaltyPoints", expression = "java(defaultInteger(request.getLoyaltyPoints()))")
     @Mapping(target = "totalSpent", expression = "java(defaultBigDecimal(request.getTotalSpent()))")
@@ -63,6 +64,7 @@ public interface UserMapper extends BaseMapper<UserResponse, User> {
     @Mapping(target = "passwordHash", source = "encodedPassword")
     @Mapping(target = "gender", expression = "java(defaultGender(request.getGender()))")
     @Mapping(target = "avatarUrl", expression = "java(DataNormalizer.normalize(request.getAvatarUrl()))")
+    @Mapping(target = "coverImageUrl", expression = "java(DataNormalizer.normalize(request.getCoverImageUrl()))")
     @Mapping(target = "memberLevel", expression = "java(defaultMemberLevel(request.getMemberLevel()))")
     @Mapping(target = "loyaltyPoints", expression = "java(defaultInteger(request.getLoyaltyPoints()))")
     @Mapping(target = "totalSpent", expression = "java(defaultBigDecimal(request.getTotalSpent()))")
@@ -81,6 +83,7 @@ public interface UserMapper extends BaseMapper<UserResponse, User> {
     @Mapping(target = "phone", source = "normalizedPhone")
     @Mapping(target = "gender", expression = "java(defaultGender(request.getGender()))")
     @Mapping(target = "avatarUrl", expression = "java(DataNormalizer.normalize(request.getAvatarUrl()))")
+    @Mapping(target = "coverImageUrl", expression = "java(DataNormalizer.normalize(request.getCoverImageUrl()))")
     void applyProfileUpdate(
             @MappingTarget User user,
             UpdateMyProfileRequest request,
