@@ -4,6 +4,7 @@ import type { Tour } from "../api/tours.api";
 import { GenericDataTable } from "../../../core/components/GenericDataTable";
 import { getTourColumns } from "../components/TourColumns";
 import { TourForm } from "../components/TourForm";
+import { TourSchedulesDialog } from "../components/TourSchedulesDialog";
 import { Plus, Search, Compass } from "lucide-react";
 import type { PaginationState } from "@tanstack/react-table";
 import { useDebounce } from "../../../core/hooks/useDebounce";
@@ -11,6 +12,9 @@ import { useDebounce } from "../../../core/hooks/useDebounce";
 export default function TourPage() {
   const [formOpen, setFormOpen] = useState(false);
   const [editingTour, setEditingTour] = useState<Tour | null>(null);
+
+  const [schedulesOpen, setSchedulesOpen] = useState(false);
+  const [schedulesTour, setSchedulesTour] = useState<Tour | null>(null);
 
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 400);
@@ -28,10 +32,16 @@ export default function TourPage() {
 
   const columns = React.useMemo(
     () =>
-      getTourColumns((tour) => {
-        setEditingTour(tour);
-        setFormOpen(true);
-      }),
+      getTourColumns(
+        (tour) => {
+          setEditingTour(tour);
+          setFormOpen(true);
+        },
+        (tour) => {
+          setSchedulesTour(tour);
+          setSchedulesOpen(true);
+        },
+      ),
     [],
   );
 
@@ -104,6 +114,15 @@ export default function TourPage() {
           if (!v) setTimeout(() => setEditingTour(null), 200);
         }}
         tourToEdit={editingTour}
+      />
+
+      <TourSchedulesDialog
+        open={schedulesOpen}
+        onOpenChange={(v: boolean) => {
+          setSchedulesOpen(v);
+          if (!v) setTimeout(() => setSchedulesTour(null), 200);
+        }}
+        tour={schedulesTour}
       />
     </div>
   );

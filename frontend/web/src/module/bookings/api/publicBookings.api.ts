@@ -68,6 +68,7 @@ export const PublicBookingsApi = {
       contactEmail: emptyToUndefined(payload.contactEmail),
       bookingSource: emptyToUndefined(payload.bookingSource) ?? "web",
       specialRequests: emptyToUndefined(payload.specialRequests),
+      passengers: payload.passengers,
     };
     const response = await apiClient.post<BookingResponse>("bookings", body);
     return response.data;

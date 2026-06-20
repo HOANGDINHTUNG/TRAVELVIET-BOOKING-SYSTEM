@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { type TourCheckoutSession } from "../../lib/TourCheckoutStorage";
 import { useCreateBooking } from "../../../bookings/hooks/useBookingMutation";
 import { toast } from "sonner";
@@ -21,6 +21,15 @@ function formatMoney(amount: number) {
   return new Intl.NumberFormat("vi-VN").format(amount) + "đ";
 }
 
+type PassengerInput = {
+  fullName: string;
+  day: string;
+  month: string;
+  year: string;
+  gender: string;
+  phone: string;
+};
+
 export default function TourCheckoutForm({
   session,
   onNext,
@@ -32,6 +41,50 @@ export default function TourCheckoutForm({
   const [children, setChildren] = useState(0);
   const [infants, setInfants] = useState(0);
   const [adultSingleFlags, setAdultSingleFlags] = useState<boolean[]>([]);
+
+  const [adultPassengers, setAdultPassengers] = useState<PassengerInput[]>([
+    { fullName: "", day: "", month: "", year: "", gender: "Nam", phone: "" },
+  ]);
+  const [childPassengers, setChildPassengers] = useState<PassengerInput[]>([]);
+
+  useEffect(() => {
+    setAdultPassengers((prev) => {
+      const next = [...prev];
+      while (next.length < adults) {
+        next.push({
+          fullName: "",
+          day: "",
+          month: "",
+          year: "",
+          gender: "Nam",
+          phone: "",
+        });
+      }
+      return next.slice(0, adults);
+    });
+  }, [adults]);
+
+  useEffect(() => {
+    setChildPassengers((prev) => {
+      const next = [...prev];
+      while (next.length < children) {
+        next.push({
+          fullName: "",
+          day: "",
+          month: "",
+          year: "",
+          gender: "Nam",
+          phone: "",
+        });
+      }
+      return next.slice(0, children);
+    });
+  }, [children]);
+
+  const isPassengerValid = (p: PassengerInput) => {
+    if (!p) return false;
+    return !!(p.fullName.trim() && p.day && p.month && p.year && p.gender);
+  };
 
   const user = useAuthStore((s: any) => s.user);
   const [contactName, setContactName] = useState(user?.fullName || "");
@@ -47,7 +100,7 @@ export default function TourCheckoutForm({
     });
   };
 
-  const createMutation = useCreateBooking();
+  const createMutation = useCreateBooking({ disableRedirect: true });
 
   const handleNext = () => {
     if (!contactName || !contactPhone || !contactEmail) {
@@ -64,6 +117,41 @@ export default function TourCheckoutForm({
       toast.error("Số điện thoại không hợp lệ. Cần tối thiểu 10 số.");
       return;
     }
+
+    let passengersValid = true;
+    for (let i = 0; i < adults; i++) {
+      if (!isPassengerValid(adultPassengers[i])) passengersValid = false;
+    }
+    for (let i = 0; i < children; i++) {
+      if (!isPassengerValid(childPassengers[i])) passengersValid = false;
+    }
+
+    if (!passengersValid) {
+      toast.error("Vui lòng nhập đầy đủ thông tin hành khách!");
+      setIsModalOpen(true);
+      return;
+    }
+
+    const finalPassengers: any[] = [];
+    adultPassengers.forEach((p) => {
+      finalPassengers.push({
+        fullName: p.fullName,
+        dateOfBirth: `${p.year}-${p.month.padStart(2, "0")}-${p.day.padStart(2, "0")}`,
+        gender: p.gender,
+        passengerType: "adult",
+        phone: p.phone || undefined,
+      });
+    });
+    childPassengers.forEach((p) => {
+      finalPassengers.push({
+        fullName: p.fullName,
+        dateOfBirth: `${p.year}-${p.month.padStart(2, "0")}-${p.day.padStart(2, "0")}`,
+        gender: p.gender,
+        passengerType: "child",
+        phone: p.phone || undefined,
+      });
+    });
+
     createMutation.mutate(
       {
         tourId: session.tourId || 1, // Fallback if tourId is zero for some reason
@@ -77,6 +165,7 @@ export default function TourCheckoutForm({
         contactEmail,
         specialRequests,
         bookingSource: "web",
+        passengers: finalPassengers,
       },
       {
         onSuccess: (data) => {
@@ -97,8 +186,10 @@ export default function TourCheckoutForm({
 
   // Derive simple total costs
   const singleSupplementPrice = session.adultPrice * 0.25;
-  const singleRoomsCount = adultSingleFlags.slice(0, adults).filter(Boolean).length;
-  
+  const singleRoomsCount = adultSingleFlags
+    .slice(0, adults)
+    .filter(Boolean).length;
+
   const totalCost =
     adults * session.adultPrice +
     children * session.childPrice +
@@ -202,7 +293,7 @@ export default function TourCheckoutForm({
                 setter: setChildren,
                 min: 0,
               },
-              
+
               {
                 label: "Em bé",
                 sub: "Dưới 4 tuổi",
@@ -278,9 +369,15 @@ export default function TourCheckoutForm({
                           <span className="text-slate-400 text-sm">
                             Người lớn <span className="text-red-500">(*)</span>
                           </span>
-                          <span className="text-[#e11d27] text-sm whitespace-nowrap">
-                            Nhập thông tin &rarr;
-                          </span>
+                          {isPassengerValid(adultPassengers[i]) ? (
+                            <span className="text-emerald-500 font-bold text-sm whitespace-nowrap">
+                              ✓ Đã nhập
+                            </span>
+                          ) : (
+                            <span className="text-[#e11d27] text-sm whitespace-nowrap">
+                              Nhập thông tin &rarr;
+                            </span>
+                          )}
                         </div>
                       </div>
                       <div className="flex items-center gap-3 shrink-0 ml-10 sm:ml-0">
@@ -296,13 +393,19 @@ export default function TourCheckoutForm({
                             style={{
                               top: "1px",
                               left: "1px",
-                              borderColor: adultSingleFlags[i] ? "#2563eb" : "#cbd5e1",
-                              transform: adultSingleFlags[i] ? "translateX(100%)" : "translateX(0)"
+                              borderColor: adultSingleFlags[i]
+                                ? "#2563eb"
+                                : "#cbd5e1",
+                              transform: adultSingleFlags[i]
+                                ? "translateX(100%)"
+                                : "translateX(0)",
                             }}
                           />
-                          <label 
+                          <label
                             className={`toggle-label block overflow-hidden h-6 rounded-full cursor-pointer transition-colors duration-200 ${
-                              adultSingleFlags[i] ? "bg-blue-600" : "bg-slate-300"
+                              adultSingleFlags[i]
+                                ? "bg-blue-600"
+                                : "bg-slate-300"
                             }`}
                             onClick={() => toggleSingleRoom(i)}
                           ></label>
@@ -341,9 +444,15 @@ export default function TourCheckoutForm({
                           <span className="text-slate-400 text-sm">
                             Trẻ em <span className="text-red-500">(*)</span>
                           </span>
-                          <span className="text-[#e11d27] text-sm whitespace-nowrap">
-                            Nhập thông tin &rarr;
-                          </span>
+                          {isPassengerValid(childPassengers[i]) ? (
+                            <span className="text-emerald-500 font-bold text-sm whitespace-nowrap">
+                              ✓ Đã nhập
+                            </span>
+                          ) : (
+                            <span className="text-[#e11d27] text-sm whitespace-nowrap">
+                              Nhập thông tin &rarr;
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -569,18 +678,19 @@ export default function TourCheckoutForm({
                     </span>
                   </div>
                 )}
-                
+
                 {singleRoomsCount > 0 && (
                   <div className="flex justify-between items-center">
                     <span className="text-slate-600">Phụ thu phòng đơn</span>
                     <span className="text-slate-800">
-                      <span className="text-slate-400 mr-2">{singleRoomsCount} x</span>{" "}
+                      <span className="text-slate-400 mr-2">
+                        {singleRoomsCount} x
+                      </span>{" "}
                       {formatMoney(singleSupplementPrice)}
                     </span>
                   </div>
                 )}
                 {infants > 0 && (
-
                   <div className="flex justify-between items-center">
                     <span className="text-slate-600">Em bé</span>
                     <span className="text-slate-800">
@@ -693,7 +803,7 @@ export default function TourCheckoutForm({
                   </div>
 
                   <div className="space-y-6">
-                    {Array.from({ length: adults }).map((_, i) => (
+                    {adultPassengers.map((p, i) => (
                       <div
                         key={`modal-ad-${i}`}
                         className="flex gap-4 border-b border-slate-100 pb-6 last:border-0 last:pb-0"
@@ -708,6 +818,12 @@ export default function TourCheckoutForm({
                             </label>
                             <input
                               type="text"
+                              value={p.fullName}
+                              onChange={(e) => {
+                                const newP = [...adultPassengers];
+                                newP[i].fullName = e.target.value;
+                                setAdultPassengers(newP);
+                              }}
                               placeholder="Ví dụ: Nguyễn Văn A"
                               className="w-full h-12 bg-slate-50 border-none rounded-xl px-4 focus:ring-2 focus:ring-blue-100 outline-none"
                             />
@@ -724,6 +840,12 @@ export default function TourCheckoutForm({
                             >
                               <input
                                 type="text"
+                                value={p.day}
+                                onChange={(e) => {
+                                  const newP = [...adultPassengers];
+                                  newP[i].day = e.target.value;
+                                  setAdultPassengers(newP);
+                                }}
                                 placeholder="dd"
                                 className="w-full bg-transparent outline-none text-center"
                                 maxLength={2}
@@ -733,6 +855,12 @@ export default function TourCheckoutForm({
                               </span>
                               <input
                                 type="text"
+                                value={p.month}
+                                onChange={(e) => {
+                                  const newP = [...adultPassengers];
+                                  newP[i].month = e.target.value;
+                                  setAdultPassengers(newP);
+                                }}
                                 placeholder="mm"
                                 className="w-full bg-transparent outline-none text-center"
                                 maxLength={2}
@@ -742,6 +870,12 @@ export default function TourCheckoutForm({
                               </span>
                               <input
                                 type="text"
+                                value={p.year}
+                                onChange={(e) => {
+                                  const newP = [...adultPassengers];
+                                  newP[i].year = e.target.value;
+                                  setAdultPassengers(newP);
+                                }}
                                 placeholder="yyyy"
                                 className="w-full bg-transparent outline-none text-center"
                                 maxLength={4}
@@ -755,7 +889,15 @@ export default function TourCheckoutForm({
                               <span className="text-red-500">(*)</span>
                             </label>
                             <div className="relative">
-                              <select className="w-full h-12 bg-slate-50 border-none rounded-xl px-4 appearance-none outline-none focus:ring-2 focus:ring-blue-100 pr-10">
+                              <select
+                                value={p.gender}
+                                onChange={(e) => {
+                                  const newP = [...adultPassengers];
+                                  newP[i].gender = e.target.value;
+                                  setAdultPassengers(newP);
+                                }}
+                                className="w-full h-12 bg-slate-50 border-none rounded-xl px-4 appearance-none outline-none focus:ring-2 focus:ring-blue-100 pr-10"
+                              >
                                 <option>Nam</option>
                                 <option>Nữ</option>
                               </select>
@@ -773,6 +915,12 @@ export default function TourCheckoutForm({
                               </label>
                               <input
                                 type="text"
+                                value={p.phone}
+                                onChange={(e) => {
+                                  const newP = [...adultPassengers];
+                                  newP[i].phone = e.target.value;
+                                  setAdultPassengers(newP);
+                                }}
                                 placeholder="Ví dụ: 0901234567 / +84901234567"
                                 className="w-full h-12 bg-slate-50 border-none rounded-xl px-4 focus:ring-2 focus:ring-blue-100 outline-none"
                               />
@@ -784,6 +932,8 @@ export default function TourCheckoutForm({
                               <div className="relative inline-block w-10 align-middle select-none transition duration-200 ease-in">
                                 <input
                                   type="checkbox"
+                                  checked={!!adultSingleFlags[i]}
+                                  onChange={() => toggleSingleRoom(i)}
                                   className="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer border-slate-300"
                                   style={{ top: "1px", left: "1px" }}
                                 />
@@ -810,7 +960,7 @@ export default function TourCheckoutForm({
                   </div>
 
                   <div className="space-y-6">
-                    {Array.from({ length: children }).map((_, i) => (
+                    {childPassengers.map((p, i) => (
                       <div
                         key={`modal-child-${i}`}
                         className="flex gap-4 border-b border-slate-100 pb-6 last:border-0 last:pb-0"
@@ -825,6 +975,12 @@ export default function TourCheckoutForm({
                             </label>
                             <input
                               type="text"
+                              value={p.fullName}
+                              onChange={(e) => {
+                                const newP = [...childPassengers];
+                                newP[i].fullName = e.target.value;
+                                setChildPassengers(newP);
+                              }}
                               placeholder="Ví dụ: Nguyễn Văn A"
                               className="w-full h-12 bg-slate-50 border-none rounded-xl px-4 focus:ring-2 focus:ring-blue-100 outline-none"
                             />
@@ -841,6 +997,12 @@ export default function TourCheckoutForm({
                             >
                               <input
                                 type="text"
+                                value={p.day}
+                                onChange={(e) => {
+                                  const newP = [...childPassengers];
+                                  newP[i].day = e.target.value;
+                                  setChildPassengers(newP);
+                                }}
                                 placeholder="dd"
                                 className="w-full bg-transparent outline-none text-center"
                                 maxLength={2}
@@ -850,6 +1012,12 @@ export default function TourCheckoutForm({
                               </span>
                               <input
                                 type="text"
+                                value={p.month}
+                                onChange={(e) => {
+                                  const newP = [...childPassengers];
+                                  newP[i].month = e.target.value;
+                                  setChildPassengers(newP);
+                                }}
                                 placeholder="mm"
                                 className="w-full bg-transparent outline-none text-center"
                                 maxLength={2}
@@ -859,6 +1027,12 @@ export default function TourCheckoutForm({
                               </span>
                               <input
                                 type="text"
+                                value={p.year}
+                                onChange={(e) => {
+                                  const newP = [...childPassengers];
+                                  newP[i].year = e.target.value;
+                                  setChildPassengers(newP);
+                                }}
                                 placeholder="yyyy"
                                 className="w-full bg-transparent outline-none text-center"
                                 maxLength={4}
@@ -872,7 +1046,15 @@ export default function TourCheckoutForm({
                               <span className="text-red-500">(*)</span>
                             </label>
                             <div className="relative">
-                              <select className="w-full h-12 bg-slate-50 border-none rounded-xl px-4 appearance-none outline-none focus:ring-2 focus:ring-blue-100 pr-10">
+                              <select
+                                value={p.gender}
+                                onChange={(e) => {
+                                  const newP = [...childPassengers];
+                                  newP[i].gender = e.target.value;
+                                  setChildPassengers(newP);
+                                }}
+                                className="w-full h-12 bg-slate-50 border-none rounded-xl px-4 appearance-none outline-none focus:ring-2 focus:ring-blue-100 pr-10"
+                              >
                                 <option>Nam</option>
                                 <option>Nữ</option>
                               </select>
@@ -901,7 +1083,7 @@ export default function TourCheckoutForm({
                   </div>
 
                   <div className="space-y-6">
-                    {Array.from({ length: toddlers }).map((_, i) => (
+                    {([] as any[]).map((_, i) => (
                       <div
                         key={`modal-tod-${i}`}
                         className="flex gap-4 border-b border-slate-100 pb-6 last:border-0 last:pb-0"

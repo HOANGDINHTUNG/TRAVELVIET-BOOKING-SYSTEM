@@ -74,6 +74,14 @@ export type CreateBookingPayload = BookingQuotePayload & {
   contactEmail?: string;
   bookingSource?: string;
   specialRequests?: string;
+  passengers?: {
+    fullName: string;
+    dateOfBirth?: string;
+    gender?: string;
+    passengerType: string;
+    phone?: string;
+    identityNo?: string;
+  }[];
 };
 
 /** Slim list row from `GET /bookings/me` (Phase 2). */

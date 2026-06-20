@@ -72,6 +72,7 @@ type CreateBookingOptions = {
 export function useCreateBooking(options: CreateBookingOptions = {}) {
   const navigate = useNavigate();
   const { t } = useTranslation("bookings");
+  const queryClient = useQueryClient();
   const { onAuthenticated, disableRedirect, onSuccess, onError, ...rest } =
     options;
 
@@ -79,11 +80,14 @@ export function useCreateBooking(options: CreateBookingOptions = {}) {
     mutationFn: (payload) => PublicBookingsApi.create(payload),
     ...rest,
     onSuccess: (data, variables, context, mutation) => {
+      void queryClient.invalidateQueries({
+        queryKey: publicBookingKeys.myList(),
+      });
       toast.success(
         String(
           t("toast.createSuccess", {
             defaultValue:
-              "Đặt chỗ thành công! Đang chuyển sang trang xác nhận...",
+              "Đặt chỗ thành công! Đang chuyển sang trang tiếp theo...",
             code: data.bookingCode ?? `#${data.id}`,
           }),
         ),

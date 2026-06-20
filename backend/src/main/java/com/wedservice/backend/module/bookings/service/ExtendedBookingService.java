@@ -235,7 +235,7 @@ public class ExtendedBookingService {
      * So dem = checkout - checkin theo ngay, khong tinh ngay checkout.
      */
     private BigDecimal calculateHotelSubtotal(CreateHotelBookingRequest request, HotelRoomType roomType) {
-        long nights = request.getCheckinDate().until(request.getCheckoutDate()).getDays();
+        long nights = java.time.temporal.ChronoUnit.DAYS.between(request.getCheckinDate(), request.getCheckoutDate());
         if (nights <= 0) {
             throw BadRequestException.i18n("api.error.hotel.invalidDateRange");
         }
