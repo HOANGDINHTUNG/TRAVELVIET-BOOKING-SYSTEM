@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { type TourCheckoutSession } from "../../lib/TourCheckoutStorage";
-import { Copy, ChevronDown, Bus } from "lucide-react";
+import { Copy, ChevronDown, Bus, CheckCircle2 } from "lucide-react";
 import { OptimizedImage } from "@/components/common/media/OptimizedImage";
 
 function formatMoney(amount: number) {
@@ -60,6 +60,20 @@ export default function TourCheckoutSuccess({
     <div className="flex flex-col lg:flex-row gap-8">
       {/* LEFT COLUMN */}
       <div className="flex-1 w-full space-y-6">
+        {/* Success Banner */}
+        <div className="bg-green-50 border border-green-200 rounded-2xl p-6 flex flex-col items-center justify-center text-center shadow-sm">
+          <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mb-4 shadow-sm">
+            <CheckCircle2 size={32} className="text-white" />
+          </div>
+          <h2 className="text-2xl font-bold text-green-700 mb-2">
+            Đăng ký tour thành công!
+          </h2>
+          <p className="text-green-600 font-medium">
+            Cảm ơn bạn đã tin tưởng dịch vụ của chúng tôi. Chúng tôi sẽ sớm liên
+            hệ để xác nhận lại thông tin.
+          </p>
+        </div>
+
         {/* Contact Info */}
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="md:col-span-3 font-bold text-xl text-slate-800">

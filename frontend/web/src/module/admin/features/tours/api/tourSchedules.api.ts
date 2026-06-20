@@ -65,6 +65,18 @@ export const useCreateTourSchedule = (tourId: number | null) => {
   });
 };
 
+export const useUpdateTourSchedule = (
+  tourId: number | null,
+  scheduleId: number | null,
+) => {
+  return useCrudMutation<TourScheduleResponse, TourScheduleRequest>({
+    mutationFn: (request) =>
+      apiClient.put(`/admin/tours/${tourId}/schedules/${scheduleId}`, request),
+    successMessage: "Cập nhật thông tin lịch trình thành công!",
+    queryKeyToInvalidate: tourId ? TOUR_SCHEDULES_QUERY_KEY(tourId) : [],
+  });
+};
+
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 

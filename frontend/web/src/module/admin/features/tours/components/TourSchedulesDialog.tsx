@@ -5,7 +5,10 @@ import type { Tour } from "../api/tours.api";
 import {
   useGetTourSchedules,
   useUpdateTourScheduleStatus,
+  type TourScheduleResponse,
 } from "../api/tourSchedules.api";
+import { TourScheduleForm } from "./TourScheduleForm";
+import { Edit2 } from "lucide-react";
 
 interface TourSchedulesDialogProps {
   open: boolean;
@@ -21,6 +24,20 @@ export function TourSchedulesDialog({
   const { data: schedules, isLoading } = useGetTourSchedules(tour?.id ?? null);
   const statusMutation = useUpdateTourScheduleStatus();
 
+  const [scheduleFormOpen, setScheduleFormOpen] = React.useState(false);
+  const [scheduleToEdit, setScheduleToEdit] =
+    React.useState<TourScheduleResponse | null>(null);
+
+  const handleAddClick = () => {
+    setScheduleToEdit(null);
+    setScheduleFormOpen(true);
+  };
+
+  const handleEditClick = (schedule: TourScheduleResponse) => {
+    setScheduleToEdit(schedule);
+    setScheduleFormOpen(true);
+  };
+
   const handleToggleStatus = (scheduleId: number, currentStatus: string) => {
     if (!tour) return;
     const newStatus = currentStatus === "OPEN" ? "CLOSED" : "OPEN";
@@ -33,7 +50,7 @@ export function TourSchedulesDialog({
         <Dialog.Overlay className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[100] animate-in fade-in" />
         <Dialog.Content className="fixed left-[50%] top-[50%] z-[100] grid w-full max-w-4xl translate-x-[-50%] translate-y-[-50%] gap-4 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-2xl sm:rounded-2xl flex flex-col max-h-[85vh]">
           <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4 shrink-0">
-            <div>
+            <div className="flex-1">
               <Dialog.Title className="text-xl font-bold text-slate-900 dark:text-slate-100">
                 Lịch khởi hành & Sĩ số
               </Dialog.Title>
@@ -44,9 +61,17 @@ export function TourSchedulesDialog({
                 </strong>
               </Dialog.Description>
             </div>
-            <Dialog.Close className="rounded-full p-2 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-              <X size={20} className="text-slate-500" />
-            </Dialog.Close>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleAddClick}
+                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg text-sm transition-colors shadow-sm"
+              >
+                + Thêm lịch khởi hành
+              </button>
+              <Dialog.Close className="rounded-full p-2 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                <X size={20} className="text-slate-500" />
+              </Dialog.Close>
+            </div>
           </div>
 
           <div className="overflow-y-auto flex-1 min-h-[300px]">
@@ -63,7 +88,7 @@ export function TourSchedulesDialog({
                       <th className="px-4 py-3">Thời gian</th>
                       <th className="px-4 py-3">Giá (Người lớn)</th>
                       <th className="px-4 py-3">Sĩ số (Đã đặt/Tổng)</th>
-                      <th className="px-4 py-3">Trạng thái</th>
+                      <th className="px-4 py-3">Trạng thái & Lệnh</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -113,23 +138,32 @@ export function TourSchedulesDialog({
                           )}
                         </td>
                         <td className="px-4 py-3">
-                          <button
-                            onClick={() => handleToggleStatus(s.id, s.status)}
-                            disabled={statusMutation.isPending}
-                            title="Click để đổi trạng thái"
-                            className={`px-2.5 py-1 text-xs uppercase tracking-wider font-bold rounded-full border flex items-center gap-1 w-max transition-colors cursor-pointer disabled:opacity-50 ${
-                              s.status === "OPEN"
-                                ? "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-400 dark:hover:bg-emerald-900/40"
-                                : "bg-slate-100 text-slate-600 border-slate-300 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700"
-                            }`}
-                          >
-                            {s.status === "OPEN" ? (
-                              <CheckCircle size={12} />
-                            ) : (
-                              <Clock size={12} />
-                            )}
-                            {s.status}
-                          </button>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => handleToggleStatus(s.id, s.status)}
+                              disabled={statusMutation.isPending}
+                              title="Click để đổi trạng thái"
+                              className={`px-2.5 py-1 text-xs uppercase tracking-wider font-bold rounded-full border flex items-center gap-1 w-max transition-colors cursor-pointer disabled:opacity-50 ${
+                                s.status === "OPEN"
+                                  ? "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-400 dark:hover:bg-emerald-900/40"
+                                  : "bg-slate-100 text-slate-600 border-slate-300 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700"
+                              }`}
+                            >
+                              {s.status === "OPEN" ? (
+                                <CheckCircle size={12} />
+                              ) : (
+                                <Clock size={12} />
+                              )}
+                              {s.status}
+                            </button>
+                            <button
+                              onClick={() => handleEditClick(s)}
+                              title="Chỉnh sửa thông số"
+                              className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"
+                            >
+                              <Edit2 size={16} />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -154,6 +188,13 @@ export function TourSchedulesDialog({
           </div>
         </Dialog.Content>
       </Dialog.Portal>
+
+      <TourScheduleForm
+        open={scheduleFormOpen}
+        onOpenChange={setScheduleFormOpen}
+        tourId={tour?.id ?? null}
+        scheduleToEdit={scheduleToEdit}
+      />
     </Dialog.Root>
   );
 }

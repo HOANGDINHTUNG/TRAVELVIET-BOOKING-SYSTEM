@@ -2,12 +2,25 @@ import React, { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { X, Compass, DollarSign, Image as ImageIcon } from "lucide-react";
+import {
+  X,
+  Compass,
+  DollarSign,
+  Image as ImageIcon,
+  ChevronDown,
+  Search,
+} from "lucide-react";
 import * as Dialog from "@radix-ui/react-dialog";
 import * as Tabs from "@radix-ui/react-tabs";
 import { useCreateTour, useUpdateTour } from "../api/tours.api";
 import type { Tour, TourRequest } from "../api/tours.api";
 import { useGetDestinations } from "../../destinations/api/destinations.api";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuCheckboxItem,
+} from "@/components/ui/dropdown-menu";
 
 const tourSchema = z.object({
   code: z.string().min(1, "Bắt buộc nhập Mã (VD: TOUR1)"),
@@ -45,6 +58,13 @@ export function TourForm({ open, onOpenChange, tourToEdit }: TourFormProps) {
   const destinations = destData?.content || [];
 
   const [activeTab, setActiveTab] = useState("general");
+  const [destSearchQuery, setDestSearchQuery] = useState("");
+
+  const filteredDestinations = destinations.filter(
+    (d) =>
+      d.name.toLowerCase().includes(destSearchQuery.toLowerCase()) ||
+      d.code.toLowerCase().includes(destSearchQuery.toLowerCase()),
+  );
 
   const form = useForm<z.infer<typeof tourSchema>>({
     resolver: zodResolver(tourSchema),
@@ -247,27 +267,75 @@ export function TourForm({ open, onOpenChange, tourToEdit }: TourFormProps) {
                     <Controller
                       name="destinationIds"
                       control={form.control}
-                      render={({ field }) => (
-                        <select
-                          multiple
-                          size={4}
-                          value={field.value.map(String)}
-                          onChange={(e) => {
-                            const values = Array.from(
-                              e.target.selectedOptions,
-                              (option) => Number(option.value),
-                            );
-                            field.onChange(values);
-                          }}
-                          className="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50/50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium custom-scrollbar"
-                        >
-                          {destinations.map((d) => (
-                            <option key={d.id} value={d.id} className="p-1.5">
-                              {d.name} ({d.code})
-                            </option>
-                          ))}
-                        </select>
-                      )}
+                      render={({ field }) => {
+                        const selectedText = field.value.length
+                          ? destinations
+                              .filter((d) => field.value.includes(d.id))
+                              .map((d) => d.name)
+                              .join(", ")
+                          : "--- Chọn điểm đến ---";
+
+                        return (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <button
+                                type="button"
+                                className="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50/50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium text-left flex justify-between items-center"
+                              >
+                                <span className="truncate">{selectedText}</span>
+                                <ChevronDown
+                                  size={16}
+                                  className="text-slate-500 shrink-0"
+                                />
+                              </button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent
+                              className="w-[var(--radix-dropdown-menu-trigger-width)] max-h-80 overflow-hidden flex flex-col p-1"
+                              onCloseAutoFocus={(e) => e.preventDefault()}
+                            >
+                              <div className="flex items-center border-b border-slate-100 dark:border-slate-800 px-2 pb-1 mb-1 shrink-0">
+                                <Search className="mr-2 h-4 w-4 shrink-0 opacity-50 dark:opacity-70" />
+                                <input
+                                  type="text"
+                                  placeholder="Tìm kiếm theo tên hoặc mã..."
+                                  value={destSearchQuery}
+                                  onChange={(e) =>
+                                    setDestSearchQuery(e.target.value)
+                                  }
+                                  className="flex h-9 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-slate-400 dark:placeholder:text-slate-500 disabled:cursor-not-allowed disabled:opacity-50"
+                                />
+                              </div>
+                              <div className="flex-1 overflow-y-auto">
+                                {filteredDestinations.map((d) => (
+                                  <DropdownMenuCheckboxItem
+                                    key={d.id}
+                                    checked={field.value.includes(d.id)}
+                                    onCheckedChange={(checked) => {
+                                      if (checked) {
+                                        field.onChange([...field.value, d.id]);
+                                      } else {
+                                        field.onChange(
+                                          field.value.filter(
+                                            (id) => id !== d.id,
+                                          ),
+                                        );
+                                      }
+                                    }}
+                                    onSelect={(e) => e.preventDefault()}
+                                  >
+                                    {d.name} ({d.code})
+                                  </DropdownMenuCheckboxItem>
+                                ))}
+                                {filteredDestinations.length === 0 && (
+                                  <div className="py-6 text-center text-sm text-slate-500">
+                                    Không có điểm đến nào phù hợp.
+                                  </div>
+                                )}
+                              </div>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        );
+                      }}
                     />
                     {form.formState.errors.destinationIds && (
                       <p className="text-xs text-red-500 font-medium">
@@ -406,9 +474,10 @@ export function TourForm({ open, onOpenChange, tourToEdit }: TourFormProps) {
                         {...form.register("status")}
                         className="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium appearance-none"
                       >
-                        <option value="DRAFT">Nháp (Draft)</option>
-                        <option value="PUBLISHED">Công khai (Published)</option>
-                        <option value="ARCHIVED">Lưu kho (Archived)</option>
+                        <option value="DRAFT">Nháp (DRAFT)</option>
+                        <option value="ACTIVE">Hoạt động (ACTIVE)</option>
+                        <option value="INACTIVE">Ngưng bán (INACTIVE)</option>
+                        <option value="ARCHIVED">Lưu kho (ARCHIVED)</option>
                       </select>
                     </div>
                   </div>

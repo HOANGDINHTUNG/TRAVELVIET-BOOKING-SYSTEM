@@ -49,10 +49,14 @@ public class BookingController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime cursorCreatedAt,
             @RequestParam(required = false) Long cursorId
     ) {
+        List<BookingSummaryResponse> responseList;
         if (size == null && cursorCreatedAt == null && cursorId == null) {
-            return ApiResponse.success(bookingFacade.getMyBookings());
+            responseList = bookingFacade.getMyBookings();
+        } else {
+            responseList = bookingFacade.getMyBookings(size, cursorCreatedAt, cursorId);
         }
-        return ApiResponse.success(bookingFacade.getMyBookings(size, cursorCreatedAt, cursorId));
+        System.out.println("DEBUG API: /bookings/me called. Returning list of size: " + responseList.size());
+        return ApiResponse.success(responseList);
     }
 
     @GetMapping("/{id}")

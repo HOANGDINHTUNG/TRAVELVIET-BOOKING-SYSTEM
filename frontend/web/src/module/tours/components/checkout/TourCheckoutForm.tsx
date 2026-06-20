@@ -137,7 +137,7 @@ export default function TourCheckoutForm({
       finalPassengers.push({
         fullName: p.fullName,
         dateOfBirth: `${p.year}-${p.month.padStart(2, "0")}-${p.day.padStart(2, "0")}`,
-        gender: p.gender,
+        gender: p.gender === "Nam" ? "male" : "female",
         passengerType: "adult",
         phone: p.phone || undefined,
       });
@@ -146,7 +146,7 @@ export default function TourCheckoutForm({
       finalPassengers.push({
         fullName: p.fullName,
         dateOfBirth: `${p.year}-${p.month.padStart(2, "0")}-${p.day.padStart(2, "0")}`,
-        gender: p.gender,
+        gender: p.gender === "Nam" ? "male" : "female",
         passengerType: "child",
         phone: p.phone || undefined,
       });
