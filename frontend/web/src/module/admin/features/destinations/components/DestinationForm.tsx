@@ -54,7 +54,7 @@ export function DestinationForm({
 }: DestinationFormProps) {
   const isEditing = !!destToEdit;
   const createMut = useCreateDestination();
-  const updateMut = useUpdateDestination(destToEdit?.uuid || null);
+  const updateMut = useUpdateDestination();
 
   const form = useForm<z.infer<typeof destSchema>>({
     resolver: zodResolver(destSchema),
@@ -131,8 +131,11 @@ export function DestinationForm({
 
   const onSubmit = async (values: z.infer<typeof destSchema>) => {
     const payload = values as DestinationRequest;
-    if (isEditing) {
-      updateMut.mutate(payload, { onSuccess: () => onOpenChange(false) });
+    if (isEditing && destToEdit) {
+      updateMut.mutate(
+        { uuid: destToEdit.uuid, data: payload },
+        { onSuccess: () => onOpenChange(false) },
+      );
     } else {
       createMut.mutate(payload, { onSuccess: () => onOpenChange(false) });
     }
